@@ -8,7 +8,6 @@
   # Environment variables for build time
   [build.environment]
     NODE_VERSION = "20"
-    NEXT_TURBOPACK = "0"
 
 # Security headers
 [[headers]]

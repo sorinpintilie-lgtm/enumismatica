@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { collection, query, orderBy, onSnapshot, where, doc, limit, startAfter, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
-import { db } from '../../../shared/firebaseConfig';
-import { Auction } from '../../../shared/types';
+import { db } from 'shared/firebaseConfig';
+import { Auction } from 'shared/types';
 
 // Default fields for auction list view - optimize for performance
 const DEFAULT_AUCTION_FIELDS = ['productId', 'startTime', 'endTime', 'reservePrice', 'currentBid', 'currentBidderId', 'status', 'createdAt', 'updatedAt'];

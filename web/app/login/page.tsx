@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { z } from 'zod';
-import { signInWithEmail, signInWithGoogle } from '../../../shared/auth';
+import { signInWithEmail, signInWithGoogle } from 'shared/auth';
 
 const loginSchema = z.object({
   email: z.string().email('Adresă de email invalidă'),

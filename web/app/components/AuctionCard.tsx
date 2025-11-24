@@ -2,8 +2,8 @@
 
 import { useState, useEffect, memo, useCallback } from 'react';
 import Link from 'next/link';
-import { Auction, Product } from '../../../shared/types';
-import { placeBid } from '../../../shared/auctionService';
+import { Auction, Product } from 'shared/types';
+import { placeBid } from 'shared/auctionService';
 import { useAuth } from '../context/AuthContext';
 import { useProduct } from '../hooks/useProducts';
 import { formatRON } from '../utils/currency';

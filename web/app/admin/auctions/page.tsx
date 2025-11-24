@@ -11,8 +11,8 @@ import {
   approveAuction,
   rejectAuction,
   forceEndAuction,
-} from '../../../../shared/adminService';
-import { Auction } from '../../../../shared/types';
+} from 'shared/adminService';
+import { Auction } from 'shared/types';
 
 export default function AdminAuctions() {
   const { user, loading: authLoading } = useAuth();

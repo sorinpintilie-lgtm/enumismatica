@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCollection } from '../hooks/useCollection';
-import { CollectionItem } from '../../../shared/types';
+import { CollectionItem } from 'shared/types';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { ro } from 'date-fns/locale';

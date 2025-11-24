@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { seedAllData, resetDatabase } from '../../../shared/seed';
+import { seedAllData, resetDatabase } from 'shared/seed';
 import Link from 'next/link';
 
 export default function SeedDatabase() {

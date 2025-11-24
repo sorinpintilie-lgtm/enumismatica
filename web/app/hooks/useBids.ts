@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { collection, query, orderBy, onSnapshot, limit, startAfter, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
-import { db } from '../../../shared/firebaseConfig';
-import { Bid } from '../../../shared/types';
+import { db } from 'shared/firebaseConfig';
+import { Bid } from 'shared/types';
 
 export function useBids(auctionId: string, pageSize: number = 50) {
   const [bids, setBids] = useState<Bid[]>([]);

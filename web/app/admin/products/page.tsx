@@ -10,8 +10,8 @@ import {
   deleteProduct,
   approveProduct,
   rejectProduct,
-} from '../../../../shared/adminService';
-import { Product } from '../../../../shared/types';
+} from 'shared/adminService';
+import { Product } from 'shared/types';
 
 export default function AdminProducts() {
   const { user, loading: authLoading } = useAuth();

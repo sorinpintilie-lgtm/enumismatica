@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { z } from 'zod';
 import { useAuction } from '../../hooks/useAuctions';
 import { useBids } from '../../hooks/useBids';
-import { placeBid, setAutoBid } from '../../../../shared/auctionService';
+import { placeBid, setAutoBid } from 'shared/auctionService';
 import { useAuth } from '../../context/AuthContext';
 import AuctionChat from '../../components/AuctionChat';
 import { useProduct } from '../../hooks/useProducts';

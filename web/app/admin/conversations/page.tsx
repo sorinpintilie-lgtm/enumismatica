@@ -9,8 +9,8 @@ import {
   getAllConversations,
   getConversationMessages,
   deleteConversation,
-} from '../../../../shared/adminService';
-import { Conversation, ChatMessage } from '../../../../shared/types';
+} from 'shared/adminService';
+import { Conversation, ChatMessage } from 'shared/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ro } from 'date-fns/locale';
 

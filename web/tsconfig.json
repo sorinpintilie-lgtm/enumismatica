@@ -19,7 +19,7 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/shared/*": ["../../shared/*"]
+      "shared/*": ["../shared/*"]
     },
     "plugins": [
       {

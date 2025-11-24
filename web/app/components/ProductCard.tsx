@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { memo } from 'react'
-import { Product } from '../../../shared/types'
+import { Product } from 'shared/types'
 import LazyImage from './LazyImage'
 import { formatRON } from '../utils/currency'
 

@@ -2,10 +2,10 @@
 
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
-import { logout } from '../../../shared/auth';
+import { logout } from 'shared/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { isAdmin } from '../../../shared/adminService';
+import { isAdmin } from 'shared/adminService';
 import NotificationCenter from './NotificationCenter';
 
 export default function Navigation() {

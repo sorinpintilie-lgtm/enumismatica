@@ -1,20 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  turbopack: {},
+  transpilePackages: ['shared'],
+  
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        'shared': '../shared',
+      },
+    },
+  },
 
-  // Use webpack instead of Turbopack for compatibility
   webpack: (config, { isServer }) => {
     const path = require('path');
-
+    
     // Add path aliases for shared folder
-    config.resolve.alias['@/shared'] = path.resolve(__dirname, '../shared');
-
-    // Add shared folder to module resolution
-    config.resolve.modules = [
-      ...(config.resolve.modules || []),
-      path.resolve(__dirname, '../shared')
-    ];
-
+    config.resolve.alias['shared'] = path.resolve(__dirname, '../shared');
+    
     return config;
   },
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '../context/AuthContext';
-import { logout } from '../../../shared/auth';
+import { logout } from 'shared/auth';
 import { useRouter } from 'next/navigation';
 import { useProducts } from '../hooks/useProducts';
 import { useAuctions } from '../hooks/useAuctions';

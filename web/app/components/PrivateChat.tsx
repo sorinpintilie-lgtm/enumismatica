@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useConversation, useConversations } from '../hooks/useChat';
 import { useAuth } from '../context/AuthContext';
-import { ChatMessage, Conversation } from '../../../shared/types';
+import { ChatMessage, Conversation } from 'shared/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import Link from 'next/link';

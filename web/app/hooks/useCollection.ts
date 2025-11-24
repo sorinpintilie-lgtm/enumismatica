@@ -6,8 +6,8 @@ import {
   deleteCollectionItem,
   getCollectionStats,
   searchCollectionItems,
-} from '../../../shared/collectionService';
-import { CollectionItem } from '../../../shared/types';
+} from 'shared/collectionService';
+import { CollectionItem } from 'shared/types';
 
 export function useCollection(userId: string | null) {
   const [items, setItems] = useState<CollectionItem[]>([]);

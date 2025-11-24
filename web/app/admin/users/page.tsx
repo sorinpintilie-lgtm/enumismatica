@@ -10,8 +10,8 @@ import {
   setUserAsAdmin,
   removeAdminRole,
   deleteUser,
-} from '../../../../shared/adminService';
-import { User } from '../../../../shared/types';
+} from 'shared/adminService';
+import { User } from 'shared/types';
 
 export default function AdminUsers() {
   const { user, loading: authLoading } = useAuth();

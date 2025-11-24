@@ -13,8 +13,8 @@ import {
   rejectProduct,
   approveAuction,
   rejectAuction,
-} from '../../../shared/adminService';
-import { Product, Auction } from '../../../shared/types';
+} from 'shared/adminService';
+import { Product, Auction } from 'shared/types';
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
