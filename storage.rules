@@ -1,0 +1,60 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+             (request.auth.uid == 'QEm0DSIzylNQIHpQAZlgtWQkYYE3' ||
+              firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    function isValidImageFile() {
+      return request.resource.size < 5 * 1024 * 1024 && // 5MB max
+             request.resource.contentType.matches('image/.*');
+    }
+
+    // Product images: Owner or admin can upload, anyone can read
+    match /products/{userId}/{imageId} {
+      allow read: if true; // Public read for product images
+      allow write: if isAuthenticated() && (isOwner(userId) || isAdmin()) && isValidImageFile();
+      allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
+    }
+
+    // Seed product images: Admin only
+    match /products/seed/{imageId} {
+      allow read: if true; // Public read
+      allow write: if isAdmin() && isValidImageFile();
+      allow delete: if isAdmin();
+    }
+
+    // Collection images: Owner or admin can upload/delete, owner can read
+    match /collections/{userId}/{imageId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow write: if isAuthenticated() && (isOwner(userId) || isAdmin()) && isValidImageFile();
+      allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
+    }
+
+    // User avatars: Owner can upload/delete, anyone authenticated can read
+    match /avatars/{userId}/{imageId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isOwner(userId) || isAdmin()) && isValidImageFile();
+      allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
+    }
+
+    // Temporary uploads: User can upload their own temp files
+    match /temp/{userId}/{imageId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow write: if isAuthenticated() && isOwner(userId) && isValidImageFile();
+      allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
+    }
+  }
+}

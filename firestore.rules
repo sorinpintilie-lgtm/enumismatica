@@ -1,0 +1,192 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+             (request.auth.uid == 'QEm0DSIzylNQIHpQAZlgtWQkYYE3' ||
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    function isValidEmail(email) {
+      return email.matches('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}');
+    }
+
+    function isValidBidAmount(amount, currentBid, reservePrice) {
+      return amount is number && amount > 0 && amount >= (currentBid != null ? currentBid : (reservePrice != null ? reservePrice : 0)) + 0.01;
+    }
+
+    function hasRequiredFields(data, requiredFields) {
+      return data.keys().hasAll(requiredFields);
+    }
+
+    function isValidTimestamp(ts) {
+      return ts is timestamp;
+    }
+
+    // Users collection: Users can read and write their own documents, admins can read all
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if (isOwner(userId) || isAdmin()) &&
+                      (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['email', 'role']) ||
+                       isAdmin() ||
+                       (request.resource.data.email == null || isValidEmail(request.resource.data.email))) &&
+                      hasRequiredFields(request.resource.data, ['email', 'displayName']);
+      allow delete: if isAdmin();
+
+      // User's personal collection subcollection
+      match /collection/{itemId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) &&
+                      hasRequiredFields(request.resource.data, ['userId', 'name', 'createdAt']) &&
+                      request.resource.data.userId == userId &&
+                      isValidTimestamp(request.resource.data.createdAt);
+        allow update: if isOwner(userId) || isAdmin();
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // Products collection: Authenticated users can read approved products, admins can read all
+    match /products/{productId} {
+      allow read: if isAuthenticated() && (resource.data.status == 'approved' || isAdmin() || isOwner(resource.data.ownerId));
+      allow create: if isAuthenticated() &&
+                    hasRequiredFields(request.resource.data, ['name', 'description', 'ownerId', 'price', 'status', 'createdAt']) &&
+                    isValidTimestamp(request.resource.data.createdAt) &&
+                    request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100 &&
+                    request.resource.data.description.size() > 0 && request.resource.data.description.size() <= 1000 &&
+                    (isOwner(request.resource.data.ownerId) || isAdmin()) &&
+                    (request.resource.data.status == 'pending' || (isAdmin() && request.resource.data.status in ['pending', 'approved', 'rejected']));
+      allow update: if isAuthenticated() &&
+                    (isOwner(resource.data.ownerId) || isAdmin()) &&
+                    (isAdmin() || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']));
+      allow delete: if isOwner(resource.data.ownerId) || isAdmin();
+
+      // Price history subcollection for products
+      match /priceHistory/{historyId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() &&
+                      (isOwner(get(/databases/$(database)/documents/products/$(productId)).data.ownerId) || isAdmin()) &&
+                      hasRequiredFields(request.resource.data, ['price', 'source', 'timestamp']) &&
+                      isValidTimestamp(request.resource.data.timestamp);
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // Auctions collection: Authenticated users can read active auctions, admins can read all
+    match /auctions/{auctionId} {
+      allow read: if isAuthenticated() && (resource.data.status in ['active', 'ended'] || isAdmin() || isOwner(resource.data.ownerId));
+      allow create: if isAuthenticated() &&
+                    hasRequiredFields(request.resource.data, ['productId', 'reservePrice', 'startTime', 'endTime', 'status']) &&
+                    isValidTimestamp(request.resource.data.startTime) && isValidTimestamp(request.resource.data.endTime) &&
+                    request.resource.data.reservePrice >= 0 &&
+                    (request.resource.data.status == 'pending' || (isAdmin() && request.resource.data.status in ['pending', 'active', 'ended', 'cancelled', 'rejected']));
+      allow update: if isAuthenticated() &&
+                    (isAdmin() ||
+                     // Allow updates to currentBid, currentBidderId, status, updatedAt for bidding
+                     (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['currentBid', 'currentBidderId', 'status', 'updatedAt']) &&
+                      request.resource.data.status in ['active', 'ended'] && isValidTimestamp(request.resource.data.updatedAt != null ? request.resource.data.updatedAt : request.time)));
+      allow delete: if isAdmin();
+
+      // Bids subcollection: Authenticated users can read all bids in an auction, write their own bids
+      match /bids/{bidId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() &&
+                      hasRequiredFields(request.resource.data, ['userId', 'amount', 'timestamp']) &&
+                      isValidTimestamp(request.resource.data.timestamp) &&
+                      (isAdmin() ||
+                       (isOwner(request.resource.data.userId) &&
+                        // Check if auction is active
+                        exists(/databases/$(database)/documents/auctions/$(auctionId)) &&
+                        get(/databases/$(database)/documents/auctions/$(auctionId)).data.status == 'active' &&
+                        // Validate bid amount
+                        isValidBidAmount(request.resource.data.amount, get(/databases/$(database)/documents/auctions/$(auctionId)).data.currentBid, get(/databases/$(database)/documents/auctions/$(auctionId)).data.reservePrice) &&
+                        // Rate limiting: check if user hasn't bid in the last 10 seconds (simple rate limit)
+                        (!exists(/databases/$(database)/documents/auctions/$(auctionId)/bids/$(bidId)) ||
+                         request.time > get(/databases/$(database)/documents/auctions/$(auctionId)/bids/$(bidId)).data.timestamp + duration.value(10, 's'))));
+        allow update, delete: if isAdmin();
+      }
+
+      // AutoBids subcollection: Users can manage their own auto-bids, admins can manage all
+      match /autoBids/{autoBidId} {
+        allow read: if isAuthenticated();
+        allow write: if (isOwner(request.resource.data.userId) || isAdmin()) &&
+                     hasRequiredFields(request.resource.data, ['userId', 'maxAmount', 'auctionId']) &&
+                     request.resource.data.maxAmount > 0;
+        allow delete: if isOwner(resource.data.userId) || isAdmin();
+      }
+
+      // Public Chat subcollection: Authenticated users can read and write messages
+      match /publicChat/{messageId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() &&
+                      isOwner(request.resource.data.senderId) &&
+                      hasRequiredFields(request.resource.data, ['senderId', 'message', 'timestamp', 'isAnonymous']) &&
+                      isValidTimestamp(request.resource.data.timestamp) &&
+                      request.resource.data.message.size() > 0 && request.resource.data.message.size() <= 500;
+        allow update: if isAuthenticated() &&
+                      isOwner(resource.data.senderId) &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['message', 'edited', 'editedAt', 'deleted']);
+        allow delete: if isOwner(resource.data.senderId) || isAdmin();
+      }
+
+      // Price history subcollection for auctions
+      match /priceHistory/{historyId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() &&
+                      hasRequiredFields(request.resource.data, ['price', 'source', 'timestamp']) &&
+                      isValidTimestamp(request.resource.data.timestamp);
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // Conversations collection: Private chats between buyers and sellers
+    match /conversations/{conversationId} {
+      allow read: if isAuthenticated() &&
+                  (resource.data.participants.hasAny([request.auth.uid]) || isAdmin());
+      allow create: if isAuthenticated() &&
+                    hasRequiredFields(request.resource.data, ['buyerId', 'sellerId', 'participants', 'status']) &&
+                    request.resource.data.participants.hasAll([request.auth.uid]) &&
+                    request.resource.data.participants.size() == 2 &&
+                    (isOwner(request.resource.data.buyerId) || isOwner(request.resource.data.sellerId));
+      allow update: if isAuthenticated() &&
+                    (resource.data.participants.hasAny([request.auth.uid]) || isAdmin()) &&
+                    (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['buyerId', 'sellerId', 'participants']) ||
+                     isAdmin());
+      allow delete: if isAdmin();
+
+      // Messages subcollection: Participants can read and write messages, admins can read all
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() &&
+                    (get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants.hasAny([request.auth.uid]) ||
+                     isAdmin());
+        allow create: if isAuthenticated() &&
+                      get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants.hasAny([request.auth.uid]) &&
+                      isOwner(request.resource.data.senderId) &&
+                      hasRequiredFields(request.resource.data, ['senderId', 'message', 'timestamp']) &&
+                      isValidTimestamp(request.resource.data.timestamp) &&
+                      request.resource.data.message.size() > 0 && request.resource.data.message.size() <= 500;
+        allow update: if isAuthenticated() &&
+                      (isOwner(resource.data.senderId) || isAdmin()) &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['message', 'edited', 'editedAt', 'deleted']);
+        allow delete: if isOwner(resource.data.senderId) || isAdmin();
+      }
+    }
+
+    // User notifications subcollection
+    match /users/{userId}/notifications/{notificationId} {
+      allow read: if isOwner(userId);
+      allow create: if isAuthenticated();
+      allow update: if isOwner(userId) &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+  }
+}

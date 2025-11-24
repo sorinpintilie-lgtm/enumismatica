@@ -1,0 +1,663 @@
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  Timestamp,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  serverTimestamp,
+  increment,
+  setDoc,
+  limit,
+  arrayUnion,
+  arrayRemove,
+  deleteField,
+} from 'firebase/firestore';
+import { db } from './firebaseConfig';
+import { ChatMessage, Conversation, ChatNotification, UserPresence } from './types';
+
+/**
+ * Send a message to an auction's public chat
+ * Messages are anonymous during active bidding
+ */
+export async function sendAuctionChatMessage(
+  auctionId: string,
+  userId: string,
+  message: string,
+  isAnonymous: boolean = true
+): Promise<string> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const chatRef = collection(db, 'auctions', auctionId, 'publicChat');
+  
+  let senderName: string | undefined;
+  let senderAvatar: string | undefined;
+
+  // If not anonymous, fetch user details
+  if (!isAnonymous) {
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      senderName = userData.displayName;
+      senderAvatar = userData.avatar;
+    }
+  }
+
+  const messageData: any = {
+    senderId: userId,
+    message,
+    timestamp: serverTimestamp(),
+    isAnonymous,
+    edited: false,
+    deleted: false,
+  };
+
+  // Only add optional fields if they have values
+  if (!isAnonymous && senderName) {
+    messageData.senderName = senderName;
+  }
+  if (!isAnonymous && senderAvatar) {
+    messageData.senderAvatar = senderAvatar;
+  }
+
+  const docRef = await addDoc(chatRef, messageData);
+
+  return docRef.id;
+}
+
+/**
+ * Send a message to a private conversation
+ */
+export async function sendPrivateMessage(
+  conversationId: string,
+  userId: string,
+  message: string
+): Promise<string> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+  
+  // Fetch user details
+  const userDoc = await getDoc(doc(db, 'users', userId));
+  let senderName = 'Unknown User';
+  let senderAvatar: string | undefined;
+
+  if (userDoc.exists()) {
+    const userData = userDoc.data();
+    senderName = userData.displayName || 'Unknown User';
+    senderAvatar = userData.avatar;
+  }
+
+  const messageData: Omit<ChatMessage, 'id'> = {
+    senderId: userId,
+    senderName,
+    senderAvatar,
+    message,
+    timestamp: new Date(),
+    isAnonymous: false,
+    edited: false,
+    deleted: false,
+  };
+
+  const docRef = await addDoc(messagesRef, {
+    ...messageData,
+    timestamp: serverTimestamp(),
+  });
+
+  // Update conversation with last message info
+  const conversationRef = doc(db, 'conversations', conversationId);
+  const conversationDoc = await getDoc(conversationRef);
+  
+  if (conversationDoc.exists()) {
+    const conversation = conversationDoc.data() as Conversation;
+    const otherUserId = conversation.participants.find(id => id !== userId);
+    
+    await updateDoc(conversationRef, {
+      lastMessage: message.substring(0, 100), // Preview
+      lastMessageAt: serverTimestamp(),
+      [`unreadCount.${otherUserId}`]: increment(1),
+      updatedAt: serverTimestamp(),
+    });
+
+    // Create notification for the other user
+    if (otherUserId) {
+      await createChatNotification(
+        otherUserId,
+        'new_message',
+        userId,
+        senderName,
+        message.substring(0, 100),
+        conversationId
+      );
+    }
+  }
+
+  return docRef.id;
+}
+
+/**
+ * Create or get a conversation between buyer and seller
+ */
+export async function createOrGetConversation(
+  buyerId: string,
+  sellerId: string,
+  auctionId?: string,
+  productId?: string
+): Promise<string> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  // Check if conversation already exists
+  const conversationsRef = collection(db, 'conversations');
+  const q = query(
+    conversationsRef,
+    where('participants', 'array-contains', buyerId)
+  );
+
+  const snapshot = await getDocs(q);
+  const existingConversation = snapshot.docs.find(doc => {
+    const data = doc.data() as Conversation;
+    return data.participants.includes(sellerId) && 
+           (auctionId ? data.auctionId === auctionId : true) &&
+           (productId ? data.productId === productId : true);
+  });
+
+  if (existingConversation) {
+    return existingConversation.id;
+  }
+
+  // Create new conversation
+  const conversationData: Omit<Conversation, 'id'> = {
+    auctionId,
+    productId,
+    buyerId,
+    sellerId,
+    participants: [buyerId, sellerId],
+    unreadCount: {
+      [buyerId]: 0,
+      [sellerId]: 0,
+    },
+    status: 'active',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const docRef = await addDoc(conversationsRef, {
+    ...conversationData,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  // Notify seller about new conversation
+  const buyerDoc = await getDoc(doc(db, 'users', buyerId));
+  const buyerName = buyerDoc.exists() ? buyerDoc.data().displayName : 'A user';
+  
+  await createChatNotification(
+    sellerId,
+    'conversation_started',
+    buyerId,
+    buyerName,
+    'A new conversation has been started',
+    docRef.id,
+    auctionId
+  );
+
+  return docRef.id;
+}
+
+/**
+ * Mark conversation messages as read
+ */
+export async function markConversationAsRead(
+  conversationId: string,
+  userId: string
+): Promise<void> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const conversationRef = doc(db, 'conversations', conversationId);
+  await updateDoc(conversationRef, {
+    [`unreadCount.${userId}`]: 0,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Get user's conversations
+ */
+export function subscribeToUserConversations(
+  userId: string,
+  callback: (conversations: Conversation[]) => void
+): () => void {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const conversationsRef = collection(db, 'conversations');
+  const q = query(
+    conversationsRef,
+    where('participants', 'array-contains', userId),
+    where('status', '==', 'active'),
+    orderBy('updatedAt', 'desc')
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const conversations: Conversation[] = [];
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      conversations.push({
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        lastMessageAt: data.lastMessageAt?.toDate(),
+      } as Conversation);
+    });
+    callback(conversations);
+  });
+}
+
+/**
+ * Subscribe to auction public chat messages
+ */
+export function subscribeToAuctionChat(
+  auctionId: string,
+  callback: (messages: ChatMessage[]) => void
+): () => void {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const chatRef = collection(db, 'auctions', auctionId, 'publicChat');
+  const q = query(chatRef, orderBy('timestamp', 'asc'), limit(100));
+
+  return onSnapshot(q, (snapshot) => {
+    const messages: ChatMessage[] = [];
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (!data.deleted) {
+        messages.push({
+          id: doc.id,
+          ...data,
+          timestamp: data.timestamp?.toDate() || new Date(),
+          editedAt: data.editedAt?.toDate(),
+        } as ChatMessage);
+      }
+    });
+    callback(messages);
+  });
+}
+
+/**
+ * Subscribe to private conversation messages
+ */
+export function subscribeToConversationMessages(
+  conversationId: string,
+  callback: (messages: ChatMessage[]) => void
+): () => void {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+  const q = query(messagesRef, orderBy('timestamp', 'asc'), limit(100));
+
+  return onSnapshot(q, (snapshot) => {
+    const messages: ChatMessage[] = [];
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (!data.deleted) {
+        messages.push({
+          id: doc.id,
+          ...data,
+          timestamp: data.timestamp?.toDate() || new Date(),
+          editedAt: data.editedAt?.toDate(),
+        } as ChatMessage);
+      }
+    });
+    callback(messages);
+  });
+}
+
+/**
+ * Create a chat notification
+ */
+async function createChatNotification(
+  userId: string,
+  type: ChatNotification['type'],
+  senderId: string,
+  senderName: string,
+  message: string,
+  conversationId?: string,
+  auctionId?: string
+): Promise<void> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const notificationsRef = collection(db, 'users', userId, 'notifications');
+  
+  const notificationData: Omit<ChatNotification, 'id'> = {
+    userId,
+    type,
+    conversationId,
+    auctionId,
+    senderId,
+    senderName,
+    message,
+    read: false,
+    pushed: false,
+    createdAt: new Date(),
+  };
+
+  const docRef = await addDoc(notificationsRef, {
+    ...notificationData,
+    createdAt: serverTimestamp(),
+  });
+
+  // Send push notification
+  try {
+    await sendPushNotification(
+      userId,
+      `Mesaj nou de la ${senderName}`,
+      message,
+      { conversationId, auctionId, notificationId: docRef.id }
+    );
+    
+    // Mark as pushed
+    await updateDoc(docRef, { pushed: true });
+  } catch (error) {
+    console.error('Failed to send push notification:', error);
+  }
+}
+
+/**
+ * Reveal identities in auction chat after auction ends
+ * This updates all anonymous messages to show sender details
+ */
+export async function revealAuctionChatIdentities(auctionId: string): Promise<void> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const chatRef = collection(db, 'auctions', auctionId, 'publicChat');
+  const q = query(chatRef, where('isAnonymous', '==', true));
+
+  const snapshot = await getDocs(q);
+  
+  const updatePromises = snapshot.docs.map(async (messageDoc) => {
+    const messageData = messageDoc.data();
+    const userId = messageData.senderId;
+    
+    // Fetch user details
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      await updateDoc(messageDoc.ref, {
+        isAnonymous: false,
+        senderName: userData.displayName,
+        senderAvatar: userData.avatar,
+      });
+    }
+  });
+
+  await Promise.all(updatePromises);
+}
+
+/**
+ * Delete a message (soft delete)
+ */
+export async function deleteMessage(
+  messageId: string,
+  isAuctionChat: boolean,
+  parentId: string // auctionId or conversationId
+): Promise<void> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const messageRef = isAuctionChat
+    ? doc(db, 'auctions', parentId, 'publicChat', messageId)
+    : doc(db, 'conversations', parentId, 'messages', messageId);
+
+  await updateDoc(messageRef, {
+    deleted: true,
+    message: '[Message deleted]',
+  });
+}
+
+/**
+ * Edit a message
+ */
+export async function editMessage(
+  messageId: string,
+  newMessage: string,
+  isAuctionChat: boolean,
+  parentId: string // auctionId or conversationId
+): Promise<void> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const messageRef = isAuctionChat
+    ? doc(db, 'auctions', parentId, 'publicChat', messageId)
+    : doc(db, 'conversations', parentId, 'messages', messageId);
+
+  await updateDoc(messageRef, {
+    message: newMessage,
+    edited: true,
+    editedAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Mark message as read by user
+ */
+export async function markMessageAsRead(
+  messageId: string,
+  userId: string,
+  isAuctionChat: boolean,
+  parentId: string
+): Promise<void> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const messageRef = isAuctionChat
+    ? doc(db, 'auctions', parentId, 'publicChat', messageId)
+    : doc(db, 'conversations', parentId, 'messages', messageId);
+
+  await updateDoc(messageRef, {
+    readBy: arrayUnion(userId),
+  });
+}
+
+/**
+ * Set typing indicator for a conversation
+ */
+export async function setTypingIndicator(
+  conversationId: string,
+  userId: string,
+  isTyping: boolean
+): Promise<void> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const conversationRef = doc(db, 'conversations', conversationId);
+  
+  if (isTyping) {
+    await updateDoc(conversationRef, {
+      typingUsers: arrayUnion(userId),
+    });
+  } else {
+    await updateDoc(conversationRef, {
+      typingUsers: arrayRemove(userId),
+    });
+  }
+}
+
+/**
+ * Subscribe to typing indicators for a conversation
+ */
+export function subscribeToTypingIndicators(
+  conversationId: string,
+  callback: (typingUsers: string[]) => void
+): () => void {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const conversationRef = doc(db, 'conversations', conversationId);
+
+  return onSnapshot(conversationRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.data();
+      callback(data.typingUsers || []);
+    } else {
+      callback([]);
+    }
+  });
+}
+
+/**
+ * Search messages in a conversation
+ */
+export async function searchMessages(
+  conversationId: string,
+  searchTerm: string,
+  isAuctionChat: boolean = false,
+  parentId?: string
+): Promise<ChatMessage[]> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const messagesRef = isAuctionChat && parentId
+    ? collection(db, 'auctions', parentId, 'publicChat')
+    : collection(db, 'conversations', conversationId, 'messages');
+
+  const q = query(messagesRef, orderBy('timestamp', 'desc'), limit(100));
+  const snapshot = await getDocs(q);
+
+  const messages: ChatMessage[] = [];
+  const searchLower = searchTerm.toLowerCase();
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    if (!data.deleted && data.message.toLowerCase().includes(searchLower)) {
+      messages.push({
+        id: doc.id,
+        ...data,
+        timestamp: data.timestamp?.toDate() || new Date(),
+        editedAt: data.editedAt?.toDate(),
+      } as ChatMessage);
+    }
+  });
+
+  return messages;
+}
+
+/**
+ * Get unread notifications count for user
+ */
+export function subscribeToNotifications(
+  userId: string,
+  callback: (notifications: ChatNotification[], unreadCount: number) => void
+): () => void {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const notificationsRef = collection(db, 'users', userId, 'notifications');
+  const q = query(notificationsRef, orderBy('createdAt', 'desc'), limit(50));
+
+  return onSnapshot(q, (snapshot) => {
+    const notifications: ChatNotification[] = [];
+    let unreadCount = 0;
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const notification: ChatNotification = {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date(),
+      } as ChatNotification;
+      
+      notifications.push(notification);
+      if (!notification.read) {
+        unreadCount++;
+      }
+    });
+
+    callback(notifications, unreadCount);
+  });
+}
+
+/**
+ * Mark notification as read
+ */
+export async function markNotificationAsRead(
+  userId: string,
+  notificationId: string
+): Promise<void> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const notificationRef = doc(db, 'users', userId, 'notifications', notificationId);
+  await updateDoc(notificationRef, {
+    read: true,
+  });
+}
+
+/**
+ * Mark all notifications as read
+ */
+export async function markAllNotificationsAsRead(userId: string): Promise<void> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const notificationsRef = collection(db, 'users', userId, 'notifications');
+  const q = query(notificationsRef, where('read', '==', false));
+  const snapshot = await getDocs(q);
+
+  const updatePromises = snapshot.docs.map((doc) =>
+    updateDoc(doc.ref, { read: true })
+  );
+
+  await Promise.all(updatePromises);
+}
+
+/**
+ * Request browser notification permission
+ */
+export async function requestNotificationPermission(): Promise<boolean> {
+  if (!('Notification' in window)) {
+    console.log('This browser does not support notifications');
+    return false;
+  }
+
+  if (Notification.permission === 'granted') {
+    return true;
+  }
+
+  if (Notification.permission !== 'denied') {
+    const permission = await Notification.requestPermission();
+    return permission === 'granted';
+  }
+
+  return false;
+}
+
+/**
+ * Show browser notification
+ */
+export function showBrowserNotification(
+  title: string,
+  options?: NotificationOptions
+): void {
+  if (Notification.permission === 'granted') {
+    new Notification(title, {
+      icon: '/icon.png',
+      badge: '/badge.png',
+      ...options,
+    });
+  }
+}
+
+/**
+ * Send push notification (browser notification)
+ */
+async function sendPushNotification(
+  userId: string,
+  title: string,
+  body: string,
+  data?: any
+): Promise<void> {
+  // Check if user has granted permission
+  if (Notification.permission === 'granted') {
+    showBrowserNotification(title, {
+      body,
+      data,
+      tag: `chat-${userId}`,
+      requireInteraction: false,
+    });
+  }
+}

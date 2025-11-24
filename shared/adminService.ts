@@ -1,0 +1,669 @@
+import {
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  Timestamp,
+  addDoc,
+  setDoc,
+  limit,
+} from 'firebase/firestore';
+import { db } from './firebaseConfig';
+import { User, Product, Auction, CollectionItem, Conversation, ChatMessage } from './types';
+
+/**
+ * Admin UID - hardcoded for security
+ */
+const ADMIN_UID = 'QEm0DSIzylNQIHpQAZlgtWQkYYE3';
+
+/**
+ * Check if a user is an admin based on their UID or role in Firestore
+ */
+export async function isAdmin(userId: string): Promise<boolean> {
+  try {
+    // Check if user is the super admin by UID
+    if (userId === ADMIN_UID) return true;
+    
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (!userDoc.exists()) return false;
+    
+    const userData = userDoc.data();
+    // Check if user has admin role
+    return userData.role === 'admin';
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
+}
+
+/**
+ * Set a user as admin (only callable by existing admin)
+ */
+export async function setUserAsAdmin(userId: string, isCurrentUserAdmin: boolean): Promise<{ success: boolean; error?: string }> {
+  if (!isCurrentUserAdmin) {
+    return { success: false, error: 'Unauthorized: Only admins can set other users as admin' };
+  }
+
+  try {
+    await updateDoc(doc(db, 'users', userId), {
+      role: 'admin',
+      updatedAt: Timestamp.fromDate(new Date()),
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Remove admin role from a user
+ */
+export async function removeAdminRole(userId: string, isCurrentUserAdmin: boolean): Promise<{ success: boolean; error?: string }> {
+  if (!isCurrentUserAdmin) {
+    return { success: false, error: 'Unauthorized: Only admins can remove admin role' };
+  }
+
+  try {
+    await updateDoc(doc(db, 'users', userId), {
+      role: 'user',
+      updatedAt: Timestamp.fromDate(new Date()),
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Get all users (admin only)
+ */
+export async function getAllUsers(): Promise<User[]> {
+  try {
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    return usersSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+    })) as User[];
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return [];
+  }
+}
+
+/**
+ * Get all products (admin only)
+ */
+export async function getAllProducts(): Promise<Product[]> {
+  try {
+    const productsSnapshot = await getDocs(collection(db, 'products'));
+    return productsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+    })) as Product[];
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return [];
+  }
+}
+
+/**
+ * Get all auctions (admin only)
+ */
+export async function getAllAuctions(): Promise<Auction[]> {
+  try {
+    const auctionsSnapshot = await getDocs(collection(db, 'auctions'));
+    return auctionsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      startTime: doc.data().startTime?.toDate() || new Date(),
+      endTime: doc.data().endTime?.toDate() || new Date(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+    })) as Auction[];
+  } catch (error) {
+    console.error('Error fetching auctions:', error);
+    return [];
+  }
+}
+
+/**
+ * Delete a product (admin only)
+ */
+export async function deleteProduct(productId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    await deleteDoc(doc(db, 'products', productId));
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Delete an auction (admin only)
+ */
+export async function deleteAuction(auctionId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    await deleteDoc(doc(db, 'auctions', auctionId));
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Update auction status (admin only)
+ */
+export async function updateAuctionStatus(
+  auctionId: string,
+  status: 'active' | 'ended' | 'cancelled'
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await updateDoc(doc(db, 'auctions', auctionId), {
+      status,
+      updatedAt: Timestamp.fromDate(new Date()),
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Create a new product (admin can create for any user)
+ */
+export async function createProduct(productData: Omit<Product, 'id'>): Promise<{ success: boolean; productId?: string; error?: string }> {
+  try {
+    const docRef = await addDoc(collection(db, 'products'), {
+      ...productData,
+      createdAt: Timestamp.fromDate(productData.createdAt),
+      updatedAt: Timestamp.fromDate(productData.updatedAt),
+    });
+    return { success: true, productId: docRef.id };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Update a product (admin can update any product)
+ */
+export async function updateProduct(
+  productId: string,
+  updates: Partial<Omit<Product, 'id' | 'createdAt'>>
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const updateData: any = {
+      ...updates,
+      updatedAt: Timestamp.fromDate(new Date()),
+    };
+    await updateDoc(doc(db, 'products', productId), updateData);
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Create a new auction (admin can create for any product)
+ */
+export async function createAuction(auctionData: Omit<Auction, 'id'>): Promise<{ success: boolean; auctionId?: string; error?: string }> {
+  try {
+    const docRef = await addDoc(collection(db, 'auctions'), {
+      ...auctionData,
+      startTime: Timestamp.fromDate(auctionData.startTime),
+      endTime: Timestamp.fromDate(auctionData.endTime),
+      createdAt: Timestamp.fromDate(auctionData.createdAt),
+      updatedAt: Timestamp.fromDate(auctionData.updatedAt),
+    });
+    return { success: true, auctionId: docRef.id };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Get platform statistics (admin only)
+ */
+export async function getPlatformStats(): Promise<{
+  totalUsers: number;
+  totalProducts: number;
+  totalAuctions: number;
+  activeAuctions: number;
+  endedAuctions: number;
+}> {
+  try {
+    const [usersSnapshot, productsSnapshot, auctionsSnapshot] = await Promise.all([
+      getDocs(collection(db, 'users')),
+      getDocs(collection(db, 'products')),
+      getDocs(collection(db, 'auctions')),
+    ]);
+
+    const auctions = auctionsSnapshot.docs.map(doc => doc.data());
+    const activeAuctions = auctions.filter(a => a.status === 'active').length;
+    const endedAuctions = auctions.filter(a => a.status === 'ended').length;
+
+    return {
+      totalUsers: usersSnapshot.size,
+      totalProducts: productsSnapshot.size,
+      totalAuctions: auctionsSnapshot.size,
+      activeAuctions,
+      endedAuctions,
+    };
+  } catch (error) {
+    console.error('Error fetching platform stats:', error);
+    return {
+      totalUsers: 0,
+      totalProducts: 0,
+      totalAuctions: 0,
+      activeAuctions: 0,
+      endedAuctions: 0,
+    };
+  }
+}
+
+/**
+ * Delete a user (admin only) - WARNING: This will not delete user's auth account
+ */
+export async function deleteUser(userId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    await deleteDoc(doc(db, 'users', userId));
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Approve a product (admin only)
+ */
+export async function approveProduct(productId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    await updateDoc(doc(db, 'products', productId), {
+      status: 'approved',
+      updatedAt: Timestamp.fromDate(new Date()),
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Reject a product (admin only)
+ */
+export async function rejectProduct(productId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    await updateDoc(doc(db, 'products', productId), {
+      status: 'rejected',
+      updatedAt: Timestamp.fromDate(new Date()),
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Approve an auction (admin only) - changes status from pending to active
+ */
+export async function approveAuction(auctionId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    await updateDoc(doc(db, 'auctions', auctionId), {
+      status: 'active',
+      updatedAt: Timestamp.fromDate(new Date()),
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Reject an auction (admin only)
+ */
+export async function rejectAuction(auctionId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    await updateDoc(doc(db, 'auctions', auctionId), {
+      status: 'rejected',
+      updatedAt: Timestamp.fromDate(new Date()),
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Get pending products (admin only)
+ */
+export async function getPendingProducts(): Promise<Product[]> {
+  try {
+    const q = query(collection(db, 'products'), where('status', '==', 'pending'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+    })) as Product[];
+  } catch (error) {
+    console.error('Error fetching pending products:', error);
+    return [];
+  }
+}
+
+/**
+ * Get pending auctions (admin only)
+ */
+export async function getPendingAuctions(): Promise<Auction[]> {
+  try {
+    const q = query(collection(db, 'auctions'), where('status', '==', 'pending'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      startTime: doc.data().startTime?.toDate() || new Date(),
+      endTime: doc.data().endTime?.toDate() || new Date(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+    })) as Auction[];
+  } catch (error) {
+    console.error('Error fetching pending auctions:', error);
+    return [];
+  }
+}
+
+/**
+ * Force end an auction (admin only)
+ */
+export async function forceEndAuction(auctionId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    await updateDoc(doc(db, 'auctions', auctionId), {
+      status: 'ended',
+      updatedAt: Timestamp.fromDate(new Date()),
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Get rejected items for review (admin only)
+ */
+export async function getRejectedProducts(): Promise<Product[]> {
+  try {
+    const q = query(collection(db, 'products'), where('status', '==', 'rejected'), orderBy('updatedAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+    })) as Product[];
+  } catch (error) {
+    console.error('Error fetching rejected products:', error);
+    return [];
+  }
+}
+
+/**
+ * Get rejected auctions for review (admin only)
+ */
+export async function getRejectedAuctions(): Promise<Auction[]> {
+  try {
+    const q = query(collection(db, 'auctions'), where('status', '==', 'rejected'), orderBy('updatedAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      startTime: doc.data().startTime?.toDate() || new Date(),
+      endTime: doc.data().endTime?.toDate() || new Date(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+    })) as Auction[];
+  } catch (error) {
+    console.error('Error fetching rejected auctions:', error);
+    return [];
+  }
+}
+
+/**
+ * Get user's collection items (admin only)
+ */
+export async function getUserCollection(userId: string): Promise<CollectionItem[]> {
+  try {
+    const collectionRef = collection(db, 'users', userId, 'collection');
+    const snapshot = await getDocs(query(collectionRef, orderBy('createdAt', 'desc')));
+    
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      acquisitionDate: doc.data().acquisitionDate?.toDate(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+    })) as CollectionItem[];
+  } catch (error) {
+    console.error('Error fetching user collection:', error);
+    return [];
+  }
+}
+
+/**
+ * Get user's conversations (admin only)
+ */
+export async function getUserConversations(userId: string): Promise<Conversation[]> {
+  try {
+    const conversationsRef = collection(db, 'conversations');
+    const q = query(
+      conversationsRef,
+      where('participants', 'array-contains', userId),
+      orderBy('updatedAt', 'desc')
+    );
+    
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+      lastMessageAt: doc.data().lastMessageAt?.toDate(),
+    })) as Conversation[];
+  } catch (error) {
+    console.error('Error fetching user conversations:', error);
+    return [];
+  }
+}
+
+/**
+ * Get conversation messages (admin only)
+ */
+export async function getConversationMessages(conversationId: string): Promise<ChatMessage[]> {
+  try {
+    const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+    const q = query(messagesRef, orderBy('timestamp', 'asc'), limit(100));
+    
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      timestamp: doc.data().timestamp?.toDate() || new Date(),
+      editedAt: doc.data().editedAt?.toDate(),
+    })) as ChatMessage[];
+  } catch (error) {
+    console.error('Error fetching conversation messages:', error);
+    return [];
+  }
+}
+
+/**
+ * Get auction chat messages (admin only)
+ */
+export async function getAuctionChatMessages(auctionId: string): Promise<ChatMessage[]> {
+  try {
+    const chatRef = collection(db, 'auctions', auctionId, 'publicChat');
+    const q = query(chatRef, orderBy('timestamp', 'asc'), limit(100));
+    
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      timestamp: doc.data().timestamp?.toDate() || new Date(),
+      editedAt: doc.data().editedAt?.toDate(),
+    })) as ChatMessage[];
+  } catch (error) {
+    console.error('Error fetching auction chat messages:', error);
+    return [];
+  }
+}
+
+/**
+ * Get detailed user analytics (admin only)
+ */
+export async function getUserAnalytics(userId: string): Promise<{
+  totalProducts: number;
+  approvedProducts: number;
+  pendingProducts: number;
+  rejectedProducts: number;
+  totalAuctions: number;
+  activeAuctions: number;
+  endedAuctions: number;
+  totalBids: number;
+  totalCollectionItems: number;
+  totalConversations: number;
+  collectionValue: number;
+}> {
+  try {
+    // Get user's products
+    const productsRef = collection(db, 'products');
+    const productsQuery = query(productsRef, where('ownerId', '==', userId));
+    const productsSnapshot = await getDocs(productsQuery);
+    const products = productsSnapshot.docs.map(doc => doc.data());
+
+    // Get auctions for user's products
+    const productIds = productsSnapshot.docs.map(doc => doc.id);
+    let auctions: any[] = [];
+    if (productIds.length > 0) {
+      const auctionsRef = collection(db, 'auctions');
+      const auctionsQuery = query(auctionsRef, where('productId', 'in', productIds.slice(0, 10))); // Firestore limit
+      const auctionsSnapshot = await getDocs(auctionsQuery);
+      auctions = auctionsSnapshot.docs.map(doc => doc.data());
+    }
+
+    // Get user's bids across all auctions
+    const allAuctionsSnapshot = await getDocs(collection(db, 'auctions'));
+    let totalBids = 0;
+    for (const auctionDoc of allAuctionsSnapshot.docs) {
+      const bidsRef = collection(db, 'auctions', auctionDoc.id, 'bids');
+      const bidsQuery = query(bidsRef, where('userId', '==', userId));
+      const bidsSnapshot = await getDocs(bidsQuery);
+      totalBids += bidsSnapshot.size;
+    }
+
+    // Get user's collection
+    const collectionRef = collection(db, 'users', userId, 'collection');
+    const collectionSnapshot = await getDocs(collectionRef);
+    const collectionItems = collectionSnapshot.docs.map(doc => doc.data());
+    const collectionValue = collectionItems.reduce((sum, item) => sum + (item.currentValue || 0), 0);
+
+    // Get user's conversations
+    const conversationsRef = collection(db, 'conversations');
+    const conversationsQuery = query(conversationsRef, where('participants', 'array-contains', userId));
+    const conversationsSnapshot = await getDocs(conversationsQuery);
+
+    return {
+      totalProducts: products.length,
+      approvedProducts: products.filter(p => p.status === 'approved').length,
+      pendingProducts: products.filter(p => p.status === 'pending').length,
+      rejectedProducts: products.filter(p => p.status === 'rejected').length,
+      totalAuctions: auctions.length,
+      activeAuctions: auctions.filter(a => a.status === 'active').length,
+      endedAuctions: auctions.filter(a => a.status === 'ended').length,
+      totalBids,
+      totalCollectionItems: collectionSnapshot.size,
+      totalConversations: conversationsSnapshot.size,
+      collectionValue,
+    };
+  } catch (error) {
+    console.error('Error fetching user analytics:', error);
+    return {
+      totalProducts: 0,
+      approvedProducts: 0,
+      pendingProducts: 0,
+      rejectedProducts: 0,
+      totalAuctions: 0,
+      activeAuctions: 0,
+      endedAuctions: 0,
+      totalBids: 0,
+      totalCollectionItems: 0,
+      totalConversations: 0,
+      collectionValue: 0,
+    };
+  }
+}
+
+/**
+ * Get all conversations (admin only)
+ */
+export async function getAllConversations(): Promise<Conversation[]> {
+  try {
+    const conversationsRef = collection(db, 'conversations');
+    const q = query(conversationsRef, orderBy('updatedAt', 'desc'), limit(100));
+    const snapshot = await getDocs(q);
+    
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+      lastMessageAt: doc.data().lastMessageAt?.toDate(),
+    })) as Conversation[];
+  } catch (error) {
+    console.error('Error fetching all conversations:', error);
+    return [];
+  }
+}
+
+/**
+ * Delete a conversation (admin only)
+ */
+export async function deleteConversation(conversationId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Delete all messages first
+    const messagesRef = collection(db, 'conversations', conversationId, 'messages');
+    const messagesSnapshot = await getDocs(messagesRef);
+    
+    const deletePromises = messagesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+    
+    // Delete conversation
+    await deleteDoc(doc(db, 'conversations', conversationId));
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Delete a collection item (admin only)
+ */
+export async function deleteUserCollectionItem(
+  userId: string,
+  itemId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await deleteDoc(doc(db, 'users', userId, 'collection', itemId));
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
