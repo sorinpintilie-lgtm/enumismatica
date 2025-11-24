@@ -2,8 +2,8 @@
   # Directory to publish
   publish = ".next"
   
-  # Build command
-  command = "npm run build"
+  # Build command - use webpack instead of turbopack due to lightningcss compatibility
+  command = "npm run build -- --no-turbopack"
   
   # Environment variables for build time
   [build.environment]

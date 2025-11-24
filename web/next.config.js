@@ -1,14 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['shared'],
-  
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        'shared': '../shared',
-      },
-    },
-  },
 
   webpack: (config, { isServer }) => {
     const path = require('path');
