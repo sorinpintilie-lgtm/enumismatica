@@ -35,7 +35,17 @@ if (typeof window !== 'undefined') {
     analytics: !!analytics,
     dbType: typeof db,
     dbConstructor: db?.constructor?.name,
+    dbKeys: db ? Object.keys(db) : [],
+    isFirestore: db && typeof db === 'object' && 'type' in db,
   });
+  
+  // Test collection call
+  try {
+    const { collection: testCollection } = await import('firebase/firestore');
+    console.log('Testing collection() with db:', testCollection(db, 'test'));
+  } catch (e) {
+    console.error('Collection test failed:', e);
+  }
 }
 
 export { app, auth, db, storage, analytics };
