@@ -1,15 +1,5 @@
 /** @type {import('next').NextConfig} */
-const path = require('path');
-
 const nextConfig = {
-  turbopack: {
-    resolve: {
-      alias: {
-        '@/shared': path.resolve(__dirname, '../shared'),
-      },
-    },
-  },
-
   // Use webpack instead of Turbopack for compatibility
   webpack: (config, { isServer }) => {
     const path = require('path');
