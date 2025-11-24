@@ -5,6 +5,9 @@ const nextConfig = {
     optimizePackageImports: ['@tanstack/react-query'],
   },
 
+  // Output configuration for Netlify static export
+  output: 'standalone',
+
   // Configure webpack for better tree shaking
   webpack: (config, { isServer }) => {
     const path = require('path');
