@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: {},
+
   // Use webpack instead of Turbopack for compatibility
   webpack: (config, { isServer }) => {
     const path = require('path');
