@@ -14,21 +14,18 @@ const firebaseConfig = {
   measurementId: "G-4BBCPEDX0G"
 };
 
-// Initialize Firebase only in browser environment
-let app: FirebaseApp | undefined;
-let auth: Auth | undefined;
-let db: Firestore | undefined;
-let storage: FirebaseStorage | undefined;
+// Initialize Firebase - this will work on both client and server
+// The Firebase SDK handles SSR automatically
+const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const auth: Auth = getAuth(app);
+const db: Firestore = getFirestore(app);
+const storage: FirebaseStorage = getStorage(app);
+
+// Initialize Analytics (only in browser environment)
 let analytics: Analytics | null = null;
-
 if (typeof window !== 'undefined') {
-  // Initialize Firebase only if it hasn't been initialized yet
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
   analytics = getAnalytics(app);
-
+  
   // Debug logging
   console.log('Firebase initialized:', {
     app: !!app,
@@ -41,6 +38,4 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// Export with non-null assertions for client-side usage
-// Components using these should check if they're defined or use 'use client' directive
 export { app, auth, db, storage, analytics };

@@ -42,7 +42,7 @@ export default function Navigation() {
               <Link href="/" className="text-lg font-semibold text-slate-900 hover:text-amber-700 transition-colors">
                 E-numismatica
               </Link>
-              <span className="text-xs uppercase tracking-[0.24em] text-slate-500">Monede. Curatoriate.</span>
+              <span className="text-xs uppercase tracking-[0.24em] text-slate-500">de colectie.</span>
             </div>
             <div className="hidden sm:flex sm:items-center sm:gap-2 sm:ml-6">
               <span className="h-6 w-px bg-slate-200" />
