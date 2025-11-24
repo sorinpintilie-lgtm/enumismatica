@@ -2,8 +2,8 @@
   # Directory to publish
   publish = ".next"
   
-  # Build command - use webpack instead of turbopack due to lightningcss compatibility
-  command = "npm run build -- --webpack"
+  # Build command - reinstall lightningcss to get native binaries, then build with webpack
+  command = "cd /opt/build/repo && npm install && cd web && npm run build -- --webpack"
   
   # Environment variables for build time
   [build.environment]
