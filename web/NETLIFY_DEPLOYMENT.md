@@ -17,21 +17,27 @@
 - **Base directory:** `web`
 - **Build command:** `npm run build`
 - **Publish directory:** `.next`
-- **Node version:** `18`
+- **Node version:** `20` (required for Next.js 16)
 
 ### 2. Environment Variables
 Add the following environment variables in Netlify dashboard (Site Settings > Environment Variables):
 
 ```
-NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+# Firebase Configuration - Already configured with real values
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyBbIZjstBI9an8Qnff6MEdraZErMzVjw1M
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=e-numismatica-ro.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=e-numismatica-ro
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=e-numismatica-ro.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=686515512350
+NEXT_PUBLIC_FIREBASE_APP_ID=1:686515512350:web:c281556b58e08bcb167a0f
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-4BBCPEDX0G
+
+# App Configuration - Update with your actual domain
 NEXT_PUBLIC_APP_URL=https://your-site-name.netlify.app
 NEXT_PUBLIC_NODE_ENV=production
 ```
+
+**Note:** The Firebase configuration is already set with the real values from the e-numismatica-ro Firebase project. You only need to update the `NEXT_PUBLIC_APP_URL` with your actual Netlify site URL.
 
 ### 3. Deploy
 Click "Deploy site" and Netlify will:
