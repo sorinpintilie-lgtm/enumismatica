@@ -1,5 +1,5 @@
 [build]
-  # Directory to publish (Netlify will detect Next.js automatically)
+  # Directory to publish
   publish = ".next"
   
   # Build command
@@ -8,9 +8,8 @@
   # Environment variables for build time
   [build.environment]
     NODE_VERSION = "20"
-    NPM_FLAGS = "--legacy-peer-deps"
 
-# Headers for security
+# Security headers
 [[headers]]
   for = "/*"
   [headers.values]
@@ -18,18 +17,6 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-
-# Redirects for Next.js
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-# SPA fallback for client-side routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
 
 # Next.js specific configuration
 [build.processing]
@@ -45,8 +32,3 @@
 
 [build.processing.html]
   pretty_urls = true
-
-# Functions configuration (if you need serverless functions)
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"

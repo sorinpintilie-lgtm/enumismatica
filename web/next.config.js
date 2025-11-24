@@ -1,49 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable experimental features for better optimization
-  experimental: {
-    optimizePackageImports: ['@tanstack/react-query'],
-  },
-
-  // Output configuration for Netlify static export
-  output: 'standalone',
-
-  // Configure webpack for better tree shaking
+  // Use webpack instead of Turbopack for compatibility
   webpack: (config, { isServer }) => {
     const path = require('path');
     
-    // Add path aliases
+    // Add path aliases for shared folder
     config.resolve.alias['@/shared'] = path.resolve(__dirname, '../shared');
-    
-    // Ensure Firebase is resolved from web's node_modules
-    config.resolve.alias['firebase'] = path.resolve(__dirname, 'node_modules/firebase');
     
     // Add shared folder to module resolution
     config.resolve.modules = [
       ...(config.resolve.modules || []),
-      path.resolve(__dirname, 'node_modules'),
       path.resolve(__dirname, '../shared')
     ];
-
-    // Optimize chunks
-    if (!isServer) {
-      config.optimization.splitChunks.chunks = 'all';
-      config.optimization.splitChunks.cacheGroups = {
-        ...config.optimization.splitChunks.cacheGroups,
-        firebase: {
-          test: /[\\/]node_modules[\\/]firebase[\\/]/,
-          name: 'firebase',
-          chunks: 'all',
-          priority: 10,
-        },
-        reactquery: {
-          test: /[\\/]node_modules[\\/]@tanstack[\\/]react-query[\\/]/,
-          name: 'react-query',
-          chunks: 'all',
-          priority: 10,
-        },
-      };
-    }
 
     return config;
   },
