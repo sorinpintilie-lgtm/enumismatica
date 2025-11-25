@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['shared'],
-  output: 'export',
-  trailingSlash: true,
 
   webpack: (config, { isServer }) => {
     const path = require('path');
