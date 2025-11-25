@@ -13,6 +13,28 @@ const nextConfig = {
       ...config.resolve.extensionAlias,
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
     };
+
+    // Ensure PostCSS processes CSS files
+    const cssRule = config.module.rules.find(
+      rule => rule.oneOf && rule.oneOf.find(r => r.test && r.test.toString().includes('css'))
+    );
+    
+    if (cssRule && cssRule.oneOf) {
+      cssRule.oneOf.forEach(rule => {
+        if (rule.use && Array.isArray(rule.use)) {
+          rule.use.forEach(loader => {
+            if (loader.loader && loader.loader.includes('postcss-loader')) {
+              loader.options = {
+                ...loader.options,
+                postcssOptions: {
+                  config: path.resolve(__dirname, 'postcss.config.js'),
+                },
+              };
+            }
+          });
+        }
+      });
+    }
     
     return config;
   },
