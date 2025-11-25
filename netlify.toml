@@ -2,8 +2,8 @@
   # Build from root directory for monorepo
   base = "/"
 
-  # Directory to publish
-  publish = "web/.next"
+  # Directory to publish (static export)
+  publish = "web/out"
 
   # Build command - install dependencies at root, then build web with webpack directly
   command = "npm install && cd web && npx next build --webpack"
@@ -23,7 +23,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Next.js specific configuration
+# Next.js static export configuration
 [build.processing]
   skip_processing = false
 

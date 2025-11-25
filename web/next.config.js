@@ -1,25 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['shared'],
-
-  // Configure Tailwind CSS without PostCSS plugins
-  experimental: {
-    turbo: {
-      rules: {
-        '*.css': {
-          loaders: ['postcss-loader'],
-          options: {
-            postcssOptions: {
-              plugins: [
-                require('tailwindcss'),
-                require('autoprefixer'),
-              ],
-            },
-          },
-        },
-      },
-    },
-  },
+  output: 'export',
+  trailingSlash: true,
 
   webpack: (config, { isServer }) => {
     const path = require('path');
