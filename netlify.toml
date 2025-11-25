@@ -11,6 +11,8 @@
   # Environment variables for build time
   [build.environment]
     NODE_VERSION = "20"
+    # Disable secrets scanning for Firebase API keys (they are public)
+    SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
 
 # Security headers
 [[headers]]
