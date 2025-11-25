@@ -2,6 +2,9 @@
 const nextConfig = {
   transpilePackages: ['shared'],
   turbopack: {},
+  images: {
+    unoptimized: true,
+  },
 
   webpack: (config, { isServer }) => {
     const path = require('path');
