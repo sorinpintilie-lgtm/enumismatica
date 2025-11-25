@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
 import { logout } from 'shared/auth';
 import { useRouter } from 'next/navigation';
@@ -35,10 +36,13 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav className="flex items-center justify-between rounded-full border border-slate-200/70 bg-white/80 px-4 sm:px-6 py-3 shadow-[0_12px_50px_rgba(15,23,42,0.12)]">
           <div className="flex items-center gap-3">
-            <img
+            <Image
               src="/alese_rev4_bt_individual_BT_Q_BRONZE_GOLD.png"
               alt="E-numismatica Logo"
+              width={80}
+              height={80}
               className="h-20 w-20 object-contain"
+              priority
             />
             <div className="flex flex-col leading-tight">
               <Link href="/" className="text-lg font-semibold text-slate-900 hover:text-amber-700 transition-colors">
