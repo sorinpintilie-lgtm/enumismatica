@@ -37,7 +37,7 @@ export default function Navigation() {
         <nav className="flex items-center justify-between rounded-full border border-slate-200/70 bg-white/80 px-4 sm:px-6 py-3 shadow-[0_12px_50px_rgba(15,23,42,0.12)]">
           <div className="flex items-center gap-3">
             <Image
-              src="/alese_rev4_bt_individual_BT_Q_BRONZE_GOLD.png"
+              src="/assets/alese_rev4_bt_individual_BT_Q_BRONZE_GOLD.png"
               alt="E-numismatica Logo"
               width={80}
               height={80}

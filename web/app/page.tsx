@@ -90,7 +90,7 @@ export default function HomePage() {
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-amber-200/60 via-white to-white blur-3xl" aria-hidden />
             <div className="relative rounded-3xl border border-amber-100 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)]">
               <LazyImage
-                src="/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png"
+                src="/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png"
                 alt="Moneda Double Eagle din colectia noastra"
                 className="h-[340px] w-full rounded-2xl object-contain bg-white"
                 placeholder="Se incarca imaginea colectiei"
