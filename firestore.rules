@@ -54,9 +54,9 @@ service cloud.firestore {
       }
     }
 
-    // Products collection: Authenticated users can read approved products, admins can read all
+    // Products collection: Anyone can read approved products, authenticated users can read their own, admins can read all
     match /products/{productId} {
-      allow read: if isAuthenticated() && (resource.data.status == 'approved' || isAdmin() || isOwner(resource.data.ownerId));
+      allow read: if resource.data.status == 'approved' || isAdmin() || (isAuthenticated() && isOwner(resource.data.ownerId));
       allow create: if isAuthenticated() &&
                     hasRequiredFields(request.resource.data, ['name', 'description', 'ownerId', 'price', 'status', 'createdAt']) &&
                     isValidTimestamp(request.resource.data.createdAt) &&
@@ -80,9 +80,9 @@ service cloud.firestore {
       }
     }
 
-    // Auctions collection: Authenticated users can read active auctions, admins can read all
+    // Auctions collection: Anyone can read active/ended auctions, authenticated users can read their own, admins can read all
     match /auctions/{auctionId} {
-      allow read: if isAuthenticated() && (resource.data.status in ['active', 'ended'] || isAdmin() || isOwner(resource.data.ownerId));
+      allow read: if resource.data.status in ['active', 'ended'] || isAdmin() || (isAuthenticated() && isOwner(resource.data.ownerId));
       allow create: if isAuthenticated() &&
                     hasRequiredFields(request.resource.data, ['productId', 'reservePrice', 'startTime', 'endTime', 'status']) &&
                     isValidTimestamp(request.resource.data.startTime) && isValidTimestamp(request.resource.data.endTime) &&
