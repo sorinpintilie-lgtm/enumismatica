@@ -7,7 +7,7 @@ import { PriceHistory } from 'shared/types';
 import { format } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
-import { db } from 'shared/firebaseConfig';
+import { db } from '../lib/firebase';
 import { formatRON } from '../utils/currency';
 
 interface PriceEvolutionChartProps {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { collection, query, orderBy, onSnapshot, where, doc, limit, startAfter, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
-import { db } from 'shared/firebaseConfig';
+import { db } from '../lib/firebase';
 import { Auction } from 'shared/types';
 
 // Default fields for auction list view - optimize for performance
@@ -23,10 +23,19 @@ export function useAuctions(status?: 'active' | 'ended' | 'cancelled', pageSize:
       return;
     }
 
+    console.log('[useAuctions] db object:', {
+      db,
+      type: typeof db,
+      constructor: db?.constructor?.name,
+      keys: Object.keys(db),
+      hasType: 'type' in db,
+    });
+
     setLoading(true);
     setError(null);
     
     try {
+      console.log('[useAuctions] About to call collection() with db');
       let q = query(collection(db, 'auctions'), orderBy('createdAt', 'desc'), limit(pageSize));
 
       if (status) {

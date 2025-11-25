@@ -1,9 +1,12 @@
 [build]
+  # Build from root directory for monorepo
+  base = "/"
+
   # Directory to publish
-  publish = ".next"
-  
-  # Build command - reinstall lightningcss to get native binaries, then build with webpack
-  command = "cd /opt/build/repo && npm install && cd web && npm run build -- --webpack"
+  publish = "web/.next"
+
+  # Build command - install dependencies at root, then build web workspace
+  command = "npm install && npm run build:web"
   
   # Environment variables for build time
   [build.environment]

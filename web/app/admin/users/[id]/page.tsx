@@ -15,7 +15,7 @@ import {
 } from 'shared/adminService';
 import { User, CollectionItem, Conversation, ChatMessage } from 'shared/types';
 import { getDoc, doc } from 'firebase/firestore';
-import { db } from 'shared/firebaseConfig';
+import { db } from '../../../lib/firebase';
 
 export default function AdminUserDetail() {
   const { user: currentUser, loading: authLoading } = useAuth();

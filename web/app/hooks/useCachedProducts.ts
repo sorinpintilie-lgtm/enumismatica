@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { collection, query, orderBy, where, limit, startAfter, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from 'shared/firebaseConfig';
+import { db } from '../lib/firebase';
 import { Product } from 'shared/types';
 
 // Default fields for product list view - optimize for performance

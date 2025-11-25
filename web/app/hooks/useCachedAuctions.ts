@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { collection, query, orderBy, where, limit, startAfter, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from 'shared/firebaseConfig';
+import { db } from '../lib/firebase';
 import { Auction } from 'shared/types';
 
 // Default fields for auction list view - optimize for performance

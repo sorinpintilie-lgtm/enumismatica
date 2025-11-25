@@ -11,12 +11,12 @@ interface ProductCardProps {
 function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group panel h-full flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 via-white to-slate-100">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-white">
         {product.images.length > 0 ? (
           <LazyImage
             src={product.images[0]}
             alt={product.name}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            className="h-full w-full object-contain transition duration-500 group-hover:scale-105"
             placeholder="Loading..."
           />
         ) : (
@@ -25,9 +25,6 @@ function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-slate-900/5" />
-        <div className="absolute right-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700 shadow-md backdrop-blur">
-          Curated
-        </div>
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>

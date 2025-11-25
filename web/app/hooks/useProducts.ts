@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { collection, query, orderBy, onSnapshot, where, doc, limit, startAfter, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
-import { db } from 'shared/firebaseConfig';
+import { db } from '../lib/firebase';
 import { Product } from 'shared/types';
 
 // Default fields for product list view - optimize for performance

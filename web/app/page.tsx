@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import LazyImage from './components/LazyImage';
+import ProductCard from './components/ProductCard';
+import { useCachedProducts } from './hooks/useCachedProducts';
 
 const highlights = [
   {
@@ -34,6 +36,8 @@ const steps = [
 ];
 
 export default function HomePage() {
+  const { data: products = [], isLoading: productsLoading } = useCachedProducts(undefined, 8);
+
   return (
     <div className="bg-gradient-to-b from-amber-50 via-white to-white">
       {/* Hero */}
@@ -84,11 +88,11 @@ export default function HomePage() {
 
           <div className="relative">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-amber-200/60 via-white to-white blur-3xl" aria-hidden />
-            <div className="relative rounded-3xl border border-amber-100 bg-white/90 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)]">
+            <div className="relative rounded-3xl border border-amber-100 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)]">
               <LazyImage
                 src="/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png"
                 alt="Moneda Double Eagle din colectia noastra"
-                className="h-[340px] w-full rounded-2xl object-cover"
+                className="h-[340px] w-full rounded-2xl object-contain bg-white"
                 placeholder="Se incarca imaginea colectiei"
               />
               <div className="mt-4 flex items-start justify-between rounded-2xl border border-amber-100 bg-amber-50/70 px-4 py-3">
@@ -124,8 +128,40 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Latest Products */}
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div className="mb-10 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-700 mb-2">Catalog</p>
+          <h2 className="text-3xl font-bold text-slate-900 mb-3">Ultimele Produse</h2>
+          <p className="text-slate-600 max-w-2xl mx-auto">Monede recent adăugate în catalog, verificate și gata de livrare</p>
+        </div>
+        {productsLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="h-96 bg-slate-100 rounded-2xl animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {products.slice(0, 8).map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+        <div className="text-center">
+          <Link
+            href="/products"
+            className="inline-flex items-center justify-center rounded-full border-2 border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-amber-300 hover:bg-amber-50"
+          >
+            Vezi toate produsele
+            <span className="ml-2" aria-hidden>→</span>
+          </Link>
+        </div>
+      </section>
+
+
       {/* How it works */}
-      <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="rounded-3xl border border-slate-100 bg-white/80 p-8 shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>

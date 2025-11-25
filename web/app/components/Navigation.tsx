@@ -35,9 +35,11 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav className="flex items-center justify-between rounded-full border border-slate-200/70 bg-white/80 px-4 sm:px-6 py-3 shadow-[0_12px_50px_rgba(15,23,42,0.12)]">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-inner shadow-amber-100 flex items-center justify-center text-lg font-semibold text-slate-900">
-              RO
-            </div>
+            <img
+              src="/alese_rev4_bt_individual_BT_Q_BRONZE_GOLD.png"
+              alt="E-numismatica Logo"
+              className="h-20 w-20 object-contain"
+            />
             <div className="flex flex-col leading-tight">
               <Link href="/" className="text-lg font-semibold text-slate-900 hover:text-amber-700 transition-colors">
                 E-numismatica

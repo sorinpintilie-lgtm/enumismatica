@@ -67,12 +67,12 @@ function AuctionCard({ auction }: AuctionCardProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      <div className="aspect-w-1 aspect-h-1 bg-gray-200">
+      <div className="aspect-w-1 aspect-h-1 bg-white">
         {product && product.images && product.images.length > 0 ? (
           <img
             src={product.images[0]}
             alt={product.name || 'Articol Licitație'}
-            className="w-full h-48 object-cover"
+            className="w-full h-48 object-contain"
           />
         ) : (
           <div className="w-full h-48 bg-gray-300 flex items-center justify-center">
