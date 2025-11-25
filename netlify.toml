@@ -6,17 +6,13 @@
   publish = "web/.next"
 
   # Build command - clear all caches, install dependencies, reinstall lightningcss for native binaries, then build
-  command = "rm -rf web/.next web/node_modules/.cache node_modules/.cache && npm install && cd web && npm install lightningcss --force && npx next build"
-  
+  command = "rm -rf web/.next web/node_modules/.cache node_modules/.cache && npm install && cd web && npm install lightningcss --force && npx next build && cp -r public .next/static/"
+
   # Environment variables for build time
   [build.environment]
     NODE_VERSION = "20"
     # Disable secrets scanning for Firebase API keys (they are public)
     SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
-
-# Use Netlify's Next.js plugin for proper deployment
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
 
 # Security headers
 [[headers]]
