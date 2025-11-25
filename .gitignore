@@ -87,7 +87,7 @@ dist
 
 # Gatsby files
 .cache/
-# public (removed - needed for Next.js)
+public
 
 # Storybook build outputs
 .out
