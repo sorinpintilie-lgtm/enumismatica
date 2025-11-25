@@ -37,9 +37,3 @@
 
 [build.processing.html]
   pretty_urls = true
-
-# Redirect rules for Next.js App Router
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
