@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/ProductCard';
 import FilterBar, { FilterOptions } from '../components/FilterBar';
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   // Fetch all fields needed for filtering and display
   const { products, loading, error } = useProducts(
     undefined, // ownerId
@@ -127,30 +127,6 @@ export default function ProductsPage() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <svg
-            className="w-12 h-12 text-red-500 mx-auto mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <h3 className="text-lg font-semibold text-red-800 mb-2">Eroare la încărcarea produselor</h3>
-          <p className="text-red-600">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Page Header */}
@@ -170,7 +146,7 @@ export default function ProductsPage() {
           Se afișează <span className="font-semibold text-gray-900">{filteredProducts.length}</span> din{' '}
           <span className="font-semibold text-gray-900">{products.length}</span> produse
         </p>
-        
+
         {/* View Toggle (Grid/List) - Optional */}
         <div className="flex gap-2">
           <button className="p-2 bg-amber-500 text-white rounded-md">
@@ -243,5 +219,20 @@ export default function ProductsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+          <p className="ml-4 text-gray-600">Se încarcă produsele...</p>
+        </div>
+      </div>
+    }>
+      <ProductsPageContent />
+    </Suspense>
   );
 }
