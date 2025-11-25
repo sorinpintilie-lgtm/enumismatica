@@ -6,9 +6,7 @@ const nextConfig = {
     unoptimized: true,
   },
   // Ensure static files are included in build
-  experimental: {
-    outputFileTracingRoot: require('path').join(__dirname, '../'),
-  },
+  outputFileTracingRoot: require('path').join(__dirname, '../'),
 
   webpack: (config, { isServer }) => {
     const path = require('path');
