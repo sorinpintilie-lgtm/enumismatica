@@ -5,8 +5,8 @@
   # Directory to publish
   publish = "web/.next"
 
-  # Build command - install dependencies at root, then build web with webpack directly
-  command = "npm install && cd web && npx next build --webpack"
+  # Build command - install dependencies at root, reinstall lightningcss for native binaries, then build
+  command = "npm install && cd web && npm install lightningcss --force && npx next build"
   
   # Environment variables for build time
   [build.environment]
