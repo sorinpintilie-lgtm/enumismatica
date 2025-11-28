@@ -202,6 +202,22 @@ export interface UserPresence {
   lastTyping: Date;
 }
 
+/**
+ * SiteAsset entity representing static assets used across the site.
+ * Stored in 'siteAssets' collection.
+ */
+export interface SiteAsset {
+  id: string;
+  name: string; // Unique identifier (e.g., 'logo', 'homepage-hero')
+  description?: string; // Description of the asset
+  imageUrl: string; // Firebase Storage URL
+  altText: string; // Alt text for accessibility
+  type: 'logo' | 'hero' | 'banner' | 'icon' | 'other'; // Asset type
+  active: boolean; // Whether this asset is currently active
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Firestore Collections Structure:
 // - users: User documents
 //   - notifications: ChatNotification subcollection

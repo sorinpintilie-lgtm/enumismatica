@@ -8,11 +8,13 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { isAdmin } from 'shared/adminService';
 import NotificationCenter from './NotificationCenter';
+import { useSiteAsset } from '../hooks/useSiteAsset';
 
 export default function Navigation() {
   const { user } = useAuth();
   const router = useRouter();
   const [isAdminUser, setIsAdminUser] = useState(false);
+  const { data: logoAsset, isLoading: logoLoading } = useSiteAsset('logo');
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -36,14 +38,27 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav className="flex items-center justify-between rounded-full border border-slate-200/70 bg-white/80 px-4 sm:px-6 py-3 shadow-[0_12px_50px_rgba(15,23,42,0.12)]">
           <div className="flex items-center gap-3">
-            <Image
-              src="/assets/alese_rev4_bt_individual_BT_Q_BRONZE_GOLD.png"
-              alt="E-numismatica Logo"
-              width={80}
-              height={80}
-              className="h-20 w-20 object-contain"
-              priority
-            />
+            {logoLoading ? (
+              <div className="h-20 w-20 bg-slate-100 rounded-lg animate-pulse" />
+            ) : logoAsset ? (
+              <Image
+                src={logoAsset.imageUrl}
+                alt={logoAsset.altText}
+                width={80}
+                height={80}
+                className="h-20 w-20 object-contain"
+                priority
+              />
+            ) : (
+              <Image
+                src="/assets/eNumismatica.ro_logo.png"
+                alt="E-numismatica Logo"
+                width={80}
+                height={80}
+                className="h-20 w-20 object-contain"
+                priority
+              />
+            )}
             <div className="flex flex-col leading-tight">
               <Link href="/" className="text-lg font-semibold text-slate-900 hover:text-amber-700 transition-colors">
                 E-numismatica

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import LazyImage from './components/LazyImage';
 import ProductCard from './components/ProductCard';
 import { useCachedProducts } from './hooks/useCachedProducts';
+import { useSiteAsset } from './hooks/useSiteAsset';
 
 const highlights = [
   {
@@ -37,6 +38,7 @@ const steps = [
 
 export default function HomePage() {
   const { data: products = [], isLoading: productsLoading } = useCachedProducts(undefined, 8);
+  const { data: heroAsset, isLoading: heroLoading } = useSiteAsset('homepage-hero');
 
   return (
     <div className="bg-gradient-to-b from-amber-50 via-white to-white">
@@ -89,12 +91,16 @@ export default function HomePage() {
           <div className="relative">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-amber-200/60 via-white to-white blur-3xl" aria-hidden />
             <div className="relative rounded-3xl border border-amber-100 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)]">
-              <LazyImage
-                src="/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png"
-                alt="Moneda Double Eagle din colectia noastra"
-                className="h-[340px] w-full rounded-2xl object-contain bg-white"
-                placeholder="Se incarca imaginea colectiei"
-              />
+              {heroLoading ? (
+                <div className="h-[340px] w-full rounded-2xl bg-slate-100 animate-pulse" />
+              ) : (
+                <LazyImage
+                  src={heroAsset?.imageUrl || '/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png'}
+                  alt={heroAsset?.altText || 'Moneda Double Eagle din colectia noastra'}
+                  className="h-[340px] w-full rounded-2xl object-contain bg-white"
+                  placeholder="Se incarca imaginea colectiei"
+                />
+              )}
               <div className="mt-4 flex items-start justify-between rounded-2xl border border-amber-100 bg-amber-50/70 px-4 py-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-600">Piesa recenta</p>
