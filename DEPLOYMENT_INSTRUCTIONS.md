@@ -19,18 +19,28 @@ This document provides step-by-step instructions to deploy the new site assets f
 
 ## Step-by-Step Deployment
 
-### Step 1: Deploy Firestore Security Rules
+### Step 1: Deploy Firebase Security Rules
 
-**IMPORTANT:** You must deploy the updated Firestore rules before uploading assets.
+**IMPORTANT:** You must deploy both Firestore and Storage rules before uploading assets.
 
-Run this command from the project root:
+Run these commands from the project root:
 ```bash
+# Deploy Firestore rules
 firebase deploy --only firestore:rules
+
+# Deploy Storage rules
+firebase deploy --only storage:rules
 ```
 
 This will deploy the new security rules that allow:
+
+**Firestore Rules:**
 - **Public read access** to all site assets (required for displaying on the website)
 - **Admin write access** for creating/updating assets
+
+**Storage Rules:**
+- **Public read access** to site-assets folder
+- **Admin write access** for uploading images
 
 ### Step 2: Upload Site Assets to Firebase
 
