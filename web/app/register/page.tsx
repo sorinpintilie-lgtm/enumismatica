@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { z } from 'zod';
@@ -15,7 +15,7 @@ const registerSchema = z.object({
   path: ["confirmPassword"],
 });
 
-export default function Register() {
+function RegisterForm() {
   const searchParams = useSearchParams();
   const initialReferral = searchParams.get('ref') || '';
 
@@ -173,5 +173,17 @@ export default function Register() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function Register() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-navy-500 via-navy-600 to-navy-900">
+        <div className="text-white text-lg">Se încarcă...</div>
+      </div>
+    }>
+      <RegisterForm />
+    </Suspense>
   );
 }
