@@ -41,73 +41,79 @@ export default function HomePage() {
   const { data: heroAsset, isLoading: heroLoading } = useSiteAsset('homepage-hero');
 
   return (
-    <div className="bg-gradient-to-b from-amber-50 via-white to-white">
+    <div className="bg-gradient-to-b from-navy-500 via-navy-600 to-navy-900">
       {/* Hero */}
       <section className="overflow-hidden">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:py-20">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 shadow-inner shadow-amber-200">
-              <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden />
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#e7b73c] bg-white/5 px-3 py-1 text-xs font-semibold text-[#e7b73c] shadow-inner shadow-[#e7b73c]/40">
+              <span className="h-2 w-2 rounded-full bg-[#e7b73c]" aria-hidden />
               Platforma romaneasca pentru colectionari
             </div>
-            <h1 className="text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
-              Colecteaza istorie cu E-numismatica
+            <h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl">
+              Colecteaza istorie cu eNumismatica
             </h1>
-            <p className="max-w-2xl text-lg text-slate-600">
+            <p className="max-w-2xl text-lg text-slate-200">
               Gasesti monede autentice, licitatii active si suport local pentru fiecare achizitie. Fie ca vrei sa completezi
               o serie sau sa investesti, iti oferim context, transparenta si o experienta moderna.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href="/products"
-                className="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800"
+                className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-5 py-3 text-sm font-semibold text-[#000940] shadow-lg shadow-[#e7b73c]/40 transition hover:bg-[#f0c955]"
               >
                 Vezi magazinul
               </Link>
               <Link
                 href="/auctions"
-                className="inline-flex items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-800 transition hover:border-amber-300 hover:bg-amber-100"
+                className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-5 py-3 text-sm font-semibold text-[#000940] shadow-lg shadow-[#e7b73c]/40 transition hover:bg-[#f0c955]"
               >
                 Licitatii in desfasurare
               </Link>
-              <span className="text-sm text-slate-500">Evaluari rapide si livrare asigurata</span>
+              <span className="text-sm text-slate-300">Evaluari rapide si livrare asigurata</span>
             </div>
-            <div className="flex flex-wrap gap-6 text-sm text-slate-500">
+            <div className="flex flex-wrap gap-6 text-sm text-slate-300">
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+                <span className="h-2 w-2 rounded-full bg-gold-400" aria-hidden />
                 Autentificare rapida
               </div>
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-blue-500" aria-hidden />
+                <span className="h-2 w-2 rounded-full bg-gold-400" aria-hidden />
                 Notificari live pentru licitatii
               </div>
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden />
+                <span className="h-2 w-2 rounded-full bg-gold-400" aria-hidden />
                 Comunitate de colectionari
               </div>
             </div>
           </div>
 
           <div className="relative">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-amber-200/60 via-white to-white blur-3xl" aria-hidden />
-            <div className="relative rounded-3xl border border-amber-100 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)]">
+            <div
+              className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#e7b73c]/40 via-transparent to-transparent blur-3xl"
+              aria-hidden
+            />
+            <div className="relative rounded-3xl border border-[#e7b73c] bg-white/98 backdrop-blur-sm p-4 shadow-[0_20px_60px_rgba(231,183,60,0.35)]">
               {heroLoading ? (
-                <div className="h-[340px] w-full rounded-2xl bg-slate-100 animate-pulse" />
+                <div className="h-[340px] w-full rounded-2xl bg-navy-100 animate-pulse" />
               ) : (
                 <LazyImage
-                  src={heroAsset?.imageUrl || '/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png'}
+                  src={
+                    heroAsset?.imageUrl ||
+                    '/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png'
+                  }
                   alt={heroAsset?.altText || 'Moneda Double Eagle din colectia noastra'}
                   className="h-[340px] w-full rounded-2xl object-contain bg-white"
                   placeholder="Se incarca imaginea colectiei"
                 />
               )}
-              <div className="mt-4 flex items-start justify-between rounded-2xl border border-amber-100 bg-amber-50/70 px-4 py-3">
+              <div className="mt-4 flex items-start justify-between rounded-2xl border border-[#e7b73c] bg-[#e7b73c] px-4 py-3 shadow-lg shadow-[#e7b73c]/40">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-600">Piesa recenta</p>
-                  <p className="text-base font-semibold text-slate-900">Double Eagle Coronet Head</p>
-                  <p className="text-sm text-slate-600">Disponibila acum in magazin si licitatii</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#000940]">Piesa recenta</p>
+                  <p className="text-base font-semibold text-white">Double Eagle Coronet Head</p>
+                  <p className="text-sm text-white/90">Disponibila acum in magazin si licitatii</p>
                 </div>
-                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700 shadow-sm shadow-amber-200">
+                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#e7b73c] shadow-sm">
                   Aur 900/1000
                 </div>
               </div>
@@ -117,38 +123,38 @@ export default function HomePage() {
       </section>
 
       {/* Highlights */}
-      <section className="border-t border-slate-100 bg-white">
+      <section className="border-t border-gold-500/20 bg-navy-600">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-4 py-12 sm:px-6 md:grid-cols-3">
           {highlights.map((item) => (
             <div
               key={item.title}
-              className="group rounded-2xl border border-slate-100 bg-slate-50/60 p-6 shadow-[0_10px_35px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:border-amber-200 hover:bg-white"
+              className="group rounded-2xl border border-gold-500/30 bg-navy-500/60 p-6 shadow-[0_10px_35px_rgba(231,183,60,0.15)] transition hover:-translate-y-1 hover:border-gold-400 hover:bg-navy-400/80 backdrop-blur-sm"
             >
-              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-                <span className="text-sm font-bold group-hover:scale-110 group-hover:transform">*</span>
+              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-gold-500 text-navy-900">
+                <span className="text-sm font-bold group-hover:scale-110 group-hover:transform">★</span>
               </div>
-              <h3 className="text-lg font-semibold text-slate-900">{item.title}</h3>
-              <p className="mt-2 text-sm text-slate-600">{item.description}</p>
+              <h3 className="text-lg font-semibold text-white">{item.title}</h3>
+              <p className="mt-2 text-sm text-slate-300">{item.description}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Latest Products */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 bg-navy-700">
         <div className="mb-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-700 mb-2">Catalog</p>
-          <h2 className="text-3xl font-bold text-slate-900 mb-3">Ultimele Produse</h2>
-          <p className="text-slate-600 max-w-2xl mx-auto">Monede recent adăugate în catalog, verificate și gata de livrare</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gold-400 mb-2">Catalog</p>
+          <h2 className="text-3xl font-bold text-white mb-3">Ultimele Produse</h2>
+          <p className="text-slate-300 max-w-2xl mx-auto">Monede recent adăugate în catalog, verificate și gata de livrare</p>
         </div>
         {productsLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-8">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-96 bg-slate-100 rounded-2xl animate-pulse" />
+              <div key={i} className="h-72 sm:h-80 bg-slate-100 rounded-2xl animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-8">
             {products.slice(0, 8).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -157,7 +163,7 @@ export default function HomePage() {
         <div className="text-center">
           <Link
             href="/products"
-            className="inline-flex items-center justify-center rounded-full border-2 border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-amber-300 hover:bg-amber-50"
+            className="inline-flex items-center justify-center rounded-full border-2 border-[#e7b73c] bg-[#e7b73c] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#e7b73c]/40 transition hover:bg-[#f0c955] hover:border-[#f0c955]"
           >
             Vezi toate produsele
             <span className="ml-2" aria-hidden>→</span>
@@ -167,28 +173,28 @@ export default function HomePage() {
 
 
       {/* How it works */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="rounded-3xl border border-slate-100 bg-white/80 p-8 shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 bg-navy-800">
+        <div className="rounded-3xl border border-gold-500/30 bg-navy-600/80 p-8 shadow-[0_18px_50px_rgba(231,183,60,0.2)] backdrop-blur-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-700">Cum functioneaza</p>
-              <h2 className="text-2xl font-bold text-slate-900">De la cautare la livrare, totul in romana</h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gold-400">Cum functioneaza</p>
+              <h2 className="text-2xl font-bold text-white">De la cautare la livrare, totul in romana</h2>
+              <p className="mt-1 text-sm text-slate-300">
                 Procese clare si suport local pentru fiecare pas, fie ca alegi magazinul sau licitatiile.
               </p>
             </div>
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-amber-200 hover:text-amber-800"
+              className="inline-flex items-center justify-center rounded-full border border-gold-500 px-4 py-2 text-sm font-semibold text-gold-400 transition hover:border-gold-400 hover:bg-gold-500/10"
             >
               Ai nevoie de ajutor?
             </Link>
           </div>
           <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
             {steps.map((step) => (
-              <div key={step.label} className="rounded-2xl border border-slate-100 bg-slate-50/50 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">{step.label}</p>
-                <p className="mt-2 text-base font-semibold text-slate-900">{step.text}</p>
+              <div key={step.label} className="rounded-2xl border border-gold-500/20 bg-navy-500/50 p-5 backdrop-blur-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold-400">{step.label}</p>
+                <p className="mt-2 text-base font-semibold text-white">{step.text}</p>
               </div>
             ))}
           </div>

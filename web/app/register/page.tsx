@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { z } from 'zod';
 import { signUpWithEmail, signInWithGoogle } from 'shared/auth';
@@ -16,9 +16,13 @@ const registerSchema = z.object({
 });
 
 export default function Register() {
+  const searchParams = useSearchParams();
+  const initialReferral = searchParams.get('ref') || '';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [referralCode, setReferralCode] = useState(initialReferral);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -38,7 +42,7 @@ export default function Register() {
       return;
     }
 
-    const { user, error } = await signUpWithEmail(email, password);
+    const { user, error } = await signUpWithEmail(email, password, referralCode || undefined);
     setLoading(false);
     if (error) {
       setError(error);
@@ -50,7 +54,7 @@ export default function Register() {
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError('');
-    const { user, error } = await signInWithGoogle();
+    const { user, error } = await signInWithGoogle(referralCode || undefined);
     setLoading(false);
     if (error) {
       setError(error);
@@ -60,17 +64,20 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-navy-500 via-navy-600 to-navy-900 py-12 px-4">
+      <div className="max-w-md w-full space-y-8 bg-white/95 backdrop-blur-sm rounded-3xl border border-gold-500/30 p-8 shadow-[0_20px_60px_rgba(231,183,60,0.2)]">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-navy-500">
             Creează-ți contul
           </h2>
+          <p className="mt-2 text-center text-sm text-slate-600">
+            Alătură-te comunității de colecționari E-numismatica
+          </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleEmailRegister}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-xl shadow-sm space-y-4">
             <div>
-              <label htmlFor="email" className="sr-only">
+              <label htmlFor="email" className="block text-sm font-medium text-navy-500 mb-1">
                 Adresă de email
               </label>
               <input
@@ -78,14 +85,14 @@ export default function Register() {
                 name="email"
                 type="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Adresă de email"
+                className="appearance-none relative block w-full px-4 py-3 border border-slate-300 placeholder-slate-400 text-navy-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 focus:z-10 sm:text-sm"
+                placeholder="nume@exemplu.ro"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label htmlFor="password" className="block text-sm font-medium text-navy-500 mb-1">
                 Parolă
               </label>
               <input
@@ -93,14 +100,14 @@ export default function Register() {
                 name="password"
                 type="password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Parolă"
+                className="appearance-none relative block w-full px-4 py-3 border border-slate-300 placeholder-slate-400 text-navy-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 focus:z-10 sm:text-sm"
+                placeholder="Minim 6 caractere"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="sr-only">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-navy-500 mb-1">
                 Confirmă parola
               </label>
               <input
@@ -108,23 +115,37 @@ export default function Register() {
                 name="confirmPassword"
                 type="password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none relative block w-full px-4 py-3 border border-slate-300 placeholder-slate-400 text-navy-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 focus:z-10 sm:text-sm"
                 placeholder="Confirmă parola"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
+            <div>
+              <label htmlFor="referral" className="block text-sm font-medium text-navy-500 mb-1">
+                Cod de invitație (opțional)
+              </label>
+              <input
+                id="referral"
+                name="referral"
+                type="text"
+                className="appearance-none relative block w-full px-4 py-3 border border-slate-300 placeholder-slate-400 text-navy-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 focus:z-10 sm:text-sm"
+                placeholder="Introdu codul de invitație sau lasă gol"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+              />
+            </div>
           </div>
 
           {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm text-center">{error}</div>
           )}
 
           <div>
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 shadow-lg shadow-gold-500/30 transition-all duration-200"
             >
               {loading ? 'Se înregistrează...' : 'Înregistrare'}
             </button>
@@ -135,7 +156,7 @@ export default function Register() {
               type="button"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="group relative w-full flex justify-center py-3 px-4 border border-slate-300 text-sm font-semibold rounded-xl text-navy-500 bg-white hover:bg-slate-50 hover:border-gold-500/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 transition-all duration-200"
             >
               Înregistrare cu Google
             </button>
@@ -144,7 +165,7 @@ export default function Register() {
           <div className="text-center">
             <Link
               href="/login"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-gold-600 hover:text-gold-700 transition-colors"
             >
               Ai deja cont? Autentifică-te
             </Link>

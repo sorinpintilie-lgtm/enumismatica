@@ -10,6 +10,13 @@ export interface User {
   displayName: string;
   avatar?: string; // Optional profile image URL
   role?: 'admin' | 'user'; // User role, defaults to 'user'
+
+  // Credit & referral system
+  credits?: number; // Current credit balance for boosts and rewards
+  referralCode?: string; // Stable code for invitation links (typically userId)
+  referredBy?: string; // User ID or referral code of the inviter
+  referralBonusApplied?: boolean; // Prevents double-applying signup bonus
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,6 +46,10 @@ export interface Product {
   weight?: number; // Weight in grams
   diameter?: number; // Diameter in millimeters
   category?: string; // General category (e.g., "coins", "banknotes", "medals")
+
+  // Boosted visibility fields
+  boostExpiresAt?: Date; // Until when this product is boosted in listings
+  boostedAt?: Date; // When the current boost was applied
   
   createdAt: Date;
   updatedAt: Date;
@@ -218,6 +229,21 @@ export interface SiteAsset {
   updatedAt: Date;
 }
 
+/**
+ * EventRegistration entity for QR/event-based pre-registrations.
+ * Stored in 'eventRegistrations' collection.
+ */
+export interface EventRegistration {
+  id: string;
+  email: string;
+  fullName?: string;
+  source?: string; // e.g., 'qr-event', 'landing-page'
+  eventKey: string; // e.g., 'app-launch-2025'
+  marketingOptIn?: boolean;
+  notes?: string;
+  createdAt: Date;
+}
+ 
 // Firestore Collections Structure:
 // - users: User documents
 //   - notifications: ChatNotification subcollection

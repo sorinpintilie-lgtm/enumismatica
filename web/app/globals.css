@@ -1,14 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #f7f8fb;
-  --bg-secondary: #f2f0ea;
-  --text-main: #0f172a;
-  --text-muted: #4b5563;
-  --accent: #c9a14a;
-  --accent-strong: #8b6b20;
-  --card: rgba(255, 255, 255, 0.9);
-  --border: rgba(15, 23, 42, 0.06);
+  /* Navy Blue - Primary */
+  --navy-50: #e6e8f0;
+  --navy-100: #b3b9d4;
+  --navy-500: #000940;
+  --navy-600: #000833;
+  --navy-900: #00020d;
+  
+  /* Gold - Accent */
+  --gold-50: #fef9ed;
+  --gold-100: #fcefc7;
+  --gold-500: #e7b73c;
+  --gold-600: #d4a022;
+  --gold-700: #a67b1a;
+  
+  /* Theme Variables */
+  --bg-primary: #000940;
+  --bg-secondary: #00020d;
+  --bg-light: #e6e8f0;
+  --text-main: #000940;
+  --text-light: #ffffff;
+  --text-muted: #64748b;
+  --accent: #e7b73c;
+  --accent-strong: #d4a022;
+  --card: rgba(255, 255, 255, 0.95);
+  --card-dark: rgba(0, 9, 64, 0.95);
+  --border: rgba(231, 183, 60, 0.2);
+  --border-light: rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -36,10 +55,15 @@
 /* Smooth scroll behavior */
 html {
   scroll-behavior: smooth;
-  background: radial-gradient(80% 60% at 20% 20%, rgba(201, 161, 74, 0.12), transparent),
-    radial-gradient(70% 60% at 80% 10%, rgba(15, 23, 42, 0.08), transparent),
-    var(--bg-primary);
-  color: var(--text-main);
+  background: radial-gradient(80% 60% at 20% 20%, rgba(231, 183, 60, 0.15), transparent),
+    radial-gradient(70% 60% at 80% 10%, rgba(0, 9, 64, 0.3), transparent),
+    linear-gradient(135deg, #000940 0%, #00020d 100%);
+  color: var(--text-light);
+}
+
+body {
+  background: linear-gradient(135deg, #000940 0%, #00020d 100%);
+  min-height: 100vh;
 }
 
 /* Line clamp utility for text truncation */
@@ -78,17 +102,21 @@ html {
 
 /* Custom gradient backgrounds */
 .gradient-gold {
-  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  background: linear-gradient(135deg, #e7b73c 0%, #d4a022 100%);
 }
 
-.gradient-silver {
-  background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
+.gradient-navy {
+  background: linear-gradient(135deg, #000940 0%, #00020d 100%);
+}
+
+.gradient-navy-gold {
+  background: linear-gradient(135deg, #000940 0%, #e7b73c 100%);
 }
 
 /* Focus styles for accessibility */
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid #f59e0b;
+  outline: 2px solid #e7b73c;
   outline-offset: 2px;
 }
 
@@ -108,6 +136,23 @@ a:focus-visible {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 1rem;
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
-  backdrop-filter: blur(8px);
+  box-shadow: 0 20px 60px rgba(231, 183, 60, 0.15);
+  backdrop-filter: blur(12px);
+}
+
+.panel-dark {
+  background: var(--card-dark);
+  border: 1px solid var(--border-light);
+  border-radius: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+}
+
+/* Gold accent elements */
+.gold-glow {
+  box-shadow: 0 0 20px rgba(231, 183, 60, 0.3);
+}
+
+.navy-glow {
+  box-shadow: 0 0 20px rgba(0, 9, 64, 0.5);
 }

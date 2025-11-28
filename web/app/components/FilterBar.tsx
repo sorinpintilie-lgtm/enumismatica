@@ -112,7 +112,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div className="bg-gradient-to-br from-navy-900 via-navy-950 to-black rounded-2xl border border-[#e7b73c]/40 shadow-[0_18px_55px_rgba(0,0,0,0.9)] p-6 mb-6 text-slate-100">
       {/* Search and Quick Filters */}
       <div className="flex flex-col lg:flex-row gap-4 mb-4">
         {/* Search Bar */}
@@ -122,7 +122,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
             placeholder="Caută monede după nume, descriere..."
             value={localFilters.searchTerm}
             onChange={(e) => handleFilterUpdate('searchTerm', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            className="w-full px-4 py-3 rounded-xl border border-[#e7b73c]/40 bg-navy-900/70 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
           />
         </div>
 
@@ -131,7 +131,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
           <select
             value={localFilters.sortBy}
             onChange={(e) => handleFilterUpdate('sortBy', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            className="w-full px-4 py-3 rounded-xl border border-[#e7b73c]/40 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
           >
             <option value="best-match">Cea Mai Bună Potrivire</option>
             <option value="price-asc">Preț: Crescător + Transport</option>
@@ -145,7 +145,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
         {/* Toggle Advanced Filters */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="lg:w-auto px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md font-medium transition-colors flex items-center justify-center gap-2"
+          className="lg:w-auto px-6 py-3 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[0_0_20px_rgba(231,183,60,0.7)]"
         >
           <svg
             className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
@@ -161,15 +161,15 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
 
       {/* Advanced Filters */}
       {isExpanded && (
-        <div className="border-t pt-6 space-y-6">
+        <div className="border-t border-[#e7b73c]/25 pt-6 space-y-6">
           {/* Country and Metal */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Țară</label>
+              <label className="block text-sm font-medium text-slate-100 mb-2">Țară</label>
               <select
                 value={localFilters.country}
                 onChange={(e) => handleFilterUpdate('country', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
               >
                 {countries.map((country) => (
                   <option key={country} value={country}>
@@ -180,11 +180,11 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Metal</label>
+              <label className="block text-sm font-medium text-slate-100 mb-2">Metal</label>
               <select
                 value={localFilters.metal}
                 onChange={(e) => handleFilterUpdate('metal', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
               >
                 {metals.map((metal) => (
                   <option key={metal} value={metal}>
@@ -195,11 +195,11 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Raritate</label>
+              <label className="block text-sm font-medium text-slate-100 mb-2">Raritate</label>
               <select
                 value={localFilters.rarity}
                 onChange={(e) => handleFilterUpdate('rarity', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
               >
                 {rarities.map((rarity) => (
                   <option key={rarity} value={rarity}>
@@ -213,11 +213,11 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
           {/* Grade */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Grad</label>
+              <label className="block text-sm font-medium text-slate-100 mb-2">Grad</label>
               <select
                 value={localFilters.grade}
                 onChange={(e) => handleFilterUpdate('grade', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
               >
                 {grades.map((grade) => (
                   <option key={grade} value={grade}>
@@ -230,8 +230,8 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
 
           {/* Price Range */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Interval Preț: {localFilters.minPrice} RON - {localFilters.maxPrice} RON
+            <label className="block text-sm font-medium text-slate-100 mb-2">
+              Interval Preț: <span className="text-[#e7b73c] font-semibold">{localFilters.minPrice} RON - {localFilters.maxPrice} RON</span>
             </label>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -240,7 +240,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
                   placeholder="Preț Minim"
                   value={localFilters.minPrice || ''}
                   onChange={(e) => handlePriceChange('min', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                 />
               </div>
               <div>
@@ -249,7 +249,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
                   placeholder="Preț Maxim"
                   value={localFilters.maxPrice || ''}
                   onChange={(e) => handlePriceChange('max', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                 />
               </div>
             </div>
@@ -260,14 +260,14 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
               step="50"
               value={localFilters.maxPrice}
               onChange={(e) => handleFilterUpdate('maxPrice', parseFloat(e.target.value))}
-              className="w-full mt-3 accent-amber-500"
+              className="w-full mt-3 accent-[#e7b73c] bg-navy-800 rounded-full h-1.5"
             />
           </div>
 
           {/* Year Range */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Interval An: {localFilters.minYear} - {localFilters.maxYear}
+            <label className="block text-sm font-medium text-slate-100 mb-2">
+              Interval An: <span className="text-[#e7b73c] font-semibold">{localFilters.minYear} - {localFilters.maxYear}</span>
             </label>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -276,7 +276,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
                   placeholder="An Minim"
                   value={localFilters.minYear || ''}
                   onChange={(e) => handleYearChange('min', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                 />
               </div>
               <div>
@@ -285,7 +285,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
                   placeholder="An Maxim"
                   value={localFilters.maxYear || ''}
                   onChange={(e) => handleYearChange('max', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                 />
               </div>
             </div>
@@ -295,7 +295,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
           <div className="flex justify-end">
             <button
               onClick={resetFilters}
-              className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md font-medium transition-colors"
+              className="px-6 py-2 bg-navy-500 hover:bg-navy-600 text-white rounded-xl font-semibold transition-colors shadow-lg shadow-navy-500/20"
             >
               Resetează Filtrele
             </button>

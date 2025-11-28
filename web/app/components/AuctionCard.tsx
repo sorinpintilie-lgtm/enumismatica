@@ -37,7 +37,7 @@ function CountdownTimer({ endTime }: { endTime: Date }) {
     return () => clearInterval(timer);
   }, [endTime]);
 
-  return <span className="text-sm font-medium text-red-600">{timeLeft}</span>;
+  return <span className="text-sm font-medium text-[#e7b73c]">{timeLeft}</span>;
 }
 
 function AuctionCard({ auction }: AuctionCardProps) {
@@ -66,46 +66,52 @@ function AuctionCard({ auction }: AuctionCardProps) {
   const currentBid = auction.currentBid || auction.reservePrice;
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      <div className="aspect-w-1 aspect-h-1 bg-white">
+    <div className="group h-full flex flex-col bg-gradient-to-br from-navy-600 via-navy-800 to-navy-950 rounded-2xl border border-[#e7b73c]/40 shadow-[0_18px_55px_rgba(0,0,0,0.9)] overflow-hidden hover:border-[#e7b73c] hover:shadow-[0_26px_70px_rgba(231,183,60,0.55)] transition-all duration-300">
+      <div className="relative aspect-[4/3] bg-white">
         {product && product.images && product.images.length > 0 ? (
           <img
             src={product.images[0]}
             alt={product.name || 'Articol Licitație'}
-            className="w-full h-48 object-contain"
+            className="w-full h-full object-contain"
           />
         ) : (
-          <div className="w-full h-48 bg-gray-300 flex items-center justify-center">
-            <span className="text-gray-500">Se încarcă...</span>
+          <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+            <span className="text-slate-400">Se încarcă...</span>
           </div>
         )}
       </div>
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
+      <div className="p-4 flex flex-col gap-3">
+        <div className="flex justify-between items-start mb-1">
+          <h3 className="text-lg font-semibold text-white truncate">
             Licitație #{auction.id.slice(-6)}
           </h3>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            auction.status === 'active' ? 'bg-green-100 text-green-800' :
-            auction.status === 'ended' ? 'bg-red-100 text-red-800' :
-            'bg-gray-100 text-gray-800'
-          }`}>
+          <span
+            className={`px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide ${
+              auction.status === 'active'
+                ? 'bg-[#e7b73c]/20 text-[#e7b73c] border border-[#e7b73c]/60'
+                : auction.status === 'ended'
+                ? 'bg-red-900/60 text-red-200 border border-red-500/40'
+                : 'bg-slate-800 text-slate-100 border border-slate-500/40'
+            }`}
+          >
             {auction.status.toUpperCase()}
           </span>
         </div>
 
-        <div className="mb-3">
-          <p className="text-sm text-gray-600">Licitație Curentă:</p>
-          <p className="text-xl font-bold text-blue-600">{formatRON(currentBid)}</p>
+        <div className="mb-1">
+          <p className="text-xs uppercase tracking-wide text-slate-300">Licitație Curentă</p>
+          <p className="text-2xl font-extrabold text-[#e7b73c] drop-shadow-[0_0_18px_rgba(231,183,60,0.6)]">
+            {formatRON(currentBid)}
+          </p>
         </div>
 
-        <div className="mb-3">
-          <p className="text-sm text-gray-600">Timp Rămas:</p>
+        <div className="mb-2">
+          <p className="text-xs uppercase tracking-wide text-slate-300">Timp Rămas</p>
           <CountdownTimer endTime={auction.endTime} />
         </div>
 
         {!isEnded && (
-          <form onSubmit={handleBid} className="mb-3">
+          <form onSubmit={handleBid} className="mb-2">
             <div className="flex space-x-2">
               <input
                 type="number"
@@ -114,13 +120,13 @@ function AuctionCard({ auction }: AuctionCardProps) {
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
                 placeholder={`Minim: ${formatRON(Math.max(currentBid + 0.01, auction.reservePrice))}`}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-3 py-2 rounded-md border border-[#e7b73c]/35 bg-navy-900/70 text-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent text-sm"
                 required
               />
               <button
                 type="submit"
                 disabled={bidLoading || !user}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                className="bg-[#e7b73c] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/50 text-[#000940] px-4 py-2 rounded-md text-sm font-semibold transition-colors duration-200 shadow-[0_0_20px_rgba(231,183,60,0.7)]"
               >
                 {bidLoading ? '...' : user ? 'Licitează' : 'Autentificare'}
               </button>
@@ -130,7 +136,7 @@ function AuctionCard({ auction }: AuctionCardProps) {
 
         <Link
           href={`/auctions/${auction.id}`}
-          className="block w-full text-center bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+          className="block w-full text-center mt-1 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-4 py-2.5 rounded-md text-sm font-semibold transition-colors duration-200 shadow-[0_0_24px_rgba(231,183,60,0.75)]"
         >
           Vezi Detalii
         </Link>

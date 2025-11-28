@@ -4,7 +4,8 @@ import { db } from '../lib/firebase';
 import { Product } from 'shared/types';
 
 // Default fields for product list view - optimize for performance
-const DEFAULT_PRODUCT_FIELDS = ['name', 'images', 'price', 'createdAt', 'updatedAt'];
+// Include boost fields so we can prioritize boosted products in listings
+const DEFAULT_PRODUCT_FIELDS = ['name', 'images', 'price', 'createdAt', 'updatedAt', 'boostExpiresAt', 'boostedAt'];
 
 export function useProducts(ownerId?: string, pageSize: number = 20, fields: string[] = DEFAULT_PRODUCT_FIELDS) {
   const [products, setProducts] = useState<Product[]>([]);
@@ -56,10 +57,16 @@ export function useProducts(ownerId?: string, pageSize: number = 20, fields: str
 
           // Always include dates for proper typing
           if (fields.includes('createdAt')) {
-            productData.createdAt = data.createdAt?.toDate() || new Date();
+            productData.createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt || new Date();
           }
           if (fields.includes('updatedAt')) {
-            productData.updatedAt = data.updatedAt?.toDate() || new Date();
+            productData.updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt || new Date();
+          }
+          if (fields.includes('boostExpiresAt') && data.boostExpiresAt) {
+            productData.boostExpiresAt = data.boostExpiresAt?.toDate ? data.boostExpiresAt.toDate() : data.boostExpiresAt;
+          }
+          if (fields.includes('boostedAt') && data.boostedAt) {
+            productData.boostedAt = data.boostedAt?.toDate ? data.boostedAt.toDate() : data.boostedAt;
           }
 
           productsData.push(productData as Product);
@@ -122,10 +129,16 @@ export function useProducts(ownerId?: string, pageSize: number = 20, fields: str
           });
 
           if (fields.includes('createdAt')) {
-            productData.createdAt = data.createdAt?.toDate() || new Date();
+            productData.createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt || new Date();
           }
           if (fields.includes('updatedAt')) {
-            productData.updatedAt = data.updatedAt?.toDate() || new Date();
+            productData.updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt || new Date();
+          }
+          if (fields.includes('boostExpiresAt') && data.boostExpiresAt) {
+            productData.boostExpiresAt = data.boostExpiresAt?.toDate ? data.boostExpiresAt.toDate() : data.boostExpiresAt;
+          }
+          if (fields.includes('boostedAt') && data.boostedAt) {
+            productData.boostedAt = data.boostedAt?.toDate ? data.boostedAt.toDate() : data.boostedAt;
           }
 
           productsData.push(productData as Product);

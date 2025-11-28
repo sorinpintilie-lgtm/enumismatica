@@ -189,6 +189,22 @@ service cloud.firestore {
       allow delete: if isOwner(userId) || isAdmin();
     }
 
+    // User credit transactions subcollection
+    // Users can read their own credit history; writes are done by the app logic.
+    match /users/{userId}/creditTransactions/{transactionId} {
+      allow read: if isOwner(userId) || isAdmin();
+
+      // Create only via authenticated owner or admin; prevent arbitrary tampering with credits
+      allow create: if isAuthenticated() &&
+                    (isOwner(userId) || isAdmin()) &&
+                    hasRequiredFields(request.resource.data, ['userId', 'type', 'amount', 'createdAt']) &&
+                    request.resource.data.userId == userId &&
+                    isValidTimestamp(request.resource.data.createdAt);
+
+      // Updates and deletes only by admin (for auditability)
+      allow update, delete: if isAdmin();
+    }
+
     // Site Assets collection: Public read, admin write
     match /siteAssets/{assetId} {
       allow read: if true; // Public read access for displaying site assets
@@ -198,6 +214,19 @@ service cloud.firestore {
                             request.resource.data.altText.size() > 0 && request.resource.data.altText.size() <= 200 &&
                             request.resource.data.type in ['logo', 'hero', 'banner', 'icon', 'other'];
       allow delete: if isAdmin();
+    }
+
+    // Event registrations (QR / landing pre-registrations)
+    // Anyone can create a registration with a valid email; only admins can read/delete.
+    match /eventRegistrations/{registrationId} {
+      // For privacy, only admins should read these directly from Firestore.
+      allow read: if isAdmin();
+
+      allow create: if hasRequiredFields(request.resource.data, ['email', 'eventKey', 'createdAt']) &&
+                    isValidEmail(request.resource.data.email) &&
+                    isValidTimestamp(request.resource.data.createdAt);
+
+      allow update, delete: if isAdmin();
     }
   }
 }

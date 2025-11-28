@@ -145,8 +145,8 @@ export default function AuctionsPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
-          <p className="ml-4 text-gray-600">Se încarcă licitațiile...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
+          <p className="ml-4 text-slate-300">Se încarcă licitațiile...</p>
         </div>
       </div>
     );
@@ -155,9 +155,9 @@ export default function AuctionsPage() {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <div className="bg-red-900/50 border border-red-500/50 rounded-2xl p-6 text-center backdrop-blur-sm">
           <svg
-            className="w-12 h-12 text-red-500 mx-auto mb-4"
+            className="w-12 h-12 text-red-400 mx-auto mb-4"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -169,8 +169,8 @@ export default function AuctionsPage() {
               d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <h3 className="text-lg font-semibold text-red-800 mb-2">Eroare la încărcarea licitațiilor</h3>
-          <p className="text-red-600">{error}</p>
+          <h3 className="text-lg font-semibold text-red-200 mb-2">Eroare la încărcarea licitațiilor</h3>
+          <p className="text-red-300">{error}</p>
         </div>
       </div>
     );
@@ -180,40 +180,40 @@ export default function AuctionsPage() {
     <div className="container mx-auto px-4 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Licitații Active</h1>
-        <p className="text-gray-600">
+        <h1 className="text-4xl font-bold text-white mb-2">Licitații Active</h1>
+        <p className="text-slate-300">
           Licitează pentru {auctions.length} articole numismatice
         </p>
       </div>
 
       {/* Status Filter Tabs */}
-      <div className="mb-6 flex gap-2 border-b border-gray-200">
+      <div className="mb-6 flex gap-2 border-b border-gold-500/20">
         <button
           onClick={() => setStatusFilter('active')}
-          className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+          className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             statusFilter === 'active'
-              ? 'border-amber-500 text-amber-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              ? 'border-gold-500 text-gold-400'
+              : 'border-transparent text-slate-400 hover:text-white'
           }`}
         >
           Licitații Active
         </button>
         <button
           onClick={() => setStatusFilter('all')}
-          className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+          className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             statusFilter === 'all'
-              ? 'border-amber-500 text-amber-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              ? 'border-gold-500 text-gold-400'
+              : 'border-transparent text-slate-400 hover:text-white'
           }`}
         >
           Toate Licitațiile
         </button>
         <button
           onClick={() => setStatusFilter('ended')}
-          className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+          className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             statusFilter === 'ended'
-              ? 'border-amber-500 text-amber-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              ? 'border-gold-500 text-gold-400'
+              : 'border-transparent text-slate-400 hover:text-white'
           }`}
         >
           Licitații Încheiate
@@ -225,19 +225,19 @@ export default function AuctionsPage() {
 
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">
-        <p className="text-gray-600">
-          Se afișează <span className="font-semibold text-gray-900">{filteredAuctions.length}</span> din{' '}
-          <span className="font-semibold text-gray-900">{auctions.length}</span> licitații
+        <p className="text-slate-300">
+          Se afișează <span className="font-semibold text-gold-400">{filteredAuctions.length}</span> din{' '}
+          <span className="font-semibold text-gold-400">{auctions.length}</span> licitații
         </p>
         
         {/* View Toggle */}
         <div className="flex gap-2">
-          <button className="p-2 bg-amber-500 text-white rounded-md">
+          <button className="p-2 bg-[#e7b73c] text-white rounded-md hover:bg-[#f0c955] transition-colors shadow-[0_0_20px_rgba(231,183,60,0.6)]">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
           </button>
-          <button className="p-2 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300">
+          <button className="p-2 bg-navy-400/50 text-slate-300 rounded-md hover:bg-navy-400 transition-colors">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
             </svg>
@@ -261,8 +261,8 @@ export default function AuctionsPage() {
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">Nu s-au găsit licitații</h3>
-          <p className="text-gray-500 mb-6">
+          <h3 className="text-xl font-semibold text-white mb-2">Nu s-au găsit licitații</h3>
+          <p className="text-slate-300 mb-6">
             {filters.searchTerm
               ? 'Încearcă să ajustezi căutarea sau filtrele'
               : statusFilter === 'active'
@@ -281,14 +281,14 @@ export default function AuctionsPage() {
                   grade: 'Toate Gradele',
                 })
               }
-              className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-md font-medium transition-colors"
+              className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-6 py-2 rounded-xl font-semibold transition-colors shadow-lg shadow-[0_0_20px_rgba(231,183,60,0.6)]"
             >
               Șterge Filtrele
             </button>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
           {filteredAuctions.map((auction) => (
             <AuctionCard key={auction.id} auction={auction} />
           ))}

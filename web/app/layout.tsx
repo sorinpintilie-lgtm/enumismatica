@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import Navigation from './components/Navigation'
 import ClientProvider from './components/ClientProvider'
-
+import NavigationWrapper from './components/NavigationWrapper'
+ 
 export const metadata: Metadata = {
-  title: 'E-numismatica - Magazin de Monede & Licitatii',
+  title: 'eNumismatica - Magazin de Monede & Licitatii',
   description: 'Cumpara si vinde articole numismatice prin magazinul si platforma noastra de licitatii',
 }
-
+ 
 export default function RootLayout({
   children,
 }: {
@@ -15,9 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ro">
-      <body className="antialiased text-slate-900 selection:bg-amber-100 selection:text-amber-900">
+      <body className="antialiased text-white selection:bg-gold-500 selection:text-navy-900 bg-gradient-to-b from-navy-500 via-navy-600 to-navy-900">
         <ClientProvider>
-          <Navigation />
+          <NavigationWrapper />
           <main className="min-h-screen">
             {children}
           </main>

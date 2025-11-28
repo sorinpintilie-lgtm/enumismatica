@@ -120,8 +120,8 @@ function ProductsPageContent() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
-          <p className="ml-4 text-gray-600">Se încarcă produsele...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
+          <p className="ml-4 text-slate-300">Se încarcă produsele...</p>
         </div>
       </div>
     );
@@ -131,8 +131,8 @@ function ProductsPageContent() {
     <div className="container mx-auto px-4 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Catalog Produse</h1>
-        <p className="text-gray-600">
+        <h1 className="text-4xl font-bold text-[#e7b73c] mb-2">Catalog Produse</h1>
+        <p className="text-slate-200">
           Explorează colecția noastră de {products.length} articole numismatice
         </p>
       </div>
@@ -142,19 +142,19 @@ function ProductsPageContent() {
 
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">
-        <p className="text-gray-600">
-          Se afișează <span className="font-semibold text-gray-900">{filteredProducts.length}</span> din{' '}
-          <span className="font-semibold text-gray-900">{products.length}</span> produse
+        <p className="text-slate-300">
+          Se afișează <span className="font-semibold text-gold-400">{filteredProducts.length}</span> din{' '}
+          <span className="font-semibold text-gold-400">{products.length}</span> produse
         </p>
 
         {/* View Toggle (Grid/List) - Optional */}
         <div className="flex gap-2">
-          <button className="p-2 bg-amber-500 text-white rounded-md">
+          <button className="p-2 bg-gold-500 text-white rounded-md hover:bg-gold-400 transition-colors">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
           </button>
-          <button className="p-2 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300">
+          <button className="p-2 bg-navy-400/50 text-slate-300 rounded-md hover:bg-navy-400 transition-colors">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
             </svg>
@@ -178,8 +178,8 @@ function ProductsPageContent() {
               d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">Nu s-au găsit produse</h3>
-          <p className="text-gray-500 mb-6">
+          <h3 className="text-xl font-semibold text-white mb-2">Nu s-au găsit produse</h3>
+          <p className="text-slate-300 mb-6">
             {filters.searchTerm
               ? 'Încearcă să ajustezi căutarea sau filtrele'
               : 'Nu există produse disponibile momentan'}
@@ -196,14 +196,14 @@ function ProductsPageContent() {
                   grade: 'All Grades',
                 })
               }
-              className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-md font-medium transition-colors"
+              className="bg-gold-500 hover:bg-gold-600 text-white px-6 py-2 rounded-xl font-semibold transition-colors shadow-lg shadow-gold-500/30"
             >
               Șterge Filtrele
             </button>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -213,7 +213,7 @@ function ProductsPageContent() {
       {/* Load More Button (if needed for pagination) */}
       {filteredProducts.length > 0 && filteredProducts.length < products.length && (
         <div className="mt-12 text-center">
-          <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-8 py-3 rounded-md font-medium transition-colors">
+          <button className="bg-gold-500 hover:bg-gold-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg shadow-gold-500/30">
             Încarcă Mai Multe Produse
           </button>
         </div>
@@ -227,8 +227,8 @@ export default function ProductsPage() {
     <Suspense fallback={
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
-          <p className="ml-4 text-gray-600">Se încarcă produsele...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
+          <p className="ml-4 text-slate-300">Se încarcă produsele...</p>
         </div>
       </div>
     }>
