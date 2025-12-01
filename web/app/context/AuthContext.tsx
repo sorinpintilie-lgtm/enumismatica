@@ -8,7 +8,8 @@ import { db } from '../lib/firebase';
 
 interface ExtendedUser extends FirebaseUser {
   isAdmin?: boolean;
-  role?: 'admin' | 'user';
+  isSuperAdmin?: boolean;
+  role?: 'superadmin' | 'admin' | 'user';
   displayName: string;
 }
 
@@ -37,7 +38,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser({
             ...firebaseUser,
             role,
-            isAdmin: role === 'admin',
+            isAdmin: role === 'admin' || role === 'superadmin',
+            isSuperAdmin: role === 'superadmin',
             displayName: firebaseUser.displayName || firebaseUser.email || 'User',
           } as ExtendedUser);
         } catch (error) {

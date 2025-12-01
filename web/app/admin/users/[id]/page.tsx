@@ -317,6 +317,11 @@ export default function AdminUserDetail() {
                 <h1 className="text-3xl font-bold text-white">{user.displayName}</h1>
                 <p className="text-slate-300">{user.email}</p>
                 <div className="flex gap-2 mt-2">
+                  {user.role === 'superadmin' && (
+                    <span className="px-2 py-1 text-xs rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
+                      SUPER ADMIN
+                    </span>
+                  )}
                   {user.role === 'admin' && (
                     <span className="px-2 py-1 text-xs rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
                       Admin
@@ -653,14 +658,16 @@ export default function AdminUserDetail() {
               </button>
             )}
 
-            {/* Change Role */}
-            <button
-              onClick={() => setShowControlModal('role')}
-              className="bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 p-6 rounded-lg text-left transition-colors"
-            >
-              <h3 className="font-semibold text-lg mb-2">Schimbă Rol</h3>
-              <p className="text-sm opacity-80">Modifică rolul utilizatorului (Admin/User)</p>
-            </button>
+            {/* Change Role - Only for SuperAdmin or if target is not admin/superadmin */}
+            {(currentUser?.isSuperAdmin || (user.role !== 'admin' && user.role !== 'superadmin')) && (
+              <button
+                onClick={() => setShowControlModal('role')}
+                className="bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 p-6 rounded-lg text-left transition-colors"
+              >
+                <h3 className="font-semibold text-lg mb-2">Schimbă Rol</h3>
+                <p className="text-sm opacity-80">Modifică rolul utilizatorului</p>
+              </button>
+            )}
 
             {/* Update Credits */}
             <button
@@ -680,14 +687,16 @@ export default function AdminUserDetail() {
               <p className="text-sm opacity-80">Forțează deconectarea utilizatorului</p>
             </button>
 
-            {/* Delete User */}
-            <button
-              onClick={() => setShowControlModal('delete')}
-              className="bg-red-600/20 hover:bg-red-600/30 border border-red-600/30 text-red-300 p-6 rounded-lg text-left transition-colors"
-            >
-              <h3 className="font-semibold text-lg mb-2">Șterge Cont</h3>
-              <p className="text-sm opacity-80">Marchează contul ca șters (soft delete)</p>
-            </button>
+            {/* Delete User - Only for SuperAdmin or if target is regular user */}
+            {(currentUser?.isSuperAdmin || user.role === 'user') && (
+              <button
+                onClick={() => setShowControlModal('delete')}
+                className="bg-red-600/20 hover:bg-red-600/30 border border-red-600/30 text-red-300 p-6 rounded-lg text-left transition-colors"
+              >
+                <h3 className="font-semibold text-lg mb-2">Șterge Cont</h3>
+                <p className="text-sm opacity-80">Marchează contul ca șters (soft delete)</p>
+              </button>
+            )}
           </div>
         )}
 
@@ -721,6 +730,14 @@ export default function AdminUserDetail() {
 
               {showControlModal === 'role' && (
                 <div className="mb-4 space-y-2">
+                  {currentUser?.isSuperAdmin && (
+                    <button
+                      onClick={() => handleChangeRole('superadmin')}
+                      className="w-full bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 px-4 py-2 rounded-lg font-semibold"
+                    >
+                      Setează ca Super Admin
+                    </button>
+                  )}
                   <button
                     onClick={() => handleChangeRole('admin')}
                     className="w-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 px-4 py-2 rounded-lg"

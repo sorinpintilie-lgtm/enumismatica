@@ -4,6 +4,30 @@
 
 This document describes the comprehensive admin control and monitoring system implemented for the E-numismatica.ro platform. The system provides complete visibility and control over all user activities, with detailed logging, real-time monitoring, and powerful administrative tools.
 
+## Role Hierarchy
+
+The platform implements a three-tier role system:
+
+1. **Super Admin** (`superadmin`)
+   - Highest level of access
+   - Can manage all users including other admins
+   - Can promote/demote admins
+   - Can delete admin accounts
+   - Full access to all features and data
+   - Hardcoded UID: `QEm0DSIzylNQIHpQAZlgtWQkYYE3`
+
+2. **Admin** (`admin`)
+   - Can manage regular users
+   - Cannot modify other admin or super admin accounts
+   - Cannot change roles to/from admin
+   - Can delete regular user accounts only
+   - Full access to monitoring and logging features
+
+3. **User** (`user`)
+   - Standard user access
+   - No administrative privileges
+   - Can only access their own data
+
 ## Features Implemented
 
 ### 1. User Activity Logging Service (`shared/activityLogService.ts`)

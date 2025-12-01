@@ -213,7 +213,7 @@ export async function unbanUser(
  */
 export async function changeUserRole(
   targetUserId: string,
-  newRole: 'admin' | 'user',
+  newRole: 'superadmin' | 'admin' | 'user',
   adminUserId: string,
   adminEmail: string,
   reason?: string

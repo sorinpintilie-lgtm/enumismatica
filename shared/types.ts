@@ -9,7 +9,7 @@ export interface User {
   email: string;
   displayName: string;
   avatar?: string; // Optional profile image URL
-  role?: 'admin' | 'user'; // User role, defaults to 'user'
+  role?: 'superadmin' | 'admin' | 'user'; // User role, defaults to 'user'
 
   // Credit & referral system
   credits?: number; // Current credit balance for boosts and rewards
