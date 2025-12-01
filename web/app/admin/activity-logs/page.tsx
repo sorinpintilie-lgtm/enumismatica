@@ -98,16 +98,17 @@ export default function ActivityLogsPage() {
   const [expandedLog, setExpandedLog] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        router.push('/login');
-      } else if (user.isAdmin === false) {
-        // Only redirect if explicitly not admin (not undefined)
-        router.push('/dashboard');
-      } else if (user.isAdmin) {
-        // User is confirmed admin, load logs
-        loadLogs();
+    if (!authLoading && user) {
+      // Wait for isAdmin to be defined (not undefined)
+      if (user.isAdmin !== undefined) {
+        if (!user.isAdmin) {
+          router.push('/dashboard');
+        } else {
+          loadLogs();
+        }
       }
+    } else if (!authLoading && !user) {
+      router.push('/login');
     }
   }, [user, authLoading, router]);
 
