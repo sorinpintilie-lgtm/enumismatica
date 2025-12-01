@@ -228,5 +228,35 @@ service cloud.firestore {
 
       allow update, delete: if isAdmin();
     }
+
+    // Activity Logs collection: Only admins can read, authenticated users can create their own logs
+    match /activityLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated() &&
+                    hasRequiredFields(request.resource.data, ['userId', 'eventType', 'timestamp', 'metadata']) &&
+                    isValidTimestamp(request.resource.data.timestamp) &&
+                    (isOwner(request.resource.data.userId) || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+
+    // Admin Actions collection: Only admins can read and write
+    match /adminActions/{actionId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() &&
+                    hasRequiredFields(request.resource.data, ['userId', 'action', 'performedBy', 'performedByEmail', 'timestamp']) &&
+                    isValidTimestamp(request.resource.data.timestamp);
+      allow update, delete: if isAdmin();
+    }
+
+    // Admin Notifications collection: Only admins can read and write
+    match /adminNotifications/{notificationId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated() &&
+                    hasRequiredFields(request.resource.data, ['type', 'severity', 'title', 'message', 'read', 'actionTaken', 'createdAt']) &&
+                    isValidTimestamp(request.resource.data.createdAt);
+      allow update: if isAdmin() &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'actionTaken', 'actionTakenBy', 'actionTakenAt']);
+      allow delete: if isAdmin();
+    }
   }
 }

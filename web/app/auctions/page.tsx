@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Suspense } from 'react';
+import Link from 'next/link';
 import { useAuctions } from '../hooks/useAuctions';
 import { useProducts } from '../hooks/useProducts';
 import AuctionCard from '../components/AuctionCard';
 import FilterBar, { FilterOptions } from '../components/FilterBar';
+import { useAuth } from '../context/AuthContext';
 
-export default function AuctionsPage() {
+function AuctionsListContent() {
   const { auctions, loading: auctionsLoading, error: auctionsError } = useAuctions('active');
   // Fetch all fields needed for filtering and display
   const { products, loading: productsLoading } = useProducts(
@@ -58,7 +60,6 @@ export default function AuctionsPage() {
         console.log('[AuctionsPage] No product found for auction:', auction.id, 'productId:', auction.productId);
         return false;
       }
-      
 
       // Search filter
       if (filters.searchTerm) {
@@ -255,16 +256,14 @@ export default function AuctionsPage() {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={1.5}
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
           <h3 className="text-xl font-semibold text-white mb-2">Nu s-au găsit licitații</h3>
           <p className="text-slate-300 mb-6">
             {filters.searchTerm
               ? 'Încearcă să ajustezi căutarea sau filtrele'
-              : statusFilter === 'active'
-              ? 'Nu există licitații active momentan'
-              : 'Nu există licitații care să corespundă criteriilor'}
+              : 'Nu există licitații disponibile momentan'}
           </p>
           {filters.searchTerm && (
             <button
@@ -278,19 +277,82 @@ export default function AuctionsPage() {
                   grade: 'Toate Gradele',
                 })
               }
-              className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-6 py-2 rounded-xl font-semibold transition-colors shadow-lg shadow-[0_0_20px_rgba(231,183,60,0.6)]"
+              className="bg-gold-500 hover:bg-gold-600 text-white px-6 py-2 rounded-xl font-semibold transition-colors shadow-lg shadow-gold-500/30"
             >
               Șterge Filtrele
             </button>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredAuctions.map((auction) => (
             <AuctionCard key={auction.id} auction={auction} />
           ))}
         </div>
       )}
     </div>
+  );
+}
+
+function AuctionsPageContent() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
+          <p className="ml-4 text-slate-300">Se verifică sesiunea de utilizator...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="max-w-xl rounded-2xl border border-[#e7b73c]/40 bg-navy-900/80 p-8 text-center shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
+          <h1 className="text-2xl font-bold text-white mb-3">
+            Licitațiile sunt disponibile doar pentru utilizatori autentificați
+          </h1>
+          <p className="text-sm text-slate-300 mb-5">
+            Pentru a vedea licitațiile active și a participa la licitații, trebuie să te autentifici în contul tău.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-5 py-2.5 text-sm font-semibold text-[#000940] shadow-lg shadow-[#e7b73c]/50 hover:bg-[#f0c955] transition"
+            >
+              Autentificare
+            </Link>
+            <Link
+              href="/register"
+              className="inline-flex items-center justify-center rounded-full border border-[#e7b73c] px-5 py-2.5 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition"
+            >
+              Creează cont
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <AuctionsListContent />;
+}
+
+export default function AuctionsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
+            <p className="ml-4 text-slate-300">Se încarcă licitațiile...</p>
+          </div>
+        </div>
+      }
+    >
+      <AuctionsPageContent />
+    </Suspense>
   );
 }

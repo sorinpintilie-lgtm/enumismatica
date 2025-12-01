@@ -4,36 +4,40 @@ import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { isAdmin } from 'shared/adminService';
 import {
-  isAdmin,
-  getPlatformStats,
-  getPendingProducts,
-  getPendingAuctions,
-  approveProduct,
-  rejectProduct,
-  approveAuction,
-  rejectAuction,
-} from 'shared/adminService';
-import { Product, Auction } from 'shared/types';
+  getRecentActivity,
+  subscribeToActivityLogs,
+  ActivityLog,
+} from 'shared/activityLogService';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { formatDistanceToNow } from 'date-fns';
+import { ro } from 'date-fns/locale';
+
+interface DashboardStats {
+  totalUsers: number;
+  activeUsers: number;
+  totalProducts: number;
+  totalAuctions: number;
+  activeAuctions: number;
+  totalBids: number;
+  recentActivity: ActivityLog[];
+  suspiciousActivity: ActivityLog[];
+  errorCount: number;
+}
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalProducts: 0,
-    totalAuctions: 0,
-    activeAuctions: 0,
-    endedAuctions: 0,
-  });
-  const [pendingProducts, setPendingProducts] = useState<Product[]>([]);
-  const [pendingAuctions, setPendingAuctions] = useState<Auction[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'auctions'>('overview');
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [realtimeActivity, setRealtimeActivity] = useState<ActivityLog[]>([]);
+  const [realtimeEnabled, setRealtimeEnabled] = useState(true);
 
   useEffect(() => {
-    const checkAdmin = async () => {
+    const checkAdminAndLoad = async () => {
       if (!user) {
         router.push('/login');
         return;
@@ -46,306 +50,327 @@ export default function AdminDashboard() {
       }
 
       setIsAdminUser(true);
-      await loadData();
+      await loadDashboardData();
       setLoading(false);
     };
 
     if (!authLoading) {
-      checkAdmin();
+      checkAdminAndLoad();
     }
   }, [user, authLoading, router]);
 
-  const loadData = async () => {
-    const [statsData, products, auctions] = await Promise.all([
-      getPlatformStats(),
-      getPendingProducts(),
-      getPendingAuctions(),
-    ]);
+  useEffect(() => {
+    if (!isAdminUser || !realtimeEnabled) return;
 
-    setStats(statsData);
-    setPendingProducts(products);
-    setPendingAuctions(auctions);
-  };
+    const unsubscribe = subscribeToActivityLogs(
+      { limit: 50 },
+      (logs) => {
+        setRealtimeActivity(logs);
+      },
+      (error) => {
+        console.error('Realtime activity error:', error);
+      }
+    );
 
-  const handleApproveProduct = async (productId: string) => {
-    const result = await approveProduct(productId);
-    if (result.success) {
-      await loadData();
-    } else {
-      alert(`Error: ${result.error}`);
+    return () => unsubscribe();
+  }, [isAdminUser, realtimeEnabled]);
+
+  const loadDashboardData = async () => {
+    try {
+      // Get total users
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      const totalUsers = usersSnapshot.size;
+
+      // Get active users (logged in last 7 days)
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const activeUsersQuery = query(
+        collection(db, 'users'),
+        where('updatedAt', '>=', sevenDaysAgo)
+      );
+      const activeUsersSnapshot = await getDocs(activeUsersQuery);
+      const activeUsers = activeUsersSnapshot.size;
+
+      // Get total products
+      const productsSnapshot = await getDocs(collection(db, 'products'));
+      const totalProducts = productsSnapshot.size;
+
+      // Get total auctions
+      const auctionsSnapshot = await getDocs(collection(db, 'auctions'));
+      const totalAuctions = auctionsSnapshot.size;
+
+      // Get active auctions
+      const activeAuctionsQuery = query(
+        collection(db, 'auctions'),
+        where('status', '==', 'active')
+      );
+      const activeAuctionsSnapshot = await getDocs(activeAuctionsQuery);
+      const activeAuctions = activeAuctionsSnapshot.size;
+
+      // Get total bids (approximate from all auctions)
+      let totalBids = 0;
+      for (const auctionDoc of auctionsSnapshot.docs) {
+        const bidsSnapshot = await getDocs(collection(db, 'auctions', auctionDoc.id, 'bids'));
+        totalBids += bidsSnapshot.size;
+      }
+
+      // Get recent activity
+      const recentActivity = await getRecentActivity(100);
+
+      // Get suspicious activity
+      const suspiciousActivity = recentActivity.filter(
+        (log) =>
+          log.eventType.includes('suspicious') ||
+          log.eventType.includes('unauthorized') ||
+          log.eventType.includes('rate_limit')
+      );
+
+      // Count errors
+      const errorCount = recentActivity.filter(
+        (log) => log.eventType.includes('error')
+      ).length;
+
+      setStats({
+        totalUsers,
+        activeUsers,
+        totalProducts,
+        totalAuctions,
+        activeAuctions,
+        totalBids,
+        recentActivity: recentActivity.slice(0, 20),
+        suspiciousActivity,
+        errorCount,
+      });
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
     }
   };
 
-  const handleRejectProduct = async (productId: string) => {
-    const result = await rejectProduct(productId);
-    if (result.success) {
-      await loadData();
-    } else {
-      alert(`Error: ${result.error}`);
-    }
-  };
-
-  const handleApproveAuction = async (auctionId: string) => {
-    const result = await approveAuction(auctionId);
-    if (result.success) {
-      await loadData();
-    } else {
-      alert(`Error: ${result.error}`);
-    }
-  };
-
-  const handleRejectAuction = async (auctionId: string) => {
-    const result = await rejectAuction(auctionId);
-    if (result.success) {
-      await loadData();
-    } else {
-      alert(`Error: ${result.error}`);
-    }
-  };
-
-  if (authLoading || loading) {
+  if (authLoading || loading || !isAdminUser) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
         </div>
       </div>
     );
   }
 
-  if (!isAdminUser) {
-    return null;
-  }
+  const activityToDisplay = realtimeEnabled ? realtimeActivity : stats?.recentActivity || [];
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Tablou de bord Admin</h1>
-            <p className="text-gray-600 mt-2">Gestionează conținutul platformei și utilizatorii</p>
-          </div>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">Panou Admin</h1>
+          <p className="text-slate-300">Monitorizare și control complet al platformei</p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Link
-            href="/dashboard"
-            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200"
+            href="/admin/users"
+            className="bg-navy-800/50 hover:bg-navy-700/50 border border-gold-500/20 hover:border-gold-500/40 rounded-lg p-6 transition-colors"
           >
-            Înapoi la tabloul de bord
+            <h3 className="text-lg font-semibold text-white mb-2">Utilizatori</h3>
+            <p className="text-3xl font-bold text-gold-400">{stats?.totalUsers || 0}</p>
+            <p className="text-sm text-slate-400 mt-1">{stats?.activeUsers || 0} activi</p>
+          </Link>
+
+          <Link
+            href="/admin/products"
+            className="bg-navy-800/50 hover:bg-navy-700/50 border border-gold-500/20 hover:border-gold-500/40 rounded-lg p-6 transition-colors"
+          >
+            <h3 className="text-lg font-semibold text-white mb-2">Produse</h3>
+            <p className="text-3xl font-bold text-gold-400">{stats?.totalProducts || 0}</p>
+            <p className="text-sm text-slate-400 mt-1">Total catalog</p>
+          </Link>
+
+          <Link
+            href="/admin/auctions"
+            className="bg-navy-800/50 hover:bg-navy-700/50 border border-gold-500/20 hover:border-gold-500/40 rounded-lg p-6 transition-colors"
+          >
+            <h3 className="text-lg font-semibold text-white mb-2">Licitații</h3>
+            <p className="text-3xl font-bold text-gold-400">{stats?.activeAuctions || 0}</p>
+            <p className="text-sm text-slate-400 mt-1">{stats?.totalAuctions || 0} total</p>
+          </Link>
+
+          <Link
+            href="/admin/activity-logs"
+            className="bg-navy-800/50 hover:bg-navy-700/50 border border-gold-500/20 hover:border-gold-500/40 rounded-lg p-6 transition-colors"
+          >
+            <h3 className="text-lg font-semibold text-white mb-2">Loguri</h3>
+            <p className="text-3xl font-bold text-gold-400">{activityToDisplay.length}</p>
+            <p className="text-sm text-slate-400 mt-1">Evenimente recente</p>
           </Link>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`${
-                activeTab === 'overview'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-            >
-              Prezentare generală
-            </button>
-            <button
-              onClick={() => setActiveTab('products')}
-              className={`${
-                activeTab === 'products'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-            >
-              Produse în așteptare ({pendingProducts.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('auctions')}
-              className={`${
-                activeTab === 'auctions'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-            >
-              Licitații în așteptare ({pendingAuctions.length})
-            </button>
-          </nav>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+            <p className="text-sm text-slate-400">Total Licitări</p>
+            <p className="text-2xl font-bold text-white">{stats?.totalBids || 0}</p>
+          </div>
+
+          <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+            <p className="text-sm text-slate-400">Activitate Suspectă</p>
+            <p className="text-2xl font-bold text-red-400">{stats?.suspiciousActivity.length || 0}</p>
+          </div>
+
+          <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+            <p className="text-sm text-slate-400">Erori</p>
+            <p className="text-2xl font-bold text-orange-400">{stats?.errorCount || 0}</p>
+          </div>
+
+          <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+            <p className="text-sm text-slate-400">Status Sistem</p>
+            <p className="text-lg font-bold text-green-400">ONLINE</p>
+          </div>
         </div>
 
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Total utilizatori</h3>
-              <p className="text-3xl font-bold text-blue-600">{stats.totalUsers}</p>
-              <Link href="/admin/users" className="text-sm text-blue-600 hover:text-blue-800 mt-2 inline-block">
-                Gestionează utilizatori →
-              </Link>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Total produse</h3>
-              <p className="text-3xl font-bold text-green-600">{stats.totalProducts}</p>
-              <p className="text-sm text-gray-600 mt-2">{pendingProducts.length} în așteptarea aprobării</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Total licitații</h3>
-              <p className="text-3xl font-bold text-purple-600">{stats.totalAuctions}</p>
-              <p className="text-sm text-gray-600 mt-2">
-                {stats.activeAuctions} active, {pendingAuctions.length} în așteptare
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Licitații active</h3>
-              <p className="text-3xl font-bold text-orange-600">{stats.activeAuctions}</p>
-              <Link href="/admin/auctions" className="text-sm text-blue-600 hover:text-blue-800 mt-2 inline-block">
-                Vezi toate →
-              </Link>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Licitații încheiate</h3>
-              <p className="text-3xl font-bold text-gray-600">{stats.endedAuctions}</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Gestionare Conținut</h3>
-              <div className="space-y-2">
-                <Link href="/admin/products" className="block text-blue-600 hover:text-blue-800 text-sm">
-                  📦 Gestionează produse →
-                </Link>
-                <Link href="/admin/auctions" className="block text-blue-600 hover:text-blue-800 text-sm">
-                  🔨 Gestionează licitații →
-                </Link>
-                <Link href="/admin/users" className="block text-blue-600 hover:text-blue-800 text-sm">
-                  👥 Gestionează utilizatori →
-                </Link>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Monitorizare</h3>
-              <div className="space-y-2">
-                <Link href="/admin/conversations" className="block text-blue-600 hover:text-blue-800 text-sm">
-                  💬 Vezi toate conversațiile →
-                </Link>
-                <Link href="/seed-db" className="block text-blue-600 hover:text-blue-800 text-sm">
-                  🌱 Gestionare bază de date →
-                </Link>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Statistici Platformă</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Utilizatori:</span>
-                  <span className="font-medium">{stats.totalUsers}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Produse:</span>
-                  <span className="font-medium">{stats.totalProducts}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Licitații:</span>
-                  <span className="font-medium">{stats.totalAuctions}</span>
-                </div>
-              </div>
-            </div>
+        {/* Real-time Activity Feed */}
+        <div className="bg-navy-800/50 rounded-2xl border border-gold-500/20 p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-white">Activitate în Timp Real</h2>
+            <button
+              onClick={() => setRealtimeEnabled(!realtimeEnabled)}
+              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                realtimeEnabled
+                  ? 'bg-green-500 hover:bg-green-600 text-white'
+                  : 'bg-navy-700 hover:bg-navy-600 text-slate-300'
+              }`}
+            >
+              {realtimeEnabled ? 'LIVE' : 'Pauzat'}
+            </button>
           </div>
-        )}
 
-        {/* Pending Products Tab */}
-        {activeTab === 'products' && (
-          <div className="bg-white rounded-lg shadow-md">
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Produse în așteptare</h2>
-              {pendingProducts.length === 0 ? (
-                <p className="text-gray-500">Niciun produs în așteptare pentru revizuire.</p>
-              ) : (
-                <div className="space-y-4">
-                  {pendingProducts.map((product) => (
-                    <div key={product.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-                          <p className="text-gray-600 mt-1">{product.description}</p>
-                          <p className="text-sm text-gray-500 mt-2">Preț: ${product.price.toFixed(2)}</p>
-                          <p className="text-sm text-gray-500">ID Proprietar: {product.ownerId}</p>
-                          <p className="text-sm text-gray-500">
-                            Creat: {product.createdAt.toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex gap-2 ml-4">
-                          <button
-                            onClick={() => handleApproveProduct(product.id)}
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                          >
-                            Aprobă
-                          </button>
-                          <button
-                            onClick={() => handleRejectProduct(product.id)}
-                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                          >
-                            Respinge
-                          </button>
-                        </div>
+          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+            {activityToDisplay.length === 0 ? (
+              <p className="text-slate-400 text-center py-8">Nicio activitate recentă</p>
+            ) : (
+              activityToDisplay.map((log) => (
+                <div
+                  key={log.id}
+                  className="bg-navy-900/50 rounded-lg p-4 border border-gold-500/10 hover:border-gold-500/20 transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span
+                          className={`text-sm font-mono font-semibold ${
+                            log.eventType.includes('error') || log.eventType.includes('suspicious')
+                              ? 'text-red-400'
+                              : log.eventType.startsWith('admin_')
+                              ? 'text-purple-400'
+                              : log.eventType.includes('login')
+                              ? 'text-green-400'
+                              : 'text-blue-400'
+                          }`}
+                        >
+                          {log.eventType}
+                        </span>
+                        {log.isAdmin && (
+                          <span className="bg-purple-500/20 text-purple-300 px-2 py-1 rounded text-xs font-semibold border border-purple-500/30">
+                            ADMIN
+                          </span>
+                        )}
+                        <span className="text-slate-400 text-sm">
+                          {formatDistanceToNow(log.timestamp.toDate(), { addSuffix: true, locale: ro })}
+                        </span>
+                      </div>
+                      <div className="text-slate-300 text-sm">
+                        <span className="text-slate-500">Utilizator:</span>{' '}
+                        <span className="text-gold-400 font-mono">
+                          {log.userName || log.userEmail || log.userId.slice(0, 8)}
+                        </span>
+                        {log.metadata.page && (
+                          <>
+                            {' | '}
+                            <span className="text-slate-500">Pagină:</span> {log.metadata.page}
+                          </>
+                        )}
+                        {log.metadata.device && (
+                          <>
+                            {' | '}
+                            <span className="text-slate-500">Dispozitiv:</span> {log.metadata.device}
+                          </>
+                        )}
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              )}
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Suspicious Activity Alert */}
+        {stats && stats.suspiciousActivity.length > 0 && (
+          <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-6 mb-8">
+            <h2 className="text-2xl font-bold text-red-300 mb-4">
+              Alerte Securitate ({stats.suspiciousActivity.length})
+            </h2>
+            <div className="space-y-2">
+              {stats.suspiciousActivity.slice(0, 5).map((log) => (
+                <div key={log.id} className="bg-red-900/30 rounded-lg p-4 border border-red-500/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-red-300 font-semibold">{log.eventType}</span>
+                      <p className="text-sm text-red-200 mt-1">
+                        Utilizator: {log.userName || log.userEmail || log.userId}
+                      </p>
+                      {log.metadata.ipAddress && (
+                        <p className="text-xs text-red-200 mt-1">IP: {log.metadata.ipAddress}</p>
+                      )}
+                    </div>
+                    <span className="text-xs text-red-300">
+                      {formatDistanceToNow(log.timestamp.toDate(), { addSuffix: true, locale: ro })}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
+            <Link
+              href="/admin/activity-logs"
+              className="mt-4 inline-block text-red-300 hover:text-red-200 font-semibold"
+            >
+              Vezi toate alertele →
+            </Link>
           </div>
         )}
 
-        {/* Pending Auctions Tab */}
-        {activeTab === 'auctions' && (
-          <div className="bg-white rounded-lg shadow-md">
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Licitații în așteptare</h2>
-              {pendingAuctions.length === 0 ? (
-                <p className="text-gray-500">Nicio licitație în așteptare pentru revizuire.</p>
-              ) : (
-                <div className="space-y-4">
-                  {pendingAuctions.map((auction) => (
-                    <div key={auction.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900">Licitație #{auction.id.slice(-6)}</h3>
-                          <p className="text-sm text-gray-600 mt-1">ID Produs: {auction.productId}</p>
-                          <p className="text-sm text-gray-500 mt-2">
-                            Preț de rezervă: ${auction.reservePrice.toFixed(2)}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Start: {auction.startTime.toLocaleDateString()} - Sfârșit:{' '}
-                            {auction.endTime.toLocaleDateString()}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Creat: {auction.createdAt.toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex gap-2 ml-4">
-                          <button
-                            onClick={() => handleApproveAuction(auction.id)}
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                          >
-                            Aprobă
-                          </button>
-                          <button
-                            onClick={() => handleRejectAuction(auction.id)}
-                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                          >
-                            Respinge
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Quick Links */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link
+            href="/admin/users"
+            className="bg-navy-800/50 hover:bg-navy-700/50 border border-gold-500/20 hover:border-gold-500/40 rounded-lg p-6 transition-colors"
+          >
+            <h3 className="text-lg font-semibold text-white mb-2">Gestionare Utilizatori</h3>
+            <p className="text-sm text-slate-400">
+              Vizualizează, editează și controlează conturile utilizatorilor
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/activity-logs"
+            className="bg-navy-800/50 hover:bg-navy-700/50 border border-gold-500/20 hover:border-gold-500/40 rounded-lg p-6 transition-colors"
+          >
+            <h3 className="text-lg font-semibold text-white mb-2">Loguri Detaliate</h3>
+            <p className="text-sm text-slate-400">
+              Monitorizare completă a activității utilizatorilor
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/conversations"
+            className="bg-navy-800/50 hover:bg-navy-700/50 border border-gold-500/20 hover:border-gold-500/40 rounded-lg p-6 transition-colors"
+          >
+            <h3 className="text-lg font-semibold text-white mb-2">Conversații</h3>
+            <p className="text-sm text-slate-400">
+              Monitorizează mesajele și conversațiile utilizatorilor
+            </p>
+          </Link>
+        </div>
       </div>
     </div>
   );

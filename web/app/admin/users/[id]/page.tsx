@@ -13,9 +13,25 @@ import {
   deleteUserCollectionItem,
   deleteConversation,
 } from 'shared/adminService';
+import {
+  adminResetUserPassword,
+  banUser,
+  unbanUser,
+  changeUserRole,
+  deleteUserAccount,
+  updateUserCredits,
+  forceLogoutUser,
+} from 'shared/adminControlService';
+import {
+  getUserActivityStats,
+  getActivityLogs,
+  ActivityLog,
+} from 'shared/activityLogService';
 import { User, CollectionItem, Conversation, ChatMessage } from 'shared/types';
 import { getDoc, doc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
+import { formatDistanceToNow } from 'date-fns';
+import { ro } from 'date-fns/locale';
 
 export default function AdminUserDetail() {
   const { user: currentUser, loading: authLoading } = useAuth();
@@ -31,7 +47,12 @@ export default function AdminUserDetail() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [conversationMessages, setConversationMessages] = useState<ChatMessage[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'collection' | 'messages'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'collection' | 'messages' | 'activity' | 'controls'>('overview');
+  const [activityStats, setActivityStats] = useState<any>(null);
+  const [recentActivity, setRecentActivity] = useState<ActivityLog[]>([]);
+  const [actionReason, setActionReason] = useState('');
+  const [newCredits, setNewCredits] = useState(0);
+  const [showControlModal, setShowControlModal] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAdminAndLoad = async () => {
@@ -61,12 +82,14 @@ export default function AdminUserDetail() {
       // Load user document
       const userDoc = await getDoc(doc(db, 'users', userId));
       if (userDoc.exists()) {
-        setUser({
+        const userData = {
           id: userDoc.id,
           ...userDoc.data(),
           createdAt: userDoc.data().createdAt?.toDate() || new Date(),
           updatedAt: userDoc.data().updatedAt?.toDate() || new Date(),
-        } as User);
+        } as User;
+        setUser(userData);
+        setNewCredits(userData.credits || 0);
       }
 
       // Load analytics
@@ -80,6 +103,14 @@ export default function AdminUserDetail() {
       // Load conversations
       const conversationsData = await getUserConversations(userId);
       setConversations(conversationsData);
+
+      // Load activity stats
+      const stats = await getUserActivityStats(userId);
+      setActivityStats(stats);
+
+      // Load recent activity
+      const { logs } = await getActivityLogs({ userId, limit: 20 });
+      setRecentActivity(logs);
     } catch (error) {
       console.error('Error loading user data:', error);
     }
@@ -117,11 +148,138 @@ export default function AdminUserDetail() {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!user || !currentUser) return;
+    if (!actionReason.trim()) {
+      alert('Te rog introdu un motiv pentru această acțiune');
+      return;
+    }
+
+    try {
+      await adminResetUserPassword(
+        userId,
+        user.email,
+        currentUser.uid,
+        currentUser.email || '',
+        actionReason
+      );
+      alert('Email de resetare parolă trimis cu succes!');
+      setShowControlModal(null);
+      setActionReason('');
+      await loadUserData();
+    } catch (error) {
+      alert(`Eroare: ${error}`);
+    }
+  };
+
+  const handleBanUser = async () => {
+    if (!user || !currentUser) return;
+    if (!actionReason.trim()) {
+      alert('Te rog introdu un motiv pentru ban');
+      return;
+    }
+
+    try {
+      await banUser(userId, currentUser.uid, currentUser.email || '', actionReason);
+      alert('Utilizator blocat cu succes!');
+      setShowControlModal(null);
+      setActionReason('');
+      await loadUserData();
+    } catch (error) {
+      alert(`Eroare: ${error}`);
+    }
+  };
+
+  const handleUnbanUser = async () => {
+    if (!user || !currentUser) return;
+
+    try {
+      await unbanUser(userId, currentUser.uid, currentUser.email || '', actionReason);
+      alert('Utilizator deblocat cu succes!');
+      setShowControlModal(null);
+      setActionReason('');
+      await loadUserData();
+    } catch (error) {
+      alert(`Eroare: ${error}`);
+    }
+  };
+
+  const handleChangeRole = async (newRole: 'admin' | 'user') => {
+    if (!user || !currentUser) return;
+    if (!actionReason.trim()) {
+      alert('Te rog introdu un motiv pentru schimbarea rolului');
+      return;
+    }
+
+    try {
+      await changeUserRole(userId, newRole, currentUser.uid, currentUser.email || '', actionReason);
+      alert(`Rol schimbat cu succes în ${newRole}!`);
+      setShowControlModal(null);
+      setActionReason('');
+      await loadUserData();
+    } catch (error) {
+      alert(`Eroare: ${error}`);
+    }
+  };
+
+  const handleUpdateCredits = async () => {
+    if (!user || !currentUser) return;
+    if (!actionReason.trim()) {
+      alert('Te rog introdu un motiv pentru actualizarea creditelor');
+      return;
+    }
+
+    try {
+      await updateUserCredits(userId, newCredits, currentUser.uid, currentUser.email || '', actionReason);
+      alert('Credite actualizate cu succes!');
+      setShowControlModal(null);
+      setActionReason('');
+      await loadUserData();
+    } catch (error) {
+      alert(`Eroare: ${error}`);
+    }
+  };
+
+  const handleForceLogout = async () => {
+    if (!user || !currentUser) return;
+    if (!actionReason.trim()) {
+      alert('Te rog introdu un motiv pentru deconectare forțată');
+      return;
+    }
+
+    try {
+      await forceLogoutUser(userId, currentUser.uid, currentUser.email || '', actionReason);
+      alert('Utilizatorul va fi deconectat la următoarea cerere!');
+      setShowControlModal(null);
+      setActionReason('');
+      await loadUserData();
+    } catch (error) {
+      alert(`Eroare: ${error}`);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!user || !currentUser) return;
+    if (!actionReason.trim()) {
+      alert('Te rog introdu un motiv pentru ștergere');
+      return;
+    }
+    if (!confirm('ATENȚIE: Această acțiune va marca contul ca șters. Ești sigur?')) return;
+
+    try {
+      await deleteUserAccount(userId, currentUser.uid, currentUser.email || '', actionReason);
+      alert('Utilizator șters cu succes!');
+      router.push('/admin/users');
+    } catch (error) {
+      alert(`Eroare: ${error}`);
+    }
+  };
+
   if (authLoading || loading || !isAdminUser) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
         </div>
       </div>
     );
@@ -131,8 +289,8 @@ export default function AdminUserDetail() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Utilizator negăsit</h1>
-          <Link href="/admin/users" className="text-blue-600 hover:text-blue-800">
+          <h1 className="text-2xl font-bold text-white mb-4">Utilizator negăsit</h1>
+          <Link href="/admin/users" className="text-gold-400 hover:text-gold-300">
             ← Înapoi la utilizatori
           </Link>
         </div>
@@ -140,136 +298,138 @@ export default function AdminUserDetail() {
     );
   }
 
+  const isBanned = (user as any).banned === true;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <Link href="/admin/users" className="text-blue-600 hover:text-blue-800 font-medium mb-4 inline-block">
+          <Link href="/admin/users" className="text-gold-400 hover:text-gold-300 font-medium mb-4 inline-block">
             ← Înapoi la utilizatori
           </Link>
-          <div className="flex items-center gap-4">
-            {user.avatar && (
-              <img src={user.avatar} alt={user.displayName} className="w-16 h-16 rounded-full" />
-            )}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{user.displayName}</h1>
-              <p className="text-gray-600">{user.email}</p>
-              <div className="flex gap-2 mt-2">
-                {user.role === 'admin' && (
-                  <span className="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800">
-                    Admin
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {user.avatar && (
+                <img src={user.avatar} alt={user.displayName} className="w-16 h-16 rounded-full border-2 border-gold-500" />
+              )}
+              <div>
+                <h1 className="text-3xl font-bold text-white">{user.displayName}</h1>
+                <p className="text-slate-300">{user.email}</p>
+                <div className="flex gap-2 mt-2">
+                  {user.role === 'admin' && (
+                    <span className="px-2 py-1 text-xs rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      Admin
+                    </span>
+                  )}
+                  {isBanned && (
+                    <span className="px-2 py-1 text-xs rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
+                      BLOCAT
+                    </span>
+                  )}
+                  <span className="px-2 py-1 text-xs rounded-full bg-navy-700 text-slate-300 font-mono">
+                    ID: {user.id.slice(0, 8)}...
                   </span>
-                )}
-                <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
-                  ID: {user.id}
-                </span>
+                </div>
               </div>
             </div>
+            <button
+              onClick={() => setActiveTab('controls')}
+              className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              Controale Admin
+            </button>
           </div>
         </div>
 
         {/* Stats Overview */}
         {analytics && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-            <div className="bg-white rounded-lg shadow p-4">
-              <p className="text-sm text-gray-600">Produse</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.totalProducts}</p>
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+              <p className="text-sm text-slate-400">Produse</p>
+              <p className="text-2xl font-bold text-white">{analytics.totalProducts}</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <p className="text-sm text-gray-600">Licitații</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.totalAuctions}</p>
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+              <p className="text-sm text-slate-400">Licitații</p>
+              <p className="text-2xl font-bold text-white">{analytics.totalAuctions}</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <p className="text-sm text-gray-600">Licitări</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.totalBids}</p>
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+              <p className="text-sm text-slate-400">Licitări</p>
+              <p className="text-2xl font-bold text-white">{analytics.totalBids}</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <p className="text-sm text-gray-600">Colecție</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.totalCollectionItems}</p>
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+              <p className="text-sm text-slate-400">Colecție</p>
+              <p className="text-2xl font-bold text-white">{analytics.totalCollectionItems}</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <p className="text-sm text-gray-600">Conversații</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.totalConversations}</p>
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+              <p className="text-sm text-slate-400">Conversații</p>
+              <p className="text-2xl font-bold text-white">{analytics.totalConversations}</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <p className="text-sm text-gray-600">Valoare Colecție</p>
-              <p className="text-2xl font-bold text-green-600">${analytics.collectionValue.toFixed(0)}</p>
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+              <p className="text-sm text-slate-400">Credite</p>
+              <p className="text-2xl font-bold text-gold-400">{user.credits || 0}</p>
             </div>
           </div>
         )}
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="flex gap-4">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`px-4 py-2 border-b-2 font-medium transition-colors ${
-                activeTab === 'overview'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Prezentare Generală
-            </button>
-            <button
-              onClick={() => setActiveTab('collection')}
-              className={`px-4 py-2 border-b-2 font-medium transition-colors ${
-                activeTab === 'collection'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Colecție ({collection.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('messages')}
-              className={`px-4 py-2 border-b-2 font-medium transition-colors ${
-                activeTab === 'messages'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Mesaje ({conversations.length})
-            </button>
+        <div className="border-b border-gold-500/20 mb-6">
+          <nav className="flex gap-4 overflow-x-auto">
+            {['overview', 'collection', 'messages', 'activity', 'controls'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab as any)}
+                className={`px-4 py-2 border-b-2 font-medium transition-colors whitespace-nowrap ${
+                  activeTab === tab
+                    ? 'border-gold-500 text-gold-400'
+                    : 'border-transparent text-slate-400 hover:text-white'
+                }`}
+              >
+                {tab === 'overview' && 'Prezentare'}
+                {tab === 'collection' && `Colecție (${collection.length})`}
+                {tab === 'messages' && `Mesaje (${conversations.length})`}
+                {tab === 'activity' && 'Activitate'}
+                {tab === 'controls' && 'Controale'}
+              </button>
+            ))}
           </nav>
         </div>
 
         {/* Tab Content */}
         {activeTab === 'overview' && analytics && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Statistici Produse</h3>
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Statistici Produse</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Aprobate:</span>
-                  <span className="font-medium text-green-600">{analytics.approvedProducts}</span>
+                  <span className="text-slate-300">Aprobate:</span>
+                  <span className="font-medium text-green-400">{analytics.approvedProducts}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">În așteptare:</span>
-                  <span className="font-medium text-yellow-600">{analytics.pendingProducts}</span>
+                  <span className="text-slate-300">În așteptare:</span>
+                  <span className="font-medium text-yellow-400">{analytics.pendingProducts}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Respinse:</span>
-                  <span className="font-medium text-red-600">{analytics.rejectedProducts}</span>
+                  <span className="text-slate-300">Respinse:</span>
+                  <span className="font-medium text-red-400">{analytics.rejectedProducts}</span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Statistici Licitații</h3>
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Statistici Licitații</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Active:</span>
-                  <span className="font-medium text-green-600">{analytics.activeAuctions}</span>
+                  <span className="text-slate-300">Active:</span>
+                  <span className="font-medium text-green-400">{analytics.activeAuctions}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Încheiate:</span>
-                  <span className="font-medium text-gray-600">{analytics.endedAuctions}</span>
+                  <span className="text-slate-300">Încheiate:</span>
+                  <span className="font-medium text-slate-300">{analytics.endedAuctions}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Total licitări plasate:</span>
-                  <span className="font-medium text-blue-600">{analytics.totalBids}</span>
+                  <span className="text-slate-300">Total licitări plasate:</span>
+                  <span className="font-medium text-blue-400">{analytics.totalBids}</span>
                 </div>
               </div>
             </div>
@@ -277,33 +437,33 @@ export default function AdminUserDetail() {
         )}
 
         {activeTab === 'collection' && (
-          <div className="bg-white rounded-lg shadow-md">
+          <div className="bg-navy-800/50 rounded-lg border border-gold-500/20">
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold text-white mb-4">
                 Colecția Personală ({collection.length} articole)
               </h3>
               {collection.length === 0 ? (
-                <p className="text-gray-500">Utilizatorul nu are articole în colecție.</p>
+                <p className="text-slate-400">Utilizatorul nu are articole în colecție.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {collection.map((item) => (
-                    <div key={item.id} className="border border-gray-200 rounded-lg p-4">
+                    <div key={item.id} className="border border-gold-500/20 rounded-lg p-4 bg-navy-900/50">
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                        <h4 className="font-semibold text-white">{item.name}</h4>
                         <button
                           onClick={() => handleDeleteCollectionItem(item.id)}
-                          className="text-red-600 hover:text-red-800 text-sm"
+                          className="text-red-400 hover:text-red-300 text-sm"
                         >
                           Șterge
                         </button>
                       </div>
                       <div className="text-sm space-y-1">
-                        {item.country && <p className="text-gray-600">Țară: {item.country}</p>}
-                        {item.year && <p className="text-gray-600">An: {item.year}</p>}
-                        {item.metal && <p className="text-gray-600">Metal: {item.metal}</p>}
-                        {item.grade && <p className="text-gray-600">Grad: {item.grade}</p>}
+                        {item.country && <p className="text-slate-300">Țară: {item.country}</p>}
+                        {item.year && <p className="text-slate-300">An: {item.year}</p>}
+                        {item.metal && <p className="text-slate-300">Metal: {item.metal}</p>}
+                        {item.grade && <p className="text-slate-300">Grad: {item.grade}</p>}
                         {item.currentValue && (
-                          <p className="text-green-600 font-medium">Valoare: ${item.currentValue.toFixed(2)}</p>
+                          <p className="text-green-400 font-medium">Valoare: ${item.currentValue.toFixed(2)}</p>
                         )}
                       </div>
                     </div>
@@ -317,34 +477,34 @@ export default function AdminUserDetail() {
         {activeTab === 'messages' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Conversations List */}
-            <div className="bg-white rounded-lg shadow-md">
-              <div className="p-4 border-b border-gray-200">
-                <h3 className="font-semibold text-gray-900">Conversații ({conversations.length})</h3>
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20">
+              <div className="p-4 border-b border-gold-500/20">
+                <h3 className="font-semibold text-white">Conversații ({conversations.length})</h3>
               </div>
-              <div className="divide-y divide-gray-200 max-h-[600px] overflow-y-auto">
+              <div className="divide-y divide-gold-500/20 max-h-[600px] overflow-y-auto">
                 {conversations.length === 0 ? (
-                  <p className="p-4 text-gray-500 text-sm">Nicio conversație</p>
+                  <p className="p-4 text-slate-400 text-sm">Nicio conversație</p>
                 ) : (
                   conversations.map((conv) => (
                     <div
                       key={conv.id}
-                      className={`p-4 cursor-pointer hover:bg-gray-50 ${
-                        selectedConversation === conv.id ? 'bg-blue-50' : ''
+                      className={`p-4 cursor-pointer hover:bg-navy-700/50 ${
+                        selectedConversation === conv.id ? 'bg-navy-700' : ''
                       }`}
                       onClick={() => loadConversationMessages(conv.id)}
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-white">
                             Conversație #{conv.id.slice(-6)}
                           </p>
                           {conv.lastMessage && (
-                            <p className="text-sm text-gray-500 truncate mt-1">
+                            <p className="text-sm text-slate-400 truncate mt-1">
                               {conv.lastMessage}
                             </p>
                           )}
                           {conv.auctionId && (
-                            <p className="text-xs text-blue-600 mt-1">
+                            <p className="text-xs text-gold-400 mt-1">
                               Licitație: {conv.auctionId.slice(-6)}
                             </p>
                           )}
@@ -354,7 +514,7 @@ export default function AdminUserDetail() {
                             e.stopPropagation();
                             handleDeleteConversation(conv.id);
                           }}
-                          className="text-red-600 hover:text-red-800 text-xs ml-2"
+                          className="text-red-400 hover:text-red-300 text-xs ml-2"
                         >
                           Șterge
                         </button>
@@ -366,19 +526,19 @@ export default function AdminUserDetail() {
             </div>
 
             {/* Messages View */}
-            <div className="lg:col-span-2 bg-white rounded-lg shadow-md">
-              <div className="p-4 border-b border-gray-200">
-                <h3 className="font-semibold text-gray-900">
+            <div className="lg:col-span-2 bg-navy-800/50 rounded-lg border border-gold-500/20">
+              <div className="p-4 border-b border-gold-500/20">
+                <h3 className="font-semibold text-white">
                   {selectedConversation ? `Mesaje Conversație` : 'Selectează o conversație'}
                 </h3>
               </div>
               <div className="p-4 max-h-[600px] overflow-y-auto">
                 {!selectedConversation ? (
-                  <p className="text-gray-500 text-center py-8">
+                  <p className="text-slate-400 text-center py-8">
                     Selectează o conversație pentru a vedea mesajele
                   </p>
                 ) : conversationMessages.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">Niciun mesaj în această conversație</p>
+                  <p className="text-slate-400 text-center py-8">Niciun mesaj în această conversație</p>
                 ) : (
                   <div className="space-y-4">
                     {conversationMessages.map((msg) => (
@@ -388,8 +548,8 @@ export default function AdminUserDetail() {
                       >
                         <div className={`max-w-[70%] rounded-lg px-4 py-2 ${
                           msg.senderId === userId
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-100 text-gray-900'
+                            ? 'bg-gold-500 text-navy-900'
+                            : 'bg-navy-700 text-white'
                         }`}>
                           <p className="text-sm font-medium mb-1">
                             {msg.senderName || 'Unknown'}
@@ -404,6 +564,213 @@ export default function AdminUserDetail() {
                     ))}
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'activity' && (
+          <div className="space-y-6">
+            {/* Activity Stats */}
+            {activityStats && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+                  <p className="text-sm text-slate-400">Total Evenimente</p>
+                  <p className="text-2xl font-bold text-white">{activityStats.totalEvents}</p>
+                </div>
+                <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+                  <p className="text-sm text-slate-400">Sesiuni</p>
+                  <p className="text-2xl font-bold text-white">{activityStats.sessionsCount}</p>
+                </div>
+                <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+                  <p className="text-sm text-slate-400">Ultima Activitate</p>
+                  <p className="text-sm font-medium text-gold-400">
+                    {activityStats.lastActivity
+                      ? formatDistanceToNow(activityStats.lastActivity, { addSuffix: true, locale: ro })
+                      : 'N/A'}
+                  </p>
+                </div>
+                <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
+                  <p className="text-sm text-slate-400">Tipuri Evenimente</p>
+                  <p className="text-2xl font-bold text-white">{Object.keys(activityStats.eventsByType).length}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Recent Activity */}
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Activitate Recentă</h3>
+              <div className="space-y-2">
+                {recentActivity.length === 0 ? (
+                  <p className="text-slate-400">Nicio activitate înregistrată</p>
+                ) : (
+                  recentActivity.map((log) => (
+                    <div key={log.id} className="bg-navy-900/50 rounded-lg p-3 border border-gold-500/10">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-mono text-gold-400">{log.eventType}</span>
+                        <span className="text-xs text-slate-400">
+                          {formatDistanceToNow(log.timestamp.toDate(), { addSuffix: true, locale: ro })}
+                        </span>
+                      </div>
+                      {log.metadata.page && (
+                        <p className="text-xs text-slate-400 mt-1">Pagină: {log.metadata.page}</p>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'controls' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Password Reset */}
+            <button
+              onClick={() => setShowControlModal('password')}
+              className="bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 p-6 rounded-lg text-left transition-colors"
+            >
+              <h3 className="font-semibold text-lg mb-2">Resetare Parolă</h3>
+              <p className="text-sm opacity-80">Trimite email de resetare parolă utilizatorului</p>
+            </button>
+
+            {/* Ban/Unban */}
+            {!isBanned ? (
+              <button
+                onClick={() => setShowControlModal('ban')}
+                className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 p-6 rounded-lg text-left transition-colors"
+              >
+                <h3 className="font-semibold text-lg mb-2">Blochează Utilizator</h3>
+                <p className="text-sm opacity-80">Blochează accesul utilizatorului la platformă</p>
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowControlModal('unban')}
+                className="bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-300 p-6 rounded-lg text-left transition-colors"
+              >
+                <h3 className="font-semibold text-lg mb-2">Deblochează Utilizator</h3>
+                <p className="text-sm opacity-80">Permite din nou accesul utilizatorului</p>
+              </button>
+            )}
+
+            {/* Change Role */}
+            <button
+              onClick={() => setShowControlModal('role')}
+              className="bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 p-6 rounded-lg text-left transition-colors"
+            >
+              <h3 className="font-semibold text-lg mb-2">Schimbă Rol</h3>
+              <p className="text-sm opacity-80">Modifică rolul utilizatorului (Admin/User)</p>
+            </button>
+
+            {/* Update Credits */}
+            <button
+              onClick={() => setShowControlModal('credits')}
+              className="bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-300 p-6 rounded-lg text-left transition-colors"
+            >
+              <h3 className="font-semibold text-lg mb-2">Actualizează Credite</h3>
+              <p className="text-sm opacity-80">Modifică numărul de credite al utilizatorului</p>
+            </button>
+
+            {/* Force Logout */}
+            <button
+              onClick={() => setShowControlModal('logout')}
+              className="bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-300 p-6 rounded-lg text-left transition-colors"
+            >
+              <h3 className="font-semibold text-lg mb-2">Deconectare Forțată</h3>
+              <p className="text-sm opacity-80">Forțează deconectarea utilizatorului</p>
+            </button>
+
+            {/* Delete User */}
+            <button
+              onClick={() => setShowControlModal('delete')}
+              className="bg-red-600/20 hover:bg-red-600/30 border border-red-600/30 text-red-300 p-6 rounded-lg text-left transition-colors"
+            >
+              <h3 className="font-semibold text-lg mb-2">Șterge Cont</h3>
+              <p className="text-sm opacity-80">Marchează contul ca șters (soft delete)</p>
+            </button>
+          </div>
+        )}
+
+        {/* Control Modal */}
+        {showControlModal && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <div className="bg-navy-800 rounded-lg border border-gold-500/30 p-6 max-w-md w-full">
+              <h2 className="text-xl font-bold text-white mb-4">
+                {showControlModal === 'password' && 'Resetare Parolă'}
+                {showControlModal === 'ban' && 'Blochează Utilizator'}
+                {showControlModal === 'unban' && 'Deblochează Utilizator'}
+                {showControlModal === 'role' && 'Schimbă Rol'}
+                {showControlModal === 'credits' && 'Actualizează Credite'}
+                {showControlModal === 'logout' && 'Deconectare Forțată'}
+                {showControlModal === 'delete' && 'Șterge Cont'}
+              </h2>
+
+              {showControlModal === 'credits' && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Număr Credite
+                  </label>
+                  <input
+                    type="number"
+                    value={newCredits}
+                    onChange={(e) => setNewCredits(parseInt(e.target.value) || 0)}
+                    className="w-full bg-navy-700 border border-gold-500/30 rounded-lg px-4 py-2 text-white"
+                  />
+                </div>
+              )}
+
+              {showControlModal === 'role' && (
+                <div className="mb-4 space-y-2">
+                  <button
+                    onClick={() => handleChangeRole('admin')}
+                    className="w-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 px-4 py-2 rounded-lg"
+                  >
+                    Setează ca Admin
+                  </button>
+                  <button
+                    onClick={() => handleChangeRole('user')}
+                    className="w-full bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 px-4 py-2 rounded-lg"
+                  >
+                    Setează ca User
+                  </button>
+                </div>
+              )}
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Motiv {showControlModal !== 'unban' && '(obligatoriu)'}
+                </label>
+                <textarea
+                  value={actionReason}
+                  onChange={(e) => setActionReason(e.target.value)}
+                  className="w-full bg-navy-700 border border-gold-500/30 rounded-lg px-4 py-2 text-white h-24"
+                  placeholder="Introdu motivul pentru această acțiune..."
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowControlModal(null);
+                    setActionReason('');
+                  }}
+                  className="flex-1 bg-navy-700 hover:bg-navy-600 text-white px-4 py-2 rounded-lg"
+                >
+                  Anulează
+                </button>
+                <button
+                  onClick={() => {
+                    if (showControlModal === 'password') handleResetPassword();
+                    else if (showControlModal === 'ban') handleBanUser();
+                    else if (showControlModal === 'unban') handleUnbanUser();
+                    else if (showControlModal === 'credits') handleUpdateCredits();
+                    else if (showControlModal === 'logout') handleForceLogout();
+                    else if (showControlModal === 'delete') handleDeleteUser();
+                  }}
+                  className="flex-1 bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg font-semibold"
+                >
+                  Confirmă
+                </button>
               </div>
             </div>
           </div>
