@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   getActivityLogs,
   subscribeToActivityLogs,
@@ -97,8 +98,16 @@ export default function ActivityLogsPage() {
   const [expandedLog, setExpandedLog] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && (!user || !user.isAdmin)) {
-      router.push('/');
+    if (!authLoading) {
+      if (!user) {
+        router.push('/login');
+      } else if (user.isAdmin === false) {
+        // Only redirect if explicitly not admin (not undefined)
+        router.push('/dashboard');
+      } else if (user.isAdmin) {
+        // User is confirmed admin, load logs
+        loadLogs();
+      }
     }
   }, [user, authLoading, router]);
 
@@ -106,7 +115,7 @@ export default function ActivityLogsPage() {
     if (user?.isAdmin) {
       loadLogs();
     }
-  }, [user, selectedCategory, selectedUserId]);
+  }, [selectedCategory, selectedUserId]);
 
   useEffect(() => {
     if (!user?.isAdmin || !realTimeEnabled) return;
@@ -199,10 +208,25 @@ export default function ActivityLogsPage() {
     return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
   };
 
-  if (authLoading || !user?.isAdmin) {
+  if (authLoading || loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
+        <p className="ml-4 text-slate-300">Se verifică permisiunile...</p>
+      </div>
+    );
+  }
+
+  if (!user?.isAdmin) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Acces Interzis</h1>
+          <p className="text-slate-300 mb-4">Nu ai permisiuni de administrator.</p>
+          <Link href="/dashboard" className="text-gold-400 hover:text-gold-300">
+            ← Înapoi la dashboard
+          </Link>
+        </div>
       </div>
     );
   }

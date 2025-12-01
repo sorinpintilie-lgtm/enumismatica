@@ -46,77 +46,79 @@ export default function HomePage() {
     <div className="bg-gradient-to-b from-navy-500 via-navy-600 to-navy-900">
       {/* Hero */}
       <section className="overflow-hidden">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-          {/* Header Badge - Centered */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#e7b73c] bg-white/5 px-4 py-2 text-xs font-semibold text-[#e7b73c] shadow-inner shadow-[#e7b73c]/40">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-20">
+          {/* Left Column - Content */}
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#e7b73c] bg-white/5 px-3 py-1 text-xs font-semibold text-[#e7b73c] shadow-inner shadow-[#e7b73c]/40">
               <span className="h-2 w-2 rounded-full bg-[#e7b73c]" aria-hidden />
               Platforma romaneasca pentru colectionari
             </div>
-          </div>
-
-          {/* Main Title - Centered */}
-          <h1 className="text-center text-4xl font-bold leading-tight text-white sm:text-5xl mb-6">
-            Colecteaza istorie cu eNumismatica
-          </h1>
-
-          {/* Description - Centered */}
-          <p className="text-center max-w-3xl mx-auto text-lg text-slate-200 mb-10">
-            Gasesti monede autentice, licitatii active si suport local pentru fiecare achizitie. Fie ca vrei sa completezi
-            o serie sau sa investesti, iti oferim context, transparenta si o experienta moderna.
-          </p>
-
-          {/* CTA Buttons - Centered */}
-          <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
-            <Link
-              href="/products"
-              className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-8 py-3.5 text-base font-semibold text-[#000940] shadow-lg shadow-[#e7b73c]/40 transition hover:bg-[#f0c955] hover:shadow-[#e7b73c]/60"
-            >
-              Vezi magazinul
-            </Link>
-            <Link
-              href="/auctions"
-              className="inline-flex items-center justify-center rounded-full border-2 border-[#e7b73c] px-8 py-3.5 text-base font-semibold text-[#e7b73c] transition hover:bg-[#e7b73c]/10"
-            >
-              Licitatii in desfasurare
-            </Link>
-          </div>
-
-          {/* Features Grid - Symmetrical 3 columns */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
-            <div className="flex flex-col items-center text-center p-6 rounded-2xl border border-gold-500/20 bg-navy-700/50 backdrop-blur-sm transition hover:border-gold-500/40 hover:bg-navy-700/70">
-              <div className="h-12 w-12 rounded-full bg-gold-500/20 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-base font-semibold text-white mb-2">Autentificare rapida</h3>
-              <p className="text-sm text-slate-300">Acces instant la cont si licitatii</p>
+            <h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl">
+              Colecteaza istorie cu eNumismatica
+            </h1>
+            <p className="max-w-2xl text-lg text-slate-200">
+              Gasesti monede autentice, licitatii active si suport local pentru fiecare achizitie. Fie ca vrei sa completezi
+              o serie sau sa investesti, iti oferim context, transparenta si o experienta moderna.
+            </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/products"
+                className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-6 py-3 text-sm font-semibold text-[#000940] shadow-lg shadow-[#e7b73c]/40 transition hover:bg-[#f0c955]"
+              >
+                Vezi magazinul
+              </Link>
+              <Link
+                href="/auctions"
+                className="inline-flex items-center justify-center rounded-full border-2 border-[#e7b73c] px-6 py-3 text-sm font-semibold text-[#e7b73c] transition hover:bg-[#e7b73c]/10"
+              >
+                Licitatii in desfasurare
+              </Link>
             </div>
 
-            <div className="flex flex-col items-center text-center p-6 rounded-2xl border border-gold-500/20 bg-navy-700/50 backdrop-blur-sm transition hover:border-gold-500/40 hover:bg-navy-700/70">
-              <div className="h-12 w-12 rounded-full bg-gold-500/20 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
+            {/* Features - Grid Layout */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+              <div className="flex items-start gap-3 p-4 rounded-xl border border-gold-500/20 bg-navy-700/30 backdrop-blur-sm">
+                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gold-500/20 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white">Autentificare rapida</h3>
+                  <p className="text-xs text-slate-300 mt-1">Acces instant la cont si licitatii</p>
+                </div>
               </div>
-              <h3 className="text-base font-semibold text-white mb-2">Notificari live pentru licitatii</h3>
-              <p className="text-sm text-slate-300">Alerte instant pentru oferte noi</p>
-            </div>
 
-            <div className="flex flex-col items-center text-center p-6 rounded-2xl border border-gold-500/20 bg-navy-700/50 backdrop-blur-sm transition hover:border-gold-500/40 hover:bg-navy-700/70">
-              <div className="h-12 w-12 rounded-full bg-gold-500/20 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+              <div className="flex items-start gap-3 p-4 rounded-xl border border-gold-500/20 bg-navy-700/30 backdrop-blur-sm">
+                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gold-500/20 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white">Notificari live pentru licitatii</h3>
+                  <p className="text-xs text-slate-300 mt-1">Alerte instant pentru oferte noi</p>
+                </div>
               </div>
-              <h3 className="text-base font-semibold text-white mb-2">Comunitate de colectionari</h3>
-              <p className="text-sm text-slate-300">Conecteaza-te cu pasionati</p>
+
+              <div className="flex items-start gap-3 p-4 rounded-xl border border-gold-500/20 bg-navy-700/30 backdrop-blur-sm">
+                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gold-500/20 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white">Comunitate de colectionari</h3>
+                  <p className="text-xs text-slate-300 mt-1">Conecteaza-te cu pasionati</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Hero Image - Centered */}
-          <div className="relative max-w-2xl mx-auto">
+          {/* Right Column - Image */}
+          <div className="relative">
             <div
               className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#e7b73c]/40 via-transparent to-transparent blur-3xl"
               aria-hidden
