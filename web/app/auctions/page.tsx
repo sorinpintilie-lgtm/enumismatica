@@ -126,9 +126,6 @@ export default function AuctionsPage() {
           return a.endTime.getTime() - b.endTime.getTime();
         case 'newly-listed':
           return b.createdAt.getTime() - a.createdAt.getTime();
-        case 'distance-nearest':
-          // For now, sort by ending soonest (distance not implemented)
-          return a.endTime.getTime() - b.endTime.getTime();
         default:
           return a.endTime.getTime() - b.endTime.getTime();
       }
