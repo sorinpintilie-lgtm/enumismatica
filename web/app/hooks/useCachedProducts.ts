@@ -6,9 +6,22 @@ import { Product } from 'shared/types';
 // Default fields for product list view - optimize for performance
 const DEFAULT_PRODUCT_FIELDS = ['name', 'images', 'price', 'createdAt', 'updatedAt'];
 
-export function useCachedProducts(ownerId?: string, pageSize: number = 20, fields: string[] = DEFAULT_PRODUCT_FIELDS) {
+/**
+ * Cached products hook optimized for homepage and lightweight listings.
+ * The `enabled` flag lets us avoid hitting Firestore when the user
+ * is not authenticated (e.g. guests on homepage).
+ */
+export function useCachedProducts(
+  ownerId?: string,
+  pageSize: number = 20,
+  fields?: string[],
+  enabled: boolean = true
+) {
+  // Normalize fields so callers can pass undefined and still get defaults
+  const selectedFields = fields ?? DEFAULT_PRODUCT_FIELDS;
+
   return useQuery({
-    queryKey: ['products', ownerId, pageSize, fields],
+    queryKey: ['products', ownerId, pageSize, selectedFields],
     queryFn: async () => {
       let q = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(pageSize));
 
@@ -24,17 +37,17 @@ export function useCachedProducts(ownerId?: string, pageSize: number = 20, field
         const productData: any = { id: doc.id };
 
         // Only include requested fields for performance
-        fields.forEach(field => {
+        selectedFields.forEach(field => {
           if (data[field] !== undefined) {
             productData[field] = data[field];
           }
         });
 
         // Always include dates for proper typing
-        if (fields.includes('createdAt')) {
+        if (selectedFields.includes('createdAt')) {
           productData.createdAt = data.createdAt?.toDate() || new Date();
         }
-        if (fields.includes('updatedAt')) {
+        if (selectedFields.includes('updatedAt')) {
           productData.updatedAt = data.updatedAt?.toDate() || new Date();
         }
 
@@ -43,6 +56,7 @@ export function useCachedProducts(ownerId?: string, pageSize: number = 20, field
 
       return productsData;
     },
+    enabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });

@@ -12,23 +12,24 @@ const SITE_ASSETS_COLLECTION = 'siteAssets';
  */
 export async function getSiteAsset(name: string): Promise<SiteAsset | null> {
   try {
-    const q = query(
-      collection(db, SITE_ASSETS_COLLECTION),
-      where('name', '==', name),
-      where('active', '==', true)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    
-    if (querySnapshot.empty) {
+    // Fast path: we use the asset "name" as the Firestore document ID,
+    // so we can read it directly instead of running a query.
+    const docRef = doc(db, SITE_ASSETS_COLLECTION, name);
+    const snapshot = await getDoc(docRef);
+
+    if (!snapshot.exists()) {
       return null;
     }
-    
-    const doc = querySnapshot.docs[0];
-    const data = doc.data();
-    
+
+    const data = snapshot.data();
+
+    // Respect the "active" flag if present
+    if (data.active === false) {
+      return null;
+    }
+
     return {
-      id: doc.id,
+      id: snapshot.id,
       name: data.name,
       description: data.description,
       imageUrl: data.imageUrl,

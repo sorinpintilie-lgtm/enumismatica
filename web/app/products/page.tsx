@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useMemo, useEffect, Suspense } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/ProductCard';
 import FilterBar, { FilterOptions } from '../components/FilterBar';
+import { useAuth } from '../context/AuthContext';
 
-function ProductsPageContent() {
+function ProductsListContent() {
   // Fetch all fields needed for filtering and display
   const { products, loading, error } = useProducts(
     undefined, // ownerId
@@ -93,19 +95,14 @@ function ProductsPageContent() {
     filtered.sort((a, b) => {
       switch (filters.sortBy) {
         case 'best-match':
-          // Sort by relevance (newest first as default)
+          // Relevanță: implicit cele mai noi produse primele
           return b.createdAt.getTime() - a.createdAt.getTime();
         case 'price-asc':
           return a.price - b.price;
         case 'price-desc':
           return b.price - a.price;
-        case 'ending-soonest':
-          // For products, sort by newest (no ending time)
-          return b.createdAt.getTime() - a.createdAt.getTime();
         case 'newly-listed':
-          return b.createdAt.getTime() - a.createdAt.getTime();
-        case 'distance-nearest':
-          // For now, sort by newest (distance not implemented)
+          // Adăugate recent: identic cu cele mai noi primele
           return b.createdAt.getTime() - a.createdAt.getTime();
         default:
           return b.createdAt.getTime() - a.createdAt.getTime();
@@ -131,9 +128,9 @@ function ProductsPageContent() {
     <div className="container mx-auto px-4 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#e7b73c] mb-2">Catalog Produse</h1>
+        <h1 className="text-4xl font-bold text-[#e7b73c] mb-2">Catalog</h1>
         <p className="text-slate-200">
-          Explorează colecția noastră de {products.length} articole numismatice
+          Explorează colecția noastră de {products.length} articole
         </p>
       </div>
 
@@ -222,16 +219,65 @@ function ProductsPageContent() {
   );
 }
 
-export default function ProductsPage() {
-  return (
-    <Suspense fallback={
+function ProductsPageContent() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
-          <p className="ml-4 text-slate-300">Se încarcă produsele...</p>
+          <p className="ml-4 text-slate-300">Se verifică sesiunea de utilizator...</p>
         </div>
       </div>
-    }>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="max-w-xl rounded-2xl border border-[#e7b73c]/40 bg-navy-900/80 p-8 text-center shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
+          <h1 className="text-2xl font-bold text-white mb-3">
+            Catalogul este disponibil doar pentru utilizatori autentificați
+          </h1>
+          <p className="text-sm text-slate-300 mb-5">
+            Pentru a vedea produsele, licitațiile și detaliile pieselor, trebuie să te autentifici în contul tău. Fără
+            autentificare poți accesa doar pagina principală și informațiile generale.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-5 py-2.5 text-sm font-semibold text-[#000940] shadow-lg shadow-[#e7b73c]/50 hover:bg-[#f0c955] transition"
+            >
+              Autentificare
+            </Link>
+            <Link
+              href="/register"
+              className="inline-flex items-center justify-center rounded-full border border-[#e7b73c] px-5 py-2.5 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition"
+            >
+              Creează cont
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <ProductsListContent />;
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
+            <p className="ml-4 text-slate-300">Se încarcă produsele...</p>
+          </div>
+        </div>
+      }
+    >
       <ProductsPageContent />
     </Suspense>
   );

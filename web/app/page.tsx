@@ -5,6 +5,7 @@ import LazyImage from './components/LazyImage';
 import ProductCard from './components/ProductCard';
 import { useCachedProducts } from './hooks/useCachedProducts';
 import { useSiteAsset } from './hooks/useSiteAsset';
+import { useAuth } from './context/AuthContext';
 
 const highlights = [
   {
@@ -37,7 +38,8 @@ const steps = [
 ];
 
 export default function HomePage() {
-  const { data: products = [], isLoading: productsLoading } = useCachedProducts(undefined, 8);
+  const { user } = useAuth();
+  const { data: products = [], isLoading: productsLoading } = useCachedProducts(undefined, 8, undefined, !!user);
   const { data: heroAsset, isLoading: heroLoading } = useSiteAsset('homepage-hero');
 
   return (
@@ -70,7 +72,6 @@ export default function HomePage() {
               >
                 Licitatii in desfasurare
               </Link>
-              <span className="text-sm text-slate-300">Evaluari rapide si livrare asigurata</span>
             </div>
             <div className="flex flex-wrap gap-6 text-sm text-slate-300">
               <div className="flex items-center gap-2">
@@ -145,30 +146,60 @@ export default function HomePage() {
         <div className="mb-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gold-400 mb-2">Catalog</p>
           <h2 className="text-3xl font-bold text-white mb-3">Ultimele Produse</h2>
-          <p className="text-slate-300 max-w-2xl mx-auto">Monede recent adăugate în catalog, verificate și gata de livrare</p>
+          <p className="text-slate-300 max-w-2xl mx-auto">
+            Monede recent adăugate în catalog, verificate și gata de livrare. Vizualizarea detaliilor și a licitațiilor este
+            disponibilă doar utilizatorilor autentificați.
+          </p>
         </div>
-        {productsLoading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-8">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-72 sm:h-80 bg-slate-100 rounded-2xl animate-pulse" />
-            ))}
-          </div>
+
+        {user ? (
+          <>
+            {productsLoading ? (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-8">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="h-72 sm:h-80 bg-slate-100 rounded-2xl animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-8">
+                {products.slice(0, 8).map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
+            <div className="text-center">
+              <Link
+                href="/products"
+                className="inline-flex items-center justify-center rounded-full border-2 border-[#e7b73c] bg-[#e7b73c] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#e7b73c]/40 transition hover:bg-[#f0c955] hover:border-[#f0c955]"
+              >
+                Vezi toate produsele
+                <span className="ml-2" aria-hidden>→</span>
+              </Link>
+            </div>
+          </>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-8">
-            {products.slice(0, 8).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          <div className="mx-auto max-w-xl rounded-2xl border border-[#e7b73c]/40 bg-navy-900/70 p-6 text-center shadow-[0_18px_45px_rgba(0,0,0,0.8)]">
+            <h3 className="text-lg font-semibold text-white mb-2">Autentifică-te pentru a vedea catalogul</h3>
+            <p className="text-sm text-slate-300 mb-4">
+              Pentru a accesa produsele, licitațiile și detaliile pieselor, este necesar un cont. Fără autentificare poți vedea
+              doar pagina de start și informațiile generale.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-5 py-2.5 text-sm font-semibold text-[#000940] shadow-lg shadow-[#e7b73c]/50 hover:bg-[#f0c955] transition"
+              >
+                Autentificare
+              </Link>
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center rounded-full border border-[#e7b73c] px-5 py-2.5 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition"
+              >
+                Creează cont
+              </Link>
+            </div>
           </div>
         )}
-        <div className="text-center">
-          <Link
-            href="/products"
-            className="inline-flex items-center justify-center rounded-full border-2 border-[#e7b73c] bg-[#e7b73c] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#e7b73c]/40 transition hover:bg-[#f0c955] hover:border-[#f0c955]"
-          >
-            Vezi toate produsele
-            <span className="ml-2" aria-hidden>→</span>
-          </Link>
-        </div>
       </section>
 
 

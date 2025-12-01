@@ -6,7 +6,17 @@ import { Auction } from 'shared/types';
 // Default fields for auction list view - optimize for performance
 const DEFAULT_AUCTION_FIELDS = ['productId', 'startTime', 'endTime', 'reservePrice', 'currentBid', 'currentBidderId', 'status', 'createdAt', 'updatedAt'];
 
-export function useAuctions(status?: 'active' | 'ended' | 'cancelled', pageSize: number = 20, fields: string[] = DEFAULT_AUCTION_FIELDS) {
+/**
+ * Live auctions hook used on auctions pages.
+ * The `enabled` flag allows us to skip attaching Firestore listeners
+ * when access is locked (e.g. user not authenticated).
+ */
+export function useAuctions(
+  status?: 'active' | 'ended' | 'cancelled',
+  pageSize: number = 20,
+  fields: string[] = DEFAULT_AUCTION_FIELDS,
+  enabled: boolean = true
+) {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,6 +25,15 @@ export function useAuctions(status?: 'active' | 'ended' | 'cancelled', pageSize:
   const unsubscribeRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
+    // If disabled (e.g. user not authenticated), do not attach any listeners.
+    if (!enabled) {
+      setAuctions([]);
+      setLoading(false);
+      setError(null);
+      setHasMore(false);
+      return;
+    }
+
     // Safety check: ensure db is initialized
     if (!db) {
       console.error('Firestore db is not initialized');
@@ -104,10 +123,10 @@ export function useAuctions(status?: 'active' | 'ended' | 'cancelled', pageSize:
       setError(error instanceof Error ? error.message : 'Unknown error');
       setLoading(false);
     }
-  }, [status, pageSize, JSON.stringify(fields)]);
+   }, [status, pageSize, JSON.stringify(fields), enabled]);
 
   const loadMore = useCallback(() => {
-    if (!hasMore || !lastVisible || loading || !db) return;
+    if (!enabled || !hasMore || !lastVisible || loading || !db) return;
 
     setLoading(true);
     
@@ -174,7 +193,7 @@ export function useAuctions(status?: 'active' | 'ended' | 'cancelled', pageSize:
       setError(error instanceof Error ? error.message : 'Unknown error');
       setLoading(false);
     }
-  }, [hasMore, lastVisible, loading, status, pageSize, fields]);
+   }, [hasMore, lastVisible, loading, status, pageSize, fields, enabled]);
 
   return { auctions, loading, error, hasMore, loadMore };
 }

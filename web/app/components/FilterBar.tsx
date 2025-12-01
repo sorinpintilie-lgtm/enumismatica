@@ -12,7 +12,10 @@ export interface FilterOptions {
   metal: string;
   rarity: string;
   grade: string;
-  sortBy: 'best-match' | 'price-asc' | 'price-desc' | 'ending-soonest' | 'newly-listed' | 'distance-nearest';
+  // Common sort options used by both products and auctions.
+  // Products will only expose a subset (best-match, price-asc/desc, newly-listed),
+  // while auctions can also expose "ending-soonest".
+  sortBy: 'best-match' | 'price-asc' | 'price-desc' | 'ending-soonest' | 'newly-listed';
 }
 
 interface FilterBarProps {
@@ -133,12 +136,22 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
             onChange={(e) => handleFilterUpdate('sortBy', e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-[#e7b73c]/40 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
           >
-            <option value="best-match">Cea Mai Bună Potrivire</option>
-            <option value="price-asc">Preț: Crescător + Transport</option>
-            <option value="price-desc">Preț: Descrescător + Transport</option>
-            <option value="ending-soonest">Se Terminã Cel Mai Repede</option>
-            <option value="newly-listed">Listate Recent</option>
-            <option value="distance-nearest">Distanță: Cel Mai Apropiat</option>
+            {showAuctionFilters ? (
+              <>
+                <option value="best-match">Relevanță</option>
+                <option value="price-asc">Preț: Crescător</option>
+                <option value="price-desc">Preț: Descrescător</option>
+                <option value="ending-soonest">Se termină cel mai repede</option>
+                <option value="newly-listed">Adăugate recent</option>
+              </>
+            ) : (
+              <>
+                <option value="best-match">Relevanță</option>
+                <option value="price-asc">Preț: Crescător</option>
+                <option value="price-desc">Preț: Descrescător</option>
+                <option value="newly-listed">Adăugate recent</option>
+              </>
+            )}
           </select>
         </div>
 

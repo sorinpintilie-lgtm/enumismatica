@@ -7,7 +7,17 @@ import { Product } from 'shared/types';
 // Include boost fields so we can prioritize boosted products in listings
 const DEFAULT_PRODUCT_FIELDS = ['name', 'images', 'price', 'createdAt', 'updatedAt', 'boostExpiresAt', 'boostedAt'];
 
-export function useProducts(ownerId?: string, pageSize: number = 20, fields: string[] = DEFAULT_PRODUCT_FIELDS) {
+/**
+ * Live products hook used on catalog and other authenticated pages.
+ * The `enabled` flag lets us avoid opening Firestore listeners when access
+ * is locked (e.g. user not authenticated).
+ */
+export function useProducts(
+  ownerId?: string,
+  pageSize: number = 20,
+  fields: string[] = DEFAULT_PRODUCT_FIELDS,
+  enabled: boolean = true
+) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,6 +26,15 @@ export function useProducts(ownerId?: string, pageSize: number = 20, fields: str
   const unsubscribeRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
+    // If this hook is disabled (e.g. user not authenticated), do not attach any listeners.
+    if (!enabled) {
+      setProducts([]);
+      setLoading(false);
+      setError(null);
+      setHasMore(false);
+      return;
+    }
+
     // Safety check: ensure db is initialized
     if (!db) {
       console.error('Firestore db is not initialized');
@@ -95,10 +114,10 @@ export function useProducts(ownerId?: string, pageSize: number = 20, fields: str
         unsubscribeRef.current = null;
       }
     };
-  }, [ownerId, pageSize, JSON.stringify(fields)]);
+  }, [ownerId, pageSize, JSON.stringify(fields), enabled]);
 
   const loadMore = useCallback(() => {
-    if (!hasMore || !lastVisible || loading || !db) return;
+    if (!enabled || !hasMore || !lastVisible || loading || !db) return;
 
     setLoading(true);
     
@@ -160,7 +179,7 @@ export function useProducts(ownerId?: string, pageSize: number = 20, fields: str
 
     // Clean up the pagination listener after it fires once
     return () => unsubscribe();
-  }, [hasMore, lastVisible, loading, ownerId, pageSize, fields]);
+  }, [hasMore, lastVisible, loading, ownerId, pageSize, fields, enabled]);
 
   return { products, loading, error, hasMore, loadMore };
 }
