@@ -8,6 +8,9 @@ import { useProducts } from '../hooks/useProducts';
 import { useAuctions } from '../hooks/useAuctions';
 import Link from 'next/link';
 import { getUserCredits, boostProductWithCredits } from 'shared/creditService';
+import { getUserAutoBidsForUser, cancelAutoBid } from 'shared/auctionService';
+import { formatRON } from '../utils/currency';
+import type { AutoBid, Auction } from 'shared/types';
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -22,6 +25,8 @@ export default function Dashboard() {
   const [credits, setCredits] = useState<number | null>(null);
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [creditsError, setCreditsError] = useState<string | null>(null);
+  const [autoBids, setAutoBids] = useState<{ autoBid: AutoBid; auction: Auction | null }[]>([]);
+  const [autoBidsLoading, setAutoBidsLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -59,6 +64,39 @@ export default function Dashboard() {
     };
   }, [user?.uid]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadAutoBids = async () => {
+      if (!user?.uid) {
+        if (isMounted) {
+          setAutoBids([]);
+        }
+        return;
+      }
+
+      setAutoBidsLoading(true);
+      try {
+        const data = await getUserAutoBidsForUser(user.uid);
+        if (isMounted) {
+          setAutoBids(data);
+        }
+      } catch (err) {
+        console.error('Failed to load user auto-bids', err);
+      } finally {
+        if (isMounted) {
+          setAutoBidsLoading(false);
+        }
+      }
+    };
+
+    loadAutoBids();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.uid]);
+
   const handleBoostProduct = async (productId: string) => {
     if (!user?.uid) return;
     try {
@@ -67,6 +105,23 @@ export default function Dashboard() {
     } catch (err: any) {
       console.error('Failed to boost product', err);
       alert(err?.message || 'Nu s-a putut aplica boost-ul pentru acest produs.');
+    }
+  };
+
+  const handleCancelAutoBidFromDashboard = async (auctionId: string) => {
+    if (!user?.uid) return;
+
+    const confirmed = window.confirm(
+      'Ești sigur că vrei să anulezi licitarea automată pentru această licitație?',
+    );
+    if (!confirmed) return;
+
+    try {
+      await cancelAutoBid(auctionId, user.uid);
+      setAutoBids((prev) => prev.filter((entry) => entry.autoBid.auctionId !== auctionId));
+    } catch (err: any) {
+      console.error('Failed to cancel auto-bid', err);
+      alert(err?.message || 'Nu s-a putut anula licitarea automată pentru această licitație.');
     }
   };
 
@@ -316,13 +371,17 @@ export default function Dashboard() {
             {userAuctions.length === 0 ? (
               <p className="text-slate-200">Nicio licitație activă.</p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 mb-4">
                 {userAuctions.slice(0, 5).map((auction) => (
-                  <div key={auction.id} className="flex justify-between items-center p-3 bg-navy-900/40 rounded-xl border border-gold-500/20">
+                  <div
+                    key={auction.id}
+                    className="flex justify-between items-center p-3 bg-navy-900/40 rounded-xl border border-gold-500/20"
+                  >
                     <div>
                       <p className="font-medium text-white">Licitație #{auction.id.slice(-6)}</p>
                       <p className="text-sm text-gold-300 font-semibold">
-                        Licitație curentă: ${auction.currentBid?.toFixed(2) || auction.reservePrice.toFixed(2)}
+                        Licitație curentă:{' '}
+                        {formatRON(auction.currentBid ?? auction.reservePrice)}
                       </p>
                     </div>
                     <Link
@@ -335,6 +394,71 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
+
+            <div className="mt-4 border-t border-gold-500/30 pt-4">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Licitările mele automate
+              </h3>
+              {autoBidsLoading ? (
+                <div className="flex items-center gap-2 text-slate-200 text-sm">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gold-500"></div>
+                  <span>Se încarcă licitările automate...</span>
+                </div>
+              ) : autoBids.length === 0 ? (
+                <p className="text-slate-200 text-sm">
+                  Nu ai setat încă nicio licitare automată.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {autoBids.slice(0, 5).map(({ autoBid, auction }) => (
+                    <div
+                      key={`${autoBid.auctionId}-${autoBid.id}`}
+                      className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 p-3 bg-navy-900/40 rounded-xl border border-gold-500/20"
+                    >
+                      <div>
+                        <p className="font-medium text-white">
+                          Licitație #{auction ? auction.id.slice(-6) : autoBid.auctionId.slice(-6)}
+                        </p>
+                        <p className="text-sm text-gold-300 font-semibold">
+                          Până la: {formatRON(autoBid.maxAmount)}
+                        </p>
+                        {auction && (
+                          <p className="text-xs text-slate-300">
+                            Status:{' '}
+                            <span className="font-semibold">
+                              {auction.status.toUpperCase()}
+                            </span>{' '}
+                            &mdash; se încheie la {auction.endTime.toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {auction && (
+                          <Link
+                            href={`/auctions/${auction.id}`}
+                            className="text-gold-300 hover:text-gold-200 text-xs font-semibold"
+                          >
+                            Vezi licitația
+                          </Link>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleCancelAutoBidFromDashboard(autoBid.auctionId)}
+                          className="inline-flex items-center justify-center rounded-full border border-red-500/70 px-3 py-1.5 text-xs font-semibold text-red-200 hover:bg-red-500/10 transition-colors"
+                        >
+                          Anulează
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {autoBids.length > 5 && (
+                    <p className="text-xs text-slate-300">
+                      Și încă {autoBids.length - 5} licitări automate active...
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

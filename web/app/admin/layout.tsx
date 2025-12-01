@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Admin - E-numismatica',
-  description: 'Panou de administrare',
+  title: 'Admin - eNumismatica',
+  description: 'Panou de administrare eNumismatica',
 }
 
 export default function AdminLayout({

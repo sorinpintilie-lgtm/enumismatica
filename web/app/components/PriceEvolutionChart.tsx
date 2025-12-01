@@ -69,12 +69,12 @@ export default function PriceEvolutionChart({ itemId, type, title }: PriceEvolut
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="panel-dark p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">
           {title || 'Evoluție Preț'}
         </h3>
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold-500"></div>
         </div>
       </div>
     );
@@ -82,11 +82,11 @@ export default function PriceEvolutionChart({ itemId, type, title }: PriceEvolut
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="panel-dark p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">
           {title || 'Evoluție Preț'}
         </h3>
-        <div className="text-center text-red-600 p-4">
+        <div className="text-center text-red-400 p-4">
           <p>{error}</p>
         </div>
       </div>
@@ -95,16 +95,16 @@ export default function PriceEvolutionChart({ itemId, type, title }: PriceEvolut
 
   if (priceHistory.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="panel-dark p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">
           {title || 'Evoluție Preț'}
         </h3>
-        <div className="text-center text-gray-500 p-8">
-          <svg className="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="text-center text-slate-300 p-8">
+          <svg className="w-16 h-16 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
           </svg>
           <p className="text-sm">Nu există date despre evoluția prețului</p>
-          <p className="text-xs mt-1">
+          <p className="text-xs mt-1 text-slate-400">
             {type === 'auction' ? 'Datele vor apărea pe măsură ce sunt plasate licitări' : 'Adaugă intrări în istoricul prețurilor'}
           </p>
         </div>
@@ -127,14 +127,14 @@ export default function PriceEvolutionChart({ itemId, type, title }: PriceEvolut
     priceHistory[0].price > 0 ? ((priceChange / priceHistory[0].price) * 100) : 0;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="panel-dark p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-white">
           {title || 'Evoluție Preț'}
         </h3>
         <div className="text-right">
-          <p className="text-sm text-gray-600">Schimbare</p>
-          <p className={`text-lg font-bold ${priceChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <p className="text-sm text-slate-300">Schimbare</p>
+          <p className={`text-lg font-bold ${priceChange >= 0 ? 'text-emerald-300' : 'text-red-400'}`}>
             {priceChange >= 0 ? '+' : ''}{formatRON(priceChange)} ({priceChangePercent >= 0 ? '+' : ''}{priceChangePercent.toFixed(1)}%)
           </p>
         </div>
@@ -143,21 +143,21 @@ export default function PriceEvolutionChart({ itemId, type, title }: PriceEvolut
       {/* Stats Row */}
       {stats && (
         <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-600 mb-1">Curent</p>
-            <p className="text-lg font-bold text-gray-900">{formatRON(stats.currentPrice)}</p>
+          <div className="text-center p-3 rounded-lg bg-navy-900/60 border border-gold-500/20">
+            <p className="text-xs text-slate-300 mb-1">Curent</p>
+            <p className="text-lg font-bold text-white">{formatRON(stats.currentPrice)}</p>
           </div>
-          <div className="text-center p-3 bg-green-50 rounded-lg">
-            <p className="text-xs text-gray-600 mb-1">Maxim</p>
-            <p className="text-lg font-bold text-green-600">{formatRON(stats.highestPrice)}</p>
+          <div className="text-center p-3 rounded-lg bg-emerald-900/40 border border-emerald-400/40">
+            <p className="text-xs text-slate-300 mb-1">Maxim</p>
+            <p className="text-lg font-bold text-emerald-300">{formatRON(stats.highestPrice)}</p>
           </div>
-          <div className="text-center p-3 bg-red-50 rounded-lg">
-            <p className="text-xs text-gray-600 mb-1">Minim</p>
-            <p className="text-lg font-bold text-red-600">{formatRON(stats.lowestPrice)}</p>
+          <div className="text-center p-3 rounded-lg bg-red-900/40 border border-red-500/50">
+            <p className="text-xs text-slate-300 mb-1">Minim</p>
+            <p className="text-lg font-bold text-red-300">{formatRON(stats.lowestPrice)}</p>
           </div>
-          <div className="text-center p-3 bg-blue-50 rounded-lg">
-            <p className="text-xs text-gray-600 mb-1">Mediu</p>
-            <p className="text-lg font-bold text-blue-600">{formatRON(stats.averagePrice)}</p>
+          <div className="text-center p-3 rounded-lg bg-blue-900/40 border border-blue-400/40">
+            <p className="text-xs text-slate-300 mb-1">Mediu</p>
+            <p className="text-lg font-bold text-blue-300">{formatRON(stats.averagePrice)}</p>
           </div>
         </div>
       )}
@@ -168,27 +168,28 @@ export default function PriceEvolutionChart({ itemId, type, title }: PriceEvolut
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#e7b73c" stopOpacity={0.85}/>
+                <stop offset="95%" stopColor="#e7b73c" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis 
-              dataKey="formattedDate" 
-              tick={{ fontSize: 12 }}
-              stroke="#6b7280"
+            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+            <XAxis
+              dataKey="formattedDate"
+              tick={{ fontSize: 12, fill: '#e5e7eb' }}
+              stroke="#94a3b8"
             />
-            <YAxis 
-              tick={{ fontSize: 12 }}
-              stroke="#6b7280"
+            <YAxis
+              tick={{ fontSize: 12, fill: '#e5e7eb' }}
+              stroke="#94a3b8"
               tickFormatter={(value) => `${value} RON`}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#fff',
-                border: '1px solid #e5e7eb',
+                backgroundColor: '#020617',
+                border: '1px solid #334155',
                 borderRadius: '0.5rem',
                 padding: '0.75rem',
+                color: '#e5e7eb',
               }}
               formatter={(value: number) => [formatRON(value), 'Preț']}
               labelFormatter={(label, payload) => {
@@ -198,10 +199,10 @@ export default function PriceEvolutionChart({ itemId, type, title }: PriceEvolut
                 return label;
               }}
             />
-            <Area 
-              type="monotone" 
-              dataKey="price" 
-              stroke="#3b82f6" 
+            <Area
+              type="monotone"
+              dataKey="price"
+              stroke="#e7b73c"
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorPrice)"
@@ -211,11 +212,11 @@ export default function PriceEvolutionChart({ itemId, type, title }: PriceEvolut
       </div>
 
       {/* Legend */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <p className="text-xs text-gray-600 mb-2">Surse date:</p>
+      <div className="mt-4 pt-4 border-t border-gold-500/20">
+        <p className="text-xs text-slate-300 mb-2">Surse date:</p>
         <div className="flex flex-wrap gap-2">
           {Array.from(new Set(priceHistory.map(h => h.source))).map((source) => (
-            <span key={source} className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded">
+            <span key={source} className="text-xs px-2 py-1 bg-navy-900/70 text-slate-200 border border-gold-500/20 rounded">
               {source === 'auction_bid' ? '🔨 Licitare' :
                source === 'manual' ? '✏️ Manual' :
                source === 'market_update' ? '📈 Piață' :
@@ -223,7 +224,7 @@ export default function PriceEvolutionChart({ itemId, type, title }: PriceEvolut
             </span>
           ))}
         </div>
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-slate-400 mt-2">
           {priceHistory.length} {priceHistory.length === 1 ? 'intrare' : 'intrări'} în istoric
         </p>
       </div>

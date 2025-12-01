@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Despre noi - E-numismatica',
-  description: 'Informații despre platforma E-numismatica',
+  title: 'Despre noi - eNumismatica',
+  description: 'Informații despre platforma eNumismatica',
 }
 
 export default function AboutLayout({

@@ -7,6 +7,7 @@ import { placeBid } from 'shared/auctionService';
 import { useAuth } from '../context/AuthContext';
 import { useProduct } from '../hooks/useProducts';
 import { formatRON } from '../utils/currency';
+import { useToast } from './ToastProvider';
 
 interface AuctionCardProps {
   auction: Auction;
@@ -45,28 +46,55 @@ function AuctionCard({ auction }: AuctionCardProps) {
   const { user } = useAuth();
   const [bidLoading, setBidLoading] = useState(false);
   const { product } = useProduct(auction.productId);
+  const { showToast } = useToast();
+
+  const isUserHighestBidder = !!user && auction.currentBidderId === user.uid;
 
   const handleBid = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+
+    if (!user) {
+      showToast({
+        type: 'error',
+        title: 'Autentificare necesară',
+        message: 'Trebuie să te autentifici pentru a plasa o licitație.',
+      });
+      return;
+    }
 
     setBidLoading(true);
     try {
       const amount = parseFloat(bidAmount);
       await placeBid(auction.id, amount, user.uid);
       setBidAmount('');
+      showToast({
+        type: 'success',
+        title: 'Licitație plasată',
+        message: 'Oferta ta a fost înregistrată. Dacă ești licitatorul cu oferta cea mai mare, vei vedea acest lucru evidențiat.',
+      });
     } catch (error) {
       console.error('Failed to place bid:', error);
+      const message =
+        error instanceof Error ? error.message : 'A apărut o eroare la plasarea licitației.';
+      showToast({
+        type: 'error',
+        title: 'Eroare la licitare',
+        message,
+      });
     } finally {
       setBidLoading(false);
     }
-  }, [auction.id, bidAmount, user]);
+  }, [auction.id, bidAmount, user, showToast]);
 
   const isEnded = new Date() > auction.endTime;
   const currentBid = auction.currentBid || auction.reservePrice;
 
   return (
-    <div className="group h-full flex flex-col bg-gradient-to-br from-navy-600 via-navy-800 to-navy-950 rounded-2xl border border-[#e7b73c]/40 shadow-[0_18px_55px_rgba(0,0,0,0.9)] overflow-hidden hover:border-[#e7b73c] hover:shadow-[0_26px_70px_rgba(231,183,60,0.55)] transition-all duration-300">
+    <div
+      className={`group h-full flex flex-col bg-gradient-to-br from-navy-600 via-navy-800 to-navy-950 rounded-2xl border border-[#e7b73c]/40 shadow-[0_18px_55px_rgba(0,0,0,0.9)] overflow-hidden hover:border-[#e7b73c] hover:shadow-[0_26px_70px_rgba(231,183,60,0.55)] transition-all duration-300 ${
+        isUserHighestBidder ? 'ring-2 ring-emerald-400/80 ring-offset-2 ring-offset-navy-900' : ''
+      }`}
+    >
       <div className="relative aspect-[4/3] bg-white">
         {product && product.images && product.images.length > 0 ? (
           <img
@@ -103,6 +131,19 @@ function AuctionCard({ auction }: AuctionCardProps) {
           <p className="text-2xl font-extrabold text-[#e7b73c] drop-shadow-[0_0_18px_rgba(231,183,60,0.6)]">
             {formatRON(currentBid)}
           </p>
+          {user && (
+            <p
+              className={`mt-1 text-xs font-medium ${
+                isUserHighestBidder ? 'text-emerald-300' : 'text-slate-400'
+              }`}
+            >
+              {isUserHighestBidder
+                ? 'În acest moment ești licitatorul cu oferta cea mai mare pentru această licitație.'
+                : auction.currentBidderId
+                ? 'În acest moment alt utilizator are oferta cea mai mare.'
+                : 'Încă nu există oferte peste prețul de rezervă.'}
+            </p>
+          )}
         </div>
 
         <div className="mb-2">

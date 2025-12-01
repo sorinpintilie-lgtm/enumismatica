@@ -9,7 +9,7 @@ export default function AboutPage() {
       <div className="bg-gradient-to-br from-navy-800 via-navy-900 to-navy-950 text-white py-20 border-b border-[#e7b73c]/40 shadow-[0_35px_120px_rgba(0,0,0,0.9)]">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-5xl font-extrabold mb-4 text-[#e7b73c] drop-shadow-[0_0_25px_rgba(0,0,0,0.8)]">
-            Despre E-numismatica
+            Despre eNumismatica
           </h1>
           <p className="text-xl text-slate-200 max-w-3xl mx-auto">
             Partenerul tău de încredere în colecționarea numismatică din 2020
@@ -25,7 +25,7 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold text-[#e7b73c] mb-6">Povestea noastră</h2>
             <div className="prose prose-lg max-w-none text-slate-200 space-y-4">
               <p>
-                E-numismatica a fost fondată cu pasiunea de a păstra istoria prin monede și valută.
+                eNumismatica a fost fondată cu pasiunea de a păstra istoria prin monede și valută.
                 Ceea ce a început ca o colecție mică a crescut până la a deveni platforma numismatică de top din România,
                 conectând colecționari, entuziaști și istorici din întreaga lume.
               </p>
@@ -37,7 +37,7 @@ export default function AboutPage() {
               </p>
               <p>
                 Fiecare monedă spune o poveste—despre imperii ridicate și căzute, despre revoluții economice, despre realizări
-                artistice și despre civilizația umană însăși. La E-numismatica, suntem dedicați să te ajutăm să
+                artistice și despre civilizația umană însăși. La eNumismatica, suntem dedicați să te ajutăm să
                 descoperi aceste povești și să construiești o colecție care reflectă pasiunea și interesele tale.
               </p>
             </div>
@@ -181,7 +181,7 @@ export default function AboutPage() {
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Gata să începi colecția ta?</h2>
           <p className="text-lg text-slate-200 mb-8 max-w-2xl mx-auto">
-            Alătură-te miilor de colecționari care au încredere în E-numismatica pentru nevoile lor numismatice.
+            Alătură-te miilor de colecționari care au încredere în eNumismatica pentru nevoile lor numismatice.
             Răsfoiește colecția noastră sau participă la următoarea noastră licitație.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

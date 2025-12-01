@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Produse - E-numismatica',
+  title: 'Produse - eNumismatica',
   description: 'Catalog de monede și produse numismatice',
 }
 

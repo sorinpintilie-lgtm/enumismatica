@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Seed Database - E-numismatica',
+  title: 'Seed Database - eNumismatica',
   description: 'Database seeding tool',
 }
 

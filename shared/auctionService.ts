@@ -1,6 +1,7 @@
 import {
   doc,
   collection,
+  collectionGroup,
   addDoc,
   updateDoc,
   getDocs,
@@ -13,6 +14,7 @@ import {
   Transaction,
   DocumentSnapshot,
   QueryDocumentSnapshot,
+  deleteDoc,
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 import { Auction, Bid, AutoBid } from './types';
@@ -132,6 +134,46 @@ export async function setAutoBid(auctionId: string, maxAmount: number, userId: s
 }
 
 /**
+ * Cancels the auto-bid for a user on a specific auction
+ */
+export async function cancelAutoBid(auctionId: string, userId: string): Promise<void> {
+  const autoBidsRef = collection(db, 'auctions', auctionId, 'autoBids');
+  const q = query(autoBidsRef, where('userId', '==', userId));
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    return;
+  }
+
+  for (const docSnap of snapshot.docs) {
+    await deleteDoc(docSnap.ref);
+  }
+}
+
+/**
+ * Gets the current user's auto-bid for a specific auction (if any)
+ */
+export async function getUserAutoBid(auctionId: string, userId: string): Promise<AutoBid | null> {
+  const autoBidsRef = collection(db, 'auctions', auctionId, 'autoBids');
+  const q = query(autoBidsRef, where('userId', '==', userId));
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const docSnap = snapshot.docs[0];
+  const data = docSnap.data();
+
+  return {
+    id: docSnap.id,
+    ...data,
+    createdAt: data.createdAt?.toDate() || new Date(),
+    updatedAt: data.updatedAt?.toDate() || new Date(),
+  } as AutoBid;
+}
+
+/**
  * Gets all auto-bids for an auction
  */
 export async function getAutoBids(auctionId: string): Promise<AutoBid[]> {
@@ -145,6 +187,58 @@ export async function getAutoBids(auctionId: string): Promise<AutoBid[]> {
     createdAt: doc.data().createdAt?.toDate() || new Date(),
     updatedAt: doc.data().updatedAt?.toDate() || new Date(),
   })) as AutoBid[];
+}
+
+/**
+ * Gets all auto-bids for a user across all auctions,
+ * along with basic auction information if available.
+ */
+export async function getUserAutoBidsForUser(
+  userId: string,
+): Promise<{ autoBid: AutoBid; auction: Auction | null }[]> {
+  const autoBidsRef = collectionGroup(db, 'autoBids');
+  const q = query(autoBidsRef, where('userId', '==', userId));
+  const snapshot = await getDocs(q);
+
+  const results: { autoBid: AutoBid; auction: Auction | null }[] = [];
+
+  for (const autoBidDoc of snapshot.docs) {
+    const data = autoBidDoc.data() as any;
+    const auctionId: string | undefined = data.auctionId;
+
+    const autoBid: AutoBid = {
+      id: autoBidDoc.id,
+      ...data,
+      createdAt: data.createdAt?.toDate() || new Date(),
+      updatedAt: data.updatedAt?.toDate() || new Date(),
+    };
+
+    let auction: Auction | null = null;
+
+    if (auctionId) {
+      try {
+        const auctionRef = doc(db, 'auctions', auctionId);
+        const auctionSnap = await getDoc(auctionRef);
+        if (auctionSnap.exists()) {
+          const aData = auctionSnap.data() as any;
+          auction = {
+            id: auctionSnap.id,
+            ...aData,
+            startTime: aData.startTime?.toDate() || new Date(),
+            endTime: aData.endTime?.toDate() || new Date(),
+            createdAt: aData.createdAt?.toDate() || new Date(),
+            updatedAt: aData.updatedAt?.toDate() || new Date(),
+          } as Auction;
+        }
+      } catch (err) {
+        console.error('Failed to load auction for auto-bid', err);
+      }
+    }
+
+    results.push({ autoBid, auction });
+  }
+
+  return results;
 }
 
 /**
