@@ -9,6 +9,7 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth';
 import { createUserProfileAfterSignup } from './creditService';
+import { logActivity } from './activityLogService';
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -31,6 +32,15 @@ export const signInWithEmail = async (email: string, password: string) => {
 
     // Ensure Firestore user profile exists (idempotent, no referral on login)
     await createUserProfileAfterSignup(userCredential.user, null);
+
+    // Log the login
+    await logActivity(
+      userCredential.user.uid,
+      'user_login',
+      { method: 'email' },
+      userCredential.user.email || undefined,
+      userCredential.user.displayName || undefined
+    );
 
     return { user: userCredential.user, error: null };
   } catch (error: any) {
@@ -62,6 +72,15 @@ export const signUpWithEmail = async (email: string, password: string, referralC
     // Create Firestore profile and apply referral bonuses (if any)
     await createUserProfileAfterSignup(userCredential.user, referralCode || null);
 
+    // Log the registration
+    await logActivity(
+      userCredential.user.uid,
+      'user_register',
+      { method: 'email', referralCode: referralCode || undefined },
+      userCredential.user.email || undefined,
+      userCredential.user.displayName || undefined
+    );
+
     return { user: userCredential.user, error: null };
   } catch (error: any) {
     return { user: null, error: error.message };
@@ -75,6 +94,15 @@ export const signInWithGoogle = async (referralCode?: string) => {
     // Ensure profile exists and apply referral only on first signup
     await createUserProfileAfterSignup(result.user, referralCode || null);
 
+    // Log the login/register
+    await logActivity(
+      result.user.uid,
+      'user_login',
+      { method: 'google', referralCode: referralCode || undefined },
+      result.user.email || undefined,
+      result.user.displayName || undefined
+    );
+
     return { user: result.user, error: null };
   } catch (error: any) {
     return { user: null, error: error.message };
@@ -83,6 +111,17 @@ export const signInWithGoogle = async (referralCode?: string) => {
 
 export const logout = async () => {
   try {
+    const user = auth.currentUser;
+    if (user) {
+      // Log the logout before signing out
+      await logActivity(
+        user.uid,
+        'user_logout',
+        {},
+        user.email || undefined,
+        user.displayName || undefined
+      );
+    }
     await signOut(auth);
     return { error: null };
   } catch (error: any) {
