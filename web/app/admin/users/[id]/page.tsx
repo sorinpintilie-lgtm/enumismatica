@@ -204,7 +204,7 @@ export default function AdminUserDetail() {
     }
   };
 
-  const handleChangeRole = async (newRole: 'admin' | 'user') => {
+  const handleChangeRole = async (newRole: 'superadmin' | 'admin' | 'user') => {
     if (!user || !currentUser) return;
     if (!actionReason.trim()) {
       alert('Te rog introdu un motiv pentru schimbarea rolului');
