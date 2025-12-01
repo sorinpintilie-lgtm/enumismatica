@@ -1,8 +1,54 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export default function AboutPage() {
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalUsers: 0,
+    totalCountries: 0,
+    authenticated: 100,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        // Get total products
+        const productsSnapshot = await getDocs(collection(db, 'products'));
+        const totalProducts = productsSnapshot.size;
+
+        // Get total users
+        const usersSnapshot = await getDocs(collection(db, 'users'));
+        const totalUsers = usersSnapshot.size;
+
+        // Get unique countries from products
+        const countries = new Set<string>();
+        productsSnapshot.docs.forEach((doc) => {
+          const country = doc.data().country;
+          if (country) {
+            countries.add(country);
+          }
+        });
+
+        setStats({
+          totalProducts,
+          totalUsers,
+          totalCountries: countries.size,
+          authenticated: 100,
+        });
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStats();
+  }, []);
   return (
     <div className="min-h-screen bg-gradient-to-b from-navy-900 via-navy-950 to-black">
       {/* Hero Section */}
@@ -157,24 +203,30 @@ export default function AboutPage() {
 
         {/* Statistics */}
         <div className="bg-gradient-to-br from-[#e7b73c] via-[#f0c955] to-[#e7b73c] rounded-2xl p-12 mb-16 shadow-[0_28px_80px_rgba(231,183,60,0.7)] border border-[#f5e4b3]/60">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-[#000940] font-semibold">
-            <div>
-              <div className="text-4xl font-extrabold mb-2">5000+</div>
-              <div className="text-[#3b2b05]/80">Monede listate</div>
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-navy-900"></div>
             </div>
-            <div>
-              <div className="text-4xl font-extrabold mb-2">2000+</div>
-              <div className="text-[#3b2b05]/80">Colecționari fericiți</div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-[#000940] font-semibold">
+              <div>
+                <div className="text-4xl font-extrabold mb-2">{stats.totalProducts.toLocaleString()}</div>
+                <div className="text-[#3b2b05]/80">Monede listate</div>
+              </div>
+              <div>
+                <div className="text-4xl font-extrabold mb-2">{stats.totalUsers.toLocaleString()}</div>
+                <div className="text-[#3b2b05]/80">Colecționari fericiți</div>
+              </div>
+              <div>
+                <div className="text-4xl font-extrabold mb-2">{stats.totalCountries}+</div>
+                <div className="text-[#3b2b05]/80">Țări</div>
+              </div>
+              <div>
+                <div className="text-4xl font-extrabold mb-2">{stats.authenticated}%</div>
+                <div className="text-[#3b2b05]/80">Autentificate</div>
+              </div>
             </div>
-            <div>
-              <div className="text-4xl font-extrabold mb-2">50+</div>
-              <div className="text-[#3b2b05]/80">Țări</div>
-            </div>
-            <div>
-              <div className="text-4xl font-extrabold mb-2">100%</div>
-              <div className="text-[#3b2b05]/80">Autentificate</div>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Call to Action */}
