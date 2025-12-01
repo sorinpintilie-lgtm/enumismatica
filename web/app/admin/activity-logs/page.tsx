@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { isAdmin } from 'shared/adminService';
 import {
   getActivityLogs,
   subscribeToActivityLogs,
@@ -89,6 +90,7 @@ const EVENT_CATEGORIES = {
 export default function ActivityLogsPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const [isAdminUser, setIsAdminUser] = useState(false);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -98,28 +100,36 @@ export default function ActivityLogsPage() {
   const [expandedLog, setExpandedLog] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && user) {
-      // Wait for isAdmin to be defined (not undefined)
-      if (user.isAdmin !== undefined) {
-        if (!user.isAdmin) {
-          router.push('/dashboard');
-        } else {
-          loadLogs();
-        }
+    const checkAdminAndLoad = async () => {
+      if (!user) {
+        router.push('/login');
+        return;
       }
-    } else if (!authLoading && !user) {
-      router.push('/login');
+
+      const adminStatus = await isAdmin(user.uid);
+      if (!adminStatus) {
+        router.push('/dashboard');
+        return;
+      }
+
+      setIsAdminUser(true);
+      await loadLogs();
+      setLoading(false);
+    };
+
+    if (!authLoading) {
+      checkAdminAndLoad();
     }
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    if (user?.isAdmin) {
+    if (isAdminUser) {
       loadLogs();
     }
   }, [selectedCategory, selectedUserId]);
 
   useEffect(() => {
-    if (!user?.isAdmin || !realTimeEnabled) return;
+    if (!isAdminUser || !realTimeEnabled) return;
 
     const filter: ActivityLogFilter = {
       limit: 100,
@@ -209,24 +219,11 @@ export default function ActivityLogsPage() {
     return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
-        <p className="ml-4 text-slate-300">Se verifică permisiunile...</p>
-      </div>
-    );
-  }
-
-  if (!user?.isAdmin) {
+  if (authLoading || loading || !isAdminUser) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Acces Interzis</h1>
-          <p className="text-slate-300 mb-4">Nu ai permisiuni de administrator.</p>
-          <Link href="/dashboard" className="text-gold-400 hover:text-gold-300">
-            ← Înapoi la dashboard
-          </Link>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
         </div>
       </div>
     );
