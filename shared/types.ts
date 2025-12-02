@@ -6,6 +6,7 @@ export interface User {
   avatar?: string;
   role: 'user' | 'admin' | 'moderator';
   createdAt: Date;
+  updatedAt?: Date;
   lastLogin?: Date;
   preferences?: UserPreferences;
   helpPreferences?: UserHelpPreferences;
