@@ -351,3 +351,18 @@ export interface UserPresence {
   currentPage?: string;
   lastSeen?: Date;
 }
+
+/**
+ * EventRegistration entity representing a user registration for an event.
+ * Stored in 'eventRegistrations' collection.
+ */
+export interface EventRegistration {
+  id: string;
+  email: string;
+  name?: string;
+  eventName: string;
+  eventDate: Date;
+  registrationDate: Date;
+  status: 'registered' | 'attended' | 'cancelled';
+  notes?: string;
+}
