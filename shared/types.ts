@@ -359,10 +359,10 @@ export interface UserPresence {
 export interface EventRegistration {
   id: string;
   email: string;
-  name?: string;
-  eventName: string;
-  eventDate: Date;
-  registrationDate: Date;
-  status: 'registered' | 'attended' | 'cancelled';
+  fullName?: string;
+  source?: string;
+  eventKey: string;
+  marketingOptIn: boolean;
   notes?: string;
+  createdAt: Date;
 }
