@@ -249,6 +249,7 @@ export interface CollectionItem {
   grade?: string;
   mintMark?: string;
   rarity?: string;
+  tags?: string[];
   weight?: number;
   diameter?: number;
   condition?: string;
