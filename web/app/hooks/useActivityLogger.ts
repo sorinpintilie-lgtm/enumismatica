@@ -12,6 +12,9 @@ export function useActivityLogger() {
   const previousPathRef = useRef<string>('');
 
   useEffect(() => {
+    // Scroll to top on page change
+    window.scrollTo(0, 0);
+
     if (!user) return;
 
     const logPageView = async () => {
