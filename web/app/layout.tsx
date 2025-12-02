@@ -7,6 +7,9 @@ import ScrollToTop from './components/ScrollToTop'
 export const metadata: Metadata = {
   title: 'eNumismatica - Magazin de Monede & Licitatii',
   description: 'Cumpara si vinde articole numismatice prin magazinul si platforma noastra de licitatii',
+  icons: {
+    icon: '/assets/eNumismatica.ro_logo.png',
+  },
 }
  
 export default function RootLayout({

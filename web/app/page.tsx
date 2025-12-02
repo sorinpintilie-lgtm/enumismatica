@@ -4,9 +4,7 @@ import Link from 'next/link';
 import LazyImage from './components/LazyImage';
 import ProductCard from './components/ProductCard';
 import { useCachedProducts } from './hooks/useCachedProducts';
-import { useSiteAsset } from './hooks/useSiteAsset';
 import { useAuth } from './context/AuthContext';
-import { getResponsiveImageProps } from 'shared/siteAssetService';
 
 const highlights = [
   {
@@ -41,7 +39,6 @@ const steps = [
 export default function HomePage() {
   const { user } = useAuth();
   const { data: products = [], isLoading: productsLoading } = useCachedProducts(undefined, 8, undefined, !!user);
-  const { data: heroAsset, isLoading: heroLoading } = useSiteAsset('homepage-hero');
 
   return (
     <div className="bg-gradient-to-b from-navy-500 via-navy-600 to-navy-900">
@@ -125,20 +122,14 @@ export default function HomePage() {
               aria-hidden
             />
             <div className="relative rounded-3xl border border-[#e7b73c] bg-white/98 backdrop-blur-sm p-4 shadow-[0_20px_60px_rgba(231,183,60,0.35)]">
-              {heroLoading ? (
-                <div className="h-[340px] w-full rounded-2xl bg-navy-100 animate-pulse" />
-              ) : (
-                <LazyImage
-                  {...(heroAsset ? getResponsiveImageProps(heroAsset) : {
-                    src: '/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png',
-                    alt: 'Moneda Double Eagle din colectia noastra',
-                    srcSet: 'assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png 1600w',
-                    sizes: '100vw'
-                  })}
-                  className="h-[340px] w-full rounded-2xl object-contain bg-white"
-                  placeholder="Se incarca imaginea colectiei"
-                />
-              )}
+              <LazyImage
+                src="/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png"
+                alt="Moneda Double Eagle din colectia noastra"
+                srcSet="/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png 1600w"
+                sizes="100vw"
+                className="h-[340px] w-full rounded-2xl object-contain bg-white"
+                placeholder="Se incarca imaginea colectiei"
+              />
               <div className="mt-4 flex items-start justify-between rounded-2xl border border-[#e7b73c] bg-[#e7b73c] px-4 py-3 shadow-lg shadow-[#e7b73c]/40">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#000940]">Piesa recenta</p>

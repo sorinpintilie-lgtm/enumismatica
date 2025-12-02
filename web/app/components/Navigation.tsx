@@ -8,14 +8,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { isAdmin } from 'shared/adminService';
 import NotificationCenter from './NotificationCenter';
-import { useSiteAsset } from '../hooks/useSiteAsset';
-import { getResponsiveImageProps } from 'shared/siteAssetService';
 
 export default function Navigation() {
   const { user } = useAuth();
   const router = useRouter();
   const [isAdminUser, setIsAdminUser] = useState(false);
-  const { data: logoAsset, isLoading: logoLoading } = useSiteAsset('logo');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -43,27 +40,14 @@ export default function Navigation() {
           <nav className="relative flex items-center justify-between rounded-full border border-gold-500/30 bg-navy-500/90 px-4 sm:px-6 py-3 shadow-[0_12px_50px_rgba(231,183,60,0.25)] backdrop-blur-md">
           {/* Left: logo + title */}
           <div className="flex items-center gap-3">
-            {logoLoading ? (
-              <div className="h-20 w-20 bg-slate-100 rounded-lg animate-pulse" />
-            ) : logoAsset ? (
-              <Image
-                src={logoAsset.imageUrl}
-                alt={logoAsset.altText || "eNumismatica Logo"}
-                width={80}
-                height={80}
-                className="h-20 w-20 object-contain"
-                priority
-              />
-            ) : (
-              <Image
-                src="/assets/eNumismatica.ro_logo.png"
-                alt="eNumismatica Logo"
-                width={80}
-                height={80}
-                className="h-20 w-20 object-contain"
-                priority
-              />
-            )}
+            <Image
+              src="/assets/eNumismatica.ro_logo.png"
+              alt="eNumismatica Logo"
+              width={80}
+              height={80}
+              className="h-20 w-20 object-contain"
+              priority
+            />
             <div className="flex flex-col leading-tight">
               <Link href="/" className="text-lg font-semibold text-white hover:text-gold-400 transition-colors">
                 eNumismatica
