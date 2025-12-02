@@ -205,8 +205,14 @@ export default function WatchlistPage() {
               className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all"
               title="Reîncarcă lista"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5M4 20h5v-5M20 4h-5v5" />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                {/* Simple circular refresh arrow to avoid problematic shapes */}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4a8 8 0 111.73 10.73M4 4v5h5"
+                />
               </svg>
             </button>
           </div>
