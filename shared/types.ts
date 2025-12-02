@@ -285,6 +285,9 @@ export interface Conversation {
   isAdminSupport?: boolean;
   auctionId?: string;
   productId?: string;
+  buyerId?: string;
+  sellerId?: string;
+  status?: string;
 }
 
 /**
