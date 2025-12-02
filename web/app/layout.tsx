@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   title: 'eNumismatica - Magazin de Monede & Licitatii',
   description: 'Cumpara si vinde articole numismatice prin magazinul si platforma noastra de licitatii',
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
+    icon: '/eNumismatica.ro_logo.ico',
+    shortcut: '/eNumismatica.ro_logo.ico',
   },
 }
  
