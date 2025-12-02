@@ -4,12 +4,16 @@ export interface User {
   name: string;
   displayName?: string;
   avatar?: string;
-  role: 'user' | 'admin' | 'moderator';
+  role: 'user' | 'admin' | 'moderator' | 'superadmin';
   createdAt: Date;
   updatedAt?: Date;
   lastLogin?: Date;
   preferences?: UserPreferences;
   helpPreferences?: UserHelpPreferences;
+  credits?: number;
+  referralCode?: string;
+  referredBy?: string;
+  referralBonusApplied?: boolean;
 }
 
 export interface UserPreferences {
