@@ -366,3 +366,15 @@ export interface EventRegistration {
   notes?: string;
   createdAt: Date;
 }
+
+/**
+ * PriceHistory entity representing a price history entry for products or auctions.
+ * Stored in 'products/{productId}/priceHistory' or 'auctions/{auctionId}/priceHistory' subcollections.
+ */
+export interface PriceHistory {
+  id: string;
+  price: number;
+  source: 'manual' | 'auction_bid' | 'market_update' | 'system';
+  note?: string;
+  timestamp: Date;
+}
