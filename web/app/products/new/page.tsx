@@ -361,16 +361,13 @@ export default function NewProductPage() {
               <label className="block text-sm font-medium text-slate-200 mb-1">
                 Denominație
               </label>
-              <select
+              <input
+                type="text"
                 className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
                 value={denomination}
                 onChange={(e) => setDenomination(e.target.value)}
-              >
-                <option value="">Selectează denominația</option>
-                {DENOMINATIONS.map(denomination => (
-                  <option key={denomination} value={denomination}>{denomination}</option>
-                ))}
-              </select>
+                placeholder="Ex: 1 Leu, 5 Kopeks, 10 Cent"
+              />
             </div>
 
             <div>
