@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { ConversationList, PrivateChat } from '../components/PrivateChat';
 import Link from 'next/link';
 
-export default function MessagesPage() {
+function MessagesPageContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -90,5 +90,22 @@ export default function MessagesPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="rounded-2xl border border-gold-500/40 bg-navy-900/85 px-8 py-10 text-center shadow-[0_24px_80px_rgba(0,0,0,0.9)]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#e7b73c] mx-auto mb-4"></div>
+            <p className="text-slate-200">Se încarcă...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <MessagesPageContent />
+    </Suspense>
   );
 }
