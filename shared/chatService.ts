@@ -217,15 +217,15 @@ export async function createOrGetConversation(
   // Notify seller about new conversation
   const buyerDoc = await getDoc(doc(db, 'users', buyerId));
   const buyerName = buyerDoc.exists() ? buyerDoc.data().displayName : 'A user';
-  
+
   await createChatNotification(
     sellerId,
     'conversation_started',
     buyerId,
     buyerName,
-    'A new conversation has been started',
+    isAdminSupport ? 'A new support conversation has been started' : 'A new conversation has been started',
     docRef.id,
-    auctionId
+    auctionId // This will be undefined for admin support, which is fine now
   );
 
   return docRef.id;
@@ -353,12 +353,10 @@ async function createChatNotification(
   if (!db) throw new Error('Firestore not initialized');
 
   const notificationsRef = collection(db, 'users', userId, 'notifications');
-  
-  const notificationData: Omit<ChatNotification, 'id'> = {
+
+  const notificationData: any = {
     userId,
     type,
-    conversationId,
-    auctionId,
     senderId,
     senderName,
     message,
@@ -366,6 +364,10 @@ async function createChatNotification(
     pushed: false,
     createdAt: new Date(),
   };
+
+  // Only include optional fields if they have values
+  if (conversationId) notificationData.conversationId = conversationId;
+  if (auctionId) notificationData.auctionId = auctionId;
 
   const docRef = await addDoc(notificationsRef, {
     ...notificationData,
