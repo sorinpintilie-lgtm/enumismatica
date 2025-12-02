@@ -471,15 +471,15 @@ function CollectionItemModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-gold-500/40 bg-navy-900/95 shadow-[0_22px_70px_rgba(0,0,0,0.9)]">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gold-500/30 bg-navy-900/95 px-6 py-4">
+          <h2 className="text-2xl font-bold text-white">
             {item ? 'Editează Articol' : 'Adaugă Articol Nou'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-slate-300 hover:text-white"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -490,7 +490,7 @@ function CollectionItemModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-200 mb-1">
                 Nume Articol *
               </label>
               <input
@@ -498,80 +498,80 @@ function CollectionItemModal({
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
                 placeholder="ex: Roman Denarius"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-200 mb-1">
                 Descriere
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
                 placeholder="Descriere detaliată..."
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Țară</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Țară</label>
               <input
                 type="text"
                 value={formData.country}
                 onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">An</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">An</label>
               <input
                 type="number"
                 value={formData.year || ''}
                 onChange={(e) => setFormData({ ...formData, year: e.target.value ? parseInt(e.target.value) : undefined })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Denominație</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Denominație</label>
               <input
                 type="text"
                 value={formData.denomination}
                 onChange={(e) => setFormData({ ...formData, denomination: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Metal</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Metal</label>
               <input
                 type="text"
                 value={formData.metal}
                 onChange={(e) => setFormData({ ...formData, metal: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Grad</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Grad</label>
               <input
                 type="text"
                 value={formData.grade}
                 onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Raritate</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Raritate</label>
               <select
                 value={formData.rarity || ''}
                 onChange={(e) => setFormData({ ...formData, rarity: e.target.value as any })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
               >
                 <option value="">Selectează...</option>
                 <option value="common">Comună</option>
@@ -583,51 +583,51 @@ function CollectionItemModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Preț Achiziție</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Preț Achiziție</label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.acquisitionPrice || ''}
                 onChange={(e) => setFormData({ ...formData, acquisitionPrice: e.target.value ? parseFloat(e.target.value) : undefined })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Valoare Curentă</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Valoare Curentă</label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.currentValue || ''}
                 onChange={(e) => setFormData({ ...formData, currentValue: e.target.value ? parseFloat(e.target.value) : undefined })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Notițe Personale</label>
+              <label className="block text-sm font-medium text-slate-200 mb-1">Notițe Personale</label>
               <textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
                 placeholder="Notițe despre acest articol..."
               />
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="mt-2 flex gap-3 pt-4 border-t border-gold-500/30">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors"
+              className="flex-1 rounded-full border border-gold-500/40 bg-navy-900/60 px-6 py-3 text-sm font-medium text-slate-100 hover:bg-navy-800 hover:border-gold-400 transition-colors"
             >
               Anulează
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className="flex-1 rounded-full bg-[#e7b73c] px-6 py-3 text-sm font-semibold text-[#000940] shadow-lg shadow-[#e7b73c]/40 transition-colors hover:bg-[#f0c955] disabled:bg-[#c9aa4a]"
             >
               {saving ? 'Se salvează...' : item ? 'Actualizează' : 'Adaugă'}
             </button>
