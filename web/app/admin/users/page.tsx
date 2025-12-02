@@ -95,7 +95,7 @@ export default function AdminUsers() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Gestionează utilizatori</h1>
+          <h1 className="text-3xl font-bold text-white">Gestionează utilizatori</h1>
           <Link
             href="/admin"
             className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-medium"
