@@ -411,6 +411,7 @@ async function seedPriceHistories(productIds: string[], auctionIds: string[]): P
 
 /**
  * Seeds sample watchlists for users (products + auctions)
+ * Best-effort only – logs and continues on permission errors.
  */
 async function seedWatchlists(
   userIds: string[],
@@ -425,55 +426,76 @@ async function seedWatchlists(
   }
 
   for (const userId of userIds) {
-    const watchlistRef = collection(db, 'users', userId, 'watchlist');
+    try {
+      const watchlistRef = collection(db, 'users', userId, 'watchlist');
 
-    // Select up to 3 random products for each user
-    const numProducts = Math.min(3, productIds.length);
-    for (let i = 0; i < numProducts; i++) {
-      const index = (i + Math.floor(Math.random() * productIds.length)) % productIds.length;
-      const productId = productIds[index];
+      // Up to 3 random products per user
+      const numProducts = Math.min(3, productIds.length);
+      for (let i = 0; i < numProducts; i++) {
+        const index = (i + Math.floor(Math.random() * productIds.length)) % productIds.length;
+        const productId = productIds[index];
 
-      await addDoc(watchlistRef, {
-        userId,
-        itemType: 'product',
-        itemId: productId,
-        addedAt: Timestamp.fromDate(
-          new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-        ),
-        notes: '',
-        notificationPreferences: {
-          priceChanges: true,
-          auctionUpdates: true,
-          bidActivity: true,
-        },
-      });
-    }
+        try {
+          await addDoc(watchlistRef, {
+            userId,
+            itemType: 'product',
+            itemId: productId,
+            addedAt: Timestamp.fromDate(
+              new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+            ),
+            notes: '',
+            notificationPreferences: {
+              priceChanges: true,
+              auctionUpdates: true,
+              bidActivity: true,
+            },
+          });
+        } catch (err) {
+          console.error(
+            'Failed to seed product watchlist entry',
+            { userId, productId },
+            err,
+          );
+        }
+      }
 
-    // Select up to 2 random auctions for each user
-    const numAuctions = Math.min(2, auctionIds.length);
-    for (let i = 0; i < numAuctions; i++) {
-      const index = (i + Math.floor(Math.random() * auctionIds.length)) % auctionIds.length;
-      const auctionId = auctionIds[index];
+      // Up to 2 random auctions per user
+      const numAuctions = Math.min(2, auctionIds.length);
+      for (let i = 0; i < numAuctions; i++) {
+        const index = (i + Math.floor(Math.random() * auctionIds.length)) % auctionIds.length;
+        const auctionId = auctionIds[index];
 
-      await addDoc(watchlistRef, {
-        userId,
-        itemType: 'auction',
-        itemId: auctionId,
-        addedAt: Timestamp.fromDate(
-          new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-        ),
-        notes: '',
-        notificationPreferences: {
-          priceChanges: true,
-          auctionUpdates: true,
-          bidActivity: true,
-        },
-      });
+        try {
+          await addDoc(watchlistRef, {
+            userId,
+            itemType: 'auction',
+            itemId: auctionId,
+            addedAt: Timestamp.fromDate(
+              new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+            ),
+            notes: '',
+            notificationPreferences: {
+              priceChanges: true,
+              auctionUpdates: true,
+              bidActivity: true,
+            },
+          });
+        } catch (err) {
+          console.error(
+            'Failed to seed auction watchlist entry',
+            { userId, auctionId },
+            err,
+          );
+        }
+      }
+    } catch (userErr) {
+      console.error('Failed to seed watchlist for user', userId, userErr);
     }
   }
 
-  console.log('Watchlists seeded for users');
+  console.log('Watchlists seeded for users (best effort)');
 }
+
 
 /**
  * Resets the entire database by deleting all collections.
@@ -551,9 +573,17 @@ export async function seedAllData(): Promise<void> {
     await seedPriceHistories(productIds, auctionIds);
     console.log('Seeded price histories for products and auctions');
 
-    console.log('Seeding watchlists...');
-    await seedWatchlists(userIds, productIds, auctionIds);
-    console.log('Seeded watchlists for users');
+    // Seed watchlists in best-effort mode; don't fail entire seeding on permission issues
+    try {
+      console.log('Seeding watchlists...');
+      await seedWatchlists(userIds, productIds, auctionIds);
+      console.log('Seeded watchlists for users');
+    } catch (watchlistError) {
+      console.error(
+        'Failed to seed watchlists (likely due to Firestore security rules). Continuing without watchlists seed.',
+        watchlistError,
+      );
+    }
 
     console.log('Sample data seeding completed successfully!');
   } catch (error) {
