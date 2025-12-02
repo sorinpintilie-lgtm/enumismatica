@@ -4,21 +4,26 @@ import { auth } from 'shared/firebaseConfig';
 
 export async function GET(request: Request) {
   try {
-    // Authenticate user
-    const user = auth.currentUser;
-    if (!user) {
+    // Autentificare utilizator - încearcă Firebase, apoi antetul x-user-id
+    const headerUserId = request.headers.get('x-user-id');
+    const uid = auth.currentUser?.uid || headerUserId;
+
+    if (!uid) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: 'Neautorizat - te rugăm să te autentifici' },
         { status: 401 }
       );
     }
 
-    // Get user's watchlist
-    const result = await getUserWatchlist(user.uid);
+    // Obține lista de urmărire a utilizatorului
+    const result = await getUserWatchlist(uid);
 
     if (!result.success) {
       return NextResponse.json(
-        { success: false, error: result.error || 'Failed to retrieve watchlist' },
+        {
+          success: false,
+          error: result.error || 'Nu s-a putut încărca lista de urmărire',
+        },
         { status: 400 }
       );
     }
@@ -27,11 +32,10 @@ export async function GET(request: Request) {
       { success: true, items: result.items || [] },
       { status: 200 }
     );
-
   } catch (error) {
     console.error('Watchlist get error:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'Eroare internă de server la încărcarea listei de urmărire' },
       { status: 500 }
     );
   }

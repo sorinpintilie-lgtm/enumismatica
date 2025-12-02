@@ -24,9 +24,13 @@ export function useWatchlist() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/watchlist/get');
+      const response = await fetch('/api/watchlist/get', {
+        headers: {
+          'x-user-id': user.uid,
+        },
+      });
       if (!response.ok) {
-        throw new Error('Failed to fetch watchlist');
+        throw new Error('Nu s-a putut încărca lista de urmărire');
       }
 
       const data = await response.json();
@@ -34,11 +38,15 @@ export function useWatchlist() {
         setWatchlist(data.items || []);
         setWatchlistCount(data.items?.length || 0);
       } else {
-        throw new Error(data.error || 'Failed to fetch watchlist');
+        throw new Error(data.error || 'Nu s-a putut încărca lista de urmărire');
       }
     } catch (err) {
       console.error('Error fetching watchlist:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch watchlist');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Nu s-a putut încărca lista de urmărire'
+      );
       setWatchlist([]);
       setWatchlistCount(0);
     } finally {
@@ -50,25 +58,26 @@ export function useWatchlist() {
    * Check if item is in watchlist
    */
   const checkWatchlistStatus = useCallback(async (itemId: string) => {
-    if (!user) return { exists: false };
+    if (!user) return { exists: false, item: null };
 
     try {
       const response = await fetch('/api/watchlist/check', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': user.uid,
         },
         body: JSON.stringify({ itemId }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to check watchlist status');
+        throw new Error('Nu s-a putut verifica starea listei de urmărire');
       }
 
       const data = await response.json();
       return {
         exists: data.exists || false,
-        item: data.item || null
+        item: data.item || null,
       };
     } catch (err) {
       console.error('Error checking watchlist status:', err);
@@ -79,115 +88,140 @@ export function useWatchlist() {
   /**
    * Add item to watchlist
    */
-  const addToWatchlist = useCallback(async (itemType: 'product' | 'auction', itemId: string, notes?: string) => {
-    if (!user) {
-      return { success: false, error: 'User not authenticated' };
-    }
-
-    try {
-      const response = await fetch('/api/watchlist/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ itemType, itemId, notes }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add to watchlist');
+  const addToWatchlist = useCallback(
+    async (itemType: 'product' | 'auction', itemId: string, notes?: string) => {
+      if (!user) {
+        return { success: false, error: 'Utilizator neautentificat' };
       }
 
-      const data = await response.json();
-      if (data.success) {
-        // Refresh watchlist after adding
-        await fetchWatchlist();
-        return { success: true };
-      } else {
-        throw new Error(data.error || 'Failed to add to watchlist');
+      try {
+        const response = await fetch('/api/watchlist/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': user.uid,
+          },
+          body: JSON.stringify({ itemType, itemId, notes }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Nu s-a putut adăuga la lista de urmărire');
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          // Reîncarcă lista după adăugare
+          await fetchWatchlist();
+          return { success: true };
+        } else {
+          throw new Error(data.error || 'Nu s-a putut adăuga la lista de urmărire');
+        }
+      } catch (err) {
+        console.error('Error adding to watchlist:', err);
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : 'Nu s-a putut adăuga la lista de urmărire',
+        };
       }
-    } catch (err) {
-      console.error('Error adding to watchlist:', err);
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : 'Failed to add to watchlist'
-      };
-    }
-  }, [user, fetchWatchlist]);
+    },
+    [user, fetchWatchlist]
+  );
 
   /**
    * Remove item from watchlist
    */
-  const removeFromWatchlist = useCallback(async (itemId: string) => {
-    if (!user) {
-      return { success: false, error: 'User not authenticated' };
-    }
-
-    try {
-      const response = await fetch('/api/watchlist/remove', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ itemId }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to remove from watchlist');
+  const removeFromWatchlist = useCallback(
+    async (itemId: string) => {
+      if (!user) {
+        return { success: false, error: 'Utilizator neautentificat' };
       }
 
-      const data = await response.json();
-      if (data.success) {
-        // Refresh watchlist after removing
-        await fetchWatchlist();
-        return { success: true };
-      } else {
-        throw new Error(data.error || 'Failed to remove from watchlist');
+      try {
+        const response = await fetch('/api/watchlist/remove', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': user.uid,
+          },
+          body: JSON.stringify({ itemId }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Nu s-a putut elimina din lista de urmărire');
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          // Reîncarcă lista după eliminare
+          await fetchWatchlist();
+          return { success: true };
+        } else {
+          throw new Error(
+            data.error || 'Nu s-a putut elimina din lista de urmărire'
+          );
+        }
+      } catch (err) {
+        console.error('Error removing from watchlist:', err);
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : 'Nu s-a putut elimina din lista de urmărire',
+        };
       }
-    } catch (err) {
-      console.error('Error removing from watchlist:', err);
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : 'Failed to remove from watchlist'
-      };
-    }
-  }, [user, fetchWatchlist]);
+    },
+    [user, fetchWatchlist]
+  );
 
   /**
    * Clear entire watchlist
    */
-  const clearWatchlist = useCallback(async () => {
-    if (!user) {
-      return { success: false, error: 'User not authenticated' };
-    }
-
-    try {
-      const response = await fetch('/api/watchlist/clear', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to clear watchlist');
+  const clearWatchlist = useCallback(
+    async () => {
+      if (!user) {
+        return { success: false, error: 'Utilizator neautentificat' };
       }
 
-      const data = await response.json();
-      if (data.success) {
-        // Refresh watchlist after clearing
-        await fetchWatchlist();
-        return { success: true };
-      } else {
-        throw new Error(data.error || 'Failed to clear watchlist');
+      try {
+        const response = await fetch('/api/watchlist/clear', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': user.uid,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Nu s-a putut goli lista de urmărire');
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          // Reîncarcă lista după golire
+          await fetchWatchlist();
+          return { success: true };
+        } else {
+          throw new Error(
+            data.error || 'Nu s-a putut goli lista de urmărire'
+          );
+        }
+      } catch (err) {
+        console.error('Error clearing watchlist:', err);
+        return {
+          success: false,
+          error:
+            err instanceof Error
+              ? err.message
+              : 'Nu s-a putut goli lista de urmărire',
+        };
       }
-    } catch (err) {
-      console.error('Error clearing watchlist:', err);
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : 'Failed to clear watchlist'
-      };
-    }
-  }, [user, fetchWatchlist]);
+    },
+    [user, fetchWatchlist]
+  );
 
   // Initial fetch
   useEffect(() => {
