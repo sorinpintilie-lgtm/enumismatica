@@ -19,14 +19,22 @@ export function useActivityLogger() {
 
     const logPageView = async () => {
       try {
+        const metadata: any = {
+          page: pathname,
+        };
+
+        if (previousPathRef.current) {
+          metadata.previousPage = previousPathRef.current;
+        }
+
+        if (document.referrer) {
+          metadata.referrer = document.referrer;
+        }
+
         await logActivity(
           user.uid,
           'page_view',
-          {
-            page: pathname,
-            previousPage: previousPathRef.current || undefined,
-            referrer: document.referrer || undefined,
-          },
+          metadata,
           user.email || undefined,
           user.displayName || undefined,
           user.isAdmin || false

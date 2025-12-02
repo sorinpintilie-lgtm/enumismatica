@@ -188,8 +188,6 @@ export async function createOrGetConversation(
 
   // Create new conversation
   const conversationData: any = {
-    auctionId,
-    productId,
     buyerId,
     sellerId,
     participants: [buyerId, sellerId],
@@ -204,6 +202,10 @@ export async function createOrGetConversation(
 
   if (isAdminSupport) {
     conversationData.isAdminSupport = true;
+  } else {
+    // Only include auction/product IDs for regular conversations
+    if (auctionId) conversationData.auctionId = auctionId;
+    if (productId) conversationData.productId = productId;
   }
 
   const docRef = await addDoc(conversationsRef, {
