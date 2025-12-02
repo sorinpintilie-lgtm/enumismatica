@@ -284,11 +284,17 @@ export interface ChatMessage {
   id: string;
   conversationId: string;
   senderId: string;
+  senderName?: string;
+  senderAvatar?: string;
   content: string;
   timestamp: Date;
   editedAt?: Date;
   isRead?: boolean;
+  isAnonymous?: boolean;
+  edited?: boolean;
+  deleted?: boolean;
   attachments?: string[];
+  readBy?: string[];
 }
 
 /**
