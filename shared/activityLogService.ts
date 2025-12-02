@@ -207,25 +207,37 @@ export async function logActivity(
     const { browser, os, device } = getBrowserInfo();
     const sessionId = getSessionId();
 
+    // Build metadata without undefined values for Firestore
+    const baseMetadata: ActivityLogMetadata = {
+      ...metadata,
+      userAgent: navigator.userAgent,
+      browser,
+      os,
+      device,
+      screenResolution: `${window.screen.width}x${window.screen.height}`,
+      page: window.location.pathname,
+    };
+
+    if (document.referrer) {
+      baseMetadata.referrer = document.referrer;
+    }
+
+    // Avoid writing undefined values (Firestore does not allow them)
     const activityLog: Omit<ActivityLog, 'id'> = {
       userId,
-      userEmail,
-      userName,
       eventType,
       timestamp: Timestamp.now(),
       sessionId,
       isAdmin,
-      metadata: {
-        ...metadata,
-        userAgent: navigator.userAgent,
-        browser,
-        os,
-        device,
-        screenResolution: `${window.screen.width}x${window.screen.height}`,
-        page: window.location.pathname,
-        referrer: document.referrer || undefined,
-      },
+      metadata: baseMetadata,
     };
+
+    if (userEmail) {
+      activityLog.userEmail = userEmail;
+    }
+    if (userName) {
+      activityLog.userName = userName;
+    }
 
     const docRef = await addDoc(collection(db, 'activityLogs'), activityLog);
     return docRef.id;
