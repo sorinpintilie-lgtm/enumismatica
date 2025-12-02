@@ -410,6 +410,72 @@ async function seedPriceHistories(productIds: string[], auctionIds: string[]): P
 }
 
 /**
+ * Seeds sample watchlists for users (products + auctions)
+ */
+async function seedWatchlists(
+  userIds: string[],
+  productIds: string[],
+  auctionIds: string[],
+): Promise<void> {
+  console.log('Seeding watchlists...');
+
+  if (!userIds.length) {
+    console.log('No users available to seed watchlists');
+    return;
+  }
+
+  for (const userId of userIds) {
+    const watchlistRef = collection(db, 'users', userId, 'watchlist');
+
+    // Select up to 3 random products for each user
+    const numProducts = Math.min(3, productIds.length);
+    for (let i = 0; i < numProducts; i++) {
+      const index = (i + Math.floor(Math.random() * productIds.length)) % productIds.length;
+      const productId = productIds[index];
+
+      await addDoc(watchlistRef, {
+        userId,
+        itemType: 'product',
+        itemId: productId,
+        addedAt: Timestamp.fromDate(
+          new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+        ),
+        notes: '',
+        notificationPreferences: {
+          priceChanges: true,
+          auctionUpdates: true,
+          bidActivity: true,
+        },
+      });
+    }
+
+    // Select up to 2 random auctions for each user
+    const numAuctions = Math.min(2, auctionIds.length);
+    for (let i = 0; i < numAuctions; i++) {
+      const index = (i + Math.floor(Math.random() * auctionIds.length)) % auctionIds.length;
+      const auctionId = auctionIds[index];
+
+      await addDoc(watchlistRef, {
+        userId,
+        itemType: 'auction',
+        itemId: auctionId,
+        addedAt: Timestamp.fromDate(
+          new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+        ),
+        notes: '',
+        notificationPreferences: {
+          priceChanges: true,
+          auctionUpdates: true,
+          bidActivity: true,
+        },
+      });
+    }
+  }
+
+  console.log('Watchlists seeded for users');
+}
+
+/**
  * Resets the entire database by deleting all collections.
  * WARNING: This will delete ALL data except the super admin user!
  */
@@ -484,6 +550,10 @@ export async function seedAllData(): Promise<void> {
     console.log('Seeding price histories...');
     await seedPriceHistories(productIds, auctionIds);
     console.log('Seeded price histories for products and auctions');
+
+    console.log('Seeding watchlists...');
+    await seedWatchlists(userIds, productIds, auctionIds);
+    console.log('Seeded watchlists for users');
 
     console.log('Sample data seeding completed successfully!');
   } catch (error) {
