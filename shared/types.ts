@@ -274,6 +274,9 @@ export interface Conversation {
   lastMessageBy?: string;
   unreadCount?: number;
   isGroup?: boolean;
+  isAdminSupport?: boolean;
+  auctionId?: string;
+  productId?: string;
 }
 
 /**
