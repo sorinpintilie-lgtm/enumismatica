@@ -93,6 +93,11 @@ export default function Navigation() {
                 Administrare
               </Link>
             )}
+            {user && (
+              <Link href="/watchlist" className="text-sm font-medium text-slate-300 hover:text-gold-400 transition-colors">
+                Lista mea
+              </Link>
+            )}
           </div>
 
           {/* Divider between menu and right-side actions */}

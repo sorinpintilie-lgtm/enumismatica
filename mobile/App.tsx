@@ -12,6 +12,9 @@ import ProductCatalogScreen from './screens/ProductCatalogScreen';
 import AuctionListScreen from './screens/AuctionListScreen';
 import ProductDetailsScreen from './screens/ProductDetailsScreen';
 import AuctionDetailsScreen from './screens/AuctionDetailsScreen';
+import WatchlistScreen from './screens/WatchlistScreen';
+import HelpCenterScreen from './screens/HelpCenterScreen';
+import HelpArticleScreen from './screens/HelpArticleScreen';
 import { auth, db } from '../shared/firebaseConfig.js';
 import { requestNotificationPermissions, setupNotificationListeners } from './services/notificationService';
 import { RootStackParamList, TabParamList } from './navigationTypes';
@@ -50,6 +53,20 @@ function TabNavigator() {
           tabBarLabel: 'Auctions',
         }}
       />
+      <Tab.Screen
+        name="Watchlist"
+        component={WatchlistScreen}
+        options={{
+          tabBarLabel: 'Watchlist',
+        }}
+      />
+      <Tab.Screen
+        name="HelpCenter"
+        component={HelpCenterScreen}
+        options={{
+          tabBarLabel: 'Help',
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -82,6 +99,7 @@ function AppNavigator() {
           <Stack.Screen name="MainTabs" component={TabNavigator} />
           <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
           <Stack.Screen name="AuctionDetails" component={AuctionDetailsScreen} />
+          <Stack.Screen name="HelpArticle" component={HelpArticleScreen} />
         </>
       ) : (
         <>

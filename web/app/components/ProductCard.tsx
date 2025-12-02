@@ -3,12 +3,14 @@ import { memo } from 'react'
 import { Product } from 'shared/types'
 import LazyImage from './LazyImage'
 import { formatRON } from '../utils/currency'
+import { WatchlistButton } from './WatchlistButton'
 
 interface ProductCardProps {
   product: Product
+  showWatchlistButton?: boolean
 }
 
-function ProductCard({ product }: ProductCardProps) {
+function ProductCard({ product, showWatchlistButton = true }: ProductCardProps) {
   return (
     <div className="group h-full flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 rounded-2xl border border-[#e7b73c]/70 bg-gradient-to-br from-navy-500 to-navy-600 shadow-[0_10px_35px_rgba(231,183,60,0.3)] hover:border-[#e7b73c] hover:shadow-[0_15px_45px_rgba(231,183,60,0.45)]">
       <div className="relative aspect-[4/3] overflow-hidden bg-white rounded-t-2xl">
@@ -47,6 +49,15 @@ function ProductCard({ product }: ProductCardProps) {
             <span aria-hidden>→</span>
           </Link>
         </div>
+        {showWatchlistButton !== false && (
+          <div className="absolute top-2 right-2 z-10">
+            <WatchlistButton
+              itemType="product"
+              itemId={product.id}
+              size="small"
+            />
+          </div>
+        )}
       </div>
     </div>
   )

@@ -286,14 +286,22 @@ const AuctionDetailsScreen: React.FC = () => {
 
         {/* Bid History */}
         <View className="mb-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-3">Istoric Licitații</Text>
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-lg font-semibold text-gray-900">Istoric Licitații</Text>
+            <TouchableOpacity
+              className="bg-blue-600 px-4 py-2 rounded-md"
+              onPress={() => navigation.navigate('BidHistory', { auctionId })}
+            >
+              <Text className="text-white text-sm font-semibold">Vezi Tot</Text>
+            </TouchableOpacity>
+          </View>
           {bidsLoading ? (
             <ActivityIndicator size="small" color="#3B82F6" />
           ) : bids.length === 0 ? (
             <Text className="text-gray-500 text-center py-4">Nicio licitație încă</Text>
           ) : (
             <FlatList
-              data={bids.slice(0, 10)} // Show last 10 bids
+              data={bids.slice(0, 5)} // Show last 5 bids
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => <BidItem bid={item} />}
               scrollEnabled={false}

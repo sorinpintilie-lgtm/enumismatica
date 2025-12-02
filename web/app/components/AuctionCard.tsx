@@ -8,9 +8,11 @@ import { useAuth } from '../context/AuthContext';
 import { useProduct } from '../hooks/useProducts';
 import { formatRON } from '../utils/currency';
 import { useToast } from './ToastProvider';
+import { WatchlistButton } from './WatchlistButton';
 
 interface AuctionCardProps {
   auction: Auction;
+  showWatchlistButton?: boolean;
 }
 
 function CountdownTimer({ endTime }: { endTime: Date }) {
@@ -41,7 +43,7 @@ function CountdownTimer({ endTime }: { endTime: Date }) {
   return <span className="text-sm font-medium text-[#e7b73c]">{timeLeft}</span>;
 }
 
-function AuctionCard({ auction }: AuctionCardProps) {
+function AuctionCard({ auction, showWatchlistButton = true }: AuctionCardProps) {
   const [bidAmount, setBidAmount] = useState('');
   const { user } = useAuth();
   const [bidLoading, setBidLoading] = useState(false);
@@ -182,6 +184,15 @@ function AuctionCard({ auction }: AuctionCardProps) {
           Vezi Detalii
         </Link>
       </div>
+      {showWatchlistButton && (
+        <div className="absolute top-2 right-2 z-10">
+          <WatchlistButton
+            itemType="auction"
+            itemId={auction.id}
+            size="small"
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -19,6 +19,8 @@
     "@react-navigation/bottom-tabs": "^7.8.6",
     "@react-navigation/native": "^7.1.21",
     "@react-navigation/stack": "^7.6.6",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "expo": "~54.0.25",
     "expo-notifications": "^0.32.13",
     "expo-status-bar": "~3.0.8",

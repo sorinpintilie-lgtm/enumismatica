@@ -12,6 +12,7 @@ import { useToast } from '../../components/ToastProvider';
 import AuctionChat from '../../components/AuctionChat';
 import { useProduct } from '../../hooks/useProducts';
 import PriceEvolutionChart from '../../components/PriceEvolutionChart';
+import BidHistoryChart from '../../components/BidHistoryChart';
 import { formatRON } from '../../utils/currency';
 import type { AutoBid } from 'shared/types';
 
@@ -680,6 +681,16 @@ export default function AuctionDetailPage() {
               isOwner={isOwner}
             />
           )}
+        </div>
+
+        {/* Bid History Visualization */}
+        <div className="mt-8">
+          <BidHistoryChart
+            auctionId={auction.id}
+            title="Istoric Licitări"
+            showUserAvatars={true}
+            showTrends={true}
+          />
         </div>
 
         {/* Price Evolution Chart - evolution of the coin in general (like product page) */}
