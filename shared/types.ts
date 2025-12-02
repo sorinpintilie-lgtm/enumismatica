@@ -307,3 +307,33 @@ export interface AuctionNotification {
   auctionTitle?: string;
   bidAmount?: number;
 }
+
+/**
+ * ChatNotification entity representing a notification about chat activity.
+ * Stored in 'users/{userId}/notifications' subcollection.
+ */
+export interface ChatNotification {
+  id: string;
+  userId: string;
+  type: 'new_message' | 'conversation_started' | 'message_read';
+  senderId: string;
+  senderName: string;
+  message: string;
+  read: boolean;
+  pushed: boolean;
+  createdAt: Date;
+  conversationId?: string;
+  auctionId?: string;
+}
+
+/**
+ * UserPresence entity representing user presence status.
+ * Stored in 'presence/{userId}' collection.
+ */
+export interface UserPresence {
+  userId: string;
+  lastActive: Date;
+  status: 'online' | 'offline' | 'away';
+  currentPage?: string;
+  lastSeen?: Date;
+}
