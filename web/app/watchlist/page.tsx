@@ -8,6 +8,48 @@ import Link from 'next/link';
 import ProductCard from '../components/ProductCard';
 import AuctionCard from '../components/AuctionCard';
 import { WatchlistButton } from '../components/WatchlistButton';
+import { useCachedProduct } from '../hooks/useCachedProducts';
+import { useCachedAuction } from '../hooks/useCachedAuctions';
+
+function WatchlistProductCard({ productId }: { productId: string }) {
+  const { data: product, isLoading, error } = useCachedProduct(productId);
+
+  if (isLoading) {
+    return (
+      <div className="h-full rounded-2xl border border-navy-700 bg-navy-900/60 animate-pulse" />
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="p-4 rounded-2xl border border-red-500/40 bg-red-900/40 text-sm text-red-100">
+        Nu s-a putut încărca produsul urmărit.
+      </div>
+    );
+  }
+
+  return <ProductCard product={product} />;
+}
+
+function WatchlistAuctionCard({ auctionId }: { auctionId: string }) {
+  const { data: auction, isLoading, error } = useCachedAuction(auctionId);
+
+  if (isLoading) {
+    return (
+      <div className="h-full rounded-2xl border border-navy-700 bg-navy-900/60 animate-pulse" />
+    );
+  }
+
+  if (error || !auction) {
+    return (
+      <div className="p-4 rounded-2xl border border-red-500/40 bg-red-900/40 text-sm text-red-100">
+        Nu s-a putut încărca licitația urmărită.
+      </div>
+    );
+  }
+
+  return <AuctionCard auction={auction} />;
+}
 
 export default function WatchlistPage() {
   const { user, loading: authLoading } = useAuth();
@@ -271,14 +313,10 @@ export default function WatchlistPage() {
 
                 {/* Item content */}
                 {item.itemType === 'product' && (
-                  <ProductCard
-                    product={{ id: item.itemId } as any}
-                  />
+                  <WatchlistProductCard productId={item.itemId} />
                 )}
                 {item.itemType === 'auction' && (
-                  <AuctionCard
-                    auction={{ id: item.itemId } as any}
-                  />
+                  <WatchlistAuctionCard auctionId={item.itemId} />
                 )}
 
                 {/* Item notes if available */}

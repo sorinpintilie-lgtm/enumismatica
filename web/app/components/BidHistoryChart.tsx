@@ -326,39 +326,49 @@ export default function BidHistoryChart({ auctionId, title, showUserAvatars = tr
             </tr>
           </thead>
           <tbody>
-            {chartData.slice().reverse().map((bid) => (
-              <tr key={bid.bidPosition} className="border-b border-gold-500/10 hover:bg-navy-900/50">
-                <td className="p-2 text-slate-200">{bid.bidPosition}</td>
-                <td className="p-2 text-slate-200">{bid.fullTime}</td>
-                <td className="p-2 text-right font-semibold text-white">{formatRON(bid.amount)}</td>
-                <td className={`p-2 text-right ${
-                  bid.priceChange > 0 ? 'text-emerald-300' : bid.priceChange < 0 ? 'text-red-400' : 'text-slate-300'
-                }`}>
-                  {bid.priceChange !== 0 ? `${bid.priceChange > 0 ? '+' : ''}${formatRON(bid.priceChange)} (${bid.priceChange > 0 ? '+' : ''}${bid.priceChangePercent.toFixed(1)}%)` : '-'}
-                </td>
-                <td className="p-2 text-slate-200 flex items-center gap-2">
-                  {showUserAvatars && (
-                    <img
-                      src={bid.userAvatar}
-                      alt={bid.userName}
-                      className="w-6 h-6 rounded-full"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = 'https://i.pravatar.cc/150?img=1';
-                      }}
-                    />
-                  )}
-                  <span>{bid.userName}</span>
-                </td>
-                <td className="p-2">
-                  {bid.isAutoBid ? (
-                    <span className="text-xs px-2 py-1 bg-blue-900/60 text-blue-300 rounded-full">Auto</span>
-                  ) : (
-                    <span className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded-full">Manual</span>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {chartData.slice().reverse().map((bid) => {
+              const priceChangePercent = bid.priceChangePercent ?? 0;
+
+              return (
+                <tr key={bid.bidPosition} className="border-b border-gold-500/10 hover:bg-navy-900/50">
+                  <td className="p-2 text-slate-200">{bid.bidPosition}</td>
+                  <td className="p-2 text-slate-200">{bid.fullTime}</td>
+                  <td className="p-2 text-right font-semibold text-white">{formatRON(bid.amount)}</td>
+                  <td
+                    className={`p-2 text-right ${
+                      bid.priceChange > 0 ? 'text-emerald-300' : bid.priceChange < 0 ? 'text-red-400' : 'text-slate-300'
+                    }`}
+                  >
+                    {bid.priceChange !== 0
+                      ? `${bid.priceChange > 0 ? '+' : ''}${formatRON(bid.priceChange)} (${
+                          bid.priceChange > 0 ? '+' : ''
+                        }${priceChangePercent.toFixed(1)}%)`
+                      : '-'}
+                  </td>
+                  <td className="p-2 text-slate-200 flex items-center gap-2">
+                    {showUserAvatars && (
+                      <img
+                        src={bid.userAvatar}
+                        alt={bid.userName}
+                        className="w-6 h-6 rounded-full"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'https://i.pravatar.cc/150?img=1';
+                        }}
+                      />
+                    )}
+                    <span>{bid.userName}</span>
+                  </td>
+                  <td className="p-2">
+                    {bid.isAutoBid ? (
+                      <span className="text-xs px-2 py-1 bg-blue-900/60 text-blue-300 rounded-full">Auto</span>
+                    ) : (
+                      <span className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded-full">Manual</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
