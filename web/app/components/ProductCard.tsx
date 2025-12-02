@@ -14,10 +14,10 @@ function ProductCard({ product, showWatchlistButton = true }: ProductCardProps) 
   return (
     <div className="relative group h-full flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 rounded-2xl border border-[#e7b73c]/70 bg-gradient-to-br from-navy-500 to-navy-600 shadow-[0_10px_35px_rgba(231,183,60,0.3)] hover:border-[#e7b73c] hover:shadow-[0_15px_45px_rgba(231,183,60,0.45)]">
       <div className="relative aspect-[4/3] overflow-hidden bg-white rounded-t-2xl">
-        {product.images.length > 0 ? (
+        {product.images && product.images.length > 0 ? (
           <LazyImage
             src={product.images[0]}
-            alt={product.name}
+            alt={product.name || 'Produs'}
             className="h-full w-full object-contain transition duration-500 group-hover:scale-105"
             placeholder="Loading..."
           />

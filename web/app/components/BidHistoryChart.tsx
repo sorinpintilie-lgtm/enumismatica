@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import { formatRON } from '../utils/currency';
 import { BidHistory, BidHistoryStats } from 'shared/types';
+import { getBidHistoryForAuction, getBidHistoryTrends } from 'shared/bidHistoryService';
 
 interface BidHistoryChartProps {
   auctionId: string;
@@ -29,28 +30,19 @@ export default function BidHistoryChart({ auctionId, title, showUserAvatars = tr
       try {
         setLoading(true);
         setError(null);
-
-        // Fetch bid history data
-        const response = await fetch(`/api/bid-history?auctionId=${auctionId}&limit=200`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch bid history');
-        }
-
-        const data = await response.json();
-        if (data.success && data.bids) {
-          setBidHistory(data.bids);
-          setStats(data.stats);
-
-          // Fetch trends if enabled
-          if (showTrends) {
-            const trendsResponse = await fetch(`/api/bid-history?auctionId=${auctionId}`, {
-              method: 'POST'
-            });
-
-            if (trendsResponse.ok) {
-              const trendsData = await trendsResponse.json();
-              setTrends(trendsData);
-            }
+ 
+        // Fetch bid history data directly from Firestore via shared service
+        const { bids, stats } = await getBidHistoryForAuction(auctionId, 200);
+        setBidHistory(bids);
+        setStats(stats);
+ 
+        // Fetch trends if enabled (best-effort; failures here shouldn't break the chart)
+        if (showTrends) {
+          try {
+            const trendsData = await getBidHistoryTrends(auctionId);
+            setTrends(trendsData);
+          } catch (trendErr) {
+            console.error('Error fetching bid history trends:', trendErr);
           }
         }
       } catch (err) {
