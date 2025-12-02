@@ -213,3 +213,80 @@ export interface BidHistoryStats {
   competitionIndex: number; // unique bidders / total bids ratio
   priceTrend: 'up' | 'down' | 'stable'; // Overall price movement trend
 }
+
+/**
+ * SiteAsset entity representing a site-wide asset like logo or hero image.
+ * Stored in 'siteAssets' collection.
+ */
+export interface SiteAsset {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  altText: string;
+  type: 'logo' | 'hero' | 'banner' | 'icon' | 'other';
+  active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * CollectionItem entity representing an item in a user's collection.
+ * Stored in 'users/{userId}/collection' subcollection.
+ */
+export interface CollectionItem {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  category?: string;
+  type?: string;
+  year?: number;
+  country?: string;
+  denomination?: string;
+  metal?: string;
+  weight?: number;
+  diameter?: number;
+  condition?: string;
+  acquisitionDate?: Date;
+  acquisitionPrice?: number;
+  currentValue?: number;
+  purchaseSource?: string;
+  images?: string[];
+  notes?: string;
+  isPublic?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Conversation entity representing a chat conversation.
+ * Stored in 'conversations' collection.
+ */
+export interface Conversation {
+  id: string;
+  participants: string[];
+  title?: string;
+  lastMessage?: string;
+  lastMessageAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  lastMessageBy?: string;
+  unreadCount?: number;
+  isGroup?: boolean;
+}
+
+/**
+ * ChatMessage entity representing a message in a conversation.
+ * Stored in 'conversations/{conversationId}/messages' subcollection.
+ */
+export interface ChatMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  content: string;
+  timestamp: Date;
+  editedAt?: Date;
+  isRead?: boolean;
+  attachments?: string[];
+}

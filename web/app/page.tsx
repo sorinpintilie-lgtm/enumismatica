@@ -6,6 +6,7 @@ import ProductCard from './components/ProductCard';
 import { useCachedProducts } from './hooks/useCachedProducts';
 import { useSiteAsset } from './hooks/useSiteAsset';
 import { useAuth } from './context/AuthContext';
+import { getResponsiveImageProps } from 'shared/siteAssetService';
 
 const highlights = [
   {
@@ -128,11 +129,12 @@ export default function HomePage() {
                 <div className="h-[340px] w-full rounded-2xl bg-navy-100 animate-pulse" />
               ) : (
                 <LazyImage
-                  src={
-                    heroAsset?.imageUrl ||
-                    '/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png'
-                  }
-                  alt={heroAsset?.altText || 'Moneda Double Eagle din colectia noastra'}
+                  {...(heroAsset ? getResponsiveImageProps(heroAsset) : {
+                    src: '/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png',
+                    alt: 'Moneda Double Eagle din colectia noastra',
+                    srcSet: 'assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png 1600w',
+                    sizes: '100vw'
+                  })}
                   className="h-[340px] w-full rounded-2xl object-contain bg-white"
                   placeholder="Se incarca imaginea colectiei"
                 />

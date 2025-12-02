@@ -2,6 +2,7 @@ import { collection, doc, getDoc, getDocs, setDoc, query, where, Timestamp } fro
 import { db } from './firebaseConfig';
 import { SiteAsset } from './types';
 import { uploadImage } from './storageService';
+import { createResponsiveImageProps } from './utils/responsiveImageUtils';
 
 const SITE_ASSETS_COLLECTION = 'siteAssets';
 
@@ -184,4 +185,28 @@ export async function deactivateSiteAsset(name: string): Promise<void> {
     console.error('Error deactivating site asset:', error);
     throw error;
   }
+}
+
+/**
+ * Get responsive image props for a site asset
+ * @param asset - Site asset
+ * @returns Object with responsive image props
+ */
+export function getResponsiveImageProps(asset: SiteAsset): {
+  srcSet: string;
+  sizes: string;
+  src: string;
+  alt: string;
+} {
+  const { srcSet, sizes } = createResponsiveImageProps(asset.imageUrl, {
+    widths: [400, 800, 1200, 1600],
+    defaultSize: '100vw'
+  });
+
+  return {
+    srcSet,
+    sizes,
+    src: asset.imageUrl,
+    alt: asset.altText,
+  };
 }

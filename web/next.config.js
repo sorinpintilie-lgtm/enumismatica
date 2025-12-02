@@ -71,6 +71,36 @@ const nextConfig = {
           },
         ],
       },
+      {
+        // Cache static assets aggressively
+        source: '/assets/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache Firebase Storage images
+        source: '/(.*)firebasestorage\\.googleapis\\.com/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache API responses
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, must-revalidate',
+          },
+        ],
+      },
     ];
   },
 };

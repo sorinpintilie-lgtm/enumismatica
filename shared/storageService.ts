@@ -1,5 +1,6 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from 'firebase/storage';
 import { storage } from './firebaseConfig';
+import { convertToWebP } from './utils/imageUtils';
 
 /**
  * Upload an image to Firebase Storage
@@ -10,10 +11,15 @@ import { storage } from './firebaseConfig';
 export async function uploadImage(file: File, path: string): Promise<string> {
   if (!storage) throw new Error('Firebase Storage not initialized');
 
-  const storageRef = ref(storage, path);
-  const snapshot = await uploadBytes(storageRef, file);
+  // Convert to WebP format for better compression
+  const webpFile = await convertToWebP(file);
+
+  // Update path to use .webp extension
+  const webpPath = path.replace(/\.[^/.]+$/, '.webp');
+  const storageRef = ref(storage, webpPath);
+  const snapshot = await uploadBytes(storageRef, webpFile);
   const downloadURL = await getDownloadURL(snapshot.ref);
-  
+
   return downloadURL;
 }
 

@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { isAdmin } from 'shared/adminService';
 import NotificationCenter from './NotificationCenter';
 import { useSiteAsset } from '../hooks/useSiteAsset';
+import { getResponsiveImageProps } from 'shared/siteAssetService';
 
 export default function Navigation() {
   const { user } = useAuth();
@@ -47,7 +48,7 @@ export default function Navigation() {
             ) : logoAsset ? (
               <Image
                 src={logoAsset.imageUrl}
-                alt={logoAsset.altText}
+                alt={logoAsset.altText || "eNumismatica Logo"}
                 width={80}
                 height={80}
                 className="h-20 w-20 object-contain"

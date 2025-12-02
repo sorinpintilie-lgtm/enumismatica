@@ -5,9 +5,13 @@ interface LazyImageProps {
   alt: string;
   className?: string;
   placeholder?: string;
+  srcSet?: string;
+  sizes?: string;
+  width?: number;
+  height?: number;
 }
 
-export default function LazyImage({ src, alt, className = '', placeholder }: LazyImageProps) {
+export default function LazyImage({ src, alt, className = '', placeholder, srcSet, sizes, width, height }: LazyImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -67,6 +71,11 @@ export default function LazyImage({ src, alt, className = '', placeholder }: Laz
           className={`transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`}
           onLoad={handleLoad}
           onError={handleError}
+          srcSet={srcSet}
+          sizes={sizes}
+          width={width}
+          height={height}
+          loading="lazy"
         />
       )}
 
