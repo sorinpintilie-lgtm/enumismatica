@@ -465,24 +465,44 @@ export async function getUserCollection(userId: string): Promise<CollectionItem[
 
 /**
  * Get user's conversations (admin only)
+ * Tries ordered query first; falls back to simple where() if Firestore index is missing.
  */
 export async function getUserConversations(userId: string): Promise<Conversation[]> {
   try {
     const conversationsRef = collection(db, 'conversations');
-    const q = query(
-      conversationsRef,
-      where('participants', 'array-contains', userId),
-      orderBy('updatedAt', 'desc')
-    );
-    
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate() || new Date(),
-      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-      lastMessageAt: doc.data().lastMessageAt?.toDate(),
-    })) as Conversation[];
+
+    let snapshot;
+    try {
+      // Prefer ordered conversations by updatedAt
+      const q = query(
+        conversationsRef,
+        where('participants', 'array-contains', userId),
+        orderBy('updatedAt', 'desc'),
+      );
+      snapshot = await getDocs(q);
+    } catch (err) {
+      // Fallback without orderBy if index is missing or query fails
+      console.error(
+        'Error fetching user conversations with orderBy, retrying without orderBy:',
+        err,
+      );
+      const fallbackQ = query(
+        conversationsRef,
+        where('participants', 'array-contains', userId),
+      );
+      snapshot = await getDocs(fallbackQ);
+    }
+
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        lastMessageAt: data.lastMessageAt?.toDate(),
+      } as Conversation;
+    });
   } catch (error) {
     console.error('Error fetching user conversations:', error);
     return [];
