@@ -286,7 +286,7 @@ export interface ChatMessage {
   senderId: string;
   senderName?: string;
   senderAvatar?: string;
-  content: string;
+  message: string;
   timestamp: Date;
   editedAt?: Date;
   isRead?: boolean;
