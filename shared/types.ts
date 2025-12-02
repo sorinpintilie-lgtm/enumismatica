@@ -290,3 +290,20 @@ export interface ChatMessage {
   isRead?: boolean;
   attachments?: string[];
 }
+
+/**
+ * AuctionNotification entity representing a notification about auction activity.
+ * Stored in 'users/{userId}/auctionNotifications' subcollection.
+ */
+export interface AuctionNotification {
+  id: string;
+  userId: string;
+  type: 'outbid' | 'auction_won' | 'auction_ended_no_win';
+  message: string;
+  read: boolean;
+  pushed: boolean;
+  createdAt: Date;
+  auctionId?: string;
+  auctionTitle?: string;
+  bidAmount?: number;
+}
