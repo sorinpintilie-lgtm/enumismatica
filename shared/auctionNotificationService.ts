@@ -21,24 +21,26 @@ import { AuctionNotification } from './types';
 export async function createAuctionNotification(
   userId: string,
   type: 'outbid' | 'auction_won' | 'auction_ended_no_win',
-  auctionId: string,
+  auctionId: string | undefined,
   message: string,
   auctionTitle?: string,
   bidAmount?: number
 ): Promise<void> {
   const notificationsRef = collection(db, 'users', userId, 'auctionNotifications');
 
-  const notificationData = {
+  const notificationData: any = {
     userId,
     type,
-    auctionId,
-    auctionTitle,
-    bidAmount,
     message,
     read: false,
     pushed: false,
     createdAt: Timestamp.fromDate(new Date()),
   };
+
+  // Only include optional fields if they have values
+  if (auctionId) notificationData.auctionId = auctionId;
+  if (auctionTitle) notificationData.auctionTitle = auctionTitle;
+  if (bidAmount !== undefined) notificationData.bidAmount = bidAmount;
 
   await addDoc(notificationsRef, notificationData);
 }

@@ -201,6 +201,15 @@ service cloud.firestore {
       allow delete: if isOwner(userId) || isAdmin();
     }
 
+    // User auction notifications subcollection
+    match /users/{userId}/auctionNotifications/{notificationId} {
+      allow read: if isOwner(userId);
+      allow create: if isAuthenticated();
+      allow update: if isOwner(userId) &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
     // User credit transactions subcollection
     // Users can read their own credit history; writes are done by the app logic.
     match /users/{userId}/creditTransactions/{transactionId} {
