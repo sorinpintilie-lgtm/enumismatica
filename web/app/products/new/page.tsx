@@ -8,6 +8,54 @@ import { useAuth } from '../../context/AuthContext';
 import { uploadMultipleImages, validateImageFile } from 'shared/storageService';
 import { useToast } from '../../components/ToastProvider';
 
+// Predefined options for product attributes
+const COUNTRIES = [
+  'România', 'Germania', 'Franța', 'Italia', 'Spania', 'Regatul Unit', 'Austria', 'Elveția',
+  'Rusia', 'Polonia', 'Ungaria', 'Cehia', 'Slovacia', 'Bulgaria', 'Serbia', 'Croația',
+  'Grecia', 'Turcia', 'SUA', 'Canada', 'Australia', 'China', 'Japonia', 'India',
+  'Brazilia', 'Argentina', 'Mexic', 'Africa de Sud', 'Egipt', 'Israel', 'Arabia Saudită'
+];
+
+const METALS = [
+  'Aur', 'Argint', 'Cupru', 'Bronz', 'Oțel', 'Aluminiu', 'Platină', 'Paladiu',
+  'Zinc', 'Nichel', 'Aliaj', 'Cupru-Nichel', 'Argint-Aur', 'Electrum'
+];
+
+const DENOMINATIONS = [
+  '1 Ban', '5 Bani', '10 Bani', '25 Bani', '50 Bani', '1 Leu', '5 Lei', '10 Lei', '20 Lei', '50 Lei', '100 Lei', '200 Lei', '500 Lei',
+  '1 Cent', '2 Cent', '5 Cent', '10 Cent', '20 Cent', '50 Cent', '1 Euro', '2 Euro',
+  '1 Centavo', '5 Centavos', '10 Centavos', '25 Centavos', '50 Centavos', '1 Peso',
+  '1 Kopek', '2 Kopeki', '3 Kopeki', '5 Kopek', '10 Kopek', '15 Kopek', '20 Kopek', '50 Kopek', '1 Ruble',
+  '1 Pfennig', '2 Pfennige', '5 Pfennige', '10 Pfennige', '50 Pfennige', '1 Mark', '2 Mark', '5 Mark',
+  '1 Penny', '3 Pence', '6 Pence', '1 Shilling', '2 Shillings', '1 Pound',
+  '1 Franc', '2 Francs', '5 Francs', '10 Francs', '20 Francs', '50 Francs', '100 Francs',
+  '1 Lira', '2 Lire', '5 Lire', '10 Lire', '20 Lire', '50 Lire', '100 Lire', '500 Lire'
+];
+
+const RARITIES = [
+  { value: 'common', label: 'Comun' },
+  { value: 'uncommon', label: 'Necomun' },
+  { value: 'rare', label: 'Rar' },
+  { value: 'very-rare', label: 'Foarte Rar' },
+  { value: 'extremely-rare', label: 'Extrem de Rar' }
+];
+
+const GRADES = [
+  'VF (Very Fine)', 'XF (Extremely Fine)', 'AU (Almost Uncirculated)', 'MS (Mint State)',
+  'MS-60', 'MS-61', 'MS-62', 'MS-63', 'MS-64', 'MS-65', 'MS-66', 'MS-67', 'MS-68', 'MS-69', 'MS-70',
+  'F (Fine)', 'VG (Very Good)', 'G (Good)', 'AG (About Good)', 'FA (Fair)', 'PR (Poor)',
+  'UNC (Uncirculated)', 'BU (Brilliant Uncirculated)', 'Proof', 'Proof-like'
+];
+
+const ERAS = [
+  'Antică', 'Medievală', 'Renașterea', 'Epoca Modernă', 'Secolul XIX', 'Secolul XX', 'Secolul XXI',
+  '1895-1917', '1917-1991', '1991-Prezent', 'Pre-1917', 'Post-1917', 'Comunism', 'Monarhie'
+];
+
+const CATEGORIES = [
+  'Monede', 'Banknote', 'Medalii', 'Jetoane', 'Insigne', 'Ordine', 'Decorații', 'Altele'
+];
+
 export default function NewProductPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -18,10 +66,12 @@ export default function NewProductPage() {
   const [price, setPrice] = useState('');
   const [country, setCountry] = useState('');
   const [year, setYear] = useState('');
+  const [era, setEra] = useState('');
   const [metal, setMetal] = useState('');
   const [denomination, setDenomination] = useState('');
   const [rarity, setRarity] = useState('');
   const [grade, setGrade] = useState('');
+  const [category, setCategory] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [createAuction, setCreateAuction] = useState(false);
   const [reservePrice, setReservePrice] = useState('');
@@ -136,10 +186,12 @@ export default function NewProductPage() {
         status: 'pending',
         country: country || null,
         year: year ? Number(year) : null,
+        era: era || null,
         metal: metal || null,
         denomination: denomination || null,
         rarity: rarity || null,
         grade: grade || null,
+        category: category || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
@@ -196,7 +248,7 @@ export default function NewProductPage() {
       <div className="max-w-2xl mx-auto bg-navy-900/80 border border-gold-500/40 rounded-2xl p-6 shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
         <h1 className="text-2xl font-bold text-white mb-4">Adaugă un produs</h1>
         <p className="text-sm text-slate-300 mb-6">
-          Completează detaliile produsului tău. După trimitere, produsul (și opțional licitația) vor fi revizuite de un administrator înainte să fie publice.
+          Încarcă imagini, adaugă titlu și descriere, apoi selectează din opțiunile disponibile pentru caracteristicile produsului. După trimitere, produsul (și opțional licitația) vor fi revizuite de un administrator înainte să fie publice.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -246,12 +298,16 @@ export default function NewProductPage() {
               <label className="block text-sm font-medium text-slate-200 mb-1">
                 Țara
               </label>
-              <input
-                type="text"
+              <select
                 className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-              />
+              >
+                <option value="">Selectează țara</option>
+                {COUNTRIES.map(country => (
+                  <option key={country} value={country}>{country}</option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -261,58 +317,108 @@ export default function NewProductPage() {
               <input
                 type="number"
                 min="0"
+                max="2100"
                 className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
+                placeholder="Ex: 2024"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-1">
+                Epocă
+              </label>
+              <select
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                value={era}
+                onChange={(e) => setEra(e.target.value)}
+              >
+                <option value="">Selectează epoca</option>
+                {ERAS.map(era => (
+                  <option key={era} value={era}>{era}</option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-200 mb-1">
                 Metal
               </label>
-              <input
-                type="text"
+              <select
                 className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
                 value={metal}
                 onChange={(e) => setMetal(e.target.value)}
-              />
+              >
+                <option value="">Selectează metalul</option>
+                {METALS.map(metal => (
+                  <option key={metal} value={metal}>{metal}</option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-200 mb-1">
                 Denominație
               </label>
-              <input
-                type="text"
+              <select
                 className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
                 value={denomination}
                 onChange={(e) => setDenomination(e.target.value)}
-              />
+              >
+                <option value="">Selectează denominația</option>
+                {DENOMINATIONS.map(denomination => (
+                  <option key={denomination} value={denomination}>{denomination}</option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-200 mb-1">
                 Raritate
               </label>
-              <input
-                type="text"
+              <select
                 className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
                 value={rarity}
                 onChange={(e) => setRarity(e.target.value)}
-              />
+              >
+                <option value="">Selectează raritatea</option>
+                {RARITIES.map(rarity => (
+                  <option key={rarity.value} value={rarity.value}>{rarity.label}</option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-200 mb-1">
                 Grad / stare
               </label>
-              <input
-                type="text"
+              <select
                 className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
                 value={grade}
                 onChange={(e) => setGrade(e.target.value)}
-              />
+              >
+                <option value="">Selectează gradul</option>
+                {GRADES.map(grade => (
+                  <option key={grade} value={grade}>{grade}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-1">
+                Categorie
+              </label>
+              <select
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="">Selectează categoria</option>
+                {CATEGORIES.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
             </div>
           </div>
 
