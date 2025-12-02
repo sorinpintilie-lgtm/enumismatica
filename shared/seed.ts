@@ -241,43 +241,88 @@ export async function seedProducts(userIds: string[]): Promise<string[]> {
     'UfTK2-0-small.jpg', 'V4ryX-0-small.jpg', 'VV8yA-0-small.jpg'
   ];
   
+  // Existing seed images in Firebase Storage for coins (already uploaded)
+  const storageCoinFiles = [
+    '1763979112991_0_1.jpg',
+    '1763979114876_0_2.jpg',
+    '1763979116387_1_1.jpg',
+    '1763979117146_1_2.jpg',
+    '1763979119136_2_1.jpg',
+    '1763979119811_2_2.jpg',
+    '1763979121148_3_1.jpg',
+    '1763979121786_3_2.jpg',
+    '1763979124135_4_1.jpg',
+    '1763979124710_4_2.jpg',
+    '1763979126146_5_1.jpg',
+    '1763979126580_5_2.jpg',
+    '1763979127180_6_1.jpg',
+    '1763979127653_6_2.jpg',
+    '1763979128286_7_1.jpg',
+    '1763979128718_7_2.jpg',
+    '1763979129351_8_1.jpg',
+    '1763979129777_8_2.jpg',
+    '1763979130466_9_1.jpg',
+    '1763979130842_9_2.jpg',
+    '1763979134287_10_1.jpg',
+    '1763979139776_10_2.jpg',
+    '1763979140442_11_1.jpg',
+    '1763979140795_11_2.jpg',
+    '1763979141392_12_1.jpg',
+    '1763979141757_12_2.jpg',
+    '1763979142320_13_1.jpg',
+    '1763979142706_13_2.jpg',
+    '1763979143297_14_1.jpg',
+    '1763979143654_14_2.jpg',
+    '1763979144196_15_1.jpg',
+    '1763979144564_15_2.jpg',
+    '1763979145186_16_1.jpg',
+    '1763979145532_16_2.jpg',
+    '1763979146135_17_1.jpg',
+    '1763979146506_17_2.jpg',
+    '1763979147068_18_1.jpg',
+    '1763979147432_18_2.jpg',
+    '1763979147994_19_1.jpg',
+    '1763979148359_19_2.jpg',
+    '1763979148912_20_1.jpg',
+    '1763979149286_20_2.jpg',
+    '1763979149893_21_1.jpg',
+    '1763979150240_21_2.jpg',
+    '1763979150761_22_1.jpg',
+    '1763979151176_22_2.jpg',
+    '1763979151802_23_1.jpg',
+    '1763979152256_23_2.jpg',
+    '1763979152809_24_1.jpg',
+    '1763979153172_24_2.jpg',
+  ];
+
+  const buildStorageUrl = (fileName: string) =>
+    `https://firebasestorage.googleapis.com/v0/b/e-numismatica-ro.firebasestorage.app/o/products%2Fseed%2F${encodeURIComponent(
+      fileName,
+    )}?alt=media`;
+
   for (let i = 0; i < products.length; i++) {
-    console.log(`Uploading images for product ${i + 1}/${products.length}...`);
-    
-    // Upload 2 images to Firebase Storage so products use DB-hosted image URLs
-    const imageUrls: string[] = [];
-    try {
-      const img1 = await uploadLocalImage(
-        `/monede/${coinImages[i % coinImages.length]}`,
-        `products/seed/${Date.now()}_${i}_1.jpg`
-      );
-      imageUrls.push(img1);
-      
-      const img2 = await uploadLocalImage(
-        `/monede/${coinImages[(i + 1) % coinImages.length]}`,
-        `products/seed/${Date.now()}_${i}_2.jpg`
-      );
-      imageUrls.push(img2);
-    } catch (error) {
-      console.error(`Failed to upload images for product ${i}:`, error);
-      // Fallback to local paths if upload fails
-      imageUrls.push(`/monede/${coinImages[i % coinImages.length]}`);
-      imageUrls.push(`/monede/${coinImages[(i + 1) % coinImages.length]}`);
-    }
-    
+    console.log(`Assigning storage images for product ${i + 1}/${products.length}...`);
+
+    // Use pre-seeded Storage images instead of uploading from /monede
+    const baseIndex = (2 * i) % storageCoinFiles.length;
+    const imageUrls: string[] = [
+      buildStorageUrl(storageCoinFiles[baseIndex]),
+      buildStorageUrl(storageCoinFiles[(baseIndex + 1) % storageCoinFiles.length]),
+    ];
+
     const productData = {
       ...products[i],
       ownerId: userIds[i % userIds.length],
       images: imageUrls,
     };
-    
+
     const docRef = await addDoc(collection(db, 'products'), {
       ...productData,
       createdAt: Timestamp.fromDate(productData.createdAt),
       updatedAt: Timestamp.fromDate(productData.updatedAt),
     });
     productIds.push(docRef.id);
-    
+
     // Small delay to avoid rate limiting
     await new Promise(resolve => setTimeout(resolve, 100));
   }

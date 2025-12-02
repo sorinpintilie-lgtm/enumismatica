@@ -29,11 +29,18 @@ service firebase.storage {
       allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
     }
 
-    // Seed product images: Admin only
+    // Seed product images: Superadmin/admin only, but *without* strict contentType checks.
+    // This avoids 403s during seeding if the upload metadata doesn't include a contentType.
     match /products/seed/{imageId} {
       allow read: if true; // Public read
-      allow write: if isAdmin() && isValidImageFile();
-      allow delete: if isAdmin();
+
+      // Allow writes for the hard-coded superadmin UID or any user that passes isAdmin().
+      // We intentionally skip isValidImageFile here to avoid failures when contentType is missing.
+      allow write: if isAuthenticated() &&
+                   (request.auth.uid == 'QEm0DSIzylNQIHpQAZlgtWQkYYE3' || isAdmin());
+
+      allow delete: if isAuthenticated() &&
+                    (request.auth.uid == 'QEm0DSIzylNQIHpQAZlgtWQkYYE3' || isAdmin());
     }
 
     // Collection images: Owner or admin can upload/delete, owner can read
