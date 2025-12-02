@@ -242,6 +242,7 @@ export interface CollectionItem {
   category?: string;
   type?: string;
   year?: number;
+  era?: string;
   country?: string;
   denomination?: string;
   metal?: string;
