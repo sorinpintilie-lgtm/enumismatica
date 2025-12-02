@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNotifications } from '../hooks/useChat';
+import { useAuctionNotifications } from '../hooks/useAuctionNotifications';
 import { useAuth } from '../context/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ro } from 'date-fns/locale';
@@ -9,17 +10,35 @@ import Link from 'next/link';
 
 export default function NotificationCenter() {
   const { user } = useAuth();
-  const { 
-    notifications, 
-    unreadCount, 
-    loading, 
+  const {
+    notifications: chatNotifications,
+    unreadCount: chatUnreadCount,
+    loading: chatLoading,
     permissionGranted,
     requestPermission,
-    markAsRead,
-    markAllAsRead,
+    markAsRead: markChatAsRead,
+    markAllAsRead: markAllChatAsRead,
   } = useNotifications(user?.uid || null);
+
+  const {
+    notifications: auctionNotifications,
+    unreadCount: auctionUnreadCount,
+    loading: auctionLoading,
+    markAsRead: markAuctionAsRead,
+    markAllAsRead: markAllAuctionAsRead,
+  } = useAuctionNotifications(user?.uid || null);
+
   const [isOpen, setIsOpen] = useState(false);
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
+
+  // Combine notifications
+  const allNotifications = [
+    ...chatNotifications.map(n => ({ ...n, type: 'chat' as const })),
+    ...auctionNotifications.map(n => ({ ...n, type: 'auction' as const })),
+  ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+  const totalUnreadCount = chatUnreadCount + auctionUnreadCount;
+  const loading = chatLoading || auctionLoading;
 
   useEffect(() => {
     // Check if we should show permission prompt
@@ -36,15 +55,19 @@ export default function NotificationCenter() {
     }
   };
 
-  const handleNotificationClick = async (notificationId: string, conversationId?: string, auctionId?: string) => {
-    await markAsRead(notificationId);
+  const handleNotificationClick = async (notification: any) => {
+    if (notification.type === 'chat') {
+      await markChatAsRead(notification.id);
+    } else {
+      await markAuctionAsRead(notification.id);
+    }
     setIsOpen(false);
-    
+
     // Navigate to the relevant page
-    if (conversationId) {
-      window.location.href = `/messages?conversation=${conversationId}`;
-    } else if (auctionId) {
-      window.location.href = `/auctions/${auctionId}`;
+    if (notification.conversationId) {
+      window.location.href = `/messages?conversation=${notification.conversationId}`;
+    } else if (notification.auctionId) {
+      window.location.href = `/auctions/${notification.auctionId}`;
     }
   };
 
@@ -61,9 +84,9 @@ export default function NotificationCenter() {
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
-        {unreadCount > 0 && (
+        {totalUnreadCount > 0 && (
           <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-            {unreadCount > 99 ? '99+' : unreadCount}
+            {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
           </span>
         )}
       </button>
@@ -82,9 +105,12 @@ export default function NotificationCenter() {
             {/* Header */}
             <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50">
               <h3 className="text-lg font-semibold text-gray-900">Notificări</h3>
-              {unreadCount > 0 && (
+              {totalUnreadCount > 0 && (
                 <button
-                  onClick={markAllAsRead}
+                  onClick={async () => {
+                    await markAllChatAsRead();
+                    await markAllAuctionAsRead();
+                  }}
                   className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                 >
                   Marchează toate ca citite
@@ -131,7 +157,7 @@ export default function NotificationCenter() {
                 <div className="flex justify-center items-center p-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
-              ) : notifications.length === 0 ? (
+              ) : allNotifications.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
                   <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -140,14 +166,10 @@ export default function NotificationCenter() {
                 </div>
               ) : (
                 <div className="divide-y divide-gray-200">
-                  {notifications.map((notification) => (
+                  {allNotifications.map((notification) => (
                     <button
-                      key={notification.id}
-                      onClick={() => handleNotificationClick(
-                        notification.id,
-                        notification.conversationId,
-                        notification.auctionId
-                      )}
+                      key={`${notification.type}-${notification.id}`}
+                      onClick={() => handleNotificationClick(notification)}
                       className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${
                         !notification.read ? 'bg-blue-50' : ''
                       }`}
@@ -159,16 +181,28 @@ export default function NotificationCenter() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-medium text-gray-900">
-                              {notification.senderName}
+                              {notification.type === 'chat' ? (notification.senderName || 'Utilizator') : 'Licitație'}
                             </span>
                             <span className={`text-xs px-2 py-0.5 rounded ${
-                              notification.type === 'new_message' ? 'bg-blue-100 text-blue-800' :
-                              notification.type === 'auction_chat' ? 'bg-amber-100 text-amber-800' :
-                              'bg-green-100 text-green-800'
+                              notification.type === 'chat' ? (
+                                (notification as any).type === 'new_message' ? 'bg-blue-100 text-blue-800' :
+                                (notification as any).type === 'auction_chat' ? 'bg-amber-100 text-amber-800' :
+                                'bg-green-100 text-green-800'
+                              ) : (
+                                (notification as any).type === 'outbid' ? 'bg-red-100 text-red-800' :
+                                (notification as any).type === 'auction_won' ? 'bg-green-100 text-green-800' :
+                                'bg-yellow-100 text-yellow-800'
+                              )
                             }`}>
-                              {notification.type === 'new_message' ? 'Mesaj nou' :
-                               notification.type === 'auction_chat' ? 'Chat licitație' :
-                               'Conversație nouă'}
+                              {notification.type === 'chat' ? (
+                                (notification as any).type === 'new_message' ? 'Mesaj nou' :
+                                (notification as any).type === 'auction_chat' ? 'Chat licitație' :
+                                'Conversație nouă'
+                              ) : (
+                                (notification as any).type === 'outbid' ? 'Depășit' :
+                                (notification as any).type === 'auction_won' ? 'Câștigat' :
+                                'Licitație încheiată'
+                              )}
                             </span>
                           </div>
                           <p className="text-sm text-gray-600 truncate">
@@ -186,7 +220,7 @@ export default function NotificationCenter() {
             </div>
 
             {/* Footer */}
-            {notifications.length > 0 && (
+            {allNotifications.length > 0 && (
               <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
                 <Link
                   href="/messages"

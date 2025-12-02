@@ -19,6 +19,7 @@ import {
 import { db } from './firebaseConfig';
 import { Auction, Bid, AutoBid } from './types';
 import { addAuctionPriceHistory } from './priceHistoryService';
+import { createAuctionNotification } from './auctionNotificationService';
 
 /**
  * Validates if a bid is valid for an auction
@@ -55,6 +56,9 @@ export async function placeBid(auctionId: string, bidAmount: number, userId: str
   const auctionRef = doc(db, 'auctions', auctionId);
   const bidsRef = collection(db, 'auctions', auctionId, 'bids');
 
+  let previousBidderId: string | undefined;
+  let auctionTitle: string | undefined;
+
   await runTransaction(db, async (transaction) => {
     const auctionDoc = await transaction.get(auctionRef);
     if (!auctionDoc.exists()) {
@@ -72,6 +76,12 @@ export async function placeBid(auctionId: string, bidAmount: number, userId: str
     if (!validation.valid) {
       throw new Error(validation.error);
     }
+
+    // Store previous bidder for notification
+    previousBidderId = auction.currentBidderId;
+
+    // Get auction title from product (simplified - in real app might need to fetch product)
+    auctionTitle = `Auction ${auctionId}`;
 
     // Add the bid
     const bidData: Omit<Bid, 'id'> = {
@@ -96,6 +106,22 @@ export async function placeBid(auctionId: string, bidAmount: number, userId: str
     // Process auto-bids
     await processAutoBidsInTransaction(transaction, auctionId, bidAmount, userId);
   });
+
+  // Send notification to previous bidder if they were outbid
+  if (previousBidderId && previousBidderId !== userId) {
+    try {
+      await createAuctionNotification(
+        previousBidderId,
+        'outbid',
+        auctionId,
+        `Ai fost depășit în licitația ${auctionTitle}. Oferta curentă: ${bidAmount.toFixed(2)} RON`,
+        auctionTitle,
+        bidAmount
+      );
+    } catch (error) {
+      console.error('Failed to send outbid notification:', error);
+    }
+  }
 
   // Track price history (outside transaction)
   try {
@@ -303,6 +329,9 @@ async function processAutoBidsInTransaction(
 export async function endAuction(auctionId: string): Promise<void> {
   const auctionRef = doc(db, 'auctions', auctionId);
 
+  let winnerId: string | null = null;
+  let auctionTitle: string | undefined;
+
   await runTransaction(db, async (transaction) => {
     const auctionDoc = await transaction.get(auctionRef);
     if (!auctionDoc.exists()) {
@@ -318,7 +347,8 @@ export async function endAuction(auctionId: string): Promise<void> {
       return; // Already ended
     }
 
-    const winnerId = (auction.currentBid || 0) >= auction.reservePrice ? auction.currentBidderId : null;
+    winnerId = (auction.currentBid || 0) >= auction.reservePrice ? auction.currentBidderId : null;
+    auctionTitle = `Auction ${auctionId}`;
 
     transaction.update(auctionRef, {
       status: 'ended',
@@ -326,4 +356,39 @@ export async function endAuction(auctionId: string): Promise<void> {
       // Could add winnerId if needed
     });
   });
+
+  // Send notification to winner or notify no winner
+  if (winnerId) {
+    try {
+      await createAuctionNotification(
+        winnerId,
+        'auction_won',
+        auctionId,
+        `Felicitări! Ai câștigat licitația ${auctionTitle}`,
+        auctionTitle
+      );
+    } catch (error) {
+      console.error('Failed to send auction won notification:', error);
+    }
+  } else {
+    // Notify all bidders that auction ended without winner
+    try {
+      // Get all bidders from the auction
+      const bidsRef = collection(db, 'auctions', auctionId, 'bids');
+      const bidsSnapshot = await getDocs(bidsRef);
+      const bidderIds = [...new Set(bidsSnapshot.docs.map(doc => doc.data().userId))];
+
+      for (const bidderId of bidderIds) {
+        await createAuctionNotification(
+          bidderId,
+          'auction_ended_no_win',
+          auctionId,
+          `Licitația ${auctionTitle} s-a încheiat fără câștigător`,
+          auctionTitle
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send auction ended notifications:', error);
+    }
+  }
 }

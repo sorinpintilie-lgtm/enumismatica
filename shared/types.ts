@@ -204,6 +204,23 @@ export interface ChatNotification {
 }
 
 /**
+ * Notification entity for auction-related notifications.
+ * Stored in 'users/{userId}/auctionNotifications' subcollection.
+ */
+export interface AuctionNotification {
+  id: string;
+  userId: string; // User receiving the notification
+  type: 'outbid' | 'auction_won' | 'auction_ended_no_win';
+  auctionId: string; // Reference to the auction
+  auctionTitle?: string; // Title of the auction item
+  bidAmount?: number; // Relevant bid amount
+  message: string; // Notification message
+  read: boolean; // Whether the notification has been read
+  pushed: boolean; // Whether push notification was sent
+  createdAt: Date;
+}
+
+/**
  * User presence for typing indicators
  * Stored in 'conversations/{conversationId}/presence/{userId}'
  */
