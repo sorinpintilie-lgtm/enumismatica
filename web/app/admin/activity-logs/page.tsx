@@ -64,10 +64,12 @@ const EVENT_TYPE_LABELS: Record<ActivityEventType, string> = {
   admin_product_edit: '[ADMIN] Editare produs',
   admin_product_delete: '[ADMIN] Ștergere produs',
   admin_logs_view: '[ADMIN] Vizualizare loguri',
+  admin_analytics_access: '[ADMIN] Acces panou analitice',
   // Errors
   error_occurred: '[ERROR] Eroare',
   api_error: '[ERROR] Eroare API',
   payment_error: '[ERROR] Eroare plată',
+  security_error: '[SECURITY] Eroare de securitate',
   // Security
   suspicious_activity: '[SECURITY] Activitate suspectă',
   rate_limit_exceeded: '[SECURITY] Limită de rate depășită',
