@@ -73,6 +73,8 @@ export default function AdminDashboard() {
       },
       (error) => {
         console.error('Realtime activity error:', error);
+        // Don't show error to user, just disable realtime
+        setRealtimeEnabled(false);
       }
     );
 
@@ -87,9 +89,12 @@ export default function AdminDashboard() {
       const conversationId = await startConversation(adminTargetUserId.trim(), undefined, undefined, true);
       router.push(`/messages?conversation=${conversationId}`);
       setAdminTargetUserId('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to start admin chat:', error);
-      alert('Eroare la pornirea conversației de suport');
+      const errorMessage = error?.message?.includes('permission-denied')
+        ? 'Nu aveți permisiunea să creați conversații de suport'
+        : 'Eroare la pornirea conversației de suport';
+      alert(errorMessage);
     } finally {
       setStartingChat(false);
     }
