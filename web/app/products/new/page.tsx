@@ -71,7 +71,6 @@ export default function NewProductPage() {
   const [denomination, setDenomination] = useState('');
   const [rarity, setRarity] = useState('');
   const [grade, setGrade] = useState('');
-  const [category, setCategory] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [createAuction, setCreateAuction] = useState(false);
   const [reservePrice, setReservePrice] = useState('');
@@ -191,7 +190,6 @@ export default function NewProductPage() {
         denomination: denomination || null,
         rarity: rarity || null,
         grade: grade || null,
-        category: category || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
@@ -299,13 +297,18 @@ export default function NewProductPage() {
                 Țara
               </label>
               <select
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20"
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
+                style={{
+                  backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)'
+                }}
               >
-                <option value="" className="bg-navy-900 text-slate-400">Selectează țara</option>
+                <option value="" style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: '#94a3b8' }}>Selectează țara</option>
                 {COUNTRIES.map(country => (
-                  <option key={country} value={country} className="bg-navy-900 text-white">{country}</option>
+                  <option key={country} value={country} style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: 'white' }}>{country}</option>
                 ))}
               </select>
             </div>
@@ -330,13 +333,18 @@ export default function NewProductPage() {
                 Epocă
               </label>
               <select
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20"
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
                 value={era}
                 onChange={(e) => setEra(e.target.value)}
+                style={{
+                  backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)'
+                }}
               >
-                <option value="" className="bg-navy-900 text-slate-400">Selectează epoca</option>
+                <option value="" style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: '#94a3b8' }}>Selectează epoca</option>
                 {ERAS.map(era => (
-                  <option key={era} value={era} className="bg-navy-900 text-white">{era}</option>
+                  <option key={era} value={era} style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: 'white' }}>{era}</option>
                 ))}
               </select>
             </div>
@@ -346,13 +354,18 @@ export default function NewProductPage() {
                 Metal
               </label>
               <select
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20"
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
                 value={metal}
                 onChange={(e) => setMetal(e.target.value)}
+                style={{
+                  backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)'
+                }}
               >
-                <option value="" className="bg-navy-900 text-slate-400">Selectează metalul</option>
+                <option value="" style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: '#94a3b8' }}>Selectează metalul</option>
                 {METALS.map(metal => (
-                  <option key={metal} value={metal} className="bg-navy-900 text-white">{metal}</option>
+                  <option key={metal} value={metal} style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: 'white' }}>{metal}</option>
                 ))}
               </select>
             </div>
@@ -375,13 +388,18 @@ export default function NewProductPage() {
                 Raritate
               </label>
               <select
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20"
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
                 value={rarity}
                 onChange={(e) => setRarity(e.target.value)}
+                style={{
+                  backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)'
+                }}
               >
-                <option value="" className="bg-navy-900 text-slate-400">Selectează raritatea</option>
+                <option value="" style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: '#94a3b8' }}>Selectează raritatea</option>
                 {RARITIES.map(rarity => (
-                  <option key={rarity.value} value={rarity.value} className="bg-navy-900 text-white">{rarity.label}</option>
+                  <option key={rarity.value} value={rarity.value} style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: 'white' }}>{rarity.label}</option>
                 ))}
               </select>
             </div>
@@ -391,32 +409,22 @@ export default function NewProductPage() {
                 Grad / stare
               </label>
               <select
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20"
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
                 value={grade}
                 onChange={(e) => setGrade(e.target.value)}
+                style={{
+                  backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)'
+                }}
               >
-                <option value="" className="bg-navy-900 text-slate-400">Selectează gradul</option>
+                <option value="" style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: '#94a3b8' }}>Selectează gradul</option>
                 {GRADES.map(grade => (
-                  <option key={grade} value={grade} className="bg-navy-900 text-white">{grade}</option>
+                  <option key={grade} value={grade} style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: 'white' }}>{grade}</option>
                 ))}
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-1">
-                Categorie
-              </label>
-              <select
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                <option value="" className="bg-navy-900 text-slate-400">Selectează categoria</option>
-                {CATEGORIES.map(category => (
-                  <option key={category} value={category} className="bg-navy-900 text-white">{category}</option>
-                ))}
-              </select>
-            </div>
           </div>
 
           <div>
