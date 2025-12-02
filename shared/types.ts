@@ -282,7 +282,7 @@ export interface Conversation {
  */
 export interface ChatMessage {
   id: string;
-  conversationId: string;
+  conversationId?: string;
   senderId: string;
   senderName?: string;
   senderAvatar?: string;
