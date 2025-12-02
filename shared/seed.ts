@@ -425,13 +425,38 @@ async function seedWatchlists(
     return;
   }
 
+  if (!productIds.length && !auctionIds.length) {
+    console.log('No products or auctions available to seed watchlists');
+    return;
+  }
+
+  // If Firestore rules block these writes (permission-denied), avoid spamming
+  // the console by detecting it once and skipping the rest of the seeding.
+  let permissionDenied = false;
+
+  const isPermissionError = (err: any): boolean => {
+    if (!err) return false;
+    const code = (err as any).code as string | undefined;
+    const message = (err as any).message as string | undefined;
+    return (
+      code === 'permission-denied' ||
+      (typeof message === 'string' && message.includes('Missing or insufficient permissions'))
+    );
+  };
+
   for (const userId of userIds) {
+    if (permissionDenied) {
+      break;
+    }
+
     try {
       const watchlistRef = collection(db, 'users', userId, 'watchlist');
 
       // Up to 3 random products per user
       const numProducts = Math.min(3, productIds.length);
       for (let i = 0; i < numProducts; i++) {
+        if (permissionDenied) break;
+
         const index = (i + Math.floor(Math.random() * productIds.length)) % productIds.length;
         const productId = productIds[index];
 
@@ -451,17 +476,27 @@ async function seedWatchlists(
             },
           });
         } catch (err) {
-          console.error(
-            'Failed to seed product watchlist entry',
-            { userId, productId },
-            err,
-          );
+          if (isPermissionError(err)) {
+            permissionDenied = true;
+            console.warn(
+              'Watchlist seeding skipped due to Firestore security rules (permission-denied).',
+              { userId, productId },
+            );
+          } else {
+            console.error(
+              'Failed to seed product watchlist entry',
+              { userId, productId },
+              err,
+            );
+          }
         }
       }
 
       // Up to 2 random auctions per user
       const numAuctions = Math.min(2, auctionIds.length);
       for (let i = 0; i < numAuctions; i++) {
+        if (permissionDenied) break;
+
         const index = (i + Math.floor(Math.random() * auctionIds.length)) % auctionIds.length;
         const auctionId = auctionIds[index];
 
@@ -481,19 +516,41 @@ async function seedWatchlists(
             },
           });
         } catch (err) {
-          console.error(
-            'Failed to seed auction watchlist entry',
-            { userId, auctionId },
-            err,
-          );
+          if (isPermissionError(err)) {
+            permissionDenied = true;
+            console.warn(
+              'Watchlist seeding skipped due to Firestore security rules (permission-denied).',
+              { userId, auctionId },
+            );
+          } else {
+            console.error(
+              'Failed to seed auction watchlist entry',
+              { userId, auctionId },
+              err,
+            );
+          }
         }
       }
     } catch (userErr) {
-      console.error('Failed to seed watchlist for user', userId, userErr);
+      if (isPermissionError(userErr)) {
+        permissionDenied = true;
+        console.warn(
+          'Watchlist seeding skipped for remaining users due to Firestore security rules (permission-denied).',
+          { userId },
+        );
+      } else {
+        console.error('Failed to seed watchlist for user', userId, userErr);
+      }
     }
   }
 
-  console.log('Watchlists seeded for users (best effort)');
+  if (permissionDenied) {
+    console.warn(
+      'Watchlist seeding could not complete due to Firestore security rules. This only affects sample watchlists; the rest of the sample data was seeded successfully.',
+    );
+  } else {
+    console.log('Watchlists seeded for users (best effort)');
+  }
 }
 
 
