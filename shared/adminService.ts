@@ -580,10 +580,8 @@ export async function getUserAnalytics(userId: string): Promise<{
     const collectionItems = collectionSnapshot.docs.map(doc => doc.data());
     const collectionValue = collectionItems.reduce((sum, item) => sum + (item.currentValue || 0), 0);
 
-    // Get user's conversations
-    const conversationsRef = collection(db, 'conversations');
-    const conversationsQuery = query(conversationsRef, where('participants', 'array-contains', userId));
-    const conversationsSnapshot = await getDocs(conversationsQuery);
+    // Get user's conversations (shared logic with admin conversations view)
+    const userConversations = await getUserConversations(userId);
 
     return {
       totalProducts: products.length,
@@ -595,7 +593,7 @@ export async function getUserAnalytics(userId: string): Promise<{
       endedAuctions: auctions.filter(a => a.status === 'ended').length,
       totalBids,
       totalCollectionItems: collectionSnapshot.size,
-      totalConversations: conversationsSnapshot.size,
+      totalConversations: userConversations.length,
       collectionValue,
     };
   } catch (error) {
