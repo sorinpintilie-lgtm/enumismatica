@@ -246,6 +246,8 @@ export interface CollectionItem {
   country?: string;
   denomination?: string;
   metal?: string;
+  grade?: string;
+  mintMark?: string;
   weight?: number;
   diameter?: number;
   condition?: string;
