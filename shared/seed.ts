@@ -242,15 +242,28 @@ export async function seedProducts(userIds: string[]): Promise<string[]> {
   ];
   
   for (let i = 0; i < products.length; i++) {
-    console.log(`Assigning images for product ${i + 1}/${products.length}...`);
+    console.log(`Uploading images for product ${i + 1}/${products.length}...`);
     
-    // For seeding, always use local /monede paths and avoid Firebase Storage writes.
-    // This prevents noisy 403 (storage/unauthorized) errors when Storage rules
-    // are locked down, while still giving products valid image URLs.
-    const imageUrls: string[] = [
-      `/monede/${coinImages[i % coinImages.length]}`,
-      `/monede/${coinImages[(i + 1) % coinImages.length]}`,
-    ];
+    // Upload 2 images to Firebase Storage so products use DB-hosted image URLs
+    const imageUrls: string[] = [];
+    try {
+      const img1 = await uploadLocalImage(
+        `/monede/${coinImages[i % coinImages.length]}`,
+        `products/seed/${Date.now()}_${i}_1.jpg`
+      );
+      imageUrls.push(img1);
+      
+      const img2 = await uploadLocalImage(
+        `/monede/${coinImages[(i + 1) % coinImages.length]}`,
+        `products/seed/${Date.now()}_${i}_2.jpg`
+      );
+      imageUrls.push(img2);
+    } catch (error) {
+      console.error(`Failed to upload images for product ${i}:`, error);
+      // Fallback to local paths if upload fails
+      imageUrls.push(`/monede/${coinImages[i % coinImages.length]}`);
+      imageUrls.push(`/monede/${coinImages[(i + 1) % coinImages.length]}`);
+    }
     
     const productData = {
       ...products[i],

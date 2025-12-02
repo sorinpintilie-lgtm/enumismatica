@@ -68,11 +68,15 @@ service cloud.firestore {
       // User's watchlist subcollection
       match /watchlist/{itemId} {
         allow read: if isOwner(userId) || isAdmin();
-        allow create: if isOwner(userId) &&
+
+        // Normal users can manage their own watchlist.
+        // Admins/superadmins can also create watchlist entries for any user (needed for seeding/sample data).
+        allow create: if (isOwner(userId) || isAdmin()) &&
                       hasRequiredFields(request.resource.data, ['userId', 'itemType', 'itemId', 'addedAt']) &&
                       request.resource.data.userId == userId &&
                       request.resource.data.itemType in ['product', 'auction'] &&
                       isValidTimestamp(request.resource.data.addedAt);
+
         allow update: if isOwner(userId) || isAdmin();
         allow delete: if isOwner(userId) || isAdmin();
       }
