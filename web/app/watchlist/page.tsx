@@ -10,11 +10,11 @@ import AuctionCard from '../components/AuctionCard';
 import { WatchlistButton } from '../components/WatchlistButton';
 
 export default function WatchlistPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const {
     watchlist,
-    loading,
+    loading: watchlistLoading,
     error,
     fetchWatchlist,
     removeFromWatchlist,
@@ -25,12 +25,12 @@ export default function WatchlistPage() {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [selectMode, setSelectMode] = useState<boolean>(false);
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated (only after auth state is resolved)
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       router.push('/login');
     }
-  }, [user, router]);
+  }, [authLoading, user, router]);
 
   // Refresh watchlist when tab changes
   useEffect(() => {
@@ -92,6 +92,14 @@ export default function WatchlistPage() {
   // Group watchlist items by type for display
   const productsInWatchlist = watchlist.filter(item => item.itemType === 'product');
   const auctionsInWatchlist = watchlist.filter(item => item.itemType === 'auction');
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-navy-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-400"></div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -187,7 +195,7 @@ export default function WatchlistPage() {
         </div>
 
         {/* Loading state */}
-        {loading && (
+        {watchlistLoading && (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-400"></div>
           </div>
@@ -207,7 +215,7 @@ export default function WatchlistPage() {
         )}
 
         {/* Empty state */}
-        {watchlist.length === 0 && !loading && !error && (
+        {watchlist.length === 0 && !watchlistLoading && !error && (
           <div className="text-center py-16">
             <div className="mx-auto mb-6">
               <svg className="w-20 h-20 text-gray-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,7 +244,7 @@ export default function WatchlistPage() {
         )}
 
         {/* Watchlist content */}
-        {watchlist.length > 0 && !loading && !error && (
+        {watchlist.length > 0 && !watchlistLoading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredWatchlist.map((item) => (
               <div key={item.id} className="relative group">

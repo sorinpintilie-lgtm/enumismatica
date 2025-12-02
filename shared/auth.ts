@@ -110,10 +110,11 @@ export const signInWithGoogle = async (referralCode?: string) => {
 };
 
 export const logout = async () => {
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      // Log the logout before signing out
+  const user = auth.currentUser;
+
+  // Never block sign-out on logging errors
+  if (user) {
+    try {
       await logActivity(
         user.uid,
         'user_logout',
@@ -121,7 +122,12 @@ export const logout = async () => {
         user.email || undefined,
         user.displayName || undefined
       );
+    } catch (error) {
+      console.error('Failed to log logout activity:', error);
     }
+  }
+
+  try {
     await signOut(auth);
     return { error: null };
   } catch (error: any) {
