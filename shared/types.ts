@@ -2,6 +2,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  displayName?: string;
+  avatar?: string;
   role: 'user' | 'admin' | 'moderator';
   createdAt: Date;
   lastLogin?: Date;
