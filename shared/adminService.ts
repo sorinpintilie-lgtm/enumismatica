@@ -85,12 +85,17 @@ export async function removeAdminRole(userId: string, isCurrentUserAdmin: boolea
 export async function getAllUsers(): Promise<User[]> {
   try {
     const usersSnapshot = await getDocs(collection(db, 'users'));
-    return usersSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate() || new Date(),
-      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-    })) as User[];
+    return usersSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        email: data.email || '',
+        name: data.name || '',
+        role: data.role || 'user',
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+      } as User;
+    });
   } catch (error) {
     console.error('Error fetching users:', error);
     return [];
