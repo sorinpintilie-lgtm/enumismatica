@@ -1,13 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { ConversationList, PrivateChat } from '../components/PrivateChat';
 import Link from 'next/link';
 
 export default function MessagesPage() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+
+  // Read conversation from URL params
+  useEffect(() => {
+    const conversationParam = searchParams.get('conversation');
+    if (conversationParam) {
+      setSelectedConversationId(conversationParam);
+    }
+  }, [searchParams]);
 
   if (!user) {
     return (

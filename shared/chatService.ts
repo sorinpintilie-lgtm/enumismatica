@@ -141,29 +141,45 @@ export async function sendPrivateMessage(
 }
 
 /**
- * Create or get a conversation between buyer and seller
+ * Create or get a conversation between buyer and seller, or admin support chat
  */
 export async function createOrGetConversation(
   buyerId: string,
   sellerId: string,
   auctionId?: string,
-  productId?: string
+  productId?: string,
+  isAdminSupport: boolean = false
 ): Promise<string> {
   if (!db) throw new Error('Firestore not initialized');
 
   // Check if conversation already exists
   const conversationsRef = collection(db, 'conversations');
-  const q = query(
-    conversationsRef,
-    where('participants', 'array-contains', buyerId)
-  );
+  let q;
+
+  if (isAdminSupport) {
+    // For admin support, check if admin already has a support conversation with this user
+    q = query(
+      conversationsRef,
+      where('participants', 'array-contains', buyerId),
+      where('isAdminSupport', '==', true)
+    );
+  } else {
+    q = query(
+      conversationsRef,
+      where('participants', 'array-contains', buyerId)
+    );
+  }
 
   const snapshot = await getDocs(q);
   const existingConversation = snapshot.docs.find(doc => {
     const data = doc.data() as Conversation;
-    return data.participants.includes(sellerId) && 
-           (auctionId ? data.auctionId === auctionId : true) &&
-           (productId ? data.productId === productId : true);
+    if (isAdminSupport) {
+      return data.participants.includes(sellerId) && data.isAdminSupport === true;
+    } else {
+      return data.participants.includes(sellerId) &&
+             (auctionId ? data.auctionId === auctionId : true) &&
+             (productId ? data.productId === productId : true);
+    }
   });
 
   if (existingConversation) {
@@ -171,7 +187,7 @@ export async function createOrGetConversation(
   }
 
   // Create new conversation
-  const conversationData: Omit<Conversation, 'id'> = {
+  const conversationData: any = {
     auctionId,
     productId,
     buyerId,
@@ -185,6 +201,10 @@ export async function createOrGetConversation(
     createdAt: new Date(),
     updatedAt: new Date(),
   };
+
+  if (isAdminSupport) {
+    conversationData.isAdminSupport = true;
+  }
 
   const docRef = await addDoc(conversationsRef, {
     ...conversationData,

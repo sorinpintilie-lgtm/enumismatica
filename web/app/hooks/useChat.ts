@@ -333,7 +333,8 @@ export function useConversations(userId: string | null) {
     async (
       sellerId: string,
       auctionId?: string,
-      productId?: string
+      productId?: string,
+      isAdminSupport: boolean = false
     ): Promise<string> => {
       if (!userId) throw new Error('User not authenticated');
 
@@ -342,7 +343,8 @@ export function useConversations(userId: string | null) {
           userId,
           sellerId,
           auctionId,
-          productId
+          productId,
+          isAdminSupport
         );
         return conversationId;
       } catch (err: any) {

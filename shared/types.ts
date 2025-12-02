@@ -181,6 +181,7 @@ export interface Conversation {
   unreadCount: { [userId: string]: number }; // Unread message count per user
   typingUsers?: string[]; // Array of user IDs currently typing
   status: 'active' | 'archived' | 'closed'; // Conversation status
+  isAdminSupport?: boolean; // Whether this is an admin support conversation
   createdAt: Date;
   updatedAt: Date;
 }

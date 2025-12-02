@@ -33,6 +33,11 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
   const [showSearch, setShowSearch] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Check if this is an admin support conversation
+  const isAdminChat = messages.length > 0 && messages.some(msg =>
+    msg.senderId !== user?.uid && user?.role === 'user'
+  ); // If user is normal user and receives messages from someone else, likely admin
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -141,13 +146,22 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
   return (
     <div className="rounded-2xl bg-navy-900/80 border border-gold-500/30 shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col h-full">
       {/* Header */}
-      <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-navy-900 px-4 py-3 border-b border-gold-500/30">
+      <div className={`px-4 py-3 border-b border-gold-500/30 ${
+        isAdminChat ? 'bg-gradient-to-r from-amber-900/80 via-orange-900/80 to-red-900/80' : 'bg-gradient-to-r from-navy-900 via-navy-800 to-navy-900'
+      }`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <svg className="w-5 h-5 text-[#e7b73c]" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
             </svg>
-            <h3 className="text-white font-semibold">Conversație Privată</h3>
+            <h3 className="text-white font-semibold">
+              {isAdminChat ? 'Suport Admin' : 'Conversație Privată'}
+            </h3>
+            {isAdminChat && (
+              <span className="bg-amber-500 text-amber-900 text-xs px-2 py-1 rounded-full font-bold">
+                SUPORT
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -275,12 +289,32 @@ interface ConversationListProps {
 
 export function ConversationList({ onSelectConversation, selectedConversationId }: ConversationListProps) {
   const { user } = useAuth();
-  const { conversations, loading, totalUnreadCount } = useConversations(user?.uid || null);
+  const { conversations, loading, totalUnreadCount, startConversation } = useConversations(user?.uid || null);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [adminTargetUserId, setAdminTargetUserId] = useState('');
+
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
   const getOtherUserName = (conversation: Conversation) => {
     // This would need to be enhanced to fetch actual user names
     const otherUserId = conversation.participants.find(id => id !== user?.uid);
+    if (conversation.isAdminSupport) {
+      return otherUserId === user?.uid ? 'Suport Admin' : `Utilizator ${otherUserId?.slice(-4)}`;
+    }
     return `Utilizator ${otherUserId?.slice(-4)}`;
+  };
+
+  const handleStartAdminChat = async () => {
+    if (!adminTargetUserId.trim() || !user) return;
+
+    try {
+      const conversationId = await startConversation(adminTargetUserId.trim(), undefined, undefined, true);
+      onSelectConversation(conversationId);
+      setAdminTargetUserId('');
+      setShowAdminPanel(false);
+    } catch (error) {
+      console.error('Failed to start admin chat:', error);
+    }
   };
 
   if (!user) {
@@ -294,12 +328,49 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
   return (
     <div className="rounded-2xl bg-navy-900/80 border border-gold-500/30 shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-navy-900 px-4 py-3 flex items-center justify-between">
-        <h3 className="text-white font-semibold">Conversații</h3>
-        {totalUnreadCount > 0 && (
-          <span className="bg-[#e7b73c] text-[#000940] text-xs font-bold px-2 py-1 rounded-full">
-            {totalUnreadCount}
-          </span>
+      <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-navy-900 px-4 py-3">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-white font-semibold">Conversații</h3>
+          <div className="flex items-center gap-2">
+            {totalUnreadCount > 0 && (
+              <span className="bg-[#e7b73c] text-[#000940] text-xs font-bold px-2 py-1 rounded-full">
+                {totalUnreadCount}
+              </span>
+            )}
+            {isAdmin && (
+              <button
+                onClick={() => setShowAdminPanel(!showAdminPanel)}
+                className="text-gold-200 hover:text-white transition-colors text-sm px-3 py-1 rounded border border-gold-500/30 hover:border-gold-500/60"
+              >
+                Suport Admin
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Admin Support Panel */}
+        {showAdminPanel && isAdmin && (
+          <div className="border-t border-gold-500/20 pt-3">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={adminTargetUserId}
+                onChange={(e) => setAdminTargetUserId(e.target.value)}
+                placeholder="ID utilizator..."
+                className="flex-1 px-3 py-2 text-sm rounded bg-navy-800 text-slate-50 placeholder-slate-400 border border-gold-500/40 focus:outline-none focus:ring-1 focus:ring-gold-500"
+              />
+              <button
+                onClick={handleStartAdminChat}
+                disabled={!adminTargetUserId.trim()}
+                className="px-4 py-2 bg-[#e7b73c] text-[#000940] text-sm rounded hover:bg-[#f0c955] disabled:bg-navy-700 disabled:text-slate-400 transition-colors font-medium"
+              >
+                Chat
+              </button>
+            </div>
+            <p className="text-xs text-slate-400 mt-2">
+              Introduceți ID-ul utilizatorului pentru a începe o conversație de suport
+            </p>
+          </div>
         )}
       </div>
 
@@ -321,6 +392,7 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
           conversations.map((conversation) => {
             const isSelected = conversation.id === selectedConversationId;
             const unreadCount = user?.uid ? (conversation.unreadCount[user.uid] || 0) : 0;
+            const isAdminChat = conversation.isAdminSupport;
 
             return (
               <button
@@ -328,7 +400,7 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
                 onClick={() => onSelectConversation(conversation.id)}
                 className={`w-full p-4 text-left hover:bg-navy-900/60 transition-colors ${
                   isSelected ? 'bg-navy-900/80 border-l-4 border-[#e7b73c]' : ''
-                }`}
+                } ${isAdminChat ? 'bg-gradient-to-r from-amber-900/20 to-orange-900/20 border-r-2 border-amber-500/50' : ''}`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
