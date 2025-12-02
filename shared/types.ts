@@ -248,6 +248,7 @@ export interface CollectionItem {
   metal?: string;
   grade?: string;
   mintMark?: string;
+  rarity?: string;
   weight?: number;
   diameter?: number;
   condition?: string;
