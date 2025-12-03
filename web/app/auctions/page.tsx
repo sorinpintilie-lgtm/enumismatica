@@ -20,10 +20,11 @@ function AuctionsListContent() {
   const [filters, setFilters] = useState<FilterOptions>({
     searchTerm: '',
     country: 'Toate Țările',
+    // 0 values mean "no filter" for price and year
     minPrice: 0,
-    maxPrice: 10000,
-    minYear: 1, // Ancient coins start from year 1 AD
-    maxYear: new Date().getFullYear(),
+    maxPrice: 0,
+    minYear: 0,
+    maxYear: 0,
     metal: 'Toate Metalele',
     rarity: 'Toate Raritățile',
     grade: 'Toate Gradele',
@@ -80,14 +81,24 @@ function AuctionsListContent() {
 
       // Price range filter (using current bid or reserve price)
       const auctionPrice = auction.currentBid || auction.reservePrice;
-      if (auctionPrice < filters.minPrice || auctionPrice > filters.maxPrice) {
-        return false;
+      if (filters.minPrice > 0 || filters.maxPrice > 0) {
+        if (filters.minPrice > 0 && auctionPrice < filters.minPrice) {
+          return false;
+        }
+        if (filters.maxPrice > 0 && auctionPrice > filters.maxPrice) {
+          return false;
+        }
       }
 
       // Year range filter
-      if (filters.minYear || filters.maxYear) {
-        if (!product.year) return false;
-        if (product.year < filters.minYear || product.year > filters.maxYear) {
+      if (filters.minYear > 0 || filters.maxYear > 0) {
+        // Keep auctions whose product year is missing, even when year filter is active
+        if (!product.year) return true;
+
+        if (filters.minYear > 0 && product.year < filters.minYear) {
+          return false;
+        }
+        if (filters.maxYear > 0 && product.year > filters.maxYear) {
           return false;
         }
       }
@@ -265,23 +276,29 @@ function AuctionsListContent() {
               ? 'Încearcă să ajustezi căutarea sau filtrele'
               : 'Nu există licitații disponibile momentan'}
           </p>
-          {filters.searchTerm && (
-            <button
-              onClick={() =>
-                setFilters({
-                  ...filters,
-                  searchTerm: '',
-                  country: 'Toate Țările',
-                  metal: 'Toate Metalele',
-                  rarity: 'Toate Raritățile',
-                  grade: 'Toate Gradele',
-                })
-              }
-              className="bg-gold-500 hover:bg-gold-600 text-white px-6 py-2 rounded-xl font-semibold transition-colors shadow-lg shadow-gold-500/30"
-            >
-              Șterge Filtrele
-            </button>
-          )}
+         {filters.searchTerm && (
+           <button
+             onClick={() =>
+               setFilters({
+                 ...filters,
+                 searchTerm: '',
+                 country: 'Toate Țările',
+                 metal: 'Toate Metalele',
+                 rarity: 'Toate Raritățile',
+                 grade: 'Toate Gradele',
+                 // Reset numeric filters to "no filter"
+                 minPrice: 0,
+                 maxPrice: 0,
+                 minYear: 0,
+                 maxYear: 0,
+                 sortBy: 'best-match',
+               })
+             }
+             className="bg-gold-500 hover:bg-gold-600 text-white px-6 py-2 rounded-xl font-semibold transition-colors shadow-lg shadow-gold-500/30"
+           >
+             Șterge Filtrele
+           </button>
+         )}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
