@@ -98,6 +98,19 @@ export interface Product {
   promotedAt?: Date;
   promotionExpiresAt?: Date;
 
+  /**
+   * Direct shop sale state:
+   *  - isSold / soldAt: mark when the product has been bought.
+   *  - buyerId: who bought it.
+   *  - orderId: reference to the order in 'orders' collection.
+   *
+   * These are set by the orderService / payment flow.
+   */
+  isSold?: boolean;
+  soldAt?: Date;
+  buyerId?: string;
+  orderId?: string;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -484,4 +497,27 @@ export interface PriceHistory {
   source: 'manual' | 'auction_bid' | 'market_update' | 'system';
   note?: string;
   timestamp: Date;
+}
+
+/**
+ * Order entity representing a direct purchase from the shop.
+ * Stored in 'orders' collection.
+ *
+ * For future Netopia integration:
+ *  - create with status "pending" and paymentProvider "netopia"
+ *  - set paymentReference once the payment is initiated
+ *  - update status to "paid" from a secure Netopia callback handler.
+ */
+export interface Order {
+  id: string;
+  productId: string;
+  buyerId: string;
+  sellerId: string;
+  price: number;
+  currency: 'RON';
+  status: 'pending' | 'paid' | 'cancelled' | 'failed' | 'refunded';
+  paymentProvider: 'manual' | 'netopia';
+  paymentReference: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }

@@ -6,15 +6,19 @@ import Link from 'next/link';
 import { useProduct } from '../../hooks/useProducts';
 import PriceEvolutionChart from '../../components/PriceEvolutionChart';
 import { useToast } from '../../components/ToastProvider';
+import { useAuth } from '../../context/AuthContext';
+import { createDirectOrderForProduct } from 'shared/orderService';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const { product, loading, error } = useProduct(id);
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [buying, setBuying] = useState(false);
 
   const images = product?.images ?? [];
 
@@ -34,6 +38,59 @@ export default function ProductDetailPage() {
   const showNextImage = () => {
     if (!images.length) return;
     setLightboxIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const handleBuy = async () => {
+    if (!product) return;
+
+    if (!user) {
+      showToast({
+        type: 'error',
+        title: 'Autentificare necesară',
+        message: 'Trebuie să te autentifici pentru a cumpăra acest produs.',
+      });
+      return;
+    }
+
+    if (product.ownerId === user.uid) {
+      showToast({
+        type: 'error',
+        title: 'Nu poți cumpăra propriul produs',
+        message: 'Ești deja proprietarul acestui produs.',
+      });
+      return;
+    }
+
+    if ((product as any).isSold) {
+      showToast({
+        type: 'error',
+        title: 'Produs indisponibil',
+        message: 'Acest produs a fost deja vândut.',
+      });
+      return;
+    }
+
+    try {
+      setBuying(true);
+      const orderId = await createDirectOrderForProduct(product.id, user.uid);
+
+      showToast({
+        type: 'success',
+        title: 'Cumpărare reușită',
+        message: `Ai cumpărat acest produs. Comanda ta a fost înregistrată (ID: ${orderId}). Momentan plata este simulată, integrarea Netopia va fi adăugată ulterior.`,
+      });
+    } catch (error) {
+      console.error('Failed to buy product:', error);
+      const message =
+        error instanceof Error ? error.message : 'A apărut o eroare la cumpărarea produsului.';
+      showToast({
+        type: 'error',
+        title: 'Eroare la cumpărare',
+        message,
+      });
+    } finally {
+      setBuying(false);
+    }
   };
 
   if (loading) {
@@ -132,21 +189,31 @@ export default function ProductDetailPage() {
               </div>
 
               <div>
-                <p className="text-4xl font-bold text-[#e7b73c] mb-4">
+                <p className="text-4xl font-bold text-[#e7b73c] mb-2">
                   {product.price.toFixed(2)} RON
                 </p>
+                {product.isSold && (
+                  <p className="text-sm font-semibold text-red-300 mb-2">
+                    Acest produs a fost vândut și nu mai este disponibil.
+                  </p>
+                )}
                 <button
                   type="button"
-                  onClick={() =>
-                    showToast({
-                      type: 'success',
-                      title: 'Adăugat în coș',
-                      message: `${product.name} a fost adăugat în coșul tău (simulare vizuală).`,
-                    })
+                  onClick={handleBuy}
+                  disabled={
+                    buying ||
+                    product.isSold === true ||
+                    (!!user && product.ownerId === user.uid)
                   }
-                  className="w-full bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-6 py-3 rounded-xl font-semibold text-lg transition-colors duration-200 shadow-[0_0_24px_rgba(231,183,60,0.8)]"
+                  className="w-full bg-[#e7b73c] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/50 disabled:text-slate-700 text-[#000940] px-6 py-3 rounded-xl font-semibold text-lg transition-colors duration-200 shadow-[0_0_24px_rgba(231,183,60,0.8)]"
                 >
-                  Adaugă în coș
+                  {product.isSold
+                    ? 'Deja vândut'
+                    : !!user && product.ownerId === user.uid
+                    ? 'Ești proprietarul acestui produs'
+                    : buying
+                    ? 'Se procesează cumpărarea...'
+                    : 'Cumpără acum (plata Netopia va fi adăugată)'}
                 </button>
               </div>
 

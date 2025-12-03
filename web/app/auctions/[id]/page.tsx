@@ -15,6 +15,7 @@ import PriceEvolutionChart from '../../components/PriceEvolutionChart';
 import BidHistoryChart from '../../components/BidHistoryChart';
 import { formatRON } from '../../utils/currency';
 import type { AutoBid } from 'shared/types';
+import { logEvent } from '../../hooks/useActivityLogger';
 
 const bidSchema = z.object({
   amount: z.number().positive('Bid amount must be positive'),
@@ -178,6 +179,11 @@ export default function AuctionDetailPage() {
 
     try {
       await buyNowAuction(id, user.uid);
+      await logEvent(user, 'auction_win', {
+        auctionId: id,
+        method: 'buy_now',
+        finalPrice: auction?.buyNowPrice ?? null,
+      });
       showToast({
         type: 'success',
         title: 'Cumpărare instant',
@@ -210,6 +216,11 @@ export default function AuctionDetailPage() {
       if (confirmAction.type === 'manual') {
         const amount = confirmAction.amount;
         await placeBid(id, amount, user.uid);
+        await logEvent(user, 'auction_bid', {
+          auctionId: id,
+          bidAmount: amount,
+          source: 'auction_detail',
+        });
         lastManualBidAmountRef.current = amount;
         setBidAmount('');
         showToast({
@@ -234,6 +245,10 @@ export default function AuctionDetailPage() {
           title: 'Licitare automată activată',
           message: `Vom licita automat pentru tine până la ${formatRON(amount)}.`,
         });
+        await logEvent(user, 'auction_auto_bid_set', {
+          auctionId: id,
+          maxAmount: amount,
+        });
       } else if (confirmAction.type === 'cancel-auto') {
         await cancelAutoBid(id, user.uid);
         setUserAutoBid(null);
@@ -241,6 +256,9 @@ export default function AuctionDetailPage() {
           type: 'success',
           title: 'Licitare automată anulată',
           message: 'Licitarea automată a fost dezactivată pentru această licitație.',
+        });
+        await logEvent(user, 'auction_auto_bid_cancel', {
+          auctionId: id,
         });
       }
     } catch (error) {

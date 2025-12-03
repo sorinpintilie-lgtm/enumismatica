@@ -9,6 +9,7 @@ import { useProduct } from '../hooks/useProducts';
 import { formatRON } from '../utils/currency';
 import { useToast } from './ToastProvider';
 import { WatchlistButton } from './WatchlistButton';
+import { logEvent } from '../hooks/useActivityLogger';
 
 interface AuctionCardProps {
   auction: Auction;
@@ -68,6 +69,11 @@ function AuctionCard({ auction, showWatchlistButton = true }: AuctionCardProps) 
     try {
       const amount = parseFloat(bidAmount);
       await placeBid(auction.id, amount, user.uid);
+      await logEvent(user, 'auction_bid', {
+        auctionId: auction.id,
+        bidAmount: amount,
+        source: 'auction_card',
+      });
       setBidAmount('');
       showToast({
         type: 'success',
@@ -86,7 +92,7 @@ function AuctionCard({ auction, showWatchlistButton = true }: AuctionCardProps) 
     } finally {
       setBidLoading(false);
     }
-  }, [auction.id, bidAmount, user, showToast]);
+  }, [auction.id, bidAmount, user, showToast, logEvent]);
 
   const isEnded = new Date() > auction.endTime;
   const currentBid = auction.currentBid || auction.reservePrice;
