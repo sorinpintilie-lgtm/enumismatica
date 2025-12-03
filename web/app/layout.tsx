@@ -12,6 +12,16 @@ export const metadata: Metadata = {
     icon: '/eNumismatica.ro_logo.ico',
     shortcut: '/eNumismatica.ro_logo.ico',
   },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+  },
 }
  
 export default function RootLayout({
@@ -21,6 +31,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ro">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="format-detection" content="telephone=no" />
+      </head>
       <body className="antialiased text-white selection:bg-gold-500 selection:text-navy-900 bg-gradient-to-b from-navy-500 via-navy-600 to-navy-900">
         <ScrollToTop />
         <ClientProvider>
