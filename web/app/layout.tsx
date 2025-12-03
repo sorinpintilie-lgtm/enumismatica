@@ -3,6 +3,7 @@ import './globals.css'
 import ClientProvider from './components/ClientProvider'
 import NavigationWrapper from './components/NavigationWrapper'
 import ScrollToTop from './components/ScrollToTop'
+import LoadingSpinner from './components/LoadingSpinner'
  
 export const metadata: Metadata = {
   title: 'eNumismatica - Magazin de Monede & Licitatii',

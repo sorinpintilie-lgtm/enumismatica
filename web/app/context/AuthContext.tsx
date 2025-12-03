@@ -27,36 +27,52 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+      if (!mounted) return;
+
       if (firebaseUser) {
-        // Fetch user role from Firestore
+        // Fetch user role from Firestore with caching
         try {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           const userData = userDoc.data();
           const role = userData?.role || 'user';
-          
-          setUser({
-            ...firebaseUser,
-            role,
-            isAdmin: role === 'admin' || role === 'superadmin',
-            isSuperAdmin: role === 'superadmin',
-            displayName: firebaseUser.displayName || firebaseUser.email || 'User',
-          } as ExtendedUser);
+
+          if (mounted) {
+            setUser({
+              ...firebaseUser,
+              role,
+              isAdmin: role === 'admin' || role === 'superadmin',
+              isSuperAdmin: role === 'superadmin',
+              displayName: firebaseUser.displayName || firebaseUser.email || 'User',
+            } as ExtendedUser);
+          }
         } catch (error) {
           console.error('Failed to fetch user role:', error);
-          setUser({
-            ...firebaseUser,
-            role: 'user',
-            isAdmin: false,
-            displayName: firebaseUser.displayName || firebaseUser.email || 'User',
-          } as ExtendedUser);
+          if (mounted) {
+            setUser({
+              ...firebaseUser,
+              role: 'user',
+              isAdmin: false,
+              displayName: firebaseUser.displayName || firebaseUser.email || 'User',
+            } as ExtendedUser);
+          }
         }
       } else {
-        setUser(null);
+        if (mounted) {
+          setUser(null);
+        }
       }
-      setLoading(false);
+      if (mounted) {
+        setLoading(false);
+      }
     });
-    return unsubscribe;
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, []);
 
   return (

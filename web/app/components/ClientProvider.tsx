@@ -1,9 +1,10 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { AuthProvider } from '../context/AuthContext'
+import { AuthProvider, useAuth } from '../context/AuthContext'
 import ToastProvider from './ToastProvider'
 import ActivityLogger from './ActivityLogger'
+import LoadingSpinner from './LoadingSpinner'
 
 // Create a client
 function makeQueryClient() {
@@ -35,6 +36,23 @@ function getQueryClient() {
   }
 }
 
+function AuthWrapper({ children }: { children: React.ReactNode }) {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-navy-500 via-navy-600 to-navy-900">
+        <div className="text-center">
+          <LoadingSpinner size="lg" className="mb-4" />
+          <p className="text-white text-lg">Se încarcă...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
 export default function ClientProvider({ children }: { children: React.ReactNode }) {
   // NOTE: Avoid useState when initializing the query client if you don't
   // have a suspense boundary between this and the code that may suspend
@@ -45,10 +63,12 @@ export default function ClientProvider({ children }: { children: React.ReactNode
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ActivityLogger />
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+        <AuthWrapper>
+          <ActivityLogger />
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </AuthWrapper>
       </AuthProvider>
     </QueryClientProvider>
   )

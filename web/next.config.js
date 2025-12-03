@@ -5,6 +5,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Performance optimizations
+  swcMinify: true,
+  compress: true,
+  poweredByHeader: false,
   // Ensure static files are included in build
   experimental: {
     outputFileTracingRoot: require('path').join(__dirname, '../'),
@@ -98,6 +102,16 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=3600, must-revalidate',
+          },
+        ],
+      },
+      {
+        // Cache dynamic pages for mobile
+        source: '/((?!api|_next|favicon).*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, must-revalidate',
           },
         ],
       },
