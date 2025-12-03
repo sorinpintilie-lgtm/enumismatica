@@ -37,19 +37,6 @@ function getQueryClient() {
 }
 
 function AuthWrapper({ children }: { children: React.ReactNode }) {
-  const { loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-navy-500 via-navy-600 to-navy-900">
-        <div className="text-center">
-          <LoadingSpinner size="lg" className="mb-4" />
-          <p className="text-white text-lg">Se încarcă...</p>
-        </div>
-      </div>
-    );
-  }
-
   return <>{children}</>;
 }
 

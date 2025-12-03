@@ -25,12 +25,15 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authKey, setAuthKey] = useState(0); // Force re-render key
 
   useEffect(() => {
     let mounted = true;
 
     const unsubscribe = onAuthStateChange(async (firebaseUser) => {
       if (!mounted) return;
+
+      console.log('Auth state changed:', !!firebaseUser, firebaseUser?.email);
 
       if (firebaseUser) {
         // Fetch user role from Firestore with caching
@@ -40,28 +43,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const role = userData?.role || 'user';
 
           if (mounted) {
-            setUser({
+            const extendedUser = {
               ...firebaseUser,
               role,
               isAdmin: role === 'admin' || role === 'superadmin',
               isSuperAdmin: role === 'superadmin',
               displayName: firebaseUser.displayName || firebaseUser.email || 'User',
-            } as ExtendedUser);
+            } as ExtendedUser;
+
+            setUser(extendedUser);
+            setAuthKey(prev => prev + 1); // Force re-render
           }
         } catch (error) {
           console.error('Failed to fetch user role:', error);
           if (mounted) {
-            setUser({
+            const extendedUser = {
               ...firebaseUser,
               role: 'user',
               isAdmin: false,
               displayName: firebaseUser.displayName || firebaseUser.email || 'User',
-            } as ExtendedUser);
+            } as ExtendedUser;
+
+            setUser(extendedUser);
+            setAuthKey(prev => prev + 1); // Force re-render
           }
         }
       } else {
         if (mounted) {
           setUser(null);
+          setAuthKey(prev => prev + 1); // Force re-render
         }
       }
       if (mounted) {
@@ -76,7 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider key={authKey} value={{ user, loading }}>
       {children}
     </AuthContext.Provider>
   );
