@@ -14,6 +14,7 @@ export type TabParamList = {
   Dashboard: undefined;
   ProductCatalog: undefined;
   AuctionList: undefined;
+  Cart: undefined;
   Watchlist: undefined;
   HelpCenter: undefined;
 };
