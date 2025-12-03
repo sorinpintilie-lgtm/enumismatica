@@ -21,21 +21,26 @@ const auth: Auth = getAuth(app);
 const db: Firestore = getFirestore(app);
 const storage: FirebaseStorage = getStorage(app);
 
-// Initialize Analytics (only in browser environment)
+// Initialize Analytics (only in real browser environment – NOT React Native)
 let analytics: Analytics | null = null;
-if (typeof window !== 'undefined') {
-  analytics = getAnalytics(app);
-  
-  // Debug logging
-  console.log('Firebase initialized:', {
-    app: !!app,
-    auth: !!auth,
-    db: !!db,
-    storage: !!storage,
-    analytics: !!analytics,
-    dbType: typeof db,
-    dbConstructor: db?.constructor?.name,
-  });
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  try {
+    analytics = getAnalytics(app);
+    
+    // Debug logging
+    console.log('Firebase initialized:', {
+      app: !!app,
+      auth: !!auth,
+      db: !!db,
+      storage: !!storage,
+      analytics: !!analytics,
+      dbType: typeof db,
+      dbConstructor: db?.constructor?.name,
+    });
+  } catch (err) {
+    // Analytics is not supported in some environments (e.g. React Native).
+    console.log('Firebase analytics not initialized in this environment:', err);
+  }
 }
 
 export { app, auth, db, storage, analytics };

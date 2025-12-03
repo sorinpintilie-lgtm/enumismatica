@@ -77,6 +77,30 @@ const DashboardScreen: React.FC = () => {
               >
                 <Text className="text-white text-center text-sm">View Auctions</Text>
               </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-amber-500 py-2 px-4 rounded-md"
+                onPress={() => navigation.navigate('MainTabs', { screen: 'Cart' })}
+              >
+                <Text className="text-white text-center text-sm">My Cart</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-purple-600 py-2 px-4 rounded-md"
+                onPress={() => navigation.navigate('MainTabs', { screen: 'Watchlist' })}
+              >
+                <Text className="text-white text-center text-sm">Watchlist</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-gray-800 py-2 px-4 rounded-md"
+                onPress={() => navigation.navigate('OrderHistory')}
+              >
+                <Text className="text-white text-center text-sm">Order History</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-gray-700 py-2 px-4 rounded-md"
+                onPress={() => navigation.navigate('SalesHistory')}
+              >
+                <Text className="text-white text-center text-sm">Sales History</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>

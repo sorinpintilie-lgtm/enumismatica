@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { z } from 'zod';
 import { signUpWithEmail, signInWithGoogle } from '../../shared/auth';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../navigationTypes';
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -18,7 +20,7 @@ const RegisterScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handleEmailRegister = async () => {
     try {
@@ -36,7 +38,7 @@ const RegisterScreen: React.FC = () => {
     if (error) {
       Alert.alert('Error', error);
     } else if (user) {
-      navigation.navigate('Dashboard' as never);
+      // AuthContext + AppNavigator will automatically move to the authenticated stack.
     }
   };
 
@@ -47,7 +49,7 @@ const RegisterScreen: React.FC = () => {
     if (error) {
       Alert.alert('Error', error);
     } else if (user) {
-      navigation.navigate('Dashboard' as never);
+      // AuthContext + AppNavigator will automatically move to the authenticated stack.
     }
   };
 
