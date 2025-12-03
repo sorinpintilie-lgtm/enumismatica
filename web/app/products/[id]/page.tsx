@@ -8,6 +8,7 @@ import PriceEvolutionChart from '../../components/PriceEvolutionChart';
 import { useToast } from '../../components/ToastProvider';
 import { useAuth } from '../../context/AuthContext';
 import { createDirectOrderForProduct } from 'shared/orderService';
+import { useCart } from '../../hooks/useCart';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -15,6 +16,7 @@ export default function ProductDetailPage() {
   const { product, loading, error } = useProduct(id);
   const { showToast } = useToast();
   const { user } = useAuth();
+  const { addToCart } = useCart(user?.uid);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -77,7 +79,7 @@ export default function ProductDetailPage() {
       showToast({
         type: 'success',
         title: 'Cumpărare reușită',
-        message: `Ai cumpărat acest produs. Comanda ta a fost înregistrată (ID: ${orderId}). Momentan plata este simulată, integrarea Netopia va fi adăugată ulterior.`,
+        message: `Ai cumpărat acest produs. Comanda ta a fost înregistrată (ID: ${orderId}).`,
       });
     } catch (error) {
       console.error('Failed to buy product:', error);
@@ -90,6 +92,37 @@ export default function ProductDetailPage() {
       });
     } finally {
       setBuying(false);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+
+    if (!user) {
+      showToast({
+        type: 'error',
+        title: 'Autentificare necesară',
+        message: 'Trebuie să te autentifici pentru a adăuga produse în coș.',
+      });
+      return;
+    }
+
+    try {
+      await addToCart(product.id, 1);
+      showToast({
+        type: 'success',
+        title: 'Adăugat în coș',
+        message: `${product.name} a fost adăugat în coșul tău.`,
+      });
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      const message =
+        error instanceof Error ? error.message : 'A apărut o eroare la adăugarea produsului în coș.';
+      showToast({
+        type: 'error',
+        title: 'Eroare la coș',
+        message,
+      });
     }
   };
 
@@ -197,24 +230,38 @@ export default function ProductDetailPage() {
                     Acest produs a fost vândut și nu mai este disponibil.
                   </p>
                 )}
-                <button
-                  type="button"
-                  onClick={handleBuy}
-                  disabled={
-                    buying ||
-                    product.isSold === true ||
-                    (!!user && product.ownerId === user.uid)
-                  }
-                  className="w-full bg-[#e7b73c] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/50 disabled:text-slate-700 text-[#000940] px-6 py-3 rounded-xl font-semibold text-lg transition-colors duration-200 shadow-[0_0_24px_rgba(231,183,60,0.8)]"
-                >
-                  {product.isSold
-                    ? 'Deja vândut'
-                    : !!user && product.ownerId === user.uid
-                    ? 'Ești proprietarul acestui produs'
-                    : buying
-                    ? 'Se procesează cumpărarea...'
-                    : 'Cumpără acum (plata Netopia va fi adăugată)'}
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3 mt-1">
+                  <button
+                    type="button"
+                    onClick={handleAddToCart}
+                    disabled={product.isSold === true || (!!user && product.ownerId === user.uid)}
+                    className="flex-1 bg-navy-900/80 hover:bg-navy-800 disabled:bg-navy-900/40 disabled:text-slate-500 text-gold-200 px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors border border-gold-500/60 shadow-[0_0_18px_rgba(15,23,42,0.9)]"
+                  >
+                    {product.isSold
+                      ? 'Deja vândut'
+                      : !!user && product.ownerId === user.uid
+                      ? 'Ești proprietarul acestui produs'
+                      : 'Adaugă în coș'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBuy}
+                    disabled={
+                      buying ||
+                      product.isSold === true ||
+                      (!!user && product.ownerId === user.uid)
+                    }
+                    className="flex-1 bg-[#e7b73c] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/50 disabled:text-slate-700 text-[#000940] px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors shadow-[0_0_24px_rgba(231,183,60,0.8)]"
+                  >
+                    {product.isSold
+                      ? 'Deja vândut'
+                      : !!user && product.ownerId === user.uid
+                      ? 'Ești proprietarul acestui produs'
+                      : buying
+                      ? 'Se procesează cumpărarea...'
+                      : 'Cumpără acum'}
+                  </button>
+                </div>
               </div>
 
               <div>

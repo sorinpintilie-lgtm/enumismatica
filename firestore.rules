@@ -80,6 +80,28 @@ service cloud.firestore {
         allow update: if isOwner(userId) || isAdmin();
         allow delete: if isOwner(userId) || isAdmin();
       }
+
+      // User's cart subcollection for shop purchases
+      match /cart/{itemId} {
+        allow read: if isOwner(userId) || isAdmin();
+
+        // Only the owner (or admin) can create cart items for this user.
+        // Required fields:
+        //  - userId: must equal the authenticated user
+        //  - productId: product being added
+        //  - quantity: positive number
+        //  - addedAt: timestamp when added
+        allow create: if isOwner(userId) &&
+                      hasRequiredFields(request.resource.data, ['userId', 'productId', 'quantity', 'addedAt']) &&
+                      request.resource.data.userId == userId &&
+                      request.resource.data.quantity is number &&
+                      request.resource.data.quantity > 0 &&
+                      isValidTimestamp(request.resource.data.addedAt);
+
+        // Owner or admin can update (e.g., change quantity) or delete items.
+        allow update: if isOwner(userId) || isAdmin();
+        allow delete: if isOwner(userId) || isAdmin();
+      }
     }
 
     // Products collection: Anyone can read approved products, authenticated users can read their own, admins can read all
@@ -92,9 +114,30 @@ service cloud.firestore {
                     request.resource.data.description.size() > 0 && request.resource.data.description.size() <= 1000 &&
                     (isOwner(request.resource.data.ownerId) || isAdmin()) &&
                     (request.resource.data.status == 'pending' || (isAdmin() && request.resource.data.status in ['pending', 'approved', 'rejected']));
-      allow update: if isAuthenticated() &&
-                    (isOwner(resource.data.ownerId) || isAdmin()) &&
-                    (isAdmin() || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']));
+      allow update: if isAuthenticated() && (
+                      // Existing rule: owner or admin can update (with status restrictions for non-admin)
+                      (
+                        (isOwner(resource.data.ownerId) || isAdmin()) &&
+                        (isAdmin() || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']))
+                      )
+                      ||
+                      // New rule: allow the buyer to mark a product as sold as part of a checkout/ordering flow.
+                      // - Only non-admin, non-owner can use this
+                      // - Only specific fields may change: isSold, soldAt, buyerId, orderId, updatedAt
+                      // - Product must not already be sold
+                      // - isSold must become true
+                      // - buyerId must match the authenticated user
+                      (
+                        !isOwner(resource.data.ownerId) &&
+                        !isAdmin() &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isSold', 'soldAt', 'buyerId', 'orderId', 'updatedAt']) &&
+                        (resource.data.isSold == null || resource.data.isSold == false) &&
+                        request.resource.data.isSold == true &&
+                        request.resource.data.buyerId == request.auth.uid &&
+                        // Ensure we have a valid timestamp for soldAt (or at least the write time)
+                        isValidTimestamp(request.resource.data.soldAt != null ? request.resource.data.soldAt : request.time)
+                      )
+                    );
       allow delete: if isOwner(resource.data.ownerId) || isAdmin();
 
       // Price history subcollection for products
@@ -251,6 +294,35 @@ service cloud.firestore {
                             request.resource.data.altText.size() > 0 && request.resource.data.altText.size() <= 200 &&
                             request.resource.data.type in ['logo', 'hero', 'banner', 'icon', 'other'];
       allow delete: if isAdmin();
+    }
+
+    // Orders collection: direct purchases from the shop.
+    // For now, orders are created client-side after validation. Later, Netopia integration
+    // can update status/payment fields securely via backend.
+    match /orders/{orderId} {
+      // Buyers, sellers and admins can read the order
+      allow read: if isAuthenticated() &&
+                  (
+                    resource.data.buyerId == request.auth.uid ||
+                    resource.data.sellerId == request.auth.uid ||
+                    isAdmin()
+                  );
+
+      // Orders are created by the buyer's client:
+      //  - buyerId must match the authenticated user
+      //  - basic required fields must be present
+      allow create: if isAuthenticated() &&
+                    request.resource.data.buyerId == request.auth.uid &&
+                    hasRequiredFields(
+                      request.resource.data,
+                      ['productId', 'buyerId', 'sellerId', 'price', 'currency', 'status', 'paymentProvider']
+                    ) &&
+                    request.resource.data.currency == 'RON' &&
+                    request.resource.data.price is number &&
+                    request.resource.data.price > 0;
+
+      // Updates and deletes restricted to admins for now (future: Netopia callbacks / backend).
+      allow update, delete: if isAdmin();
     }
 
     // Event registrations (QR / landing pre-registrations)

@@ -197,6 +197,18 @@ export interface WatchlistItem {
 }
 
 /**
+ * CartItem entity representing a product added to a user's cart.
+ * Stored in 'users/{userId}/cart' subcollection.
+ */
+export interface CartItem {
+  id: string;
+  userId: string;
+  productId: string;
+  quantity: number;
+  addedAt: Date;
+}
+
+/**
  * HelpArticle entity for Help Center content.
  * Stored in 'helpArticles' collection.
  */
