@@ -460,7 +460,7 @@ export default function AuctionDetailPage() {
                 ? 'Confirmă licitația'
                 : 'Confirmă licitarea automată'}
             </h3>
-            <p className="text-sm text-slate-200 mb-4">
+            <p className="text-sm text-slate-200 mb-3">
               {confirmAction.type === 'manual' ? (
                 <>
                   Ești sigur că vrei să plasezi o licitație de{' '}
@@ -483,6 +483,23 @@ export default function AuctionDetailPage() {
                 </>
               )}
             </p>
+            {auction.buyNowPrice != null &&
+              typeof auction.buyNowPrice === 'number' &&
+              confirmAction.type !== 'cancel-auto' &&
+              confirmAction.amount >= auction.buyNowPrice && (
+                <div className="mb-3 rounded-md border border-amber-500/60 bg-amber-900/20 px-3 py-2">
+                  <p className="text-xs text-amber-100 font-medium">
+                    Atenție: suma aleasă ({formatRON(confirmAction.amount)}) este mai mare sau egală
+                    cu prețul "Cumpără acum"{' '}
+                    <span className="font-semibold">{formatRON(auction.buyNowPrice)}</span>.
+                  </p>
+                  <p className="text-[11px] text-amber-100/90 mt-1">
+                    Poți cumpăra imediat acest articol folosind opțiunea "Cumpără acum"
+                    la același sau la un preț mai mic, fără riscul de a licita peste. Sigur vrei să
+                    continui cu această licitație?
+                  </p>
+                </div>
+              )}
             <div className="flex justify-end gap-2">
               <button
                 type="button"

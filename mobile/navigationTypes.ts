@@ -6,6 +6,10 @@ export type RootStackParamList = {
   AuctionDetails: { auctionId: string };
   BidHistory: { auctionId?: string; userId?: string };
   HelpArticle: { articleId: string };
+  /** Istoricul comenzilor (cumpărări) pentru utilizatorul curent */
+  OrderHistory: undefined;
+  /** Istoricul vânzărilor pentru utilizatorul curent */
+  SalesHistory: undefined;
   Login: undefined;
   Register: undefined;
 };

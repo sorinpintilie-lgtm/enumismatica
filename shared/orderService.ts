@@ -4,9 +4,13 @@ import {
   runTransaction,
   collection,
   serverTimestamp,
+  getDocs,
+  query,
+  where,
+  orderBy,
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
-import type { Product } from './types';
+import type { Product, Order } from './types';
 import { addCollectionItem } from './collectionService';
 
 /**
@@ -18,6 +22,31 @@ import { addCollectionItem } from './collectionService';
  *  - redirecting to Netopia
  *  - updating the order + product from a secure callback when Netopia confirms.
  */
+
+/**
+ * Normalize a Firestore order document into the shared Order type.
+ */
+function mapOrderSnapshot(orderDoc: any): Order {
+  const data = orderDoc.data();
+
+  return {
+    id: orderDoc.id,
+    productId: data.productId,
+    buyerId: data.buyerId,
+    sellerId: data.sellerId,
+    price: data.price,
+    currency: data.currency,
+    status: data.status,
+    paymentProvider: data.paymentProvider,
+    paymentReference:
+      typeof data.paymentReference === 'string' || data.paymentReference === null
+        ? data.paymentReference
+        : null,
+    createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+    updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(),
+  };
+}
+
 export async function createDirectOrderForProduct(
   productId: string,
   buyerId: string,
@@ -124,4 +153,44 @@ export async function createDirectOrderForProduct(
   }
 
   return createdOrderId;
+}
+
+/**
+ * Fetch all orders where the given user is the buyer, ordered by creation date (newest first).
+ * Used for "Comenzile mele" / order history in the dashboard.
+ */
+export async function getOrdersForBuyer(userId: string): Promise<Order[]> {
+  if (!db) {
+    throw new Error('Firestore not initialized');
+  }
+
+  const ordersRef = collection(db, 'orders');
+  const q = query(
+    ordersRef,
+    where('buyerId', '==', userId),
+    orderBy('createdAt', 'desc'),
+  );
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(mapOrderSnapshot);
+}
+
+/**
+ * Fetch all orders where the given user is the seller, ordered by creation date (newest first).
+ * Used for "Vânzările mele" / seller sales overview.
+ */
+export async function getSalesForSeller(userId: string): Promise<Order[]> {
+  if (!db) {
+    throw new Error('Firestore not initialized');
+  }
+
+  const ordersRef = collection(db, 'orders');
+  const q = query(
+    ordersRef,
+    where('sellerId', '==', userId),
+    orderBy('createdAt', 'desc'),
+  );
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(mapOrderSnapshot);
 }
