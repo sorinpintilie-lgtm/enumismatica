@@ -225,6 +225,22 @@ export default function Navigation() {
 
                 {user ? (
                   <div className="flex flex-col gap-2 text-sm">
+                    <div className="grid grid-cols-2 gap-3">
+                      <Link
+                        href="/cart"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="inline-flex items-center justify-center rounded-full border border-gold-500/60 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
+                      >
+                        🛒 Coș
+                      </Link>
+                      <Link
+                        href="/watchlist"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="inline-flex items-center justify-center rounded-full border border-gold-500/60 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
+                      >
+                        ❤️ Watchlist
+                      </Link>
+                    </div>
                     <Link
                       href="/dashboard"
                       onClick={() => setMobileMenuOpen(false)}

@@ -1,341 +1,217 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useWatchlist } from '../hooks/useWatchlist';
 import { useAuth } from '../context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useWatchlist } from '../hooks/useWatchlist';
+import { useProducts } from '../hooks/useProducts';
+import { useAuctions } from '../hooks/useAuctions';
 import Link from 'next/link';
-import ProductCard from '../components/ProductCard';
-import AuctionCard from '../components/AuctionCard';
-import { WatchlistButton } from '../components/WatchlistButton';
-import { useCachedProduct } from '../hooks/useCachedProducts';
-import { useCachedAuction } from '../hooks/useCachedAuctions';
-
-function WatchlistProductCard({ productId }: { productId: string }) {
-  const { data: product, isLoading, error } = useCachedProduct(productId);
-
-  if (isLoading) {
-    return (
-      <div className="h-full rounded-2xl border border-navy-700 bg-navy-900/60 animate-pulse" />
-    );
-  }
-
-  if (error || !product) {
-    return (
-      <div className="p-4 rounded-2xl border border-red-500/40 bg-red-900/40 text-sm text-red-100">
-        Nu s-a putut încărca produsul urmărit.
-      </div>
-    );
-  }
-
-  return <ProductCard product={product} />;
-}
-
-function WatchlistAuctionCard({ auctionId }: { auctionId: string }) {
-  const { data: auction, isLoading, error } = useCachedAuction(auctionId);
-
-  if (isLoading) {
-    return (
-      <div className="h-full rounded-2xl border border-navy-700 bg-navy-900/60 animate-pulse" />
-    );
-  }
-
-  if (error || !auction) {
-    return (
-      <div className="p-4 rounded-2xl border border-red-500/40 bg-red-900/40 text-sm text-red-100">
-        Nu s-a putut încărca licitația urmărită.
-      </div>
-    );
-  }
-
-  return <AuctionCard auction={auction} />;
-}
+import { useMemo } from 'react';
 
 export default function WatchlistPage() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
+  const { watchlist, loading, error, removeFromWatchlist, clearWatchlist } = useWatchlist();
   const {
-    watchlist,
-    loading: watchlistLoading,
-    error,
-    fetchWatchlist,
-    removeFromWatchlist,
-    clearWatchlist
-  } = useWatchlist();
+    products,
+    loading: productsLoading,
+  } = useProducts(
+    undefined,
+    200,
+  );
+  const { auctions, loading: auctionsLoading } = useAuctions();
 
-  const [activeTab, setActiveTab] = useState<'products' | 'auctions'>('products');
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [selectMode, setSelectMode] = useState<boolean>(false);
-
-  // Redirect to login if not authenticated (only after auth state is resolved)
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    }
-  }, [authLoading, user, router]);
-
-  // Refresh watchlist when tab changes
-  useEffect(() => {
-    if (user) {
-      fetchWatchlist();
-    }
-  }, [user, activeTab, fetchWatchlist]);
-
-  // Filter watchlist by active tab
-  const filteredWatchlist = watchlist.filter(item => {
-    if (activeTab === 'products') return item.itemType === 'product';
-    if (activeTab === 'auctions') return item.itemType === 'auction';
-    return true;
-  });
-
-  // Toggle item selection
-  const toggleItemSelection = (itemId: string) => {
-    setSelectedItems(prev =>
-      prev.includes(itemId)
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
-    );
-  };
-
-  // Toggle select mode
-  const toggleSelectMode = () => {
-    setSelectMode(!selectMode);
-    if (selectMode) {
-      setSelectedItems([]);
-    }
-  };
-
-  // Remove selected items
-  const removeSelectedItems = async () => {
-    if (selectedItems.length === 0) return;
-
-    try {
-      for (const itemId of selectedItems) {
-        await removeFromWatchlist(itemId);
+  const watchlistWithItems = useMemo(() => {
+    return watchlist.map((item) => {
+      let linkedItem = null;
+      if (item.itemType === 'product') {
+        linkedItem = products.find((p) => p.id === item.itemId);
+      } else if (item.itemType === 'auction') {
+        linkedItem = auctions.find((a) => a.id === item.itemId);
       }
-      setSelectedItems([]);
-      setSelectMode(false);
-    } catch (error) {
-      console.error('Error removing selected items:', error);
+      return { ...item, linkedItem };
+    });
+  }, [watchlist, products, auctions]);
+
+  const handleRemove = async (itemId: string) => {
+    if (confirm('Ești sigur că vrei să elimini acest articol din lista de urmărire?')) {
+      await removeFromWatchlist(itemId);
     }
   };
 
-  // Clear entire watchlist
-  const handleClearWatchlist = async () => {
-    if (window.confirm('Ești sigur că dorești să golești întreaga listă de urmărire?')) {
-      try {
-        await clearWatchlist();
-      } catch (error) {
-        console.error('Error clearing watchlist:', error);
-      }
+  const handleClear = async () => {
+    if (!watchlist.length) return;
+    if (confirm('Ești sigur că vrei să golești întreaga listă de urmărire?')) {
+      await clearWatchlist();
     }
   };
-
-  // Group watchlist items by type for display
-  const productsInWatchlist = watchlist.filter(item => item.itemType === 'product');
-  const auctionsInWatchlist = watchlist.filter(item => item.itemType === 'auction');
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-navy-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-400"></div>
-      </div>
-    );
-  }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-navy-900 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Te rog autentifică-te</h1>
-          <p className="text-gray-300 mb-6">Trebuie să fii autentificat pentru a accesa lista de urmărire.</p>
-          <Link
-            href="/login"
-            className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-6 py-3 rounded-xl font-semibold transition-all"
-          >
-            Autentificare
-          </Link>
+      <div className="container mx-auto px-4 py-8">
+        <div className="min-h-[60vh] flex items-center justify-center px-4">
+          <div className="max-w-xl rounded-2xl border border-[#e7b73c]/40 bg-navy-900/80 p-8 text-center shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
+            <h1 className="text-2xl font-bold text-white mb-3">
+              Lista de urmărire este disponibilă doar pentru utilizatori autentificați
+            </h1>
+            <p className="text-sm text-slate-300 mb-5">
+              Autentifică-te pentru a accesa lista ta de urmărire.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-5 py-2.5 text-sm font-semibold text-[#000940] shadow-lg shadow-[#e7b73c]/50 hover:bg-[#f0c955] transition"
+              >
+                Autentificare
+              </Link>
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center rounded-full border border-[#e7b73c] px-5 py-2.5 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition"
+              >
+                Creează cont
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
+  const isEmpty = !loading && watchlistWithItems.length === 0;
+
   return (
-    <div className="min-h-screen bg-navy-900 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Lista mea de urmărire</h1>
-            <p className="text-gray-300 mt-1">
-              {watchlist.length} articole urmărite • {productsInWatchlist.length} produse • {auctionsInWatchlist.length} licitații
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-[#e7b73c] mb-1">Lista mea de urmărire</h1>
+          {loading ? (
+            <p className="text-slate-300">Se încarcă...</p>
+          ) : isEmpty ? (
+            <p className="text-slate-300">Lista ta de urmărire este goală.</p>
+          ) : (
+            <p className="text-slate-300">
+              Ai {watchlistWithItems.length} {watchlistWithItems.length === 1 ? 'articol' : 'articole'} urmărite.
             </p>
+          )}
+        </div>
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center rounded-full border border-[#e7b73c]/70 px-4 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
+        >
+          ← Înapoi la cont
+        </Link>
+      </div>
+
+      {error && (
+        <div className="bg-red-900/50 border border-red-500/50 rounded-2xl p-6 mb-6 text-center backdrop-blur-sm">
+          <h3 className="text-lg font-semibold text-red-200 mb-2">
+            Eroare la încărcarea listei
+          </h3>
+          <p className="text-red-300">{error}</p>
+        </div>
+      )}
+
+      {!isEmpty && !loading && (
+        <div className="bg-navy-900/80 rounded-2xl border border-gold-500/30 p-6 mb-6 shadow-[0_14px_40px_rgba(0,0,0,0.8)]">
+          <div className="space-y-4">
+            {watchlistWithItems.map((item) => {
+              const { linkedItem } = item;
+              let title = '';
+              let price = '';
+              let linkHref = '';
+              let typeLabel = '';
+
+              if (item.itemType === 'product' && linkedItem) {
+                title = linkedItem.name || `Produs ${item.itemId}`;
+                price = typeof linkedItem.price === 'number' ? `${linkedItem.price.toFixed(2)} RON` : '';
+                linkHref = `/products/${item.itemId}`;
+                typeLabel = 'Produs';
+              } else if (item.itemType === 'auction' && linkedItem) {
+                title = `Auction #${linkedItem.id.slice(-6)}`;
+                const currentBid = linkedItem.currentBid || linkedItem.reservePrice;
+                price = `${currentBid.toFixed(2)} RON`;
+                linkHref = `/auctions/${item.itemId}`;
+                typeLabel = 'Licitație';
+              } else {
+                title = `${item.itemType} ${item.itemId}`;
+                linkHref = item.itemType === 'product' ? `/products/${item.itemId}` : `/auctions/${item.itemId}`;
+                typeLabel = item.itemType === 'product' ? 'Produs' : 'Licitație';
+              }
+
+              return (
+                <div
+                  key={item.id}
+                  className="flex flex-col md:flex-row gap-4 rounded-2xl border border-gold-500/30 bg-navy-950 p-4"
+                >
+                  <div className="flex-1 flex flex-col justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex items-center rounded-full bg-blue-500/15 text-blue-300 border border-blue-400/40 px-2 py-1 text-xs font-semibold uppercase tracking-wide">
+                          {typeLabel}
+                        </span>
+                      </div>
+                      <h2 className="text-sm sm:text-base font-semibold text-white mb-1 line-clamp-2">
+                        {title}
+                      </h2>
+                      {price && (
+                        <p className="text-sm font-semibold text-green-400">
+                          {price}
+                        </p>
+                      )}
+                      {item.notes && (
+                        <p className="text-xs text-slate-400 mt-1">
+                          Notă: {item.notes}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-400">
+                        Adăugat la {item.addedAt.toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Link
+                        href={linkHref}
+                        className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-3 py-1 text-xs font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
+                      >
+                        Vezi detaliile
+                      </Link>
+                      <button
+                        onClick={() => handleRemove(item.itemId)}
+                        className="inline-flex items-center justify-center rounded-full border border-red-500/70 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors"
+                      >
+                        Elimină
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="mt-6 flex justify-center">
             <button
-              onClick={toggleSelectMode}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                selectMode
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-              }`}
-            >
-              {selectMode ? 'Anulează' : 'Selectează'}
-            </button>
-
-            {selectMode && selectedItems.length > 0 && (
-              <button
-                onClick={removeSelectedItems}
-                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-all"
-              >
-                Îndepărtează selectate ({selectedItems.length})
-              </button>
-            )}
-
-            <button
-              onClick={handleClearWatchlist}
-              className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-gray-300 text-sm font-medium transition-all"
+              onClick={handleClear}
+              className="inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
             >
               Golește lista
             </button>
-
-            <button
-              onClick={fetchWatchlist}
-              className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all"
-              title="Reîncarcă lista"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                {/* Simple circular refresh arrow to avoid problematic shapes */}
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4a8 8 0 111.73 10.73M4 4v5h5"
-                />
-              </svg>
-            </button>
           </div>
         </div>
+      )}
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-6">
-          <button
-            onClick={() => setActiveTab('products')}
-            className={`flex-1 py-3 px-4 rounded-tl-lg rounded-tr-lg text-sm font-medium transition-all ${
-              activeTab === 'products'
-                ? 'bg-navy-700 text-white border-b-2 border-gold-400'
-                : 'bg-navy-800 text-gray-300 hover:bg-navy-700'
-            }`}
+      <div className="bg-navy-900/80 rounded-2xl border border-gold-500/30 p-6 shadow-[0_14px_40px_rgba(0,0,0,0.8)]">
+        <h3 className="text-lg font-semibold text-white mb-3">Continuă explorarea</h3>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/products"
+            className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-6 py-2 text-sm font-semibold text-[#000940] shadow-[0_0_24px_rgba(231,183,60,0.75)] hover:bg-[#f0c955] transition-colors"
           >
-            Produse ({productsInWatchlist.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('auctions')}
-            className={`flex-1 py-3 px-4 rounded-tl-lg rounded-tr-lg text-sm font-medium transition-all ${
-              activeTab === 'auctions'
-                ? 'bg-navy-700 text-white border-b-2 border-gold-400'
-                : 'bg-navy-800 text-gray-300 hover:bg-navy-700'
-            }`}
+            Catalog produse
+          </Link>
+          <Link
+            href="/auctions"
+            className="inline-flex items-center justify-center rounded-full border border-[#e7b73c] px-6 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
           >
-            Licitații ({auctionsInWatchlist.length})
-          </button>
+            Licitații active
+          </Link>
         </div>
-
-        {/* Loading state */}
-        {watchlistLoading && (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-400"></div>
-          </div>
-        )}
-
-        {/* Error state */}
-        {error && (
-          <div className="bg-red-900/50 border border-red-500/30 rounded-lg p-4 mb-6">
-            <p className="text-red-300">{error}</p>
-            <button
-              onClick={fetchWatchlist}
-              className="mt-2 text-red-200 hover:text-red-100 text-sm"
-            >
-              Încearcă din nou
-            </button>
-          </div>
-        )}
-
-        {/* Empty state */}
-        {watchlist.length === 0 && !watchlistLoading && !error && (
-          <div className="text-center py-16">
-            <div className="mx-auto mb-6">
-              <svg className="w-20 h-20 text-gray-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold text-white mb-2">Lista de urmărire goală</h2>
-            <p className="text-gray-400 mb-6">
-              Adaugă produse și licitații la lista de urmărire pentru a le monitoriza ușor.
-            </p>
-            <div className="flex justify-center gap-4">
-              <Link
-                href="/products"
-                className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-6 py-3 rounded-xl font-semibold transition-all"
-              >
-                Explorează produse
-              </Link>
-              <Link
-                href="/auctions"
-                className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all"
-              >
-                Vezi licitații
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Watchlist content */}
-        {watchlist.length > 0 && !watchlistLoading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredWatchlist.map((item) => (
-              <div key={item.id} className="relative group">
-                {/* Selection checkbox for select mode */}
-                {selectMode && (
-                  <div className="absolute top-2 left-2 z-10">
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.includes(item.itemId)}
-                      onChange={() => toggleItemSelection(item.itemId)}
-                      className="h-5 w-5 rounded border-gray-500 bg-navy-800 text-gold-400 focus:ring-gold-400"
-                    />
-                  </div>
-                )}
-
-                {/* Watchlist button overlay */}
-                <div className="absolute top-2 right-2 z-10">
-                  <WatchlistButton
-                    itemType={item.itemType}
-                    itemId={item.itemId}
-                    size="small"
-                  />
-                </div>
-
-                {/* Item content */}
-                {item.itemType === 'product' && (
-                  <WatchlistProductCard productId={item.itemId} />
-                )}
-                {item.itemType === 'auction' && (
-                  <WatchlistAuctionCard auctionId={item.itemId} />
-                )}
-
-                {/* Item notes if available */}
-                {item.notes && (
-                  <div className="mt-2 p-2 bg-navy-800/50 rounded-lg text-xs text-gray-300 border border-gold-500/20">
-                    <p className="font-medium text-gold-400 mb-1">Notițe:</p>
-                    <p>{item.notes}</p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
