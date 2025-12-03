@@ -22,8 +22,9 @@ function ProductsListContent() {
     country: 'Toate Țările',
     minPrice: 0,
     maxPrice: 10000,
-    minYear: 1, // Ancient coins start from year 1 AD
-    maxYear: new Date().getFullYear(),
+    // 0 / 0 = fără filtru pe ani în mod implicit. Utilizatorul setează anii doar dacă dorește.
+    minYear: 0,
+    maxYear: 0,
     metal: 'Toate Metalele',
     rarity: 'Toate Raritățile',
     grade: 'Toate Gradele',
@@ -69,9 +70,11 @@ function ProductsListContent() {
     );
 
     // Apply year range filter
+    // Notă: dacă un produs nu are anul setat, îl păstrăm în listă,
+    // altfel filtrul ar ascunde produsele fără an chiar și când gama este default.
     if (filters.minYear || filters.maxYear) {
       filtered = filtered.filter((product) => {
-        if (!product.year) return false;
+        if (!product.year) return true;
         return product.year >= filters.minYear && product.year <= filters.maxYear;
       });
     }
