@@ -231,14 +231,14 @@ export default function Navigation() {
                         onClick={() => setMobileMenuOpen(false)}
                         className="inline-flex items-center justify-center rounded-full border border-gold-500/60 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
                       >
-                        🛒 Coș
+                        Coș
                       </Link>
                       <Link
                         href="/watchlist"
                         onClick={() => setMobileMenuOpen(false)}
                         className="inline-flex items-center justify-center rounded-full border border-gold-500/60 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
                       >
-                        ❤️ Watchlist
+                        Watchlist
                       </Link>
                     </div>
                     <Link
