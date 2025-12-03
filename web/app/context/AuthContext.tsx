@@ -29,23 +29,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     let mounted = true;
-    let authResolved = false;
-
-    // Fallback timeout to prevent infinite loading (10 seconds)
-    const timeoutId = setTimeout(() => {
-      if (mounted && !authResolved) {
-        console.warn('Auth initialization timeout - setting loading to false');
-        setLoading(false);
-        authResolved = true;
-      }
-    }, 10000);
 
     const unsubscribe = onAuthStateChange(async (firebaseUser) => {
       if (!mounted) return;
 
       console.log('Auth state changed:', !!firebaseUser, firebaseUser?.email);
-      authResolved = true;
-      clearTimeout(timeoutId);
 
       if (firebaseUser) {
         // Fetch user role from Firestore with caching
@@ -93,7 +81,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => {
       mounted = false;
-      clearTimeout(timeoutId);
       unsubscribe();
     };
   }, []);

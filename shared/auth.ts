@@ -7,18 +7,11 @@ import {
   signOut,
   User,
   onAuthStateChanged,
-  setPersistence,
-  browserLocalPersistence,
 } from 'firebase/auth';
 import { createUserProfileAfterSignup } from './creditService';
 import { logActivity } from './activityLogService';
 
 const googleProvider = new GoogleAuthProvider();
-
-// Set auth persistence to LOCAL for better mobile support
-if (typeof window !== 'undefined') {
-  setPersistence(auth, browserLocalPersistence).catch(console.error);
-}
 
 export const signInWithEmail = async (email: string, password: string) => {
   try {
