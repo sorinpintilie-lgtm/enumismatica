@@ -100,9 +100,51 @@ export default function Navigation() {
             </svg>
           </button>
 
-          {/* Right: notifications + account / auth buttons (desktop / tablet only) */}
+          {/* Right: notifications + cart + watchlist + account / auth buttons (desktop / tablet only) */}
           <div className="hidden sm:flex items-center gap-3">
-            {user && <NotificationCenter />}
+            {user && (
+              <>
+                <NotificationCenter />
+                {/* Cart icon */}
+                <Link
+                  href="/cart"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gold-500/60 bg-navy-900/70 text-gold-300 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
+                  title="Coș"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="9" cy="21" r="1" />
+                    <circle cx="20" cy="21" r="1" />
+                    <path d="M1 1h4l2.6 13.4a1 1 0 0 0 1 .8H19a1 1 0 0 0 .98-.8L22 6H6" />
+                  </svg>
+                </Link>
+                {/* Watchlist icon */}
+                <Link
+                  href="/watchlist"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gold-500/60 bg-navy-900/70 text-gold-300 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
+                  title="Lista de urmărit"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M6 3h12a1 1 0 0 1 1 1v16l-7-4-7 4V4a1 1 0 0 1 1-1z" />
+                  </svg>
+                </Link>
+              </>
+            )}
             {user ? (
               <div className="flex items-center gap-2">
                 <Link

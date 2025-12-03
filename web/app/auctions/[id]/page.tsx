@@ -67,6 +67,7 @@ export default function AuctionDetailPage() {
     | { type: 'cancel-auto' }
     | null
   >(null);
+  const [showBuyNowConfirm, setShowBuyNowConfirm] = useState(false);
 
   // Track last manual and last seen user bid amounts (for auto-bid notifications)
   const lastManualBidAmountRef = useRef<number | null>(null);
@@ -162,7 +163,7 @@ export default function AuctionDetailPage() {
     }
   };
 
-  const handleBuyNow = async () => {
+  const handleBuyNowClick = () => {
     if (!auction) return;
 
     if (!user) {
@@ -175,6 +176,12 @@ export default function AuctionDetailPage() {
     }
 
     setBidError('');
+    setShowBuyNowConfirm(true);
+  };
+
+  const handleConfirmBuyNow = async () => {
+    if (!auction || !user) return;
+
     setBuyNowLoading(true);
 
     try {
@@ -203,6 +210,7 @@ export default function AuctionDetailPage() {
       });
     } finally {
       setBuyNowLoading(false);
+      setShowBuyNowConfirm(false);
     }
   };
 
@@ -408,6 +416,40 @@ export default function AuctionDetailPage() {
 
   return (
     <>
+      {showBuyNowConfirm && auction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+          <div className="mx-4 max-w-md w-full rounded-2xl bg-navy-900/95 border border-gold-500/40 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.95)]">
+            <h3 className="text-lg font-semibold text-white mb-2">
+              Confirmă cumpărarea imediată
+            </h3>
+            <p className="text-sm text-slate-200 mb-4">
+              Ești sigur că vrei să cumperi acum această licitație pentru{' '}
+              <span className="font-semibold text-[#e7b73c]">
+                {auction.buyNowPrice != null ? formatRON(auction.buyNowPrice) : '-'}
+              </span>
+              ?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowBuyNowConfirm(false)}
+                className="inline-flex items-center justify-center rounded-full border border-slate-500/60 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-300 hover:bg-slate-800/60 transition-colors"
+                disabled={buyNowLoading}
+              >
+                Nu
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmBuyNow}
+                disabled={buyNowLoading}
+                className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-4 py-2 text-sm font-semibold text-[#000940] shadow-[0_0_24px_rgba(231,183,60,0.85)] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/60 disabled:text-slate-600 transition-colors"
+              >
+                {buyNowLoading ? 'Se procesează...' : 'Da, cumpără acum'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="container mx-auto px-4 py-8">
         {/* Confirm action modal */}
         {confirmAction && (
@@ -567,7 +609,7 @@ export default function AuctionDetailPage() {
                   </p>
                   <button
                     type="button"
-                    onClick={handleBuyNow}
+                    onClick={handleBuyNowClick}
                     disabled={buyNowLoading || bidLoading}
                     className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-2 text-sm font-semibold text-navy-900 shadow-lg shadow-[0_0_24px_rgba(16,185,129,0.7)] hover:bg-emerald-400 disabled:bg-emerald-500/60 disabled:text-slate-700 transition-colors"
                   >

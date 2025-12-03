@@ -4,7 +4,20 @@ import { db } from '../lib/firebase';
 import { Auction } from 'shared/types';
 
 // Default fields for auction list view - optimize for performance
-const DEFAULT_AUCTION_FIELDS = ['productId', 'startTime', 'endTime', 'reservePrice', 'currentBid', 'currentBidderId', 'status', 'createdAt', 'updatedAt'];
+// Include buyNow fields so list cards can show "Cumpără acum" info.
+const DEFAULT_AUCTION_FIELDS = [
+  'productId',
+  'startTime',
+  'endTime',
+  'reservePrice',
+  'currentBid',
+  'currentBidderId',
+  'status',
+  'buyNowPrice',
+  'buyNowUsed',
+  'createdAt',
+  'updatedAt',
+];
 
 /**
  * Live auctions hook used on auctions pages.

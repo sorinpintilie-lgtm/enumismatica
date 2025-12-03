@@ -90,13 +90,12 @@ service cloud.firestore {
         //  - userId: must equal the authenticated user
         //  - productId: product being added
         //  - quantity: positive number
-        //  - addedAt: timestamp when added
+        // `addedAt` is optional and typically set with serverTimestamp() from the client.
         allow create: if isOwner(userId) &&
-                      hasRequiredFields(request.resource.data, ['userId', 'productId', 'quantity', 'addedAt']) &&
+                      hasRequiredFields(request.resource.data, ['userId', 'productId', 'quantity']) &&
                       request.resource.data.userId == userId &&
                       request.resource.data.quantity is number &&
-                      request.resource.data.quantity > 0 &&
-                      isValidTimestamp(request.resource.data.addedAt);
+                      request.resource.data.quantity > 0;
 
         // Owner or admin can update (e.g., change quantity) or delete items.
         allow update: if isOwner(userId) || isAdmin();

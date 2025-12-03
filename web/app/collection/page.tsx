@@ -7,6 +7,7 @@ import { CollectionItem } from 'shared/types';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { ro } from 'date-fns/locale';
+import { formatRON } from '../utils/currency';
 
 export default function MyCollectionPage() {
   const { user } = useAuth();
@@ -93,7 +94,7 @@ export default function MyCollectionPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-300 mb-1">Valoare totală</p>
-                <p className="text-3xl font-bold text-gold-400">${stats.totalValue.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-gold-400">{formatRON(stats.totalValue)}</p>
               </div>
               <div className="w-12 h-12 bg-gold-500/20 rounded-full flex items-center justify-center">
                 <svg className="w-6 h-6 text-gold-400" fill="currentColor" viewBox="0 0 20 20">
@@ -108,7 +109,7 @@ export default function MyCollectionPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-300 mb-1">Investiție</p>
-                <p className="text-3xl font-bold text-slate-100">${stats.totalInvestment.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-slate-100">{formatRON(stats.totalInvestment)}</p>
               </div>
               <div className="w-12 h-12 bg-gold-500/20 rounded-full flex items-center justify-center">
                 <svg className="w-6 h-6 text-gold-400" fill="currentColor" viewBox="0 0 20 20">
@@ -123,7 +124,8 @@ export default function MyCollectionPage() {
               <div>
                 <p className="text-sm text-slate-300 mb-1">Profit/Pierdere</p>
                 <p className={`text-3xl font-bold ${stats.totalValue >= stats.totalInvestment ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {stats.totalValue >= stats.totalInvestment ? '+' : ''}${(stats.totalValue - stats.totalInvestment).toFixed(2)}
+                  {stats.totalValue >= stats.totalInvestment ? '+' : ''}
+                  {formatRON(Math.abs(stats.totalValue - stats.totalInvestment))}
                 </p>
               </div>
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${stats.totalValue >= stats.totalInvestment ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
@@ -239,12 +241,12 @@ export default function MyCollectionPage() {
           <table className="min-w-full divide-y divide-navy-700">
             <thead className="bg-navy-800/80">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Articol</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Țară</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">An</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metal</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valoare</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acțiuni</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Articol</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Țară</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">An</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Metal</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Valoare</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Acțiuni</th>
               </tr>
             </thead>
             <tbody className="bg-transparent divide-y divide-navy-700">
@@ -260,21 +262,21 @@ export default function MyCollectionPage() {
                         </div>
                       )}
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{item.name}</div>
-                        <div className="text-sm text-gray-500">{item.denomination}</div>
+                        <div className="text-sm font-medium text-slate-100">{item.name}</div>
+                        <div className="text-sm text-slate-300">{item.denomination}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.country || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.year || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.metal || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                    ${item.currentValue?.toFixed(2) || '-'}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">{item.country || '-'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">{item.year || '-'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">{item.metal || '-'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-emerald-400">
+                    {item.currentValue != null ? formatRON(item.currentValue) : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => setEditingItem(item)}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      className="text-blue-300 hover:text-blue-100 mr-3"
                     >
                       Editează
                     </button>
@@ -284,7 +286,7 @@ export default function MyCollectionPage() {
                           deleteItem(item.id);
                         }
                       }}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-red-300 hover:text-red-100"
                     >
                       Șterge
                     </button>
@@ -404,46 +406,51 @@ function CollectionItemCard({
         <div className="space-y-2 text-sm mb-4">
           {item.country && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Țară:</span>
-              <span className="font-medium">{item.country}</span>
+              <span className="text-slate-300">Țară:</span>
+              <span className="font-medium text-slate-100">{item.country}</span>
             </div>
           )}
           {item.year && (
             <div className="flex justify-between">
-              <span className="text-gray-600">An:</span>
-              <span className="font-medium">{item.year}</span>
+              <span className="text-slate-300">An:</span>
+              <span className="font-medium text-slate-100">{item.year}</span>
             </div>
           )}
           {item.metal && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Metal:</span>
-              <span className="font-medium">{item.metal}</span>
+              <span className="text-slate-300">Metal:</span>
+              <span className="font-medium text-slate-100">{item.metal}</span>
             </div>
           )}
           {item.grade && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Grad:</span>
-              <span className="font-medium">{item.grade}</span>
+              <span className="text-slate-300">Grad:</span>
+              <span className="font-medium text-slate-100">{item.grade}</span>
             </div>
           )}
           {item.currentValue && (
             <div className="flex justify-between border-t pt-2">
-              <span className="text-gray-600">Valoare:</span>
-              <span className="font-bold text-green-600">${item.currentValue.toFixed(2)}</span>
+              <span className="text-slate-300">Valoare:</span>
+              <span className="font-bold text-emerald-400">{formatRON(item.currentValue)}</span>
             </div>
           )}
         </div>
 
         {/* Tags */}
-        {item.tags && item.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {item.tags.map((tag, idx) => (
-              <span key={idx} className="text-xs bg-navy-700/80 text-slate-200 px-2 py-1 rounded">
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+        {(() => {
+          const visibleTags = (item.tags || []).filter(
+            (tag) => tag !== 'shop-purchase' && tag !== 'auction-win'
+          );
+          return visibleTags.length > 0 ? (
+            <div className="flex flex-wrap gap-1 mb-3">
+              {visibleTags.map((tag, idx) => (
+                <span key={idx} className="text-xs bg-navy-700/80 text-slate-200 px-2 py-1 rounded">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          ) : null;
+        })()}
 
         {/* Actions */}
         <div className="flex gap-2">

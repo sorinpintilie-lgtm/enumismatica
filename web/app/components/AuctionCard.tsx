@@ -52,6 +52,15 @@ function AuctionCard({ auction, showWatchlistButton = true }: AuctionCardProps) 
   const { showToast } = useToast();
 
   const isUserHighestBidder = !!user && auction.currentBidderId === user.uid;
+  const isEnded = new Date() > auction.endTime;
+  const currentBid = auction.currentBid || auction.reservePrice;
+
+  const canBuyNow =
+    !isEnded &&
+    auction.status === 'active' &&
+    typeof auction.buyNowPrice === 'number' &&
+    auction.buyNowPrice > 0 &&
+    !auction.buyNowUsed;
 
   const handleBid = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,9 +102,6 @@ function AuctionCard({ auction, showWatchlistButton = true }: AuctionCardProps) 
       setBidLoading(false);
     }
   }, [auction.id, bidAmount, user, showToast, logEvent]);
-
-  const isEnded = new Date() > auction.endTime;
-  const currentBid = auction.currentBid || auction.reservePrice;
 
   return (
     <div
@@ -158,6 +164,15 @@ function AuctionCard({ auction, showWatchlistButton = true }: AuctionCardProps) 
           <p className="text-xs uppercase tracking-wide text-slate-300">Timp Rămas</p>
           <CountdownTimer endTime={auction.endTime} />
         </div>
+
+        {canBuyNow && (
+          <div className="mb-2">
+            <p className="text-[11px] uppercase tracking-wide text-emerald-300">Cumpără acum</p>
+            <p className="text-sm font-semibold text-emerald-300">
+              {formatRON(auction.buyNowPrice as number)}
+            </p>
+          </div>
+        )}
 
         {!isEnded && (
           <form onSubmit={handleBid} className="mb-2">

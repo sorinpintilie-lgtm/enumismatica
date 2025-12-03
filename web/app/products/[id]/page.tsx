@@ -21,6 +21,7 @@ export default function ProductDetailPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [buying, setBuying] = useState(false);
+  const [showBuyConfirm, setShowBuyConfirm] = useState(false);
 
   const images = product?.images ?? [];
 
@@ -42,7 +43,7 @@ export default function ProductDetailPage() {
     setLightboxIndex((prev) => (prev + 1) % images.length);
   };
 
-  const handleBuy = async () => {
+  const handleBuyClick = () => {
     if (!product) return;
 
     if (!user) {
@@ -71,6 +72,12 @@ export default function ProductDetailPage() {
       });
       return;
     }
+
+    setShowBuyConfirm(true);
+  };
+
+  const handleBuy = async () => {
+    if (!product || !user) return;
 
     try {
       setBuying(true);
@@ -159,6 +166,43 @@ export default function ProductDetailPage() {
 
   return (
     <>
+      {showBuyConfirm && product && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+          <div className="mx-4 max-w-md w-full rounded-2xl bg-navy-900/95 border border-gold-500/40 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.95)]">
+            <h3 className="text-lg font-semibold text-white mb-2">
+              Confirmă cumpărarea produsului
+            </h3>
+            <p className="text-sm text-slate-200 mb-4">
+              Ești sigur că vrei să cumperi acest produs pentru{' '}
+              <span className="font-semibold text-[#e7b73c]">
+                {product.price.toFixed(2)} RON
+              </span>
+              ?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowBuyConfirm(false)}
+                className="inline-flex items-center justify-center rounded-full border border-slate-500/60 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-300 hover:bg-slate-800/60 transition-colors"
+                disabled={buying}
+              >
+                Nu
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  await handleBuy();
+                  setShowBuyConfirm(false);
+                }}
+                disabled={buying}
+                className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-4 py-2 text-sm font-semibold text-[#000940] shadow-[0_0_24px_rgba(231,183,60,0.85)] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/60 disabled:text-slate-600 transition-colors"
+              >
+                {buying ? 'Se procesează...' : 'Da, cumpără acum'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
@@ -245,7 +289,7 @@ export default function ProductDetailPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={handleBuy}
+                    onClick={handleBuyClick}
                     disabled={
                       buying ||
                       product.isSold === true ||
