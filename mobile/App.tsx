@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Text } from 'react-native';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
@@ -39,6 +40,7 @@ function TabNavigator() {
         name="Dashboard"
         component={DashboardScreen}
         options={{
+          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>👤</Text>,
           tabBarLabel: 'Cont',
         }}
       />
@@ -46,6 +48,7 @@ function TabNavigator() {
         name="ProductCatalog"
         component={ProductCatalogScreen}
         options={{
+          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>🛍️</Text>,
           tabBarLabel: 'Magazin',
         }}
       />
@@ -53,6 +56,7 @@ function TabNavigator() {
         name="AuctionList"
         component={AuctionListScreen}
         options={{
+          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>🔨</Text>,
           tabBarLabel: 'Licitații',
         }}
       />
@@ -60,6 +64,7 @@ function TabNavigator() {
         name="Cart"
         component={CartScreen}
         options={{
+          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>🛒</Text>,
           tabBarLabel: 'Coș',
         }}
       />
@@ -67,6 +72,7 @@ function TabNavigator() {
         name="Watchlist"
         component={WatchlistScreen}
         options={{
+          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>❤️</Text>,
           tabBarLabel: 'Watchlist',
         }}
       />
@@ -74,6 +80,7 @@ function TabNavigator() {
         name="HelpCenter"
         component={HelpCenterScreen}
         options={{
+          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>❓</Text>,
           tabBarLabel: 'Ajutor',
         }}
       />
