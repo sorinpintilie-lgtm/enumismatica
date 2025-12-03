@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { z } from 'zod';
 import { useAuction } from '../../hooks/useAuctions';
 import { useBids } from '../../hooks/useBids';
-import { placeBid, setAutoBid, cancelAutoBid, getUserAutoBid } from 'shared/auctionService';
+import { placeBid, setAutoBid, cancelAutoBid, getUserAutoBid, buyNowAuction } from 'shared/auctionService';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/ToastProvider';
 import AuctionChat from '../../components/AuctionChat';
@@ -59,6 +59,7 @@ export default function AuctionDetailPage() {
   const [autoBidAmount, setAutoBidAmount] = useState('');
   const [bidError, setBidError] = useState('');
   const [bidLoading, setBidLoading] = useState(false);
+  const [buyNowLoading, setBuyNowLoading] = useState(false);
   const [showChat, setShowChat] = useState(true);
   const [confirmAction, setConfirmAction] = useState<
     | { type: 'manual' | 'auto'; amount: number }
@@ -160,6 +161,45 @@ export default function AuctionDetailPage() {
     }
   };
 
+  const handleBuyNow = async () => {
+    if (!auction) return;
+
+    if (!user) {
+      showToast({
+        type: 'error',
+        title: 'Autentificare necesară',
+        message: 'Trebuie să te autentifici pentru a folosi opțiunea "Cumpără acum".',
+      });
+      return;
+    }
+
+    setBidError('');
+    setBuyNowLoading(true);
+
+    try {
+      await buyNowAuction(id, user.uid);
+      showToast({
+        type: 'success',
+        title: 'Cumpărare instant',
+        message: 'Ai cumpărat imediat acest articol prin "Cumpără acum".',
+      });
+    } catch (error) {
+      console.error('Failed to use buy now:', error);
+      let message = 'Eroare la folosirea opțiunii "Cumpără acum".';
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      setBidError(message);
+      showToast({
+        type: 'error',
+        title: 'Eroare "Cumpără acum"',
+        message,
+      });
+    } finally {
+      setBuyNowLoading(false);
+    }
+  };
+
   const executeConfirmedAction = async () => {
     if (!confirmAction || !user || !auction) return;
 
@@ -245,6 +285,14 @@ export default function AuctionDetailPage() {
   // Minimum bid increment: 10 RON for bids under 1000, 50 RON for higher bids
   const bidIncrement = currentBid < 1000 ? 10 : 50;
   const minBid = Math.max(currentBid + bidIncrement, auction?.reservePrice ?? 0);
+
+  const canBuyNow =
+    !!auction &&
+    !isEnded &&
+    auction.status === 'active' &&
+    typeof auction.buyNowPrice === 'number' &&
+    auction.buyNowPrice > 0 &&
+    !auction.buyNowUsed;
 
   const isUserHighestBidder = !!user && !!auction && auction.currentBidderId === user.uid;
 
@@ -488,10 +536,27 @@ export default function AuctionDetailPage() {
                       ? 'În acest moment ești licitatorul cu oferta cea mai mare pentru această licitație.'
                       : auction.currentBidderId
                       ? 'În acest moment alt utilizator are oferta cea mai mare.'
-                      : 'Încă nu există oferte peste prețul de rezervă.'}
+                      : 'Încă nu există oferte peste prețul de start.'}
                   </p>
                 )}
               </div>
+
+              {canBuyNow && auction.buyNowPrice && (
+                <div className="text-center mb-6">
+                  <p className="text-sm text-slate-300 mb-1">Cumpără acum</p>
+                  <p className="text-2xl font-bold text-emerald-300 mb-3">
+                    {formatRON(auction.buyNowPrice)}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleBuyNow}
+                    disabled={buyNowLoading || bidLoading}
+                    className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-2 text-sm font-semibold text-navy-900 shadow-lg shadow-[0_0_24px_rgba(16,185,129,0.7)] hover:bg-emerald-400 disabled:bg-emerald-500/60 disabled:text-slate-700 transition-colors"
+                  >
+                    {buyNowLoading ? 'Se procesează...' : 'Cumpără acum'}
+                  </button>
+                </div>
+              )}
 
               <div className="text-center mb-6">
                 <p className="text-sm text-slate-300 mb-2">Timp rămas</p>
@@ -609,9 +674,15 @@ export default function AuctionDetailPage() {
                   <span className="font-mono text-slate-100">{auction.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-300">Preț de rezervă:</span>
+                  <span className="text-slate-300">Preț de start:</span>
                   <span className="text-slate-100">{formatRON(auction.reservePrice)}</span>
                 </div>
+                {typeof auction.buyNowPrice === 'number' && auction.buyNowPrice > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-300">Preț "Cumpără acum":</span>
+                    <span className="text-slate-100">{formatRON(auction.buyNowPrice)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-slate-300">Ora de start:</span>
                   <span className="text-slate-100">{auction.startTime.toLocaleString()}</span>

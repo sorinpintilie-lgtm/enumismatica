@@ -10,10 +10,32 @@ export interface User {
   lastLogin?: Date;
   preferences?: UserPreferences;
   helpPreferences?: UserHelpPreferences;
+
+  /**
+   * Current credit balance for the user.
+   */
   credits?: number;
+
+  /**
+   * Referral system fields.
+   */
   referralCode?: string;
   referredBy?: string;
   referralBonusApplied?: boolean;
+
+  /**
+   * Time-limited signup / referral bonus tracking.
+   * - signupBonusCreditsRemaining: how many promotional credits can still expire
+   * - signupBonusExpiresAt: when the promotional credits expire
+   */
+  signupBonusCreditsRemaining?: number;
+  signupBonusExpiresAt?: Date;
+
+  /**
+   * "My collection" subscription:
+   * user must pay 50 credits / year to keep collection features active.
+   */
+  collectionSubscriptionExpiresAt?: Date;
 }
 
 export interface UserPreferences {
@@ -54,9 +76,27 @@ export interface Product {
   diameter?: number; // Diameter in millimeters
   category?: string; // General category (e.g., "coins", "banknotes", "medals")
 
-  // Boosted visibility fields
+  /**
+   * Basic paid shop listing:
+   *  - listingExpiresAt: until when the product is kept in the shop
+   *    (5 credits per 30 days, extended when the user pays again).
+   */
+  listingExpiresAt?: Date;
+
+  // Boosted visibility fields (existing "boost" feature)
   boostExpiresAt?: Date; // Until when this product is boosted in listings
   boostedAt?: Date; // When the current boost was applied
+
+  /**
+   * Strong promotion / homepage highlight:
+   *  - isPromoted: whether the product is promoted
+   *  - promotedAt: when promotion was applied
+   *  - promotionExpiresAt: when promotion ends
+   * This is paid with 20 credits via promoteItemWithCredits().
+   */
+  isPromoted?: boolean;
+  promotedAt?: Date;
+  promotionExpiresAt?: Date;
 
   createdAt: Date;
   updatedAt: Date;
@@ -70,11 +110,56 @@ export interface Product {
 export interface Auction {
   id: string;
   productId: string; // Reference to the product being auctioned
+
+  /**
+   * Optional owner of the auction (usually the product owner).
+   * Used when charging credit-based auction creation fees and promotions.
+   */
+  ownerId?: string;
+
   startTime: Date;
   endTime: Date;
-  reservePrice: number; // Minimum price to sell
+
+  /**
+   * Public starting price (minimum first bid visible to all).
+   * This is used as the base amount for the first bid and for filters/sorting.
+   */
+  reservePrice: number;
+
+  /**
+   * Hidden minimum accepted price (minimum price guarantee).
+   * - Only the seller should know this value (never shown publicly).
+   * - At auction end, if currentBid < (minAcceptPrice ?? reservePrice),
+   *   the auction is treated as having no winner.
+   */
+  minAcceptPrice?: number;
+
   currentBid?: number; // Current highest bid amount
   currentBidderId?: string; // User ID of the current highest bidder
+
+  /**
+   * Optional "Cumpără acum" (Buy Now) configuration.
+   * If set, users can instantly buy the item for this price while the auction is active.
+   */
+  buyNowPrice?: number;
+  buyNowUsed?: boolean;
+
+  /**
+   * Credit-fee metadata:
+   *  - creditFeeAmount: how many credits were paid to create this auction
+   *  - paidDurationHours: how many hours of runtime were paid for
+   * These are set by chargeAuctionCreationWithCredits().
+   */
+  creditFeeAmount?: number;
+  paidDurationHours?: number;
+
+  /**
+   * Strong promotion / homepage highlight for auctions.
+   */
+  isPromoted?: boolean;
+  promotedAt?: Date;
+  promotionExpiresAt?: Date;
+
   status: 'pending' | 'active' | 'ended' | 'cancelled' | 'rejected'; // Approval and activity status
   createdAt: Date;
   updatedAt: Date;
@@ -240,6 +325,10 @@ export interface SiteAsset {
 /**
  * CollectionItem entity representing an item in a user's collection.
  * Stored in 'users/{userId}/collection' subcollection.
+ *
+ * UI rules:
+ * - "Nou" badge: shown for the first 12 hours after createdAt.
+ * - "Vândut" badge: shown for 24 hours after soldAt (when item is marked as sold).
  */
 export interface CollectionItem {
   id: string;
@@ -267,6 +356,14 @@ export interface CollectionItem {
   images?: string[];
   notes?: string;
   isPublic?: boolean;
+
+  /**
+   * Mark when an item from the collection has been sold.
+   * Used to show "Vândut" for 24 hours after this timestamp.
+   */
+  isSold?: boolean;
+  soldAt?: Date;
+
   createdAt: Date;
   updatedAt: Date;
 }

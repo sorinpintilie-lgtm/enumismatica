@@ -90,9 +90,12 @@ export async function getBidHistoryForAuction(
       priceChangePercent = previousAmount > 0 ? (priceChange / previousAmount) * 100 : 0;
     }
 
+    const rawName = userData?.name || `User ${bid.userId.slice(-6)}`;
+
     return {
       ...bid,
-      userName: userData?.name || `User ${bid.userId.slice(-6)}`,
+      // Public auction bid history is anonymized: first 3 characters, rest as stars.
+      userName: anonymizeUserName(rawName),
       userAvatar: getDefaultAvatar(bid.userId),
       isAutoBid: false, // Will be updated when we check auto-bids
       bidPosition: index + 1,
@@ -193,9 +196,12 @@ export async function getPaginatedBidHistory(
       priceChangePercent = previousAmount > 0 ? (priceChange / previousAmount) * 100 : 0;
     }
 
+    const rawName = userData?.name || `User ${bid.userId.slice(-6)}`;
+
     return {
       ...bid,
-      userName: userData?.name || `User ${bid.userId.slice(-6)}`,
+      // Public auction bid history (including paginated) is anonymized.
+      userName: anonymizeUserName(rawName),
       userAvatar: getDefaultAvatar(bid.userId),
       isAutoBid: false,
       bidPosition: index + 1,
@@ -404,6 +410,26 @@ function getDefaultAvatar(userId: string): string {
   // Use a simple avatar service with user ID for consistent avatars
   const color = Math.abs(hashCode(userId)) % 360; // Hue value 0-359
   return `https://i.pravatar.cc/150?img=${Math.abs(hashCode(userId)) % 70}`;
+}
+
+/**
+ * Anonymize a user name for public auction bid history:
+ * - Keep first 3 visible characters
+ * - Replace the rest with '*'
+ * - If the name is shorter, keep 1–2 chars and star the rest.
+ */
+function anonymizeUserName(name: string): string {
+  if (!name) return '***';
+  const trimmed = name.trim();
+  if (trimmed.length <= 1) {
+    return trimmed[0] + '**';
+  }
+  if (trimmed.length <= 3) {
+    return trimmed[0] + '*'.repeat(trimmed.length - 1);
+  }
+  const visible = trimmed.slice(0, 3);
+  const stars = '*'.repeat(trimmed.length - 3);
+  return visible + stars;
 }
 
 /**

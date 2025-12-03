@@ -17,9 +17,10 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
-import { Auction, Bid, AutoBid } from './types';
+import { Auction, Bid, AutoBid, Product } from './types';
 import { addAuctionPriceHistory } from './priceHistoryService';
 import { createAuctionNotification } from './auctionNotificationService';
+import { addCollectionItem } from './collectionService';
 
 /**
  * Validates if a bid is valid for an auction
@@ -324,13 +325,60 @@ async function processAutoBidsInTransaction(
 }
 
 /**
+ * Helper: after an auction is won (normal end or "Cumpără acum"),
+ * add the underlying product into the winner's personal collection.
+ */
+async function addWonProductToCollection(winnerId: string, productId: string): Promise<void> {
+  if (!db) return;
+
+  try {
+    const productRef = doc(db, 'products', productId);
+    const productSnap = await getDoc(productRef);
+    if (!productSnap.exists()) {
+      return;
+    }
+
+    const data = productSnap.data() as any as Product;
+
+    await addCollectionItem(winnerId, {
+      name: data.name || 'Articol licitație',
+      description: data.description || '',
+      images: data.images || [],
+      country: data.country || undefined,
+      year: data.year || undefined,
+      era: data.era || undefined,
+      denomination: data.denomination || undefined,
+      metal: data.metal || undefined,
+      grade: data.grade || undefined,
+      rarity: data.rarity || undefined,
+      weight: data.weight || undefined,
+      diameter: data.diameter || undefined,
+      category: data.category || undefined,
+      acquisitionPrice: data.price,
+      currentValue: data.price,
+      notes: `Câștigat prin licitație / cumpărare imediată din produsul ${productId}`,
+      tags: ['auction-win'],
+    });
+  } catch (err) {
+    console.error('Failed to add won product to collection:', err);
+  }
+}
+
+/**
  * Ends an auction and determines the winner
+ *
+ * Uses the hidden minimum accepted price (minAcceptPrice) if set; otherwise
+ * falls back to reservePrice:
+ *   - if currentBid < minAcceptPrice/reservePrice → no winner (auction_ended_no_win)
+ *   - else → winner is currentBidderId (auction_won)
  */
 export async function endAuction(auctionId: string): Promise<void> {
   const auctionRef = doc(db, 'auctions', auctionId);
 
   let winnerId: string | null = null;
   let auctionTitle: string | undefined;
+  let winningBidAmount: number | null = null;
+  let winnerProductId: string | null = null;
 
   await runTransaction(db, async (transaction) => {
     const auctionDoc = await transaction.get(auctionRef);
@@ -338,22 +386,36 @@ export async function endAuction(auctionId: string): Promise<void> {
       throw new Error('Auction not found');
     }
 
+    const raw = auctionDoc.data() as any;
     const auction = {
       id: auctionDoc.id,
-      ...auctionDoc.data(),
+      ...raw,
     } as Auction;
 
     if (auction.status !== 'active') {
       return; // Already ended
     }
 
-    winnerId = (auction.currentBid || 0) >= auction.reservePrice ? auction.currentBidderId : null;
+    const currentBidAmount = auction.currentBid || 0;
+    const minAccept =
+      typeof raw.minAcceptPrice === 'number' ? raw.minAcceptPrice : auction.reservePrice;
+
+    if (currentBidAmount >= minAccept && auction.currentBidderId) {
+      winnerId = auction.currentBidderId;
+      winningBidAmount = currentBidAmount;
+      winnerProductId = auction.productId;
+    } else {
+      winnerId = null;
+      winningBidAmount = null;
+      winnerProductId = null;
+    }
+
     auctionTitle = `Auction ${auctionId}`;
 
     transaction.update(auctionRef, {
       status: 'ended',
       updatedAt: Timestamp.fromDate(new Date()),
-      // Could add winnerId if needed
+      // Could add winnerId / didMeetMinimum if needed
     });
   });
 
@@ -364,11 +426,19 @@ export async function endAuction(auctionId: string): Promise<void> {
         winnerId,
         'auction_won',
         auctionId,
-        `Felicitări! Ai câștigat licitația ${auctionTitle}`,
-        auctionTitle
+        winningBidAmount != null
+          ? `Felicitări! Ai câștigat licitația ${auctionTitle} cu oferta de ${winningBidAmount.toFixed(2)} RON`
+          : `Felicitări! Ai câștigat licitația ${auctionTitle}`,
+        auctionTitle,
+        winningBidAmount != null ? winningBidAmount : undefined,
       );
     } catch (error) {
       console.error('Failed to send auction won notification:', error);
+    }
+
+    // Add won product into winner's personal collection
+    if (winnerProductId) {
+      await addWonProductToCollection(winnerId, winnerProductId);
     }
   } else {
     // Notify all bidders that auction ended without winner
@@ -390,5 +460,100 @@ export async function endAuction(auctionId: string): Promise<void> {
     } catch (error) {
       console.error('Failed to send auction ended notifications:', error);
     }
+  }
+}
+
+/**
+ * "Cumpără acum" (Buy Now) – instantly ends the auction and assigns
+ * the item to the buyer at the configured buyNowPrice.
+ *
+ * Rules:
+ * - Auction must exist and be 'active'
+ * - Auction must have a buyNowPrice configured and not already used
+ * - Optionally prevents owners from buying their own auction if ownerId is set
+ */
+export async function buyNowAuction(auctionId: string, buyerId: string): Promise<void> {
+  if (!db) throw new Error('Firestore not initialized');
+
+  const auctionRef = doc(db, 'auctions', auctionId);
+
+  let finalPrice: number | null = null;
+  let auctionTitle: string | undefined;
+  let boughtProductId: string | null = null;
+
+  await runTransaction(db, async (tx) => {
+    const auctionDoc = await tx.get(auctionRef);
+    if (!auctionDoc.exists()) {
+      throw new Error('Licitația nu există');
+    }
+
+    const raw = auctionDoc.data() as any;
+    const auction = {
+      id: auctionDoc.id,
+      ...raw,
+    } as Auction;
+
+    if (auction.status !== 'active') {
+      throw new Error('Licitația nu este activă');
+    }
+
+    if (auction.buyNowUsed) {
+      throw new Error('Opțiunea "Cumpără acum" a fost deja folosită pentru această licitație.');
+    }
+
+    if (typeof auction.buyNowPrice !== 'number' || auction.buyNowPrice <= 0) {
+      throw new Error('Această licitație nu are configurată o opțiune "Cumpără acum".');
+    }
+
+    if (auction.ownerId && auction.ownerId === buyerId) {
+      throw new Error('Nu poți folosi "Cumpără acum" pentru propria ta licitație.');
+    }
+
+    finalPrice = auction.buyNowPrice;
+    auctionTitle = `Auction ${auctionId}`;
+    boughtProductId = auction.productId;
+
+    tx.update(auctionRef, {
+      status: 'ended',
+      currentBid: finalPrice,
+      currentBidderId: buyerId,
+      buyNowUsed: true,
+      updatedAt: Timestamp.fromDate(new Date()),
+    });
+  });
+
+  if (finalPrice == null || !auctionTitle) {
+    return;
+  }
+
+  // Notify the buyer that they have won instantly via Buy Now
+  try {
+    await createAuctionNotification(
+      buyerId,
+      'auction_won',
+      auctionId,
+      `Ai cumpărat imediat prin "Cumpără acum" licitația ${auctionTitle} pentru ${finalPrice.toFixed(2)} RON`,
+      auctionTitle,
+      finalPrice,
+    );
+  } catch (error) {
+    console.error('Failed to send buy-now auction won notification:', error);
+  }
+
+  // Add bought product into buyer's personal collection
+  if (boughtProductId) {
+    await addWonProductToCollection(buyerId, boughtProductId);
+  }
+
+  // Track price history for the final price as a system event
+  try {
+    await addAuctionPriceHistory(
+      auctionId,
+      finalPrice,
+      'system',
+      'Cumpără acum - preț final',
+    );
+  } catch (error) {
+    console.error('Failed to track price history for buy-now:', error);
   }
 }

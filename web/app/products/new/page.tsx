@@ -74,6 +74,8 @@ export default function NewProductPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [listingType, setListingType] = useState<'direct' | 'auction'>('direct');
   const [reservePrice, setReservePrice] = useState('');
+  const [minAcceptPrice, setMinAcceptPrice] = useState('');
+  const [buyNowPrice, setBuyNowPrice] = useState('');
   const [auctionEndTime, setAuctionEndTime] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -144,11 +146,50 @@ export default function NewProductPage() {
       if (!Number.isFinite(numericReserve) || numericReserve <= 0) {
         showToast({
           type: 'error',
-          title: 'Preț de rezervă invalid',
-          message: 'Introdu un preț de rezervă valid mai mare decât 0.',
+          title: 'Preț de start invalid',
+          message: 'Introdu un preț de start valid mai mare decât 0.',
         });
         return;
       }
+
+      const numericMinAccept = Number(minAcceptPrice || numericReserve);
+      if (!Number.isFinite(numericMinAccept) || numericMinAccept <= 0) {
+        showToast({
+          type: 'error',
+          title: 'Preț minim acceptat invalid',
+          message: 'Introdu un preț minim acceptat valid mai mare decât 0.',
+        });
+        return;
+      }
+      if (numericMinAccept < numericReserve) {
+        showToast({
+          type: 'error',
+          title: 'Preț minim prea mic',
+          message: 'Prețul minim acceptat trebuie să fie cel puțin egal cu prețul de start.',
+        });
+        return;
+      }
+
+      if (buyNowPrice) {
+        const numericBuyNow = Number(buyNowPrice);
+        if (!Number.isFinite(numericBuyNow) || numericBuyNow <= 0) {
+          showToast({
+            type: 'error',
+            title: 'Preț "Cumpără acum" invalid',
+            message: 'Introdu un preț "Cumpără acum" valid mai mare decât 0.',
+          });
+          return;
+        }
+        if (numericBuyNow < numericMinAccept) {
+          showToast({
+            type: 'error',
+            title: 'Preț "Cumpără acum" prea mic',
+            message: 'Prețul "Cumpără acum" trebuie să fie cel puțin egal cu prețul minim acceptat.',
+          });
+          return;
+        }
+      }
+
       if (!auctionEndTime) {
         showToast({
           type: 'error',
@@ -196,12 +237,17 @@ export default function NewProductPage() {
 
       if (listingType === 'auction') {
         const reserve = reservePrice ? Number(reservePrice) : numericPrice;
+        const minAccept = minAcceptPrice ? Number(minAcceptPrice) : reserve;
+        const buyNow = buyNowPrice ? Number(buyNowPrice) : null;
         const end = new Date(auctionEndTime);
         await addDoc(collection(db, 'auctions'), {
           productId: productRef.id,
           startTime: Timestamp.fromDate(new Date()),
           endTime: Timestamp.fromDate(end),
           reservePrice: reserve,
+          minAcceptPrice: minAccept,
+          buyNowPrice: buyNow,
+          buyNowUsed: false,
           currentBid: null,
           currentBidderId: null,
           status: 'pending',
@@ -510,7 +556,7 @@ export default function NewProductPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-200 mb-1">
-                    Preț de rezervă (RON)
+                    Preț de start licitație (RON)
                   </label>
                   <input
                     type="number"
@@ -519,7 +565,37 @@ export default function NewProductPage() {
                     className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20"
                     value={reservePrice}
                     onChange={(e) => setReservePrice(e.target.value)}
-                    placeholder={price || 'Ex: 100.00'}
+                    placeholder={price || 'Ex: 10.00'}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">
+                    Preț minim acceptat (doar pentru tine) (RON)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20"
+                    value={minAcceptPrice}
+                    onChange={(e) => setMinAcceptPrice(e.target.value)}
+                    placeholder={reservePrice || price || 'Ex: 100.00'}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">
+                    Preț "Cumpără acum" (RON, opțional)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20"
+                    value={buyNowPrice}
+                    onChange={(e) => setBuyNowPrice(e.target.value)}
+                    placeholder={minAcceptPrice || reservePrice || price || 'Ex: 150.00'}
                   />
                 </div>
                 <div>

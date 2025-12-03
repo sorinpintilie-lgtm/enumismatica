@@ -323,16 +323,38 @@ export default function MyCollectionPage() {
   );
 }
 
-// Collection Item Card Component
-function CollectionItemCard({ 
-  item, 
-  onEdit, 
-  onDelete 
-}: { 
-  item: CollectionItem; 
-  onEdit: () => void; 
+ // Collection Item Card Component
+function CollectionItemCard({
+  item,
+  onEdit,
+  onDelete
+}: {
+  item: CollectionItem;
+  onEdit: () => void;
   onDelete: () => void;
 }) {
+  // Badges:
+  // - "Nou": first 12 hours after createdAt
+  // - "Vândut": 24 hours after soldAt (if isSold)
+  const now = new Date();
+
+  const createdAtDate =
+    item.createdAt instanceof Date ? item.createdAt : new Date(item.createdAt as any);
+  const isNew =
+    createdAtDate &&
+    now.getTime() - createdAtDate.getTime() <= 12 * 60 * 60 * 1000; // 12 hours
+
+  let isSoldRecent = false;
+  if (item.isSold && item.soldAt) {
+    const soldAtDate =
+      item.soldAt instanceof Date ? item.soldAt : new Date(item.soldAt as any);
+    isSoldRecent =
+      soldAtDate &&
+      now.getTime() - soldAtDate.getTime() <= 24 * 60 * 60 * 1000; // 24 hours
+  }
+
+  const showBadge = isNew || isSoldRecent;
+
   return (
     <div className="rounded-2xl border border-gold-500/20 bg-navy-900/80 overflow-hidden hover:border-gold-400 hover:shadow-[0_18px_55px_rgba(0,0,0,0.85)] transition-shadow">
       {/* Image */}
@@ -348,6 +370,19 @@ function CollectionItemCard({
             <span className="text-6xl">🪙</span>
           </div>
         )}
+
+        {showBadge && (
+          <span
+            className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold tracking-wide ${
+              isSoldRecent
+                ? 'bg-red-600 text-white'
+                : 'bg-emerald-500 text-navy-900'
+            } shadow-md`}
+          >
+            {isSoldRecent ? 'Vândut' : 'Nou'}
+          </span>
+        )}
+
         {item.rarity && (
           <span className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ${
             item.rarity === 'extremely-rare' ? 'bg-purple-100 text-purple-800' :
