@@ -366,12 +366,15 @@ export async function seedAuctions(productIds: string[], userIds: string[]): Pro
       endTime: Timestamp.fromDate(auction.endTime),
       reservePrice: auction.reservePrice,
       status: auction.status,
-      // Preconfigure optional "Cumpără acum" based on generated data
-      buyNowPrice: typeof auction.buyNowPrice === 'number' ? auction.buyNowPrice : undefined,
+      // Only add buyNowPrice when it is actually defined; Firestore does not accept undefined.
       buyNowUsed: false,
       createdAt: Timestamp.fromDate(auction.createdAt),
       updatedAt: Timestamp.fromDate(auction.updatedAt),
     };
+
+    if (typeof auction.buyNowPrice === 'number' && auction.buyNowPrice > 0) {
+      auctionData.buyNowPrice = auction.buyNowPrice;
+    }
     
     const docRef = await addDoc(collection(db, 'auctions'), auctionData);
     auctionIds.push(docRef.id);
