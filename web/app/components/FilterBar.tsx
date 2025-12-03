@@ -101,10 +101,12 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
     const defaultFilters: FilterOptions = {
       searchTerm: '',
       country: 'Toate Țările',
+      // 0 / 0 = fără filtru de preț; utilizatorul setează limite doar dacă dorește.
       minPrice: 0,
-      maxPrice: 10000,
-      minYear: 1800,
-      maxYear: new Date().getFullYear(),
+      maxPrice: 0,
+      // 0 / 0 = fără filtru de ani; utilizatorul setează anii doar dacă dorește.
+      minYear: 0,
+      maxYear: 0,
       metal: 'Toate Metalele',
       rarity: 'Toate Raritățile',
       grade: 'Toate Gradele',
@@ -244,7 +246,15 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
           {/* Price Range */}
           <div>
             <label className="block text-sm font-medium text-slate-100 mb-2">
-              Interval Preț: <span className="text-[#e7b73c] font-semibold">{localFilters.minPrice} RON - {localFilters.maxPrice} RON</span>
+              Interval Preț:{' '}
+              {localFilters.minPrice || localFilters.maxPrice ? (
+                <span className="text-[#e7b73c] font-semibold">
+                  {localFilters.minPrice || 0} RON -{' '}
+                  {localFilters.maxPrice || '∞'} RON
+                </span>
+              ) : (
+                <span className="text-slate-300 font-semibold">Fără filtru</span>
+              )}
             </label>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -271,7 +281,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
               min="0"
               max="10000"
               step="50"
-              value={localFilters.maxPrice}
+              value={localFilters.maxPrice || 0}
               onChange={(e) => handleFilterUpdate('maxPrice', parseFloat(e.target.value))}
               className="w-full mt-3 accent-[#e7b73c] bg-navy-800 rounded-full h-1.5"
             />

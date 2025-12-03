@@ -20,8 +20,9 @@ function ProductsListContent() {
   const [filters, setFilters] = useState<FilterOptions>({
     searchTerm: '',
     country: 'Toate Țările',
+    // 0 / 0 = fără filtru de preț în mod implicit. Utilizatorul setează limitele doar dacă dorește.
     minPrice: 0,
-    maxPrice: 10000,
+    maxPrice: 0,
     // 0 / 0 = fără filtru pe ani în mod implicit. Utilizatorul setează anii doar dacă dorește.
     minYear: 0,
     maxYear: 0,
@@ -64,10 +65,15 @@ function ProductsListContent() {
       filtered = filtered.filter((product) => product.country === filters.country);
     }
 
-    // Apply price range filter
-    filtered = filtered.filter(
-      (product) => product.price >= filters.minPrice && product.price <= filters.maxPrice
-    );
+    // Apply price range filter only if user has set at least one bound.
+    // Implicit (0 / 0) = fără filtru de preț.
+    if (filters.minPrice || filters.maxPrice) {
+      filtered = filtered.filter((product) => {
+        if (filters.minPrice && product.price < filters.minPrice) return false;
+        if (filters.maxPrice && product.price > filters.maxPrice) return false;
+        return true;
+      });
+    }
 
     // Apply year range filter
     // Notă: dacă un produs nu are anul setat, îl păstrăm în listă,
