@@ -188,10 +188,27 @@ const generateAuctions = (): Omit<Auction, 'id'>[] => {
   return Array.from({ length: 20 }, (_, i) => {
     const daysOffset = Math.floor(Math.random() * 14) + 1;
     const status = statuses[i];
-    const startTime = status === 'ended' ? new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) : new Date();
-    const endTime = status === 'ended' ? new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) : new Date(Date.now() + daysOffset * 24 * 60 * 60 * 1000);
-    const reservePrice = Math.floor(Math.random() * 400) + 200; // 200-600 RON for more reasonable reserve prices
-    const currentBid = (status === 'active' || status === 'ended') ? reservePrice + Math.floor(Math.random() * 100) : undefined; // Current bids 200-700 RON
+    const startTime =
+      status === 'ended'
+        ? new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+        : new Date();
+    const endTime =
+      status === 'ended'
+        ? new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+        : new Date(Date.now() + daysOffset * 24 * 60 * 60 * 1000);
+
+    const reservePrice = Math.floor(Math.random() * 400) + 200; // 200-600 RON
+    const currentBid =
+      status === 'active' || status === 'ended'
+        ? reservePrice + Math.floor(Math.random() * 100)
+        : undefined; // Current bids 200-700 RON
+
+    // Configure "Cumpără acum" for a subset of ACTIVE auctions so UI can show the button.
+    // We keep it a bit above reserve/current bid to look realistic.
+    const hasBuyNow = status === 'active' && Math.random() < 0.6; // ~60% of active auctions
+    const buyNowPrice = hasBuyNow
+      ? reservePrice + Math.floor(Math.random() * 300) + 150 // reserve + 150–450 RON
+      : undefined;
 
     return {
       productId: '',
@@ -201,6 +218,8 @@ const generateAuctions = (): Omit<Auction, 'id'>[] => {
       currentBid,
       currentBidderId: currentBid ? '' : undefined,
       status,
+      buyNowPrice,
+      buyNowUsed: false,
       createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
       updatedAt: new Date(),
     };
@@ -340,13 +359,16 @@ export async function seedAuctions(productIds: string[], userIds: string[]): Pro
     const auction = auctions[i];
     
     // For active auctions, we'll set currentBid after creating bids
-    // For now, just create the auction without currentBid
+    // For now, just create the auction without currentBid; bids seeding will update it.
     const auctionData: any = {
       productId: productIds[i % productIds.length],
       startTime: Timestamp.fromDate(auction.startTime),
       endTime: Timestamp.fromDate(auction.endTime),
       reservePrice: auction.reservePrice,
       status: auction.status,
+      // Preconfigure optional "Cumpără acum" based on generated data
+      buyNowPrice: typeof auction.buyNowPrice === 'number' ? auction.buyNowPrice : undefined,
+      buyNowUsed: false,
       createdAt: Timestamp.fromDate(auction.createdAt),
       updatedAt: Timestamp.fromDate(auction.updatedAt),
     };
