@@ -11,6 +11,20 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product, showWatchlistButton = true }: ProductCardProps) {
+  const now = new Date();
+
+  const isBoostActive =
+    product.boostExpiresAt instanceof Date
+      ? product.boostExpiresAt.getTime() > now.getTime()
+      : false;
+
+  const isPromoActive =
+    product.promotionExpiresAt instanceof Date
+      ? product.promotionExpiresAt.getTime() > now.getTime()
+      : false;
+
+  const estePromovat = isBoostActive || isPromoActive;
+
   return (
     <div className="relative group h-full flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 rounded-2xl border border-[#e7b73c]/70 bg-gradient-to-br from-navy-500 to-navy-600 shadow-[0_10px_35px_rgba(231,183,60,0.3)] hover:border-[#e7b73c] hover:shadow-[0_15px_45px_rgba(231,183,60,0.45)]">
       <div className="relative aspect-[4/3] overflow-hidden bg-white rounded-t-2xl">
@@ -25,6 +39,11 @@ function ProductCard({ product, showWatchlistButton = true }: ProductCardProps) 
           <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
             Fara imagine
           </div>
+        )}
+        {estePromovat && (
+          <span className="absolute top-2 left-2 z-10 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-navy-900 shadow-md">
+            Promovat
+          </span>
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-gold-500/10" />
       </div>

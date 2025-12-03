@@ -3,8 +3,17 @@ import { collection, query, orderBy, where, limit, startAfter, getDocs, doc, get
 import { db } from '../lib/firebase';
 import { Product } from 'shared/types';
 
-// Default fields for product list view - optimize for performance
-const DEFAULT_PRODUCT_FIELDS = ['name', 'images', 'price', 'createdAt', 'updatedAt'];
+ // Default fields for product list view - optimize for performance
+ // Include boost fields so we can highlight boosted products on homepage.
+const DEFAULT_PRODUCT_FIELDS = [
+  'name',
+  'images',
+  'price',
+  'createdAt',
+  'updatedAt',
+  'boostExpiresAt',
+  'boostedAt',
+];
 
 /**
  * Cached products hook optimized for homepage and lightweight listings.
@@ -23,7 +32,13 @@ export function useCachedProducts(
   return useQuery({
     queryKey: ['products', ownerId, pageSize, selectedFields],
     queryFn: async () => {
-      let q = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(pageSize));
+      // Match catalog behavior: show only approved products
+      let q = query(
+        collection(db, 'products'),
+        where('status', '==', 'approved'),
+        orderBy('createdAt', 'desc'),
+        limit(pageSize),
+      );
 
       if (ownerId) {
         q = query(q, where('ownerId', '==', ownerId));
@@ -43,15 +58,25 @@ export function useCachedProducts(
           }
         });
 
-        // Always include dates for proper typing
-        if (selectedFields.includes('createdAt')) {
-          productData.createdAt = data.createdAt?.toDate() || new Date();
-        }
-        if (selectedFields.includes('updatedAt')) {
-          productData.updatedAt = data.updatedAt?.toDate() || new Date();
-        }
-
-        productsData.push(productData as Product);
+                // Always include dates for proper typing
+                if (selectedFields.includes('createdAt')) {
+                  productData.createdAt = data.createdAt?.toDate() || new Date();
+                }
+                if (selectedFields.includes('updatedAt')) {
+                  productData.updatedAt = data.updatedAt?.toDate() || new Date();
+                }
+                if (selectedFields.includes('boostExpiresAt') && data.boostExpiresAt) {
+                  productData.boostExpiresAt = data.boostExpiresAt?.toDate
+                    ? data.boostExpiresAt.toDate()
+                    : data.boostExpiresAt;
+                }
+                if (selectedFields.includes('boostedAt') && data.boostedAt) {
+                  productData.boostedAt = data.boostedAt?.toDate
+                    ? data.boostedAt.toDate()
+                    : data.boostedAt;
+                }
+        
+                productsData.push(productData as Product);
       });
 
       return productsData;
@@ -80,15 +105,25 @@ export function useCachedProduct(id: string, fields: string[] = DEFAULT_PRODUCT_
           }
         });
 
-        // Always include dates for proper typing
-        if (fields.includes('createdAt')) {
-          productData.createdAt = data.createdAt?.toDate() || new Date();
-        }
-        if (fields.includes('updatedAt')) {
-          productData.updatedAt = data.updatedAt?.toDate() || new Date();
-        }
-
-        return productData as Product;
+                // Always include dates for proper typing
+                if (fields.includes('createdAt')) {
+                  productData.createdAt = data.createdAt?.toDate() || new Date();
+                }
+                if (fields.includes('updatedAt')) {
+                  productData.updatedAt = data.updatedAt?.toDate() || new Date();
+                }
+                if (fields.includes('boostExpiresAt') && data.boostExpiresAt) {
+                  productData.boostExpiresAt = data.boostExpiresAt?.toDate
+                    ? data.boostExpiresAt.toDate()
+                    : data.boostExpiresAt;
+                }
+                if (fields.includes('boostedAt') && data.boostedAt) {
+                  productData.boostedAt = data.boostedAt?.toDate
+                    ? data.boostedAt.toDate()
+                    : data.boostedAt;
+                }
+        
+                return productData as Product;
       } else {
         throw new Error('Product not found');
       }

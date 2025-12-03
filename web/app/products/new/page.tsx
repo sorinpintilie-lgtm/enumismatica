@@ -6,6 +6,7 @@ import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firesto
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { uploadMultipleImages, validateImageFile } from 'shared/storageService';
+import { addCollectionItem } from 'shared/collectionService';
 import { useToast } from '../../components/ToastProvider';
 
 // Predefined options for product attributes
@@ -234,6 +235,28 @@ export default function NewProductPage() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      // Add product into user's personal collection so it appears in "Colecția Mea"
+      try {
+        await addCollectionItem(user.uid, {
+          name: name.trim(),
+          description: description.trim(),
+          images: imageUrls,
+          country: country || undefined,
+          year: year ? Number(year) : undefined,
+          era: era || undefined,
+          metal: metal || undefined,
+          denomination: denomination || undefined,
+          rarity: rarity || undefined,
+          grade: grade || undefined,
+          acquisitionPrice: numericPrice,
+          currentValue: numericPrice,
+          notes: 'Articol creat în magazin',
+          tags: ['listare-magazin'],
+        });
+      } catch (err) {
+        console.error('Failed to add product to collection', err);
+      }
 
       if (listingType === 'auction') {
         const reserve = reservePrice ? Number(reservePrice) : numericPrice;
