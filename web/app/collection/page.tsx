@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCollection } from '../hooks/useCollection';
 import { CollectionItem } from 'shared/types';
@@ -8,16 +8,160 @@ import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import { formatRON } from '../utils/currency';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { getUserCredits, payCollectionSubscriptionWithCredits } from 'shared/creditService';
+import { useToast } from '../components/ToastProvider';
 
 export default function MyCollectionPage() {
   const { user } = useAuth();
-  const { items, loading, error, stats, addItem, updateItem, deleteItem } = useCollection(user?.uid || null);
+  const { items, loading, error, stats, addItem, updateItem, deleteItem } = useCollection(
+    user?.uid || null,
+  );
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<CollectionItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const filteredItems = items.filter(item => {
+  // Abonament + credite pentru "Colecția Mea"
+  const [subscriptionActive, setSubscriptionActive] = useState<boolean | null>(null);
+  const [subscriptionExpiresAt, setSubscriptionExpiresAt] = useState<Date | null>(null);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [creditsLoading, setCreditsLoading] = useState(false);
+
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setSubscriptionActive(null);
+      setSubscriptionExpiresAt(null);
+      setCredits(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadStatusAndCredits = async () => {
+      setSubscriptionLoading(true);
+      setSubscriptionError(null);
+
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const snap = await getDoc(userRef);
+
+        if (!cancelled) {
+          if (snap.exists()) {
+            const data = snap.data() as any;
+            const rawExpiry = (data as any).collectionSubscriptionExpiresAt;
+            let expiresAt: Date | null = null;
+
+            if (rawExpiry && typeof (rawExpiry as any).toDate === 'function') {
+              expiresAt = (rawExpiry as any).toDate();
+            } else if (rawExpiry instanceof Date) {
+              expiresAt = rawExpiry;
+            }
+
+            setSubscriptionExpiresAt(expiresAt);
+
+            const now = new Date();
+            const isActive = !!expiresAt && expiresAt.getTime() > now.getTime();
+            setSubscriptionActive(isActive);
+          } else {
+            setSubscriptionExpiresAt(null);
+            setSubscriptionActive(false);
+          }
+        }
+
+        setCreditsLoading(true);
+        try {
+          const value = await getUserCredits(user.uid);
+          if (!cancelled) {
+            setCredits(value);
+          }
+        } finally {
+          if (!cancelled) {
+            setCreditsLoading(false);
+          }
+        }
+      } catch (err: any) {
+        console.error('Failed to load collection subscription status', err);
+        if (!cancelled) {
+          setSubscriptionError(
+            err?.message ||
+              'Nu s-au putut încărca informațiile despre abonamentul colecției.',
+          );
+          setSubscriptionActive(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setSubscriptionLoading(false);
+        }
+      }
+    };
+
+    loadStatusAndCredits();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid]);
+
+  const handleActivateSubscription = async () => {
+    if (!user?.uid) return;
+
+    try {
+      setSubscriptionLoading(true);
+      await payCollectionSubscriptionWithCredits(user.uid, 1);
+
+      // Reîncarcă data de expirare a abonamentului
+      const userRef = doc(db, 'users', user.uid);
+      const snap = await getDoc(userRef);
+      if (snap.exists()) {
+        const data = snap.data() as any;
+        const rawExpiry = (data as any).collectionSubscriptionExpiresAt;
+        let expiresAt: Date | null = null;
+
+        if (rawExpiry && typeof (rawExpiry as any).toDate === 'function') {
+          expiresAt = (rawExpiry as any).toDate();
+        } else if (rawExpiry instanceof Date) {
+          expiresAt = rawExpiry;
+        }
+
+        setSubscriptionExpiresAt(expiresAt);
+
+        const now = new Date();
+        const isActive = !!expiresAt && expiresAt.getTime() > now.getTime();
+        setSubscriptionActive(isActive);
+      } else {
+        setSubscriptionActive(false);
+      }
+
+      // Reîncarcă creditele după plată
+      const value = await getUserCredits(user.uid);
+      setCredits(value);
+
+      showToast({
+        type: 'success',
+        title: 'Abonament activat',
+        message: 'Abonamentul „Colecția Mea” a fost activat pentru 1 an folosind 50 de credite.',
+      });
+    } catch (err: any) {
+      console.error('Failed to activate collection subscription', err);
+      showToast({
+        type: 'error',
+        title: 'Nu s-a putut activa abonamentul',
+        message:
+          err?.message ||
+          'A apărut o eroare la activarea abonamentului „Colecția Mea”. Încearcă din nou.',
+      });
+    } finally {
+      setSubscriptionLoading(false);
+    }
+  };
+
+  const filteredItems = items.filter((item) => {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
     return (
@@ -25,7 +169,7 @@ export default function MyCollectionPage() {
       item.description?.toLowerCase().includes(search) ||
       item.country?.toLowerCase().includes(search) ||
       item.denomination?.toLowerCase().includes(search) ||
-      item.tags?.some(tag => tag.toLowerCase().includes(search))
+      item.tags?.some((tag) => tag.toLowerCase().includes(search))
     );
   });
 
@@ -37,7 +181,8 @@ export default function MyCollectionPage() {
             Colecția este disponibilă doar pentru utilizatori autentificați
           </h1>
           <p className="text-sm text-slate-300 mb-5">
-            Pentru a vedea și gestiona articolele din colecția ta, trebuie să te autentifici în contul tău.
+            Pentru a vedea și gestiona articolele din colecția ta, trebuie să te autentifici în
+            contul tău.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
@@ -52,6 +197,73 @@ export default function MyCollectionPage() {
             >
               Creează cont
             </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (subscriptionLoading && subscriptionActive === null) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
+          <p className="ml-4 text-slate-300">
+            Se verifică abonamentul pentru „Colecția Mea”...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (subscriptionActive === false) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-10">
+        <div className="rounded-2xl border border-gold-500/40 bg-navy-900/80 p-8 shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3">Abonament Colecția Mea</h1>
+          <p className="text-sm text-slate-300 mb-4">
+            Pentru a folosi funcționalitățile „Colecția Mea” (vizualizare, adăugare și gestionare
+            articole), este nevoie de un abonament activ plătit cu credite.
+          </p>
+          <ul className="text-sm text-slate-300 mb-4 list-disc list-inside space-y-1">
+            <li>
+              Cost: <span className="font-semibold text-gold-300">50 credite / an</span>
+            </li>
+            <li>Abonamentul îți permite să păstrezi și să gestionezi colecția ta personală.</li>
+            <li>
+              Creditele se pot obține din bonusul de înregistrare, recomandări sau plăți Netopia.
+            </li>
+          </ul>
+          {subscriptionExpiresAt && (
+            <p className="text-xs text-slate-400 mb-3">
+              Ultimul abonament a expirat la:{' '}
+              <span className="font-semibold text-slate-200">
+                {subscriptionExpiresAt.toLocaleString('ro-RO')}
+              </span>
+            </p>
+          )}
+          {subscriptionError && (
+            <p className="text-xs text-red-300 mb-3">
+              {subscriptionError}
+            </p>
+          )}
+          <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4">
+            <div className="text-sm text-slate-200">
+              <p className="mb-1">Credite disponibile:</p>
+              <p className="text-2xl font-bold text-gold-300">
+                {creditsLoading ? '—' : credits ?? 0}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleActivateSubscription}
+              disabled={subscriptionLoading}
+              className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-6 py-2.5 text-sm font-semibold text-[#000940] shadow-[0_0_24px_rgba(231,183,60,0.8)] hover:bg-[#f0c955] disabled:bg-[#c9aa4a] disabled:cursor-not-allowed transition-colors"
+            >
+              {subscriptionLoading
+                ? 'Se activează abonamentul...'
+                : 'Activează abonamentul (50 credite / an)'}
+            </button>
           </div>
         </div>
       </div>

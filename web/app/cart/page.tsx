@@ -176,30 +176,13 @@ export default function CartPage() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-400">Cantitate:</span>
-                      <div className="inline-flex items-center rounded-full border border-gold-500/40 bg-navy-950/70">
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="px-2 py-1 text-sm text-slate-200 hover:text-white"
-                        >
-                          -
-                        </button>
-                        <span className="px-3 py-1 text-sm text-white">{item.quantity}</span>
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="px-2 py-1 text-sm text-slate-200 hover:text-white"
-                        >
-                          +
-                        </button>
-                      </div>
+                    <div className="text-xs text-slate-400">
+                      Produs unic (cantitate 1).
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-slate-400">Subtotal</p>
                       <p className="text-sm font-semibold text-[#e7b73c]">
-                        {product ? formatRON(product.price * item.quantity) : '—'}
+                        {product ? formatRON(product.price) : '—'}
                       </p>
                     </div>
                   </div>

@@ -33,6 +33,16 @@ export default function CheckoutPage() {
 
   const [submitting, setSubmitting] = useState(false);
 
+  // Detalii livrare (doar la nivel de checkout, momentan nu sunt trimise către procesator de plăți)
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [addressLine1, setAddressLine1] = useState('');
+  const [addressLine2, setAddressLine2] = useState('');
+  const [city, setCity] = useState('');
+  const [county, setCounty] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [notes, setNotes] = useState('');
+
   const loading = authLoading || cartLoading || productsLoading;
 
   const lines = useMemo(
@@ -112,11 +122,29 @@ export default function CheckoutPage() {
 
   const handleConfirmOrder = async () => {
     if (!userId) return;
+
     if (lines.length === 0) {
       showToast({
         type: 'error',
         title: 'Coș gol',
         message: 'Nu există produse în coș pentru a finaliza cumpărarea.',
+      });
+      return;
+    }
+
+    // Validare date livrare
+    if (
+      !fullName.trim() ||
+      !phone.trim() ||
+      !addressLine1.trim() ||
+      !city.trim() ||
+      !county.trim() ||
+      !postalCode.trim()
+    ) {
+      showToast({
+        type: 'error',
+        title: 'Date de livrare incomplete',
+        message: 'Completează numele, telefonul și adresa completă pentru livrare.',
       });
       return;
     }
@@ -156,8 +184,8 @@ export default function CheckoutPage() {
           title: 'Cumpărare finalizată',
           message:
             successCount === 1
-              ? 'Ai cumpărat 1 produs din coș. Comanda este înregistrată.'
-              : `Ai cumpărat ${successCount} produse din coș. Comenzile sunt înregistrate.`,
+              ? 'Ai cumpărat 1 produs din coș. Comanda este înregistrată. Vei fi contactat pentru confirmarea livrării la adresa introdusă.'
+              : `Ai cumpărat ${successCount} produse din coș. Comenzile sunt înregistrate. Vei fi contactat pentru confirmarea livrării la adresa introdusă.`,
         });
       } else {
         showToast({
@@ -266,6 +294,122 @@ export default function CheckoutPage() {
           </div>
 
           <div className="space-y-4">
+            {/* Detalii livrare / adresă */}
+            <div className="rounded-2xl border border-gold-500/40 bg-navy-900/90 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.9)]">
+              <h2 className="text-lg font-semibold text-white mb-3">Detalii livrare</h2>
+              <p className="text-[11px] text-slate-400 mb-4">
+                Completează datele de livrare pentru această comandă. Momentan plata nu este procesată online;
+                comanda este înregistrată intern și vei fi contactat pentru confirmare și detalii finale.
+              </p>
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Nume complet *
+                    </label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Numele complet al destinatarului"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Telefon de contact *
+                    </label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Ex: 07xx xxx xxx"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Cod poștal *
+                    </label>
+                    <input
+                      type="text"
+                      value={postalCode}
+                      onChange={(e) => setPostalCode(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Ex: 010101"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Adresă (stradă, număr, bloc, etc.) *
+                    </label>
+                    <input
+                      type="text"
+                      value={addressLine1}
+                      onChange={(e) => setAddressLine1(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Stradă, număr, bloc, scară, apartament"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Detalii suplimentare adresă (opțional)
+                    </label>
+                    <input
+                      type="text"
+                      value={addressLine2}
+                      onChange={(e) => setAddressLine2(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Interfon, etaj, indicații curier, etc."
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Oraș / Localitate *
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Ex: București"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Județ / Țară *
+                    </label>
+                    <input
+                      type="text"
+                      value={county}
+                      onChange={(e) => setCounty(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Ex: Ilfov, România"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                    Observații pentru vânzător / curier (opțional)
+                  </label>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={3}
+                    className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c] resize-none"
+                    placeholder="Ex: interval preferat de livrare, verificare colet la primire, etc."
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Rezumat comandă */}
             <div className="rounded-2xl border border-gold-500/40 bg-navy-900/90 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.9)]">
               <h2 className="text-lg font-semibold text-white mb-3">Rezumat comandă</h2>
               <div className="flex justify-between text-sm mb-2">
@@ -278,8 +422,16 @@ export default function CheckoutPage() {
               </div>
               <p className="mt-2 text-[11px] text-slate-400">
                 Fiecare produs din coș este tratat ca piesă unică, cu cantitate 1. Momentan plata nu este
-                procesată online; comenzile sunt înregistrate intern.
+                procesată online; comenzile sunt înregistrate intern și vor fi revizuite de un administrator.
               </p>
+              {fullName.trim() && city.trim() && (
+                <p className="mt-2 text-[11px] text-slate-400">
+                  Livrare către: <span className="font-semibold text-slate-200">{fullName}</span>
+                  {', '}
+                  {city}
+                  {county.trim() ? `, ${county}` : ''}
+                </p>
+              )}
               <div className="mt-4">
                 <button
                   type="button"
