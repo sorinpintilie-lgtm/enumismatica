@@ -114,10 +114,22 @@ export async function getUserWatchlist(
     const q = query(watchlistRef, orderBy('addedAt', 'desc'));
     const snapshot = await getDocs(q);
 
-    const items = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as WatchlistItem[];
+    const items = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        userId: data.userId,
+        itemType: data.itemType,
+        itemId: data.itemId,
+        addedAt: data.addedAt?.toDate ? data.addedAt.toDate() : new Date(data.addedAt),
+        notes: data.notes || '',
+        notificationPreferences: data.notificationPreferences || {
+          priceChanges: true,
+          auctionUpdates: true,
+          bidActivity: true
+        }
+      };
+    }) as WatchlistItem[];
 
     return { success: true, items };
   } catch (error) {
@@ -241,10 +253,22 @@ export function subscribeToWatchlist(
   const unsubscribe = onSnapshot(
     q,
     (snapshot) => {
-      const items = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as WatchlistItem[];
+      const items = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          userId: data.userId,
+          itemType: data.itemType,
+          itemId: data.itemId,
+          addedAt: data.addedAt?.toDate ? data.addedAt.toDate() : new Date(data.addedAt),
+          notes: data.notes || '',
+          notificationPreferences: data.notificationPreferences || {
+            priceChanges: true,
+            auctionUpdates: true,
+            bidActivity: true
+          }
+        };
+      }) as WatchlistItem[];
       callback(items);
     },
     (error) => {

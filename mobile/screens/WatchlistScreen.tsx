@@ -42,7 +42,7 @@ const WatchlistItemCard: React.FC<{ item: WatchlistItem; onRemove: (itemId: stri
       )}
 
       <Text className="text-xs text-gray-500">
-        Added: {(item.addedAt as any)?.toDate ? (item.addedAt as any).toDate().toLocaleDateString() : new Date(item.addedAt as any).toLocaleDateString()}
+        Added: {new Date(item.addedAt).toLocaleDateString()}
       </Text>
     </TouchableOpacity>
   );
