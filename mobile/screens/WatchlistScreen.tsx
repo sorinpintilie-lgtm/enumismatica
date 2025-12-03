@@ -42,7 +42,7 @@ const WatchlistItemCard: React.FC<{ item: WatchlistItem; onRemove: (itemId: stri
       )}
 
       <Text className="text-xs text-gray-500">
-        Added: {new Date(item.addedAt).toLocaleDateString()}
+        Added: {(item.addedAt as any)?.toDate ? (item.addedAt as any).toDate().toLocaleDateString() : new Date(item.addedAt as any).toLocaleDateString()}
       </Text>
     </TouchableOpacity>
   );
@@ -55,6 +55,7 @@ const WatchlistScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'products' | 'auctions'>('products');
 
   const fetchWatchlist = async () => {
     if (!user) return;
@@ -159,6 +160,26 @@ const WatchlistScreen: React.FC = () => {
           {watchlist.length} items • {productsInWatchlist.length} products • {auctionsInWatchlist.length} auctions
         </Text>
 
+        {/* Tabs */}
+        <View className="flex-row mb-4 bg-gray-100 rounded-lg p-1">
+          <TouchableOpacity
+            className={`flex-1 py-2 px-3 rounded-md ${activeTab === 'products' ? 'bg-white shadow-sm' : ''}`}
+            onPress={() => setActiveTab('products')}
+          >
+            <Text className={`text-center text-sm font-medium ${activeTab === 'products' ? 'text-gray-900' : 'text-gray-600'}`}>
+              Products ({productsInWatchlist.length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className={`flex-1 py-2 px-3 rounded-md ${activeTab === 'auctions' ? 'bg-white shadow-sm' : ''}`}
+            onPress={() => setActiveTab('auctions')}
+          >
+            <Text className={`text-center text-sm font-medium ${activeTab === 'auctions' ? 'text-gray-900' : 'text-gray-600'}`}>
+              Auctions ({auctionsInWatchlist.length})
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <View className="flex-row space-x-2">
           <TouchableOpacity
             className="flex-1 py-2 px-3 rounded-md bg-gray-800"
@@ -221,7 +242,7 @@ const WatchlistScreen: React.FC = () => {
         </View>
       ) : (
         <FlatList
-          data={watchlist}
+          data={activeTab === 'products' ? productsInWatchlist : auctionsInWatchlist}
           renderItem={({ item }) => (
             <WatchlistItemCard
               item={item}
@@ -233,6 +254,23 @@ const WatchlistScreen: React.FC = () => {
           contentContainerStyle={{ paddingVertical: 16 }}
           refreshing={refreshing}
           onRefresh={onRefresh}
+          ListEmptyComponent={
+            <View className="flex-1 justify-center items-center p-8">
+              <Text className="text-center text-gray-500 text-lg mb-4">
+                No {activeTab === 'products' ? 'products' : 'auctions'} in your watchlist
+              </Text>
+              <TouchableOpacity
+                className="bg-amber-500 px-6 py-3 rounded-md"
+                onPress={() => navigation.navigate('MainTabs', {
+                  screen: activeTab === 'products' ? 'ProductCatalog' : 'AuctionList'
+                })}
+              >
+                <Text className="text-white font-medium">
+                  Browse {activeTab === 'products' ? 'Products' : 'Auctions'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          }
         />
       )}
     </View>
