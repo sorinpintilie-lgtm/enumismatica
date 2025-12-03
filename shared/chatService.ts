@@ -22,6 +22,105 @@ import { db } from './firebaseConfig';
 import { ChatMessage, Conversation, ChatNotification, UserPresence } from './types';
 
 /**
+ * Basic content validation for public auction chat:
+ * - Blocks obvious profanity
+ * - Blocks email addresses
+ * - Blocks phone numbers / long digit strings (contact sharing)
+ */
+function validateAuctionChatContent(rawMessage: string): void {
+  const message = rawMessage.toLowerCase();
+
+  // Simple profanity filter – extendable list
+  const bannedWords = [
+    // English
+    'fuck',
+    'shit',
+    'bitch',
+    'asshole',
+    'idiot',
+    'retard',
+    // Romanian generic insults
+    'prost',
+    'proasta',
+    'prostule',
+    'bou',
+    'boule',
+    'handicapat',
+    'handicapata',
+    'psihopat',
+    'jegos',
+    // Explicit sexual / vulgar terms (Romanian)
+    'pula',
+    'pulă',
+    'pule',
+    'muie',
+    'pizda',
+    'pizdă',
+    'curva',
+    'curvă',
+    'coaie',
+    'coaiele',
+  ];
+
+  if (bannedWords.some((w) => message.includes(w))) {
+    throw new Error(
+      'Mesajul conține limbaj nepotrivit. Te rugăm să reformulezi fără cuvinte vulgare sau jigniri.',
+    );
+  }
+
+  // Email detection
+  const emailRegex = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
+  if (emailRegex.test(rawMessage)) {
+    throw new Error(
+      'Nu este permis să postezi adrese de email în chatul public. Folosește mesajele private pentru date de contact.',
+    );
+  }
+
+  // Phone / contact-like detection:
+  // Normalize common obfuscations (spaces, letters instead of digits, digit words),
+  // then strip non-digits and block if there are 7+ digits in total.
+  const normalizedForPhone = rawMessage
+    .toLowerCase()
+    // Romanian number words to digits
+    .replace(/\bzero\b/g, '0')
+    .replace(/\bunu\b/g, '1')
+    .replace(/\bdoi\b/g, '2')
+    .replace(/\btrei\b/g, '3')
+    .replace(/\bpatru\b/g, '4')
+    .replace(/\bcinci\b/g, '5')
+    .replace(/\bșase\b/g, '6')
+    .replace(/\bsase\b/g, '6')
+    .replace(/\bșapte\b/g, '7')
+    .replace(/\bsapte\b/g, '7')
+    .replace(/\bopt\b/g, '8')
+    .replace(/\bnouă\b/g, '9')
+    .replace(/\bnoua\b/g, '9')
+    // English number words to digits (just in case)
+    .replace(/\bzero\b/g, '0')
+    .replace(/\bone\b/g, '1')
+    .replace(/\btwo\b/g, '2')
+    .replace(/\bthree\b/g, '3')
+    .replace(/\bfour\b/g, '4')
+    .replace(/\bfive\b/g, '5')
+    .replace(/\bsix\b/g, '6')
+    .replace(/\bseven\b/g, '7')
+    .replace(/\beight\b/g, '8')
+    .replace(/\bnine\b/g, '9')
+    // Letter-to-digit obfuscations often used in phone numbers
+    .replace(/o/g, '0')
+    .replace(/l/g, '1')
+    .replace(/i/g, '1')
+    .replace(/s/g, '5');
+
+  const digitsOnly = normalizedForPhone.replace(/\D/g, '');
+  if (digitsOnly.length >= 7) {
+    throw new Error(
+      'Nu este permis să postezi numere de telefon sau alte date de contact (chiar scrise cu spații sau litere) în chatul public. Folosește mesajele private pentru astfel de informații.',
+    );
+  }
+}
+
+/**
  * Send a message to an auction's public chat
  * Messages are anonymous during active bidding
  */
@@ -29,12 +128,20 @@ export async function sendAuctionChatMessage(
   auctionId: string,
   userId: string,
   message: string,
-  isAnonymous: boolean = true
+  isAnonymous: boolean = true,
 ): Promise<string> {
   if (!db) throw new Error('Firestore not initialized');
 
+  const trimmed = message.trim();
+  if (!trimmed) {
+    throw new Error('Mesajul nu poate fi gol.');
+  }
+
+  // Validate content for profanity and contact info before writing to Firestore
+  validateAuctionChatContent(trimmed);
+
   const chatRef = collection(db, 'auctions', auctionId, 'publicChat');
-  
+
   let senderName: string | undefined;
   let senderAvatar: string | undefined;
 
@@ -50,7 +157,7 @@ export async function sendAuctionChatMessage(
 
   const messageData: any = {
     senderId: userId,
-    message,
+    message: trimmed,
     timestamp: serverTimestamp(),
     isAnonymous,
     edited: false,

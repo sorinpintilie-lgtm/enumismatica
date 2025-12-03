@@ -25,14 +25,15 @@ export type ActivityEventType =
   // Navigation Events
   | 'page_view'
   | 'page_leave'
-  // Product Events
-  | 'product_view'
-  | 'product_search'
-  | 'product_filter'
-  | 'product_create'
-  | 'product_update'
-  | 'product_delete'
-  // Auction Events
+    // Product Events
+    | 'product_view'
+    | 'product_search'
+    | 'product_filter'
+    | 'product_create'
+    | 'product_update'
+    | 'product_delete'
+    | 'product_buy'
+    // Auction Events
   | 'auction_view'
   | 'auction_create'
   | 'auction_bid'
@@ -465,6 +466,7 @@ export function calculateEngagementScore(logs: ActivityLog[]): number {
     'auction_bid': 10,
     'auction_create': 15,
     'product_create': 15,
+    'product_buy': 12,
     'message_send': 8,
     'conversation_start': 10,
 

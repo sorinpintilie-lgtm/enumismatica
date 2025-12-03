@@ -9,6 +9,7 @@ import { useToast } from '../../components/ToastProvider';
 import { useAuth } from '../../context/AuthContext';
 import { createDirectOrderForProduct } from 'shared/orderService';
 import { useCart } from '../../hooks/useCart';
+import { logEvent } from '../../hooks/useActivityLogger';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -82,6 +83,15 @@ export default function ProductDetailPage() {
     try {
       setBuying(true);
       const orderId = await createDirectOrderForProduct(product.id, user.uid);
+
+      // Admin activity log: direct shop purchase from product detail page
+      await logEvent(user, 'product_buy', {
+        productId: product.id,
+        productName: product.name,
+        price: product.price,
+        orderId,
+        source: 'product_detail',
+      });
 
       showToast({
         type: 'success',

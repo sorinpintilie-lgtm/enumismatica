@@ -35,6 +35,7 @@ const EVENT_TYPE_LABELS: Record<ActivityEventType, string> = {
   product_create: '[PROD] Creare produs',
   product_update: '[PROD] Actualizare produs',
   product_delete: '[PROD] Ștergere produs',
+  product_buy: '[PROD] Cumpărare produs',
   // Auctions
   auction_view: '[AUCT] Vizualizare licitație',
   auction_create: '[AUCT] Creare licitație',
@@ -80,7 +81,7 @@ const EVENT_CATEGORIES = {
   'Toate': [],
   'Autentificare': ['user_login', 'user_logout', 'user_register', 'password_reset_request', 'password_reset_complete', 'email_verification'],
   'Navigare': ['page_view', 'page_leave'],
-  'Produse': ['product_view', 'product_search', 'product_filter', 'product_create', 'product_update', 'product_delete'],
+  'Produse': ['product_view', 'product_search', 'product_filter', 'product_create', 'product_update', 'product_delete', 'product_buy'],
   'Licitații': ['auction_view', 'auction_create', 'auction_bid', 'auction_auto_bid_set', 'auction_auto_bid_cancel', 'auction_end', 'auction_win'],
   'Colecție': ['collection_add', 'collection_remove', 'collection_view'],
   'Chat': ['message_send', 'message_read', 'conversation_start'],
