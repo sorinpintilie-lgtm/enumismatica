@@ -15,6 +15,12 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 import { User, Product, Auction, CollectionItem, Conversation, ChatMessage } from './types';
+import {
+  sendProductApprovedEmail,
+  sendProductRejectedEmail,
+  sendAuctionApprovedEmail,
+  sendAuctionRejectedEmail,
+} from './emailService';
 
 /**
  * Admin UID - hardcoded for security
@@ -296,6 +302,26 @@ export async function approveProduct(productId: string): Promise<{ success: bool
       status: 'approved',
       updatedAt: Timestamp.fromDate(new Date()),
     });
+
+    // Send email notification to product owner (non-blocking)
+    const productDoc = await getDoc(doc(db, 'products', productId));
+    if (productDoc.exists()) {
+      const productData = productDoc.data();
+      if (productData.ownerId) {
+        const ownerDoc = await getDoc(doc(db, 'users', productData.ownerId));
+        if (ownerDoc.exists()) {
+          const ownerData = ownerDoc.data();
+          sendProductApprovedEmail(
+            ownerData.email,
+            productData.name || 'Produs',
+            productId
+          ).catch(error => {
+            console.error('Failed to send product approved email:', error);
+          });
+        }
+      }
+    }
+
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -305,12 +331,32 @@ export async function approveProduct(productId: string): Promise<{ success: bool
 /**
  * Reject a product (admin only)
  */
-export async function rejectProduct(productId: string): Promise<{ success: boolean; error?: string }> {
+export async function rejectProduct(productId: string, reason: string = 'Produsul nu îndeplinește criteriile platformei'): Promise<{ success: boolean; error?: string }> {
   try {
     await updateDoc(doc(db, 'products', productId), {
       status: 'rejected',
       updatedAt: Timestamp.fromDate(new Date()),
     });
+
+    // Send email notification to product owner (non-blocking)
+    const productDoc = await getDoc(doc(db, 'products', productId));
+    if (productDoc.exists()) {
+      const productData = productDoc.data();
+      if (productData.ownerId) {
+        const ownerDoc = await getDoc(doc(db, 'users', productData.ownerId));
+        if (ownerDoc.exists()) {
+          const ownerData = ownerDoc.data();
+          sendProductRejectedEmail(
+            ownerData.email,
+            productData.name || 'Produs',
+            reason
+          ).catch(error => {
+            console.error('Failed to send product rejected email:', error);
+          });
+        }
+      }
+    }
+
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -326,6 +372,34 @@ export async function approveAuction(auctionId: string): Promise<{ success: bool
       status: 'active',
       updatedAt: Timestamp.fromDate(new Date()),
     });
+
+    // Send email notification to auction owner (non-blocking)
+    const auctionDoc = await getDoc(doc(db, 'auctions', auctionId));
+    if (auctionDoc.exists()) {
+      const auctionData = auctionDoc.data();
+      if (auctionData.ownerId) {
+        const ownerDoc = await getDoc(doc(db, 'users', auctionData.ownerId));
+        if (ownerDoc.exists()) {
+          const ownerData = ownerDoc.data();
+          // Get product name for better email
+          let auctionTitle = `Licitație ${auctionId}`;
+          if (auctionData.productId) {
+            const productDoc = await getDoc(doc(db, 'products', auctionData.productId));
+            if (productDoc.exists()) {
+              auctionTitle = productDoc.data().name || auctionTitle;
+            }
+          }
+          sendAuctionApprovedEmail(
+            ownerData.email,
+            auctionTitle,
+            auctionId
+          ).catch(error => {
+            console.error('Failed to send auction approved email:', error);
+          });
+        }
+      }
+    }
+
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -335,12 +409,40 @@ export async function approveAuction(auctionId: string): Promise<{ success: bool
 /**
  * Reject an auction (admin only)
  */
-export async function rejectAuction(auctionId: string): Promise<{ success: boolean; error?: string }> {
+export async function rejectAuction(auctionId: string, reason: string = 'Licitația nu îndeplinește criteriile platformei'): Promise<{ success: boolean; error?: string }> {
   try {
     await updateDoc(doc(db, 'auctions', auctionId), {
       status: 'rejected',
       updatedAt: Timestamp.fromDate(new Date()),
     });
+
+    // Send email notification to auction owner (non-blocking)
+    const auctionDoc = await getDoc(doc(db, 'auctions', auctionId));
+    if (auctionDoc.exists()) {
+      const auctionData = auctionDoc.data();
+      if (auctionData.ownerId) {
+        const ownerDoc = await getDoc(doc(db, 'users', auctionData.ownerId));
+        if (ownerDoc.exists()) {
+          const ownerData = ownerDoc.data();
+          // Get product name for better email
+          let auctionTitle = `Licitație ${auctionId}`;
+          if (auctionData.productId) {
+            const productDoc = await getDoc(doc(db, 'products', auctionData.productId));
+            if (productDoc.exists()) {
+              auctionTitle = productDoc.data().name || auctionTitle;
+            }
+          }
+          sendAuctionRejectedEmail(
+            ownerData.email,
+            auctionTitle,
+            reason
+          ).catch(error => {
+            console.error('Failed to send auction rejected email:', error);
+          });
+        }
+      }
+    }
+
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };

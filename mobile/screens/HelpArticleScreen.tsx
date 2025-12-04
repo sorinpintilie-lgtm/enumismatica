@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Button, Alert } from 'react-native';
-import { HelpArticle, HelpCategory } from '../../shared/types';
-import { getHelpArticle, getHelpCategories, submitHelpFeedback } from '../../shared/helpService';
+import { HelpArticle, HelpCategory } from '@shared/types';
+import { getHelpArticle, getHelpCategories, submitHelpFeedback } from '@shared/helpService';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 export default function HelpArticleScreen() {

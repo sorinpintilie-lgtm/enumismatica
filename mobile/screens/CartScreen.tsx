@@ -6,7 +6,7 @@ import { RootStackParamList } from '../navigationTypes';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../hooks/useCart';
 import { useProducts } from '../hooks/useProducts';
-import { createDirectOrderForProduct } from '../../shared/orderService';
+import { createDirectOrderForProduct } from '@shared/orderService';
 
 const CartScreen: React.FC = () => {
   const { user, loading: authLoading } = useAuth();

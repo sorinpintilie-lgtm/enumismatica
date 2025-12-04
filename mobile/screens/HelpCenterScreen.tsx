@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Button } from 'react-native';
-import { HelpArticle, HelpCategory } from '../../shared/types';
-import { getHelpArticles, getHelpCategories, searchHelpContent } from '../../shared/helpService';
+import { HelpArticle, HelpCategory } from '@shared/types';
+import { getHelpArticles, getHelpCategories, searchHelpContent } from '@shared/helpService';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigationTypes';

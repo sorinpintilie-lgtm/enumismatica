@@ -12,6 +12,7 @@ import {
 import { db } from './firebaseConfig';
 import type { Product, Order } from './types';
 import { addCollectionItem } from './collectionService';
+import { sendPurchaseConfirmationEmail, sendProductSoldEmail } from './emailService';
 
 /**
  * Basic order / purchase helpers for direct product buys (shop).
@@ -122,11 +123,13 @@ export async function createDirectOrderForProduct(
     createdOrderId = orderDocRef.id;
   });
 
-  // Add the bought product into buyer's personal collection.
+  // Add the bought product into buyer's personal collection and send emails
   try {
     const productSnap = await getDoc(doc(db, 'products', productId));
     if (productSnap.exists()) {
       const data = productSnap.data() as any;
+      
+      // Add to collection
       await addCollectionItem(buyerId, {
         name: data.name || 'Articol cumpărat',
         description: data.description || '',
@@ -146,6 +149,37 @@ export async function createDirectOrderForProduct(
         notes: `Cumpărat direct din magazin (produs ${productId})`,
         tags: ['shop-purchase'],
       });
+
+      // Send email to buyer (non-blocking)
+      const buyerDoc = await getDoc(doc(db, 'users', buyerId));
+      if (buyerDoc.exists()) {
+        const buyerData = buyerDoc.data();
+        sendPurchaseConfirmationEmail(
+          buyerData.email,
+          data.name || 'Produs',
+          data.price || 0,
+          createdOrderId
+        ).catch(error => {
+          console.error('Failed to send purchase confirmation email:', error);
+        });
+      }
+
+      // Send email to seller (non-blocking)
+      if (data.ownerId) {
+        const sellerDoc = await getDoc(doc(db, 'users', data.ownerId));
+        if (sellerDoc.exists()) {
+          const sellerData = sellerDoc.data();
+          const buyerName = buyerDoc.exists() ? (buyerDoc.data().displayName || 'Cumpărător') : 'Cumpărător';
+          sendProductSoldEmail(
+            sellerData.email,
+            data.name || 'Produs',
+            data.price || 0,
+            buyerName
+          ).catch(error => {
+            console.error('Failed to send product sold email:', error);
+          });
+        }
+      }
     }
   } catch (err) {
     // Non-critical: log and continue.

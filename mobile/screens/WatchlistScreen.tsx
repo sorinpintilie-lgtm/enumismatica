@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../context/AuthContext';
 import { RootStackParamList } from '../navigationTypes';
-import { WatchlistItem } from '../../shared/types';
-import { getUserWatchlist, removeFromWatchlist, clearWatchlist } from '../../shared/watchlistService';
+import { WatchlistItem } from '@shared/types';
+import { getUserWatchlist, removeFromWatchlist, clearWatchlist } from '@shared/watchlistService';
 
 const WatchlistItemCard: React.FC<{ item: WatchlistItem; onRemove: (itemId: string) => void }> = ({ item, onRemove }) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();

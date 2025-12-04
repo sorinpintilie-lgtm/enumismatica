@@ -11,8 +11,8 @@ import {
   QueryDocumentSnapshot,
   DocumentData,
 } from 'firebase/firestore';
-import { db } from '../../shared/firebaseConfig';
-import type { CartItem } from '../../shared/types';
+import { db } from '@shared/firebaseConfig';
+import type { CartItem } from '@shared/types';
 
 /**
  * Hook for managing the authenticated user's shopping cart on mobile.

@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuctions } from '../hooks/useAuctions';
 import { useProducts } from '../hooks/useProducts';
-import { Auction } from '../../shared/types';
+import { Auction } from '@shared/types';
 import { RootStackParamList } from '../navigationTypes';
 
 interface FilterOptions {

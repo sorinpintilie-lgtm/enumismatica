@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, query, orderBy, where, limit, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../../shared/firebaseConfig';
-import { Product } from '../../shared/types';
+import { db } from '@shared/firebaseConfig';
+import { Product } from '@shared/types';
 import { Cache } from '../utils/cache';
 
 // Default fields for product list view - optimize for performance

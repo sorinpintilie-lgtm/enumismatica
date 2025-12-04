@@ -7,8 +7,8 @@ import { z } from 'zod';
 import { useAuction } from '../hooks/useAuctions';
 import { useBids } from '../hooks/useBids';
 import { useAuth } from '../context/AuthContext';
-import { placeBid, setAutoBid, validateBid } from '../../shared/auctionService';
-import { Bid } from '../../shared/types';
+import { placeBid, setAutoBid, validateBid } from '@shared/auctionService';
+import { Bid } from '@shared/types';
 import { RootStackParamList } from '../navigationTypes';
 
 // Currency formatting function

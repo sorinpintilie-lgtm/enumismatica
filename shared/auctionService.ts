@@ -21,6 +21,7 @@ import { Auction, Bid, AutoBid, Product } from './types';
 import { addAuctionPriceHistory } from './priceHistoryService';
 import { createAuctionNotification } from './auctionNotificationService';
 import { addCollectionItem } from './collectionService';
+import { sendOutbidEmail, sendAuctionWonEmail, sendAuctionSoldEmail } from './emailService';
 
 /**
  * Validates if a bid is valid for an auction
@@ -119,6 +120,20 @@ export async function placeBid(auctionId: string, bidAmount: number, userId: str
         auctionTitle,
         bidAmount
       );
+
+      // Send email notification (non-blocking)
+      const userDoc = await getDoc(doc(db, 'users', previousBidderId));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        sendOutbidEmail(
+          userData.email,
+          auctionTitle || `Licitație ${auctionId}`,
+          bidAmount,
+          auctionId
+        ).catch(error => {
+          console.error('Failed to send outbid email:', error);
+        });
+      }
     } catch (error) {
       console.error('Failed to send outbid notification:', error);
     }
@@ -432,6 +447,42 @@ export async function endAuction(auctionId: string): Promise<void> {
         auctionTitle,
         winningBidAmount != null ? winningBidAmount : undefined,
       );
+
+      // Send email notification to winner (non-blocking)
+      const winnerDoc = await getDoc(doc(db, 'users', winnerId));
+      if (winnerDoc.exists() && winningBidAmount != null) {
+        const winnerData = winnerDoc.data();
+        sendAuctionWonEmail(
+          winnerData.email,
+          auctionTitle || `Licitație ${auctionId}`,
+          winningBidAmount,
+          auctionId
+        ).catch(error => {
+          console.error('Failed to send auction won email:', error);
+        });
+      }
+
+      // Get auction owner and send sold notification
+      const auctionDoc = await getDoc(doc(db, 'auctions', auctionId));
+      if (auctionDoc.exists() && winningBidAmount != null) {
+        const auctionData = auctionDoc.data();
+        if (auctionData.ownerId) {
+          const ownerDoc = await getDoc(doc(db, 'users', auctionData.ownerId));
+          if (ownerDoc.exists()) {
+            const ownerData = ownerDoc.data();
+            const winnerName = winnerDoc.exists() ? (winnerDoc.data().displayName || 'Cumpărător') : 'Cumpărător';
+            sendAuctionSoldEmail(
+              ownerData.email,
+              auctionTitle || `Licitație ${auctionId}`,
+              winningBidAmount,
+              winnerName,
+              auctionId
+            ).catch(error => {
+              console.error('Failed to send auction sold email:', error);
+            });
+          }
+        }
+      }
     } catch (error) {
       console.error('Failed to send auction won notification:', error);
     }
@@ -536,6 +587,42 @@ export async function buyNowAuction(auctionId: string, buyerId: string): Promise
       auctionTitle,
       finalPrice,
     );
+
+    // Send email notification to buyer (non-blocking)
+    const buyerDoc = await getDoc(doc(db, 'users', buyerId));
+    if (buyerDoc.exists()) {
+      const buyerData = buyerDoc.data();
+      sendAuctionWonEmail(
+        buyerData.email,
+        auctionTitle || `Licitație ${auctionId}`,
+        finalPrice,
+        auctionId
+      ).catch(error => {
+        console.error('Failed to send buy-now won email:', error);
+      });
+    }
+
+    // Send email notification to seller (non-blocking)
+    const auctionDoc = await getDoc(doc(db, 'auctions', auctionId));
+    if (auctionDoc.exists()) {
+      const auctionData = auctionDoc.data();
+      if (auctionData.ownerId) {
+        const ownerDoc = await getDoc(doc(db, 'users', auctionData.ownerId));
+        if (ownerDoc.exists()) {
+          const ownerData = ownerDoc.data();
+          const buyerName = buyerDoc.exists() ? (buyerDoc.data().displayName || 'Cumpărător') : 'Cumpărător';
+          sendAuctionSoldEmail(
+            ownerData.email,
+            auctionTitle || `Licitație ${auctionId}`,
+            finalPrice,
+            buyerName,
+            auctionId
+          ).catch(error => {
+            console.error('Failed to send buy-now sold email:', error);
+          });
+        }
+      }
+    }
   } catch (error) {
     console.error('Failed to send buy-now auction won notification:', error);
   }

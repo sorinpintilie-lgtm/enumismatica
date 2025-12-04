@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import { createUserProfileAfterSignup } from './creditService';
 import { logActivity } from './activityLogService';
+import { sendWelcomeEmail } from './emailService';
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -72,6 +73,14 @@ export const signUpWithEmail = async (email: string, password: string, referralC
     // Create Firestore profile and apply referral bonuses (if any)
     await createUserProfileAfterSignup(userCredential.user, referralCode || null);
 
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(
+      userCredential.user.email || sanitizedEmail,
+      userCredential.user.displayName || 'Utilizator'
+    ).catch(error => {
+      console.error('Failed to send welcome email:', error);
+    });
+
     // Log the registration
     await logActivity(
       userCredential.user.uid,
@@ -91,13 +100,26 @@ export const signInWithGoogle = async (referralCode?: string) => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
 
+    // Check if this is a new user (first time signup)
+    const isNewUser = result.user.metadata.creationTime === result.user.metadata.lastSignInTime;
+
     // Ensure profile exists and apply referral only on first signup
     await createUserProfileAfterSignup(result.user, referralCode || null);
+
+    // Send welcome email for new users (non-blocking)
+    if (isNewUser) {
+      sendWelcomeEmail(
+        result.user.email || '',
+        result.user.displayName || 'Utilizator'
+      ).catch(error => {
+        console.error('Failed to send welcome email:', error);
+      });
+    }
 
     // Log the login/register
     await logActivity(
       result.user.uid,
-      'user_login',
+      isNewUser ? 'user_register' : 'user_login',
       { method: 'google', referralCode: referralCode || undefined },
       result.user.email || undefined,
       result.user.displayName || undefined

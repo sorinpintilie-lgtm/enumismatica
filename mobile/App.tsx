@@ -18,7 +18,7 @@ import HelpArticleScreen from './screens/HelpArticleScreen';
 import CartScreen from './screens/CartScreen';
 import OrderHistoryScreen from './screens/OrderHistoryScreen';
 import SalesHistoryScreen from './screens/SalesHistoryScreen';
-import { auth, db } from '../shared/firebaseConfig.js';
+import { auth, db } from '@shared/firebaseConfig.js';
 import { requestNotificationPermissions, setupNotificationListeners } from './services/notificationService';
 import { RootStackParamList, TabParamList } from './navigationTypes';
 

@@ -6,8 +6,8 @@ import { RouteProp } from '@react-navigation/native';
 import { format } from 'date-fns';
 import { ro } from 'date-fns/locale/ro';
 import { RootStackParamList } from '../navigationTypes';
-import { getBidHistoryForAuction, getUserBidHistory } from '../../shared/bidHistoryService';
-import { BidHistory, BidHistoryStats } from '../../shared/types';
+import { getBidHistoryForAuction, getUserBidHistory } from '@shared/bidHistoryService';
+import { BidHistory, BidHistoryStats } from '@shared/types';
 
 // Currency formatting function
 const formatRON = (amount: number): string => `${amount.toFixed(2)} RON`;

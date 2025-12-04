@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, M
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useProducts } from '../hooks/useProducts';
-import { Product } from '../../shared/types';
+import { Product } from '@shared/types';
 import { RootStackParamList } from '../navigationTypes';
 
 interface FilterOptions {

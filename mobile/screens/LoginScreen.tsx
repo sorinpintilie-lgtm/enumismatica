@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { z } from 'zod';
-import { signInWithEmail, signInWithGoogle } from '../../shared/auth';
+import { signInWithEmail, signInWithGoogle } from '@shared/auth';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigationTypes';

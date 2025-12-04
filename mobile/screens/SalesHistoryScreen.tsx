@@ -5,8 +5,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../context/AuthContext';
 import { RootStackParamList } from '../navigationTypes';
 import { useProducts } from '../hooks/useProducts';
-import { getSalesForSeller } from '../../shared/orderService';
-import type { Order } from '../../shared/types';
+import { getSalesForSeller } from '@shared/orderService';
+import type { Order } from '@shared/types';
 
 const SalesHistoryScreen: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
