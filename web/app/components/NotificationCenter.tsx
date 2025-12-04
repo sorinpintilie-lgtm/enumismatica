@@ -40,6 +40,17 @@ export default function NotificationCenter() {
   const totalUnreadCount = chatUnreadCount + auctionUnreadCount;
   const loading = chatLoading || auctionLoading;
 
+  // Mark all notifications as read when dropdown opens
+  useEffect(() => {
+    if (isOpen && totalUnreadCount > 0) {
+      const markAllRead = async () => {
+        await markAllChatAsRead();
+        await markAllAuctionAsRead();
+      };
+      markAllRead();
+    }
+  }, [isOpen, totalUnreadCount, markAllChatAsRead, markAllAuctionAsRead]);
+
   useEffect(() => {
     // Check if we should show permission prompt
     if (user && !permissionGranted && 'Notification' in window && Notification.permission === 'default') {

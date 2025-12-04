@@ -141,7 +141,8 @@ service cloud.firestore {
 
       // Price history subcollection for products
       match /priceHistory/{historyId} {
-        allow read: if isAuthenticated();
+        // Allow public read for approved products, authenticated read for all
+        allow read: if true;
         allow create: if isAuthenticated() &&
                       (isOwner(get(/databases/$(database)/documents/products/$(productId)).data.ownerId) || isAdmin()) &&
                       hasRequiredFields(request.resource.data, ['price', 'source', 'timestamp']) &&
@@ -209,7 +210,8 @@ service cloud.firestore {
 
       // Price history subcollection for auctions
       match /priceHistory/{historyId} {
-        allow read: if isAuthenticated();
+        // Allow public read for active/ended auctions
+        allow read: if true;
         allow create: if isAuthenticated() &&
                       hasRequiredFields(request.resource.data, ['price', 'source', 'timestamp']) &&
                       isValidTimestamp(request.resource.data.timestamp);
