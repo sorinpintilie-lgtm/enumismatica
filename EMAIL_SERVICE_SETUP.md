@@ -77,9 +77,10 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:686515512350:web:c281556b58e08bcb167a0f
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-4BBCPEDX0G
 
 # AWS SES Configuration
-AWS_SES_REGION=eu-north-1
-AWS_ACCESS_KEY_ID=<YOUR_ACCESS_KEY_ID_FROM_STEP_1.3>
-AWS_SECRET_ACCESS_KEY=<YOUR_SECRET_ACCESS_KEY_FROM_STEP_1.3>
+# Note: Using SES_ prefix to avoid conflicts with AWS SDK reserved variable names
+SES_REGION=eu-north-1
+SES_ACCESS_KEY_ID=<YOUR_ACCESS_KEY_ID_FROM_STEP_1.3>
+SES_SECRET_ACCESS_KEY=<YOUR_SECRET_ACCESS_KEY_FROM_STEP_1.3>
 SES_FROM_EMAIL=contact@enumismatica.ro
 
 # Site Configuration
@@ -101,9 +102,10 @@ EXPO_PUBLIC_FIREBASE_APP_ID=1:686515512350:web:c281556b58e08bcb167a0f
 EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=G-4BBCPEDX0G
 
 # AWS SES Configuration
-AWS_SES_REGION=eu-north-1
-AWS_ACCESS_KEY_ID=<YOUR_ACCESS_KEY_ID_FROM_STEP_1.3>
-AWS_SECRET_ACCESS_KEY=<YOUR_SECRET_ACCESS_KEY_FROM_STEP_1.3>
+# Note: Using SES_ prefix to avoid conflicts with AWS SDK reserved variable names
+SES_REGION=eu-north-1
+SES_ACCESS_KEY_ID=<YOUR_ACCESS_KEY_ID_FROM_STEP_1.3>
+SES_SECRET_ACCESS_KEY=<YOUR_SECRET_ACCESS_KEY_FROM_STEP_1.3>
 SES_FROM_EMAIL=contact@enumismatica.ro
 
 # Site Configuration
@@ -158,9 +160,9 @@ npx ts-node test-email.ts
 2. Select your site
 3. Go to "Site settings" → "Environment variables"
 4. Add the following variables:
-   - `AWS_SES_REGION`: `eu-north-1`
-   - `AWS_ACCESS_KEY_ID`: `<your_access_key>`
-   - `AWS_SECRET_ACCESS_KEY`: `<your_secret_key>`
+   - `SES_REGION`: `eu-north-1`
+   - `SES_ACCESS_KEY_ID`: `<your_access_key>`
+   - `SES_SECRET_ACCESS_KEY`: `<your_secret_key>`
    - `SES_FROM_EMAIL`: `contact@enumismatica.ro`
    - `NEXT_PUBLIC_SITE_URL`: `https://enumismatica.ro`
 
@@ -169,9 +171,9 @@ npx ts-node test-email.ts
 Add secrets to EAS:
 ```bash
 cd mobile
-eas secret:create --scope project --name AWS_ACCESS_KEY_ID --value <your_access_key>
-eas secret:create --scope project --name AWS_SECRET_ACCESS_KEY --value <your_secret_key>
-eas secret:create --scope project --name AWS_SES_REGION --value eu-north-1
+eas secret:create --scope project --name SES_ACCESS_KEY_ID --value <your_access_key>
+eas secret:create --scope project --name SES_SECRET_ACCESS_KEY --value <your_secret_key>
+eas secret:create --scope project --name SES_REGION --value eu-north-1
 eas secret:create --scope project --name SES_FROM_EMAIL --value contact@enumismatica.ro
 ```
 

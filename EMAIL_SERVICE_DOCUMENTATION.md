@@ -12,9 +12,10 @@ Add the following environment variables to your `.env.local` (web) or `.env` (mo
 
 ```env
 # AWS SES Configuration
-AWS_SES_REGION=eu-north-1
-AWS_ACCESS_KEY_ID=your_aws_access_key_id_here
-AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key_here
+# Note: Using SES_ prefix to avoid conflicts with AWS SDK reserved variable names
+SES_REGION=eu-north-1
+SES_ACCESS_KEY_ID=your_aws_access_key_id_here
+SES_SECRET_ACCESS_KEY=your_aws_secret_access_key_here
 SES_FROM_EMAIL=contact@enumismatica.ro
 
 # Site Configuration
