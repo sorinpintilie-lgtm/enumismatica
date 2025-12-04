@@ -30,6 +30,7 @@ export default function NotificationCenter() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
+  const hasMarkedAsReadRef = useRef(false);
 
   // Combine notifications
   const allNotifications = [
@@ -42,6 +43,24 @@ export default function NotificationCenter() {
   
   // Hide badge when dropdown is open
   const displayUnreadCount = isOpen ? 0 : totalUnreadCount;
+
+  // Mark all as read when dropdown closes (if there were unread notifications)
+  useEffect(() => {
+    if (!isOpen && hasMarkedAsReadRef.current) {
+      // Reset the flag
+      hasMarkedAsReadRef.current = false;
+    } else if (isOpen && totalUnreadCount > 0 && !hasMarkedAsReadRef.current) {
+      // Set flag when opening with unread notifications
+      hasMarkedAsReadRef.current = true;
+      // Mark as read after a short delay (when user has seen them)
+      const timer = setTimeout(async () => {
+        await markAllChatAsRead();
+        await markAllAuctionAsRead();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, totalUnreadCount, markAllChatAsRead, markAllAuctionAsRead]);
 
   useEffect(() => {
     // Check if we should show permission prompt
