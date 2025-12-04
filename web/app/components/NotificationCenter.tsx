@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNotifications } from '../hooks/useChat';
 import { useAuctionNotifications } from '../hooks/useAuctionNotifications';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +30,7 @@ export default function NotificationCenter() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
+  const hasMarkedAsRead = useRef(false);
 
   // Combine notifications
   const allNotifications = [
@@ -40,14 +41,20 @@ export default function NotificationCenter() {
   const totalUnreadCount = chatUnreadCount + auctionUnreadCount;
   const loading = chatLoading || auctionLoading;
 
-  // Mark all notifications as read when dropdown opens
+  // Mark all notifications as read when dropdown opens (only once per open)
   useEffect(() => {
-    if (isOpen && totalUnreadCount > 0) {
+    if (isOpen && totalUnreadCount > 0 && !hasMarkedAsRead.current) {
+      hasMarkedAsRead.current = true;
       const markAllRead = async () => {
         await markAllChatAsRead();
         await markAllAuctionAsRead();
       };
       markAllRead();
+    }
+    
+    // Reset the flag when dropdown closes
+    if (!isOpen) {
+      hasMarkedAsRead.current = false;
     }
   }, [isOpen, totalUnreadCount, markAllChatAsRead, markAllAuctionAsRead]);
 
