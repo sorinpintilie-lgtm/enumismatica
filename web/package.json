@@ -21,7 +21,6 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "recharts": "^3.5.0",
-    "shared": "*",
     "zod": "^4.1.12"
   },
   "devDependencies": {
