@@ -14,6 +14,10 @@ export default function AboutPage() {
   });
   const [loading, setLoading] = useState(true);
 
+  // Load a few high-level stats from Firestore so the About page always reflects
+  // the live state of the platform (shared with the mobile app via shared/firebaseConfig).
+  // This intentionally runs on the client to avoid coupling this marketing page to
+  // server-side data fetching or caching.
   useEffect(() => {
     const loadStats = async () => {
       try {
