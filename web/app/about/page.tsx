@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db } from 'shared/firebaseConfig';
 
 export default function AboutPage() {
   const [stats, setStats] = useState({
