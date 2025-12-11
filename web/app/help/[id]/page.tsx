@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { use } from 'react';
 import { HelpArticle, HelpCategory } from '../../../../shared/types';
 import { getHelpArticle, getHelpCategories, submitHelpFeedback } from '../../../../shared/helpService';
 import Link from 'next/link';
 
-export default function HelpArticlePage({ params }: { params: { id: string } }) {
+export default function HelpArticlePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [article, setArticle] = useState<HelpArticle | null>(null);
   const [categories, setCategories] = useState<HelpCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ export default function HelpArticlePage({ params }: { params: { id: string } }) 
         setError(null);
 
         // Load article
-        const articleResult = await getHelpArticle(params.id);
+        const articleResult = await getHelpArticle(id);
         if (articleResult.success && articleResult.article) {
           setArticle(articleResult.article);
         } else {
@@ -46,7 +48,7 @@ export default function HelpArticlePage({ params }: { params: { id: string } }) 
     }
 
     loadData();
-  }, [params.id]);
+  }, [id]);
 
   const handleFeedbackSubmit = async () => {
     if (!feedbackRating || !article) return;
