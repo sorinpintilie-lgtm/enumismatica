@@ -1,12 +1,12 @@
 [build]
-  # Build from root directory for monorepo
-  base = "/"
+  # Build from web workspace in monorepo
+  base = "web"
 
-  # Directory to publish
-  publish = "web/.next"
+  # Directory to publish (relative to base)
+  publish = ".next"
 
-  # Build command - clear all caches, install dependencies, reinstall lightningcss for native binaries, then build
-  command = "rm -rf web/.next web/node_modules/.cache node_modules/.cache && npm install && cd web && npm install lightningcss --force && npx next build"
+  # Build command - Netlify handles dependency install; just run the Next.js build
+  command = "npm run build"
   
   # Environment variables for build time
   [build.environment]
