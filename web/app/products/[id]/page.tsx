@@ -328,21 +328,134 @@ export default function ProductDetailPage() {
               </div>
 
               <div className="border-t border-gold-500/20 pt-6">
-                <h2 className="text-xl font-semibold text-white mb-3">
-                  Detalii produs
+                <h2 className="text-xl font-semibold text-white mb-4">
+                  Detalii monedă
                 </h2>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">ID Produs:</span>
-                    <span className="font-mono text-slate-100">{product.id}</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Basic Information */}
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-medium text-[#e7b73c] mb-3">Informații generale</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-slate-300">ID Produs:</span>
+                        <span className="font-mono text-slate-100">{product.id}</span>
+                      </div>
+                      {product.country && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Țară:</span>
+                          <span className="text-slate-100">{product.country}</span>
+                        </div>
+                      )}
+                      {product.year && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">An:</span>
+                          <span className="text-slate-100">{product.year}</span>
+                        </div>
+                      )}
+                      {product.era && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Epocă:</span>
+                          <span className="text-slate-100">{product.era}</span>
+                        </div>
+                      )}
+                      {product.denomination && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Valoare nominală:</span>
+                          <span className="text-slate-100">{product.denomination}</span>
+                        </div>
+                      )}
+                      {product.category && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Categorie:</span>
+                          <span className="text-slate-100">{product.category}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Listat:</span>
-                    <span className="text-slate-100">{product.createdAt.toLocaleDateString()}</span>
+
+                  {/* Physical Properties */}
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-medium text-[#e7b73c] mb-3">Proprietăți fizice</h3>
+                    <div className="space-y-2 text-sm">
+                      {product.metal && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Metal:</span>
+                          <span className="text-slate-100">{product.metal}</span>
+                        </div>
+                      )}
+                      {product.weight && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Greutate:</span>
+                          <span className="text-slate-100">{product.weight}g</span>
+                        </div>
+                      )}
+                      {product.diameter && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Diametru:</span>
+                          <span className="text-slate-100">{product.diameter}mm</span>
+                        </div>
+                      )}
+                      {product.grade && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Grad:</span>
+                          <span className="text-slate-100">{product.grade}</span>
+                        </div>
+                      )}
+                      {product.mintMark && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Marcă monetărie:</span>
+                          <span className="text-slate-100">{product.mintMark}</span>
+                        </div>
+                      )}
+                      {product.rarity && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Raritate:</span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            product.rarity === 'extremely-rare' ? 'bg-red-900/60 text-red-200' :
+                            product.rarity === 'very-rare' ? 'bg-orange-900/60 text-orange-200' :
+                            product.rarity === 'rare' ? 'bg-yellow-900/60 text-yellow-200' :
+                            product.rarity === 'uncommon' ? 'bg-blue-900/60 text-blue-200' :
+                            'bg-gray-900/60 text-gray-200'
+                          }`}>
+                            {product.rarity.replace('-', ' ').toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Ultima actualizare:</span>
-                    <span className="text-slate-100">{product.updatedAt.toLocaleDateString()}</span>
+                </div>
+
+
+                {/* Listing Information */}
+                <div className="mt-6 pt-4 border-t border-gold-500/20">
+                  <h3 className="text-lg font-medium text-[#e7b73c] mb-3">Informații listare</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-300">Listat:</span>
+                      <span className="text-slate-100">{product.createdAt.toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-300">Ultima actualizare:</span>
+                      <span className="text-slate-100">{product.updatedAt.toLocaleDateString()}</span>
+                    </div>
+                    {product.listingExpiresAt && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-300">Expiră listarea:</span>
+                        <span className="text-slate-100">{product.listingExpiresAt.toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    {product.boostExpiresAt && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-300">Promovat până la:</span>
+                        <span className="text-emerald-300">{product.boostExpiresAt.toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    {product.promotionExpiresAt && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-300">Promoție până la:</span>
+                        <span className="text-emerald-300">{product.promotionExpiresAt.toLocaleDateString()}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
