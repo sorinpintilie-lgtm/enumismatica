@@ -32,6 +32,8 @@ function ProductsListContent() {
     sortBy: 'best-match',
   });
 
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
   // Handle URL parameters on mount
   useEffect(() => {
     const countryParam = searchParams.get('country');
@@ -153,14 +155,28 @@ function ProductsListContent() {
           <span className="font-semibold text-gold-400">{products.length}</span> produse
         </p>
 
-        {/* View Toggle (Grid/List) - Optional */}
+        {/* View Toggle (Grid/List) */}
         <div className="flex gap-2">
-          <button className="p-2 bg-gold-500 text-white rounded-md hover:bg-gold-400 transition-colors">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`p-2 rounded-md transition-colors ${
+              viewMode === 'grid'
+                ? 'bg-[#e7b73c] text-white shadow-[0_0_20px_rgba(231,183,60,0.6)]'
+                : 'bg-navy-400/50 text-slate-300 hover:bg-navy-400'
+            }`}
+          >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
           </button>
-          <button className="p-2 bg-navy-400/50 text-slate-300 rounded-md hover:bg-navy-400 transition-colors">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-2 rounded-md transition-colors ${
+              viewMode === 'list'
+                ? 'bg-[#e7b73c] text-white shadow-[0_0_20px_rgba(231,183,60,0.6)]'
+                : 'bg-navy-400/50 text-slate-300 hover:bg-navy-400'
+            }`}
+          >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
             </svg>
@@ -209,9 +225,19 @@ function ProductsListContent() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+        <div className={
+          viewMode === 'grid'
+            ? "grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+            : "space-y-4"
+        }>
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <div key={product.id} className={
+              viewMode === 'list'
+                ? "flex bg-navy-800/50 rounded-xl border border-[#e7b73c]/20 p-4 hover:border-[#e7b73c]/40 transition-colors"
+                : ""
+            }>
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
       )}

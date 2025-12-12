@@ -136,22 +136,28 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
           <select
             value={localFilters.sortBy}
             onChange={(e) => handleFilterUpdate('sortBy', e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-[#e7b73c]/40 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+            className="w-full px-4 py-3 rounded-xl border border-[#e7b73c]/40 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23e7b73c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: 'right 12px center',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '16px 12px'
+            }}
           >
             {showAuctionFilters ? (
               <>
-                <option value="best-match">Relevanță</option>
-                <option value="price-asc">Preț: Crescător</option>
-                <option value="price-desc">Preț: Descrescător</option>
-                <option value="ending-soonest">Se termină cel mai repede</option>
-                <option value="newly-listed">Adăugate recent</option>
+                <option value="best-match" className="bg-navy-900 text-slate-100">Relevanță</option>
+                <option value="price-asc" className="bg-navy-900 text-slate-100">Preț: Crescător</option>
+                <option value="price-desc" className="bg-navy-900 text-slate-100">Preț: Descrescător</option>
+                <option value="ending-soonest" className="bg-navy-900 text-slate-100">Se termină cel mai repede</option>
+                <option value="newly-listed" className="bg-navy-900 text-slate-100">Adăugate recent</option>
               </>
             ) : (
               <>
-                <option value="best-match">Relevanță</option>
-                <option value="price-asc">Preț: Crescător</option>
-                <option value="price-desc">Preț: Descrescător</option>
-                <option value="newly-listed">Adăugate recent</option>
+                <option value="best-match" className="bg-navy-900 text-slate-100">Relevanță</option>
+                <option value="price-asc" className="bg-navy-900 text-slate-100">Preț: Crescător</option>
+                <option value="price-desc" className="bg-navy-900 text-slate-100">Preț: Descrescător</option>
+                <option value="newly-listed" className="bg-navy-900 text-slate-100">Adăugate recent</option>
               </>
             )}
           </select>
@@ -184,10 +190,10 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
               <select
                 value={localFilters.country}
                 onChange={(e) => handleFilterUpdate('country', e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
               >
                 {countries.map((country) => (
-                  <option key={country} value={country}>
+                  <option key={country} value={country} className="bg-navy-900 text-slate-100">
                     {country}
                   </option>
                 ))}
@@ -199,10 +205,10 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
               <select
                 value={localFilters.metal}
                 onChange={(e) => handleFilterUpdate('metal', e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
               >
                 {metals.map((metal) => (
-                  <option key={metal} value={metal}>
+                  <option key={metal} value={metal} className="bg-navy-900 text-slate-100">
                     {metal}
                   </option>
                 ))}
@@ -214,10 +220,10 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
               <select
                 value={localFilters.rarity}
                 onChange={(e) => handleFilterUpdate('rarity', e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
               >
                 {rarities.map((rarity) => (
-                  <option key={rarity} value={rarity}>
+                  <option key={rarity} value={rarity} className="bg-navy-900 text-slate-100">
                     {rarity.charAt(0).toUpperCase() + rarity.slice(1)}
                   </option>
                 ))}
@@ -232,10 +238,10 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
               <select
                 value={localFilters.grade}
                 onChange={(e) => handleFilterUpdate('grade', e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
               >
                 {grades.map((grade) => (
-                  <option key={grade} value={grade}>
+                  <option key={grade} value={grade} className="bg-navy-900 text-slate-100">
                     {grade}
                   </option>
                 ))}
