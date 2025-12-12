@@ -133,3 +133,48 @@ export function useCachedProduct(id: string, fields: string[] = DEFAULT_PRODUCT_
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
 }
+
+/**
+ * Get boosted products for homepage hero display
+ * Only returns products that are currently boosted (boost has not expired)
+ */
+export function useBoostedProducts(limitCount: number = 3) {
+  return useQuery({
+    queryKey: ['boosted-products', limitCount],
+    queryFn: async () => {
+      const now = new Date();
+      
+      // Query for products with active boosts
+      let q = query(
+        collection(db, 'products'),
+        where('status', '==', 'approved'),
+        where('boostExpiresAt', '>', now), // Only active boosts
+        orderBy('boostedAt', 'desc'), // Most recently boosted first
+        limit(limitCount),
+      );
+
+      const querySnapshot = await getDocs(q);
+      const boostedProducts: Product[] = [];
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const productData: any = {
+          id: doc.id,
+          name: data.name,
+          images: data.images,
+          price: data.price,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          boostExpiresAt: data.boostExpiresAt?.toDate() || null,
+          boostedAt: data.boostedAt?.toDate() || null,
+        };
+        
+        boostedProducts.push(productData as Product);
+      });
+
+      return boostedProducts;
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes for boosted products (more dynamic)
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  });
+}

@@ -5,6 +5,7 @@ import LazyImage from './components/LazyImage';
 import ProductCard from './components/ProductCard';
 import { useCachedProducts } from './hooks/useCachedProducts';
 import { useAuth } from './context/AuthContext';
+import { useBoostedProducts } from './hooks/useCachedProducts';
 
 const highlights = [
   {
@@ -39,6 +40,7 @@ const steps = [
 export default function HomePage() {
   const { user } = useAuth();
   const { data: products = [], isLoading: productsLoading } = useCachedProducts(undefined, 8, undefined, !!user);
+  const { data: boostedProducts = [], isLoading: boostedLoading } = useBoostedProducts(3);
 
   return (
     <div className="bg-gradient-to-b from-navy-500 via-navy-600 to-navy-900">
@@ -115,31 +117,73 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right Column - Image */}
+          {/* Right Column - Boosted Products */}
           <div className="relative">
             <div
               className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#e7b73c]/40 via-transparent to-transparent blur-3xl"
               aria-hidden
             />
             <div className="relative rounded-3xl border border-[#e7b73c] bg-white/98 backdrop-blur-sm p-4 shadow-[0_20px_60px_rgba(231,183,60,0.35)]">
-              <LazyImage
-                src="/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png"
-                alt="Moneda Double Eagle din colectia noastra"
-                srcSet="/assets/20-gouden-munt-double-eagle-coronet-head-achterkant-web_big.png 1600w"
-                sizes="100vw"
-                className="h-[340px] w-full rounded-2xl object-contain bg-white"
-                placeholder="Se incarca imaginea colectiei"
-              />
-              <div className="mt-4 flex items-start justify-between rounded-2xl border border-[#e7b73c] bg-[#e7b73c] px-4 py-3 shadow-lg shadow-[#e7b73c]/40">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#000940]">Piesa recenta</p>
-                  <p className="text-base font-semibold text-white">Double Eagle Coronet Head</p>
-                  <p className="text-sm text-white/90">Disponibila acum in magazin si licitatii</p>
+              {boostedLoading ? (
+                <div className="h-[340px] w-full rounded-2xl bg-slate-100 animate-pulse flex items-center justify-center">
+                  <div className="text-slate-400">Se încarcă produsele...</div>
                 </div>
-                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#e7b73c] shadow-sm">
-                  Aur 900/1000
+              ) : boostedProducts.length > 0 ? (
+                <>
+                  <div className="relative h-[340px] w-full rounded-2xl overflow-hidden">
+                    <LazyImage
+                      src={boostedProducts[0].images?.[0] || '/assets/placeholder-coin.jpg'}
+                      alt={`Moneda ${boostedProducts[0].name} din colecția noastră`}
+                      sizes="100vw"
+                      className="h-full w-full object-contain bg-white"
+                      placeholder={`Se încarcă imaginea ${boostedProducts[0].name}`}
+                    />
+                    <div className="absolute top-2 right-2 bg-[#e7b73c] text-[#000940] px-2 py-1 rounded-full text-xs font-semibold">
+                      Produs Promovat
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-start justify-between rounded-2xl border border-[#e7b73c] bg-[#e7b73c] px-4 py-3 shadow-lg shadow-[#e7b73c]/40">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#000940]">Produs Promovat</p>
+                      <p className="text-base font-semibold text-white">{boostedProducts[0].name}</p>
+                      <p className="text-sm text-white/90">Preț special disponibil acum</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-white">{boostedProducts[0].price} RON</div>
+                      <div className="text-xs text-white/80">La ofertă limitată</div>
+                    </div>
+                  </div>
+                  
+                  {/* Additional boosted products preview */}
+                  {boostedProducts.length > 1 && (
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      {boostedProducts.slice(1, 3).map((product) => (
+                        <div key={product.id} className="bg-navy-50 rounded-lg p-2 border border-[#e7b73c]/20">
+                          <div className="h-16 w-full bg-white rounded mb-1 overflow-hidden">
+                            <LazyImage
+                              src={product.images?.[0] || '/assets/placeholder-coin.jpg'}
+                              alt={product.name}
+                              className="h-full w-full object-contain"
+                            />
+                          </div>
+                          <p className="text-xs font-medium text-[#000940] truncate">{product.name}</p>
+                          <p className="text-xs font-bold text-[#e7b73c]">{product.price} RON</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="h-[340px] w-full rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center">
+                  <div className="text-center text-slate-400">
+                    <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <p className="text-sm font-medium">Nu sunt produse promovate</p>
+                    <p className="text-xs">Produsele promovate vor apărea aici</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
