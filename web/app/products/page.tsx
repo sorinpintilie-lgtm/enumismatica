@@ -231,13 +231,7 @@ function ProductsListContent() {
             : "space-y-4"
         }>
           {filteredProducts.map((product) => (
-            <div key={product.id} className={
-              viewMode === 'list'
-                ? "flex bg-navy-800/50 rounded-xl border border-[#e7b73c]/20 p-4 hover:border-[#e7b73c]/40 transition-colors"
-                : ""
-            }>
-              <ProductCard product={product} />
-            </div>
+            <ProductCard key={product.id} product={product} variant={viewMode} />
           ))}
         </div>
       )}

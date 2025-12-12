@@ -1,11 +1,14 @@
 'use client';
 
+  2 |
 import { useAuth } from '../context/AuthContext';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { useProducts } from '../hooks/useProducts';
 import { useAuctions } from '../hooks/useAuctions';
 import Link from 'next/link';
 import { useMemo } from 'react';
+import ProductCard from '../components/ProductCard';
+import AuctionCard from '../components/AuctionCard';
 
 export default function WatchlistPage() {
   const { user } = useAuth();
@@ -110,68 +113,23 @@ export default function WatchlistPage() {
       )}
 
       {!isEmpty && !loading && (
-        <div className="bg-navy-900/80 rounded-2xl border border-gold-500/30 p-6 mb-6 shadow-[0_14px_40px_rgba(0,0,0,0.8)]">
-          <div className="space-y-4">
+        <div className="mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
             {watchlistWithItems.map((item) => {
               const { linkedItem } = item;
-              let title = '';
-              let price = '';
-              let linkHref = '';
-              let typeLabel = '';
 
-              if (item.itemType === 'product' && linkedItem) {
-                title = linkedItem.name || `Produs ${item.itemId}`;
-                price = typeof linkedItem.price === 'number' ? `${linkedItem.price.toFixed(2)} RON` : '';
-                linkHref = `/products/${item.itemId}`;
-                typeLabel = 'Produs';
-              } else if (item.itemType === 'auction' && linkedItem) {
-                title = `Auction #${linkedItem.id.slice(-6)}`;
-                const currentBid = linkedItem.currentBid || linkedItem.reservePrice;
-                price = `${currentBid.toFixed(2)} RON`;
-                linkHref = `/auctions/${item.itemId}`;
-                typeLabel = 'Licitație';
-              } else {
-                title = `${item.itemType} ${item.itemId}`;
-                linkHref = item.itemType === 'product' ? `/products/${item.itemId}` : `/auctions/${item.itemId}`;
-                typeLabel = item.itemType === 'product' ? 'Produs' : 'Licitație';
-              }
-
-              return (
-                <div
-                  key={item.id}
-                  className="flex flex-col md:flex-row gap-4 rounded-2xl border border-gold-500/30 bg-navy-950 p-4"
-                >
-                  <div className="flex-1 flex flex-col justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="inline-flex items-center rounded-full bg-blue-500/15 text-blue-300 border border-blue-400/40 px-2 py-1 text-xs font-semibold uppercase tracking-wide">
-                          {typeLabel}
-                        </span>
-                      </div>
-                      <h2 className="text-sm sm:text-base font-semibold text-white mb-1 line-clamp-2">
-                        {title}
-                      </h2>
-                      {price && (
-                        <p className="text-sm font-semibold text-green-400">
-                          {price}
-                        </p>
-                      )}
-                      {item.notes && (
-                        <p className="text-xs text-slate-400 mt-1">
-                          Notă: {item.notes}
-                        </p>
-                      )}
-                      <p className="text-xs text-slate-400">
-                        Adăugat la {item.addedAt.toLocaleDateString()}
-                      </p>
+              if (!linkedItem) {
+                // Fallback for items that couldn't be loaded
+                return (
+                  <div
+                    key={item.id}
+                    className="relative group h-full flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 rounded-2xl border border-[#e7b73c]/70 bg-gradient-to-br from-navy-500 to-navy-600 shadow-[0_10px_35px_rgba(231,183,60,0.3)] p-4"
+                  >
+                    <div className="text-center text-slate-400">
+                      <p className="text-sm">Articol indisponibil</p>
+                      <p className="text-xs mt-1">ID: {item.itemId}</p>
                     </div>
-                    <div className="flex gap-2">
-                      <Link
-                        href={linkHref}
-                        className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-3 py-1 text-xs font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
-                      >
-                        Vezi detaliile
-                      </Link>
+                    <div className="mt-auto flex justify-center">
                       <button
                         onClick={() => handleRemove(item.itemId)}
                         className="inline-flex items-center justify-center rounded-full border border-red-500/70 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors"
@@ -180,12 +138,64 @@ export default function WatchlistPage() {
                       </button>
                     </div>
                   </div>
-                </div>
-              );
+                );
+              }
+
+              if (item.itemType === 'product') {
+                return (
+                  <div key={item.id} className="relative">
+                    <ProductCard product={linkedItem} showWatchlistButton={false} />
+                    {/* Watchlist-specific overlay */}
+                    <div className="absolute top-2 right-2 z-20 flex gap-1">
+                      <button
+                        onClick={() => handleRemove(item.itemId)}
+                        className="inline-flex items-center justify-center rounded-full bg-red-600/90 hover:bg-red-600 text-white p-2 text-xs font-semibold transition-colors shadow-lg"
+                        title="Elimină din lista de urmărire"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                    {/* Added date overlay */}
+                    <div className="absolute bottom-2 left-2 z-20">
+                      <span className="inline-flex items-center rounded-full bg-black/60 text-white px-2 py-1 text-xs font-medium backdrop-blur-sm">
+                        Adăugat {item.addedAt.toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                );
+              } else if (item.itemType === 'auction') {
+                return (
+                  <div key={item.id} className="relative">
+                    <AuctionCard auction={linkedItem} showWatchlistButton={false} />
+                    {/* Watchlist-specific overlay */}
+                    <div className="absolute top-2 right-2 z-20 flex gap-1">
+                      <button
+                        onClick={() => handleRemove(item.itemId)}
+                        className="inline-flex items-center justify-center rounded-full bg-red-600/90 hover:bg-red-600 text-white p-2 text-xs font-semibold transition-colors shadow-lg"
+                        title="Elimină din lista de urmărire"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                    {/* Added date overlay */}
+                    <div className="absolute bottom-2 left-2 z-20">
+                      <span className="inline-flex items-center rounded-full bg-black/60 text-white px-2 py-1 text-xs font-medium backdrop-blur-sm">
+                        Adăugat {item.addedAt.toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }
+
+              return null;
             })}
           </div>
 
-          <div className="mt-6 flex justify-center">
+          <div className="flex justify-center">
             <button
               onClick={handleClear}
               className="inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors"

@@ -14,6 +14,7 @@ import { logEvent } from '../hooks/useActivityLogger';
 interface AuctionCardProps {
   auction: Auction;
   showWatchlistButton?: boolean;
+  variant?: 'grid' | 'list';
 }
 
 function CountdownTimer({ endTime }: { endTime: Date }) {
@@ -44,7 +45,7 @@ function CountdownTimer({ endTime }: { endTime: Date }) {
   return <span className="text-sm font-medium text-[#e7b73c]">{timeLeft}</span>;
 }
 
-function AuctionCard({ auction, showWatchlistButton = true }: AuctionCardProps) {
+function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: AuctionCardProps) {
   const [bidAmount, setBidAmount] = useState('');
   const { user } = useAuth();
   const [bidLoading, setBidLoading] = useState(false);
@@ -103,6 +104,100 @@ function AuctionCard({ auction, showWatchlistButton = true }: AuctionCardProps) 
     }
   }, [auction.id, bidAmount, user, showToast, logEvent]);
 
+  if (variant === 'list') {
+    return (
+      <div
+        className={`group relative flex gap-4 p-4 rounded-xl border border-[#e7b73c]/40 bg-gradient-to-r from-navy-700 via-navy-800 to-navy-950 shadow-[0_8px_25px_rgba(231,183,60,0.2)] hover:border-[#e7b73c] hover:shadow-[0_12px_35px_rgba(231,183,60,0.35)] transition-all duration-300 w-full ${
+          isUserHighestBidder ? 'ring-2 ring-emerald-400/80 ring-offset-2 ring-offset-navy-900' : ''
+        }`}
+      >
+        {/* Image */}
+        <div className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
+          {product && product.images && product.images.length > 0 ? (
+            <img
+              src={product.images[0]}
+              alt={product.name || 'Articol Licitație'}
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+              <span className="text-slate-400 text-xs">Se încarcă...</span>
+            </div>
+          )}
+          <span
+            className={`absolute top-1 left-1 z-10 px-1.5 py-0.5 rounded-full text-[9px] font-semibold tracking-wide ${
+              auction.status === 'active'
+                ? 'bg-[#e7b73c]/90 text-[#000940]'
+                : auction.status === 'ended'
+                ? 'bg-red-900/90 text-red-200'
+                : 'bg-slate-800/90 text-slate-100'
+            }`}
+          >
+            {auction.status.toUpperCase()}
+          </span>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <h3 className="text-lg font-semibold text-white line-clamp-1" title={product?.name || 'Licitație'}>
+                {product?.name || `Licitație #${auction.id.slice(-6)}`}
+              </h3>
+              <p className="text-xs text-slate-400">Licitație #{auction.id.slice(-6)}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-slate-300">Preț curent</p>
+              <p className="text-xl font-bold text-[#e7b73c]">
+                {formatRON(currentBid)}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center gap-4 text-xs text-slate-400">
+              <span>⏰ <CountdownTimer endTime={auction.endTime} /></span>
+              {canBuyNow && (
+                <span className="text-emerald-300">💰 {formatRON(auction.buyNowPrice as number)}</span>
+              )}
+            </div>
+            
+            <Link
+              href={`/auctions/${auction.id}`}
+              className="inline-flex items-center gap-2 rounded-full bg-[#e7b73c] px-3 py-1.5 text-xs font-semibold text-[#000940] shadow-lg shadow-[0_0_15px_rgba(231,183,60,0.6)] transition hover:-translate-y-0.5 hover:bg-[#f0c955]"
+            >
+              Vezi detalii
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+          
+          {user && (
+            <p className={`text-xs ${
+              isUserHighestBidder ? 'text-emerald-300' : 'text-slate-400'
+            }`}>
+              {isUserHighestBidder
+                ? '✓ Ești licitatorul cu oferta cea mai mare'
+                : auction.currentBidderId
+                ? 'Alt utilizator are oferta cea mai mare'
+                : 'Încă nu există oferte peste prețul de rezervă'}
+            </p>
+          )}
+        </div>
+        
+        {showWatchlistButton && (
+          <div className="absolute top-2 right-2 z-10">
+            <WatchlistButton
+              itemType="auction"
+              itemId={auction.id}
+              size="small"
+            />
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Grid variant (original layout)
   return (
     <div
       className={`group relative h-full flex flex-col bg-gradient-to-br from-navy-600 via-navy-800 to-navy-950 rounded-2xl border border-[#e7b73c]/40 shadow-[0_18px_55px_rgba(0,0,0,0.9)] overflow-hidden hover:border-[#e7b73c] hover:shadow-[0_26px_70px_rgba(231,183,60,0.55)] transition-all duration-300 ${
