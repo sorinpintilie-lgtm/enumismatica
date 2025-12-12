@@ -8,12 +8,14 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { isAdmin } from 'shared/adminService';
 import NotificationCenter from './NotificationCenter';
+import { useCart } from '../hooks/useCart';
 
 export default function Navigation() {
   const { user } = useAuth();
   const router = useRouter();
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { items: cartItems } = useCart(user?.uid);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -103,7 +105,7 @@ export default function Navigation() {
                 {/* Cart icon */}
                 <Link
                   href="/cart"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gold-500/60 bg-navy-900/70 text-gold-300 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
+                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-gold-500/60 bg-navy-900/70 text-gold-300 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
                   title="Coș"
                 >
                   <svg
@@ -119,6 +121,11 @@ export default function Navigation() {
                     <circle cx="20" cy="21" r="1" />
                     <path d="M1 1h4l2.6 13.4a1 1 0 0 0 1 .8H19a1 1 0 0 0 .98-.8L22 6H6" />
                   </svg>
+                  {cartItems.length > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-lg">
+                      {cartItems.length > 99 ? '99+' : cartItems.length}
+                    </span>
+                  )}
                 </Link>
                 {/* Watchlist icon */}
                 <Link
@@ -229,9 +236,14 @@ export default function Navigation() {
                       <Link
                         href="/cart"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="inline-flex items-center justify-center rounded-full border border-gold-500/60 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
+                        className="relative inline-flex items-center justify-center rounded-full border border-gold-500/60 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
                       >
                         Coș
+                        {cartItems.length > 0 && (
+                          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                            {cartItems.length > 9 ? '9+' : cartItems.length}
+                          </span>
+                        )}
                       </Link>
                       <Link
                         href="/watchlist"
