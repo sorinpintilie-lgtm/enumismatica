@@ -1,6 +1,5 @@
 'use client';
 
-  2 |
 import { useAuth } from '../context/AuthContext';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { useProducts } from '../hooks/useProducts';
