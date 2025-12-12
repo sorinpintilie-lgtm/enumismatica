@@ -225,10 +225,10 @@ export default function HomePage() {
       {/* Latest Products */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 bg-navy-700">
         <div className="mb-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gold-400 mb-2">Catalog</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gold-400 mb-2">E-shop</p>
           <h2 className="text-3xl font-bold text-white mb-3">Ultimele Produse</h2>
           <p className="text-slate-300 max-w-2xl mx-auto">
-            Monede recent adăugate în catalog, verificate și gata de livrare. Vizualizarea detaliilor și a licitațiilor este
+            Monede recent adăugate în E-shop, verificate și gata de livrare. Vizualizarea detaliilor și a licitațiilor este
             disponibilă doar utilizatorilor autentificați.
           </p>
         </div>
@@ -260,7 +260,7 @@ export default function HomePage() {
           </>
         ) : (
           <div className="mx-auto max-w-xl rounded-2xl border border-[#e7b73c]/40 bg-navy-900/70 p-6 text-center shadow-[0_18px_45px_rgba(0,0,0,0.8)]">
-            <h3 className="text-lg font-semibold text-white mb-2">Autentifică-te pentru a vedea catalogul</h3>
+            <h3 className="text-lg font-semibold text-white mb-2">Autentifică-te pentru a vedea E-shop-ul</h3>
             <p className="text-sm text-slate-300 mb-4">
               Pentru a accesa produsele, licitațiile și detaliile pieselor, este necesar un cont. Fără autentificare poți vedea
               doar pagina de start și informațiile generale.

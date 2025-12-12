@@ -139,7 +139,7 @@ function ProductsListContent() {
     <div className="container mx-auto px-4 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#e7b73c] mb-2">Catalog</h1>
+        <h1 className="text-4xl font-bold text-[#e7b73c] mb-2">E-shop</h1>
         <p className="text-slate-200">
           Explorează colecția noastră de {products.length} articole
         </p>
