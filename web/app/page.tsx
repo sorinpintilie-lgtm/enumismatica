@@ -80,8 +80,8 @@ export default function HomePage() {
             {/* Features - Grid Layout */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
               <div className="flex items-start gap-3 p-4 rounded-xl border border-gold-500/20 bg-navy-700/30 backdrop-blur-sm">
-                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gold-500/20 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex-shrink-0 h-14 w-14 rounded-full bg-gold-500/20 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
@@ -92,8 +92,8 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-start gap-3 p-4 rounded-xl border border-gold-500/20 bg-navy-700/30 backdrop-blur-sm">
-                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gold-500/20 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex-shrink-0 h-14 w-14 rounded-full bg-gold-500/20 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
                 </div>
@@ -104,8 +104,8 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-start gap-3 p-4 rounded-xl border border-gold-500/20 bg-navy-700/30 backdrop-blur-sm">
-                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gold-500/20 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex-shrink-0 h-14 w-14 rounded-full bg-gold-500/20 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
@@ -192,13 +192,28 @@ export default function HomePage() {
       {/* Highlights */}
       <section className="border-t border-gold-500/20 bg-navy-600">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-4 py-12 sm:px-6 md:grid-cols-3">
-          {highlights.map((item) => (
+          {highlights.map((item, index) => (
             <div
               key={item.title}
               className="group rounded-2xl border border-gold-500/30 bg-navy-500/60 p-6 shadow-[0_10px_35px_rgba(231,183,60,0.15)] transition hover:-translate-y-1 hover:border-gold-400 hover:bg-navy-400/80 backdrop-blur-sm"
             >
-              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-gold-500 text-navy-900">
-                <span className="text-sm font-bold group-hover:scale-110 group-hover:transform">★</span>
+              <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gold-500 text-navy-900">
+                {index === 0 && (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                )}
+                {index === 1 && (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+                {index === 2 && (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                )}
               </div>
               <h3 className="text-lg font-semibold text-white">{item.title}</h3>
               <p className="mt-2 text-sm text-slate-300">{item.description}</p>
