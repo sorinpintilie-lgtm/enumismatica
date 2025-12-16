@@ -8,8 +8,9 @@ import { useAuth } from '../../context/AuthContext';
 import { uploadMultipleImages, validateImageFile } from 'shared/storageService';
 import { addCollectionItem } from 'shared/collectionService';
 import { useToast } from '../../components/ToastProvider';
+import { useCoinAutocomplete } from '../../hooks/useCoinAutocomplete';
 
-// Predefined options for product attributes
+// Keep your existing constants
 const COUNTRIES = [
   'România', 'Germania', 'Franța', 'Italia', 'Spania', 'Regatul Unit', 'Austria', 'Elveția',
   'Rusia', 'Polonia', 'Ungaria', 'Cehia', 'Slovacia', 'Bulgaria', 'Serbia', 'Croația',
@@ -20,17 +21,6 @@ const COUNTRIES = [
 const METALS = [
   'Aur', 'Argint', 'Cupru', 'Bronz', 'Oțel', 'Aluminiu', 'Platină', 'Paladiu',
   'Zinc', 'Nichel', 'Aliaj', 'Cupru-Nichel', 'Argint-Aur', 'Electrum'
-];
-
-const DENOMINATIONS = [
-  '1 Ban', '5 Bani', '10 Bani', '25 Bani', '50 Bani', '1 Leu', '5 Lei', '10 Lei', '20 Lei', '50 Lei', '100 Lei', '200 Lei', '500 Lei',
-  '1 Cent', '2 Cent', '5 Cent', '10 Cent', '20 Cent', '50 Cent', '1 Euro', '2 Euro',
-  '1 Centavo', '5 Centavos', '10 Centavos', '25 Centavos', '50 Centavos', '1 Peso',
-  '1 Kopek', '2 Kopeki', '3 Kopeki', '5 Kopek', '10 Kopek', '15 Kopek', '20 Kopek', '50 Kopek', '1 Ruble',
-  '1 Pfennig', '2 Pfennige', '5 Pfennige', '10 Pfennige', '50 Pfennige', '1 Mark', '2 Mark', '5 Mark',
-  '1 Penny', '3 Pence', '6 Pence', '1 Shilling', '2 Shillings', '1 Pound',
-  '1 Franc', '2 Francs', '5 Francs', '10 Francs', '20 Francs', '50 Francs', '100 Francs',
-  '1 Lira', '2 Lire', '5 Lire', '10 Lire', '20 Lire', '50 Lire', '100 Lire', '500 Lire'
 ];
 
 const RARITIES = [
@@ -48,11 +38,6 @@ const GRADES = [
   'UNC (Uncirculated)', 'BU (Brilliant Uncirculated)', 'Proof', 'Proof-like'
 ];
 
-const ERAS = [
-  'Antică', 'Medievală', 'Renașterea', 'Epoca Modernă', 'Secolul XIX', 'Secolul XX', 'Secolul XXI',
-  '1895-1917', '1917-1991', '1991-Prezent', 'Pre-1917', 'Post-1917', 'Comunism', 'Monarhie'
-];
-
 const CATEGORIES = [
   'Monede', 'Banknote', 'Medalii', 'Jetoane', 'Insigne', 'Ordine', 'Decorații', 'Altele'
 ];
@@ -61,15 +46,33 @@ export default function NewProductPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
+  
+  // Use the autocomplete hook
+  const {
+    selectedEra,
+    setSelectedEra,
+    selectedYear,
+    setSelectedYear,
+    selectedFaceValue,
+    setSelectedFaceValue,
+    matchedCoin,
+    romanianEras,
+    availableYears,
+    availableFaceValues,
+    reset: resetAutocomplete,
+  } = useCoinAutocomplete();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [country, setCountry] = useState('');
+  const [country, setCountry] = useState('România'); // Default to România
   const [year, setYear] = useState('');
   const [era, setEra] = useState('');
   const [metal, setMetal] = useState('');
   const [denomination, setDenomination] = useState('');
+  const [diameter, setDiameter] = useState('');
+  const [weight, setWeight] = useState('');
+  const [mintLocation, setMintLocation] = useState('');
   const [rarity, setRarity] = useState('');
   const [grade, setGrade] = useState('');
   const [files, setFiles] = useState<File[]>([]);
@@ -79,6 +82,25 @@ export default function NewProductPage() {
   const [buyNowPrice, setBuyNowPrice] = useState('');
   const [auctionEndTime, setAuctionEndTime] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [useAutocomplete, setUseAutocomplete] = useState(true);
+
+  // Auto-fill fields when matched coin is found
+  useEffect(() => {
+    if (matchedCoin && useAutocomplete) {
+      setYear(String(matchedCoin.issue_year) || '');
+      setEra(matchedCoin.era || '');
+      setDenomination(matchedCoin.face_value || '');
+      setMetal(matchedCoin.metal || '');
+      setDiameter(matchedCoin.diameter || '');
+      setWeight(matchedCoin.weight || '');
+      setMintLocation(matchedCoin.mint_or_theme || matchedCoin.mint || '');
+      
+      // Auto-generate name if empty
+      if (!name) {
+        setName(`${matchedCoin.face_value} ${matchedCoin.issue_year} - ${matchedCoin.era}`);
+      }
+    }
+  }, [matchedCoin, useAutocomplete]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -230,13 +252,15 @@ export default function NewProductPage() {
         era: era || null,
         metal: metal || null,
         denomination: denomination || null,
+        diameter: diameter || null,
+        weight: weight || null,
+        mintLocation: mintLocation || null,
         rarity: rarity || null,
         grade: grade || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
 
-      // Add product into user's personal collection so it appears in "Colecția Mea"
       try {
         await addCollectionItem(user.uid, {
           name: name.trim(),
@@ -314,71 +338,174 @@ export default function NewProductPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto bg-navy-900/80 border border-gold-500/40 rounded-2xl p-6 shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
         <h1 className="text-2xl font-bold text-white mb-4">Adaugă un produs</h1>
-        <p className="text-sm text-slate-300 mb-6">
-          Încarcă imagini, adaugă titlu și descriere, apoi selectează din opțiunile disponibile pentru caracteristicile produsului. Alege tipul de vânzare dorit.
-        </p>
-
-        {/* Listing Type Selection */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-slate-200 mb-3">
-            Tip vânzare *
+        
+        {/* Toggle for Romanian Coins */}
+        <div className="mb-6 p-4 bg-navy-800/50 rounded-lg border border-gold-500/20">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={useAutocomplete && country === 'România'}
+              onChange={(e) => {
+                setUseAutocomplete(e.target.checked);
+                if (e.target.checked) {
+                  setCountry('România');
+                } else {
+                  resetAutocomplete();
+                }
+              }}
+              className="w-4 h-4 text-gold-500 bg-navy-700 border-gold-500/40 rounded focus:ring-gold-500/50"
+            />
+            <span className="ml-3 text-sm text-slate-200">
+              Folosește asistentul pentru monede românești
+            </span>
           </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all ${
-              listingType === 'direct'
-                ? 'border-gold-500/40 bg-navy-800/50 text-slate-300'
-                : 'border-gold-400 bg-gold-400/10 text-gold-300 hover:border-gold-500/60'
-            }`}>
-              <input
-                type="radio"
-                name="listingType"
-                value="direct"
-                checked={listingType === 'direct'}
-                onChange={(e) => setListingType(e.target.value as 'direct' | 'auction')}
-                className="sr-only"
-              />
-              <div className="text-center">
-                <div className={`w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center ${
-                  listingType === 'direct' ? 'bg-navy-700 text-gold-400' : 'bg-gold-400 text-navy-900'
-                }`}>
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                </div>
-                <h3 className="font-semibold text-lg mb-1">Vând direct</h3>
-                <p className="text-sm opacity-80">Preț fix, cumpărare imediată</p>
-              </div>
-            </label>
-
-            <label className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all ${
-              listingType === 'auction'
-                ? 'border-gold-500/40 bg-navy-800/50 text-slate-300'
-                : 'border-gold-400 bg-gold-400/10 text-gold-300 hover:border-gold-500/60'
-            }`}>
-              <input
-                type="radio"
-                name="listingType"
-                value="auction"
-                checked={listingType === 'auction'}
-                onChange={(e) => setListingType(e.target.value as 'direct' | 'auction')}
-                className="sr-only"
-              />
-              <div className="text-center">
-                <div className={`w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center ${
-                  listingType === 'auction' ? 'bg-navy-700 text-gold-400' : 'bg-gold-400 text-navy-900'
-                }`}>
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                  </svg>
-                </div>
-                <h3 className="font-semibold text-lg mb-1">Pun la licitație</h3>
-                <p className="text-sm opacity-80">Licitație cu mai mulți participanți</p>
-              </div>
-            </label>
-          </div>
+          <p className="mt-2 text-xs text-slate-400">
+            Activează pentru auto-completare bazată pe baza de date de monede românești
+          </p>
         </div>
 
+        {/* Romanian Coin Autocomplete Section */}
+        {useAutocomplete && country === 'România' && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-gold-500/10 to-gold-600/10 rounded-lg border border-gold-500/30 space-y-4">
+            <h3 className="text-lg font-semibold text-gold-400 mb-3">🪙 Asistent Monede Românești</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Era Selection */}
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Epocă *
+                </label>
+                <select
+                  className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                  value={selectedEra}
+                  onChange={(e) => setSelectedEra(e.target.value)}
+                >
+                  <option value="">Selectează epoca</option>
+                  {romanianEras.map((era) => (
+                    <option key={era} value={era}>{era}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Year Selection */}
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  An *
+                </label>
+                <select
+                  className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  disabled={!selectedEra}
+                >
+                  <option value="">Selectează anul</option>
+                  {availableYears.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Face Value Selection */}
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Valoare nominală *
+                </label>
+                <select
+                  className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  value={selectedFaceValue}
+                  onChange={(e) => setSelectedFaceValue(e.target.value)}
+                  disabled={!selectedYear}
+                >
+                  <option value="">Selectează valoarea</option>
+                  {availableFaceValues.map((fv) => (
+                    <option key={fv} value={fv}>{fv}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Matched Coin Preview */}
+            {matchedCoin && (
+              <div className="mt-4 p-3 bg-navy-800/60 rounded-lg border border-gold-500/20">
+                <div className="flex items-center mb-2">
+                  <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0zm-8-3a1 1 0 11-2 0 1 1 0 012 0zm0 8a1 1 0 100-2 1 1 0 000 2z" />
+                  </svg>
+                  <span className="text-sm font-semibold text-green-400">Monedă găsită în baza de date!</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs text-slate-300">
+                  <div><span className="text-slate-400">Diametru:</span> {matchedCoin.diameter}</div>
+                  <div><span className="text-slate-400">Greutate:</span> {matchedCoin.weight}</div>
+                  <div><span className="text-slate-400">Metal:</span> {matchedCoin.metal}</div>
+                  <div><span className="text-slate-400">Monetărie:</span> {matchedCoin.mint_or_theme || matchedCoin.mint}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Listing Type Selection */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-slate-200 mb-3">
+              Tip vânzare *
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all ${
+                listingType === 'direct'
+                  ? 'border-gold-500/40 bg-navy-800/50 text-slate-300'
+                  : 'border-gold-400 bg-gold-400/10 text-gold-300 hover:border-gold-500/60'
+              }`}>
+                <input
+                  type="radio"
+                  name="listingType"
+                  value="direct"
+                  checked={listingType === 'direct'}
+                  onChange={(e) => setListingType(e.target.value as 'direct' | 'auction')}
+                  className="sr-only"
+                />
+                <div className="text-center">
+                  <div className={`w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center ${
+                    listingType === 'direct' ? 'bg-navy-700 text-gold-400' : 'bg-gold-400 text-navy-900'
+                  }`}>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-lg mb-1">Vând direct</h3>
+                  <p className="text-sm opacity-80">Preț fix, cumpărare imediată</p>
+                </div>
+              </label>
+
+              <label className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all ${
+                listingType === 'auction'
+                  ? 'border-gold-500/40 bg-navy-800/50 text-slate-300'
+                  : 'border-gold-400 bg-gold-400/10 text-gold-300 hover:border-gold-500/60'
+              }`}>
+                <input
+                  type="radio"
+                  name="listingType"
+                  value="auction"
+                  checked={listingType === 'auction'}
+                  onChange={(e) => setListingType(e.target.value as 'direct' | 'auction')}
+                  className="sr-only"
+                />
+                <div className="text-center">
+                  <div className={`w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center ${
+                    listingType === 'auction' ? 'bg-navy-700 text-gold-400' : 'bg-gold-400 text-navy-900'
+                  }`}>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-lg mb-1">Pun la licitație</h3>
+                  <p className="text-sm opacity-80">Licitație cu mai mulți participanți</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Name Input */}
           <div>
             <label className="block text-sm font-medium text-slate-200 mb-1">
               Nume produs *
@@ -388,10 +515,12 @@ export default function NewProductPage() {
               className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              placeholder={matchedCoin ? `Ex: ${matchedCoin.face_value} ${matchedCoin.issue_year}` : ''}
               required
             />
           </div>
 
+          {/* Description Input */}
           <div>
             <label className="block text-sm font-medium text-slate-200 mb-1">
               Descriere *
@@ -406,6 +535,7 @@ export default function NewProductPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Price */}
             <div>
               <label className="block text-sm font-medium text-slate-200 mb-1">
                 Preț fix (RON) *
@@ -421,30 +551,33 @@ export default function NewProductPage() {
               />
             </div>
 
+            {/* Country */}
             <div>
               <label className="block text-sm font-medium text-slate-200 mb-1">
-                Țara
+                Țara *
               </label>
               <select
                 className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                style={{
-                  backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)'
+                onChange={(e) => {
+                  setCountry(e.target.value);
+                  if (e.target.value !== 'România') {
+                    setUseAutocomplete(false);
+                    resetAutocomplete();
+                  }
                 }}
               >
-                <option value="" style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: '#94a3b8' }}>Selectează țara</option>
-                {COUNTRIES.map(country => (
-                  <option key={country} value={country} style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: 'white' }}>{country}</option>
+                <option value="">Selectează țara</option>
+                {COUNTRIES.map(c => (
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </div>
 
+            {/* Year (Manual or Auto-filled) */}
             <div>
               <label className="block text-sm font-medium text-slate-200 mb-1">
-                An
+                An {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
               </label>
               <input
                 type="number"
@@ -454,64 +587,99 @@ export default function NewProductPage() {
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
                 placeholder="Ex: 2024"
+                readOnly={!!matchedCoin && useAutocomplete}
               />
             </div>
 
+            {/* Era (Manual or Auto-filled) */}
             <div>
               <label className="block text-sm font-medium text-slate-200 mb-1">
-                Epocă
-              </label>
-              <select
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
-                value={era}
-                onChange={(e) => setEra(e.target.value)}
-                style={{
-                  backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)'
-                }}
-              >
-                <option value="" style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: '#94a3b8' }}>Selectează epoca</option>
-                {ERAS.map(era => (
-                  <option key={era} value={era} style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: 'white' }}>{era}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-1">
-                Metal
-              </label>
-              <select
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
-                value={metal}
-                onChange={(e) => setMetal(e.target.value)}
-                style={{
-                  backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)'
-                }}
-              >
-                <option value="" style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: '#94a3b8' }}>Selectează metalul</option>
-                {METALS.map(metal => (
-                  <option key={metal} value={metal} style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: 'white' }}>{metal}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-1">
-                Denominație
+                Epocă {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
               </label>
               <input
                 type="text"
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20"
-                value={denomination}
-                onChange={(e) => setDenomination(e.target.value)}
-                placeholder="Ex: 1 Leu, 5 Kopeks, 10 Cent"
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                value={era}
+                onChange={(e) => setEra(e.target.value)}
+                readOnly={!!matchedCoin && useAutocomplete}
               />
             </div>
 
+            {/* Metal (Auto-filled or Manual) */}
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-1">
+                Metal {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
+              </label>
+              <input
+                type="text"
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                value={metal}
+                onChange={(e) => setMetal(e.target.value)}
+                readOnly={!!matchedCoin && useAutocomplete}
+              />
+            </div>
+
+            {/* Denomination */}
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-1">
+                Denominație {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
+              </label>
+              <input
+                type="text"
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                value={denomination}
+                onChange={(e) => setDenomination(e.target.value)}
+                placeholder="Ex: 1 Leu"
+                readOnly={!!matchedCoin && useAutocomplete}
+              />
+            </div>
+
+            {/* Diameter */}
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-1">
+                Diametru {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
+              </label>
+              <input
+                type="text"
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                value={diameter}
+                onChange={(e) => setDiameter(e.target.value)}
+                placeholder="Ex: 23 mm"
+                readOnly={!!matchedCoin && useAutocomplete}
+              />
+            </div>
+
+            {/* Weight */}
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-1">
+                Greutate {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
+              </label>
+              <input
+                type="text"
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                placeholder="Ex: 5 g"
+                readOnly={!!matchedCoin && useAutocomplete}
+              />
+            </div>
+
+            {/* Mint Location */}
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-1">
+                Monetărie / Temă {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
+              </label>
+              <input
+                type="text"
+                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                value={mintLocation}
+                onChange={(e) => setMintLocation(e.target.value)}
+                placeholder="Ex: Bucharest"
+                readOnly={!!matchedCoin && useAutocomplete}
+              />
+            </div>
+
+            {/* Rarity */}
             <div>
               <label className="block text-sm font-medium text-slate-200 mb-1">
                 Raritate
@@ -520,19 +688,15 @@ export default function NewProductPage() {
                 className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
                 value={rarity}
                 onChange={(e) => setRarity(e.target.value)}
-                style={{
-                  backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)'
-                }}
               >
-                <option value="" style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: '#94a3b8' }}>Selectează raritatea</option>
-                {RARITIES.map(rarity => (
-                  <option key={rarity.value} value={rarity.value} style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: 'white' }}>{rarity.label}</option>
+                <option value="">Selectează raritatea</option>
+                {RARITIES.map(r => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
                 ))}
               </select>
             </div>
 
+            {/* Grade */}
             <div>
               <label className="block text-sm font-medium text-slate-200 mb-1">
                 Grad / stare
@@ -541,21 +705,16 @@ export default function NewProductPage() {
                 className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
                 value={grade}
                 onChange={(e) => setGrade(e.target.value)}
-                style={{
-                  backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)'
-                }}
               >
-                <option value="" style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: '#94a3b8' }}>Selectează gradul</option>
-                {GRADES.map(grade => (
-                  <option key={grade} value={grade} style={{ backgroundColor: 'rgba(17, 24, 39, 0.95)', color: 'white' }}>{grade}</option>
+                <option value="">Selectează gradul</option>
+                {GRADES.map(g => (
+                  <option key={g} value={g}>{g}</option>
                 ))}
               </select>
             </div>
-
           </div>
 
+          {/* Images */}
           <div>
             <label className="block text-sm font-medium text-slate-200 mb-1">
               Imagini
@@ -574,6 +733,7 @@ export default function NewProductPage() {
             )}
           </div>
 
+          {/* Auction fields (if applicable) */}
           {listingType === 'auction' && (
             <div className="mt-4 border-t border-gold-500/30 pt-4 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -637,6 +797,7 @@ export default function NewProductPage() {
             </div>
           )}
 
+          {/* Submit Button */}
           <div className="pt-2 flex justify-end">
             <button
               type="submit"

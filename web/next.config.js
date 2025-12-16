@@ -16,6 +16,9 @@ const nextConfig = {
     
     // Add path aliases for shared folder with proper module resolution
     config.resolve.alias['shared'] = path.resolve(__dirname, '../shared');
+    config.resolve.alias['@'] = path.resolve(__dirname);
+    config.resolve.alias['@hooks'] = path.resolve(__dirname, 'hooks');
+    config.resolve.alias['@data'] = path.resolve(__dirname, 'data');
     
     // Ensure proper ES module handling for shared package
     config.resolve.extensionAlias = {
