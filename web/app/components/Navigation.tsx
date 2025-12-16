@@ -66,6 +66,9 @@ export default function Navigation() {
             <Link href="/products" className="text-sm font-medium text-slate-300 hover:text-gold-400 transition-colors">
               E-shop
             </Link>
+            <Link href="/monetaria-statului" className="text-sm font-medium text-slate-300 hover:text-gold-400 transition-colors">
+              Monetăria Statului
+            </Link>
             <Link href="/auctions" className="text-sm font-medium text-slate-300 hover:text-gold-400 transition-colors">
               Licitatii
             </Link>
@@ -195,6 +198,13 @@ export default function Navigation() {
                     className="inline-flex items-center justify-center rounded-full border border-gold-500/70 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
                   >
                     E-shop
+                  </Link>
+                  <Link
+                    href="/monetaria-statului"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="inline-flex items-center justify-center rounded-full border border-gold-500/70 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
+                  >
+                    Monetăria Statului
                   </Link>
                   <Link
                     href="/auctions"
