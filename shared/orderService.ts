@@ -15,6 +15,35 @@ import { addCollectionItem } from './collectionService';
 import { sendPurchaseConfirmationEmail, sendProductSoldEmail } from './emailService';
 
 /**
+ * Parse Romanian RON string to number
+ * Handles Romanian number format: "1.234,56 Lei" -> 1234.56
+ * @param ronString - String like "1.234,56 Lei" or "100.50 RON"
+ * @returns Parsed number
+ */
+function parseRON(ronString: string): number {
+  // Remove "Lei", "RON", and other non-numeric characters except digits, dots, and commas
+  let cleaned = ronString.replace(/[^\d.,]/g, '');
+  
+  // Handle Romanian number format: thousands separated by ".", decimals by ","
+  // If there's both a dot and comma, assume dot is thousands separator and comma is decimal
+  if (cleaned.includes('.') && cleaned.includes(',')) {
+    // Remove thousands separators (dots) and replace decimal separator (comma) with dot
+    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (cleaned.includes('.') && !cleaned.includes(',')) {
+    // Only dots present - could be either thousands separator or decimal
+    // If there are multiple dots, they're thousands separators
+    const dotCount = (cleaned.match(/\./g) || []).length;
+    if (dotCount > 1) {
+      // Multiple dots = thousands separators
+      cleaned = cleaned.replace(/\./g, '');
+    }
+    // If single dot and reasonable decimal position, keep as decimal
+  }
+  
+  return parseFloat(cleaned) || 0;
+}
+
+/**
  * Basic order / purchase helpers for direct product buys (shop).
  *
  * For now, orders are created as PAID immediately (no external payment),
@@ -73,7 +102,7 @@ export async function createDirectOrderForProduct(
 
     if (isMintProduct && mintProductData) {
       // For mint products, use provided data
-      price = parseFloat(mintProductData.price.replace(' Lei', '').replace('.', '').replace(',', ''));
+      price = parseRON(mintProductData.price);
       sellerId = 'monetaria-statului'; // Special seller for mint products
       productData = mintProductData;
     } else {
@@ -152,7 +181,7 @@ export async function createDirectOrderForProduct(
     if (isMintProduct && mintProductData) {
       // For mint products
       productName = mintProductData.title || 'Produs Monetaria Statului';
-      productPrice = parseFloat(mintProductData.price.replace(' Lei', '').replace(',', ''));
+      productPrice = parseRON(mintProductData.price);
       productImages = [`/Monetaria_statului/romanian_mint_products/${mintProductData.category_slug}/${mintProductData.image_files}`];
 
       // Add to collection

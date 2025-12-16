@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../hooks/useCart';
 import { useProducts } from '../hooks/useProducts';
 import { createDirectOrderForProduct } from 'shared/orderService';
-import { formatRON } from '../utils/currency';
+import { formatRON, parseRON } from '../utils/currency';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
 
@@ -30,7 +30,7 @@ export default function CartPage() {
           product = {
             id: item.productId,
             name: item.mintProductData.title || 'Produs Monetaria Statului',
-            price: parseFloat(item.mintProductData.price.replace(' Lei', '').replace('.', '').replace(',', '')),
+            price: parseRON(item.mintProductData.price),
             images: [`/Monetaria_statului/romanian_mint_products/${item.mintProductData.category_slug}/${item.mintProductData.image_files}`],
           } as any;
         }
