@@ -89,84 +89,97 @@ export default function MintProductDetailPage() {
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Product Image */}
-              <div className="space-y-4">
-                <div
-                  className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-2xl overflow-hidden border border-gold-500/20 cursor-zoom-in"
-                  onClick={() => setLightboxOpen(true)}
-                >
-                  <img
-                    src={imageUrl}
-                    alt={product.title}
-                    className="w-full h-96 object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
-                    loading="lazy"
-                  />
+            {/* Product Image */}
+            <div className="mb-8">
+              <div
+                className="aspect-w-16 aspect-h-9 bg-navy-900/60 rounded-2xl overflow-hidden border border-gold-500/20 cursor-zoom-in max-w-2xl mx-auto"
+                onClick={() => setLightboxOpen(true)}
+              >
+                <img
+                  src={imageUrl}
+                  alt={product.title}
+                  className="w-full h-96 object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+
+            {/* Product Details */}
+            <div className="space-y-6">
+              <div className="text-center">
+                <h1 className="text-3xl font-bold text-white mb-2">
+                  {product.title || 'Produs fără titlu'}
+                </h1>
+                <p className="text-slate-300">
+                  Categorie: {product.category}
+                </p>
+              </div>
+
+              <div className="text-center">
+                <p className="text-4xl font-bold text-[#e7b73c] mb-4">
+                  {product.price}
+                </p>
+                <p className="text-sm text-slate-300 mb-6">
+                  Preț fără TVA: {product.price_without_vat}
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+                  <button
+                    type="button"
+                    className="flex-1 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-8 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors shadow-[0_0_24px_rgba(231,183,60,0.8)] max-w-xs"
+                  >
+                    Cumpără acum
+                  </button>
+                  <button
+                    type="button"
+                    className="flex-1 bg-navy-900/80 hover:bg-navy-800 text-gold-200 px-8 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors border border-gold-500/60 shadow-[0_0_18px_rgba(15,23,42,0.9)] max-w-xs"
+                  >
+                    Adaugă în coș
+                  </button>
                 </div>
               </div>
 
-              {/* Product Details */}
-              <div className="space-y-6">
-                <div>
-                  <h1 className="text-3xl font-bold text-white mb-2">
-                    {product.title || 'Produs fără titlu'}
-                  </h1>
-                  <p className="text-slate-300">
-                    Categorie: {product.category}
-                  </p>
+              <div>
+                <h2 className="text-xl font-semibold text-white mb-3">
+                  Descriere
+                </h2>
+                <div className="text-slate-200 leading-relaxed whitespace-pre-line">
+                  {product.full_description}
                 </div>
+              </div>
 
-                <div>
-                  <p className="text-4xl font-bold text-[#e7b73c] mb-2">
-                    {product.price}
-                  </p>
-                  <p className="text-sm text-slate-300">
-                    Preț fără TVA: {product.price_without_vat}
-                  </p>
-                </div>
-
+              {product.specifications && (
                 <div>
                   <h2 className="text-xl font-semibold text-white mb-3">
-                    Descriere
+                    Specificații
                   </h2>
                   <div className="text-slate-200 leading-relaxed whitespace-pre-line">
-                    {product.full_description}
+                    {product.specifications}
                   </div>
                 </div>
+              )}
 
-                {product.specifications && (
-                  <div>
-                    <h2 className="text-xl font-semibold text-white mb-3">
-                      Specificații
-                    </h2>
-                    <div className="text-slate-200 leading-relaxed whitespace-pre-line">
-                      {product.specifications}
+              <div className="border-t border-gold-500/20 pt-6">
+                <h2 className="text-xl font-semibold text-white mb-4">
+                  Detalii suplimentare
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-300">ID Produs:</span>
+                      <span className="font-mono text-slate-100">{product.product_id}</span>
                     </div>
-                  </div>
-                )}
-
-                <div className="border-t border-gold-500/20 pt-6">
-                  <h2 className="text-xl font-semibold text-white mb-4">
-                    Detalii suplimentare
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-slate-300">ID Produs:</span>
-                        <span className="font-mono text-slate-100">{product.product_id}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-300">Model:</span>
-                        <span className="text-slate-100">{product.model}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-300">SKU:</span>
-                        <span className="text-slate-100">{product.sku}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-300">Stoc:</span>
-                        <span className="text-slate-100">{product.stock}</span>
-                      </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-300">Model:</span>
+                      <span className="text-slate-100">{product.model}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-300">SKU:</span>
+                      <span className="text-slate-100">{product.sku}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-300">Stoc:</span>
+                      <span className="text-slate-100">{product.stock}</span>
                     </div>
                   </div>
                 </div>
