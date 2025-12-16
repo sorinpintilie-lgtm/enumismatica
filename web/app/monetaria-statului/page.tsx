@@ -55,11 +55,11 @@ export default function MonetariaStatuluiPage() {
         const transformedProducts = data.products.map((p: RawProduct) => ({
           ...p,
           id: p.product_id,
-          title: p.title || 'Produs fără titlu',
+          title: p.title || p.full_description.split('\n')[0].trim() || 'Produs fără titlu',
           description: p.full_description,
           price: p.price,
           category: p.category,
-          image: `/Monetaria_statului/romanian_mint_products/${p.category_slug}/${p.image_files}`,
+          image: `/monetaria-images/${p.category_slug}/${p.image_files}`,
           link: p.product_url,
         }));
         setProducts(transformedProducts);
