@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import MintProductCard from '../../components/MintProductCard';
 
 interface RawProduct {
   title: string;
@@ -27,6 +28,7 @@ export default function MintProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const [product, setProduct] = useState<RawProduct | null>(null);
+  const [similarProducts, setSimilarProducts] = useState<RawProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -42,6 +44,12 @@ export default function MintProductDetailPage() {
         if (!foundProduct) throw new Error('Product not found');
 
         setProduct(foundProduct);
+
+        // Load similar products from same category
+        const similar = data.products
+          .filter((p: RawProduct) => p.category === foundProduct.category && p.product_id !== id)
+          .slice(0, 6); // Limit to 6
+        setSimilarProducts(similar);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -89,56 +97,61 @@ export default function MintProductDetailPage() {
           </div>
 
           <div className="max-w-4xl mx-auto">
-            {/* Product Image */}
-            <div className="mb-8">
-              <div
-                className="aspect-w-16 aspect-h-9 bg-navy-900/60 rounded-2xl overflow-hidden border border-gold-500/20 cursor-zoom-in max-w-2xl mx-auto"
-                onClick={() => setLightboxOpen(true)}
-              >
-                <img
-                  src={imageUrl}
-                  alt={product.title}
-                  className="w-full h-96 object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
-                  loading="lazy"
-                />
-              </div>
-            </div>
-
-            {/* Product Details */}
-            <div className="space-y-6">
-              <div className="text-center">
-                <h1 className="text-3xl font-bold text-white mb-2">
-                  {product.title || 'Produs fără titlu'}
-                </h1>
-                <p className="text-slate-300">
-                  Categorie: {product.category}
-                </p>
-              </div>
-
-              <div className="text-center">
-                <p className="text-4xl font-bold text-[#e7b73c] mb-4">
-                  {product.price}
-                </p>
-                <p className="text-sm text-slate-300 mb-6">
-                  Preț fără TVA: {product.price_without_vat}
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
-                  <button
-                    type="button"
-                    className="flex-1 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-8 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors shadow-[0_0_24px_rgba(231,183,60,0.8)] max-w-xs"
-                  >
-                    Cumpără acum
-                  </button>
-                  <button
-                    type="button"
-                    className="flex-1 bg-navy-900/80 hover:bg-navy-800 text-gold-200 px-8 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors border border-gold-500/60 shadow-[0_0_18px_rgba(15,23,42,0.9)] max-w-xs"
-                  >
-                    Adaugă în coș
-                  </button>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {/* Product Image */}
+              <div className="space-y-4">
+                <div
+                  className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-2xl overflow-hidden border border-gold-500/20 cursor-zoom-in"
+                  onClick={() => setLightboxOpen(true)}
+                >
+                  <img
+                    src={imageUrl}
+                    alt={product.title}
+                    className="w-full h-96 object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
+                    loading="lazy"
+                  />
                 </div>
               </div>
 
+              {/* Product Details - Right Side */}
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-3xl font-bold text-white mb-2">
+                    {product.title || 'Produs fără titlu'}
+                  </h1>
+                  <p className="text-slate-300 mb-4">
+                    Categorie: {product.category}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-4xl font-bold text-[#e7b73c] mb-2">
+                    {product.price}
+                  </p>
+                  <p className="text-sm text-slate-300 mb-6">
+                    Preț fără TVA: {product.price_without_vat}
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      className="flex-1 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors shadow-[0_0_24px_rgba(231,183,60,0.8)]"
+                    >
+                      Cumpără acum
+                    </button>
+                    <button
+                      type="button"
+                      className="flex-1 bg-navy-900/80 hover:bg-navy-800 text-gold-200 px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors border border-gold-500/60 shadow-[0_0_18px_rgba(15,23,42,0.9)]"
+                    >
+                      Adaugă în coș
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Full Width Content Below */}
+            <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-semibold text-white mb-3">
                   Descriere
@@ -186,6 +199,31 @@ export default function MintProductDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Similar Products Carousel */}
+          {similarProducts.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-2xl font-bold text-white mb-6">
+                Produse similare din aceeași categorie
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {similarProducts.map((similarProduct) => {
+                  const transformedProduct = {
+                    id: similarProduct.product_id,
+                    title: similarProduct.title,
+                    description: similarProduct.full_description,
+                    price: similarProduct.price,
+                    category: similarProduct.category,
+                    image: `/Monetaria_statului/romanian_mint_products/${similarProduct.category_slug}/${similarProduct.image_files}`,
+                    link: `/monetaria-statului/${similarProduct.product_id}`,
+                  };
+                  return (
+                    <MintProductCard key={similarProduct.product_id} product={transformedProduct} />
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
