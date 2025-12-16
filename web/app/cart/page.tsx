@@ -24,7 +24,16 @@ export default function CartPage() {
   const lines = useMemo(
     () =>
       items.map((item) => {
-        const product = products.find((p) => p.id === item.productId) || null;
+        let product = products.find((p) => p.id === item.productId) || null;
+        if (!product && item.isMintProduct && item.mintProductData) {
+          // For mint products, create a pseudo-product object
+          product = {
+            id: item.productId,
+            name: item.mintProductData.title || 'Produs Monetaria Statului',
+            price: parseFloat(item.mintProductData.price.replace(' Lei', '').replace(',', '')),
+            images: [`/Monetaria_statului/romanian_mint_products/${item.mintProductData.category_slug}/${item.mintProductData.image_files}`],
+          } as any;
+        }
         return { item, product };
       }),
     [items, products],
@@ -39,7 +48,7 @@ export default function CartPage() {
     [lines],
   );
 
-  const handleCheckoutItem = async (productId: string, cartItemId: string) => {
+  const handleCheckoutItem = async (productId: string, cartItemId: string, isMintProduct?: boolean, mintProductData?: any) => {
     if (!user) {
       alert('Trebuie să fii autentificat pentru a cumpăra.');
       return;
@@ -47,7 +56,7 @@ export default function CartPage() {
 
     try {
       setPlacingOrderFor(productId);
-      await createDirectOrderForProduct(productId, user.uid);
+      await createDirectOrderForProduct(productId, user.uid, isMintProduct, mintProductData);
       await removeItem(cartItemId);
 
       alert('Comanda a fost înregistrată. O poți vedea în istoricul comenzilor.');
@@ -170,14 +179,14 @@ export default function CartPage() {
                       </p>
                       <div className="flex gap-2">
                         <Link
-                          href={`/products/${item.productId}`}
+                          href={item.isMintProduct ? `/monetaria-statului/${item.productId}` : `/products/${item.productId}`}
                           className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-3 py-1 text-xs font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
                         >
                           Vezi produsul
                         </Link>
                         <button
                           disabled={placingOrderFor === item.productId}
-                          onClick={() => handleCheckoutItem(item.productId, item.id)}
+                          onClick={() => handleCheckoutItem(item.productId, item.id, item.isMintProduct, item.mintProductData)}
                           className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-xs font-semibold text-[#000940] hover:bg-[#f0c955] transition-colors disabled:opacity-50"
                         >
                           {placingOrderFor === item.productId ? 'Se procesează...' : 'Cumpără acum'}
