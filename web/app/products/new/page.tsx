@@ -49,16 +49,16 @@ export default function NewProductPage() {
   
   // Use the autocomplete hook
   const {
-    selectedEra,
-    setSelectedEra,
+    selectedDenomination,
+    setSelectedDenomination,
     selectedYear,
     setSelectedYear,
-    selectedFaceValue,
-    setSelectedFaceValue,
+    selectedMint,
+    setSelectedMint,
     matchedCoin,
-    romanianEras,
+    availableDenominations,
     availableYears,
-    availableFaceValues,
+    availableMints,
     reset: resetAutocomplete,
   } = useCoinAutocomplete();
 
@@ -94,10 +94,10 @@ export default function NewProductPage() {
       setDiameter(matchedCoin.diameter || '');
       setWeight(matchedCoin.weight || '');
       setMintLocation(matchedCoin.mint_or_theme || matchedCoin.mint || '');
-      
+
       // Auto-generate name if empty
       if (!name) {
-        setName(`${matchedCoin.face_value} ${matchedCoin.issue_year} - ${matchedCoin.era}`);
+        setName(`${matchedCoin.face_value} ${matchedCoin.issue_year} - ${matchedCoin.mint_or_theme || matchedCoin.mint}`);
       }
     }
   }, [matchedCoin, useAutocomplete]);
@@ -370,19 +370,19 @@ export default function NewProductPage() {
             <h3 className="text-lg font-semibold text-gold-400 mb-3">🪙 Asistent Monede Românești</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Era Selection */}
+              {/* Denomination Selection */}
               <div>
                 <label className="block text-sm font-medium text-slate-200 mb-1">
-                  Epocă *
+                  Valoare nominală *
                 </label>
                 <select
                   className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                  value={selectedEra}
-                  onChange={(e) => setSelectedEra(e.target.value)}
+                  value={selectedDenomination}
+                  onChange={(e) => setSelectedDenomination(e.target.value)}
                 >
-                  <option value="">Selectează epoca</option>
-                  {romanianEras.map((era) => (
-                    <option key={era} value={era}>{era}</option>
+                  <option value="">Selectează valoarea</option>
+                  {availableDenominations.map((denomination) => (
+                    <option key={denomination} value={denomination}>{denomination}</option>
                   ))}
                 </select>
               </div>
@@ -396,7 +396,7 @@ export default function NewProductPage() {
                   className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
-                  disabled={!selectedEra}
+                  disabled={!selectedDenomination}
                 >
                   <option value="">Selectează anul</option>
                   {availableYears.map((year) => (
@@ -405,20 +405,20 @@ export default function NewProductPage() {
                 </select>
               </div>
 
-              {/* Face Value Selection */}
+              {/* Mint Selection */}
               <div>
                 <label className="block text-sm font-medium text-slate-200 mb-1">
-                  Valoare nominală *
+                  Monetărie / Temă *
                 </label>
                 <select
                   className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                  value={selectedFaceValue}
-                  onChange={(e) => setSelectedFaceValue(e.target.value)}
+                  value={selectedMint}
+                  onChange={(e) => setSelectedMint(e.target.value)}
                   disabled={!selectedYear}
                 >
-                  <option value="">Selectează valoarea</option>
-                  {availableFaceValues.map((fv) => (
-                    <option key={fv} value={fv}>{fv}</option>
+                  <option value="">Selectează monetăria</option>
+                  {availableMints.map((mint) => (
+                    <option key={mint} value={mint}>{mint}</option>
                   ))}
                 </select>
               </div>

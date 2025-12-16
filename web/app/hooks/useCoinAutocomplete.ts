@@ -163,82 +163,82 @@ const ROMANIAN_COINS: RomanianCoin[] = [
 ];
 
 export function useCoinAutocomplete() {
-  const [selectedEra, setSelectedEra] = useState('');
+  const [selectedDenomination, setSelectedDenomination] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
-  const [selectedFaceValue, setSelectedFaceValue] = useState('');
+  const [selectedMint, setSelectedMint] = useState('');
 
-  // Get unique eras
-  const romanianEras = useMemo(() => {
-    const eras = [...new Set(ROMANIAN_COINS.map(coin => coin.era))];
-    return eras.sort();
+  // Get unique denominations
+  const availableDenominations = useMemo(() => {
+    const denominations = [...new Set(ROMANIAN_COINS.map(coin => coin.face_value))];
+    return denominations.sort();
   }, []);
 
-  // Get available years for selected era
+  // Get available years for selected denomination
   const availableYears = useMemo(() => {
-    if (!selectedEra) return [];
+    if (!selectedDenomination) return [];
     const years = ROMANIAN_COINS
-      .filter(coin => coin.era === selectedEra)
+      .filter(coin => coin.face_value === selectedDenomination)
       .map(coin => coin.issue_year.toString())
       .filter((year, index, arr) => arr.indexOf(year) === index)
       .sort((a, b) => parseInt(a) - parseInt(b));
     return years;
-  }, [selectedEra]);
+  }, [selectedDenomination]);
 
-  // Get available face values for selected era and year
-  const availableFaceValues = useMemo(() => {
-    if (!selectedEra || !selectedYear) return [];
-    const faceValues = ROMANIAN_COINS
-      .filter(coin => coin.era === selectedEra && coin.issue_year.toString() === selectedYear)
-      .map(coin => coin.face_value)
-      .filter((fv, index, arr) => arr.indexOf(fv) === index)
+  // Get available mints for selected denomination and year
+  const availableMints = useMemo(() => {
+    if (!selectedDenomination || !selectedYear) return [];
+    const mints = ROMANIAN_COINS
+      .filter(coin => coin.face_value === selectedDenomination && coin.issue_year.toString() === selectedYear)
+      .map(coin => coin.mint_or_theme || coin.mint || '')
+      .filter((mint, index, arr) => arr.indexOf(mint) === index && mint)
       .sort();
-    return faceValues;
-  }, [selectedEra, selectedYear]);
+    return mints;
+  }, [selectedDenomination, selectedYear]);
 
   // Find matched coin
   const matchedCoin = useMemo(() => {
-    if (!selectedEra || !selectedYear || !selectedFaceValue) return null;
+    if (!selectedDenomination || !selectedYear || !selectedMint) return null;
     return ROMANIAN_COINS.find(
       coin =>
-        coin.era === selectedEra &&
+        coin.face_value === selectedDenomination &&
         coin.issue_year.toString() === selectedYear &&
-        coin.face_value === selectedFaceValue
+        (coin.mint_or_theme === selectedMint || coin.mint === selectedMint)
     ) || null;
-  }, [selectedEra, selectedYear, selectedFaceValue]);
+  }, [selectedDenomination, selectedYear, selectedMint]);
 
   // Reset function
   const reset = () => {
-    setSelectedEra('');
+    setSelectedDenomination('');
     setSelectedYear('');
-    setSelectedFaceValue('');
+    setSelectedMint('');
   };
 
-  // Reset dependent selections when era changes
+  // Reset dependent selections when denomination changes
   useEffect(() => {
-    if (selectedEra && !availableYears.includes(selectedYear)) {
+    if (selectedDenomination && !availableYears.includes(selectedYear)) {
       setSelectedYear('');
-      setSelectedFaceValue('');
+      setSelectedMint('');
     }
-  }, [selectedEra, availableYears, selectedYear]);
+  }, [selectedDenomination, availableYears, selectedYear]);
 
   // Reset dependent selections when year changes
   useEffect(() => {
-    if (selectedYear && !availableFaceValues.includes(selectedFaceValue)) {
-      setSelectedFaceValue('');
+    if (selectedYear && !availableMints.includes(selectedMint)) {
+      setSelectedMint('');
     }
-  }, [selectedYear, availableFaceValues, selectedFaceValue]);
+  }, [selectedYear, availableMints, selectedMint]);
 
   return {
-    selectedEra,
-    setSelectedEra,
+    selectedDenomination,
+    setSelectedDenomination,
     selectedYear,
     setSelectedYear,
-    selectedFaceValue,
-    setSelectedFaceValue,
+    selectedMint,
+    setSelectedMint,
     matchedCoin,
-    romanianEras,
+    availableDenominations,
     availableYears,
-    availableFaceValues,
+    availableMints,
     reset,
   };
 }
