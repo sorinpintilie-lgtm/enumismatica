@@ -212,7 +212,7 @@ export default function Dashboard() {
             <p className="text-3xl font-bold text-gold-300">{collectionItems?.length || 0}</p>
             <p className="text-sm text-slate-200">Articole în colecție</p>
             {collectionStats && collectionStats.totalValue > 0 && (
-              <p className="text-sm text-gold-200 mt-1 font-semibold">Valoare: ${collectionStats.totalValue.toFixed(0)}</p>
+              <p className="text-sm text-gold-200 mt-1 font-semibold">Valoare: {formatRON(collectionStats.totalValue)}</p>
             )}
           </Link>
 
@@ -322,7 +322,7 @@ export default function Dashboard() {
                     <div key={product.id} className="flex justify-between items-center p-3 bg-navy-900/40 rounded-xl border border-gold-500/20">
                       <div>
                         <p className="font-medium text-white">{product.name}</p>
-                        <p className="text-sm text-gold-300 font-semibold">${product.price.toFixed(2)}</p>
+                        <p className="text-sm text-gold-300 font-semibold">{formatRON(product.price)}</p>
                         {isBoostActive && (
                           <p className="mt-1 text-xs font-semibold text-emerald-300">
                             Boost activ – produsul tău este evidențiat în listări
