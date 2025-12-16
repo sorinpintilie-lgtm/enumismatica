@@ -206,6 +206,8 @@ export interface CartItem {
   productId: string;
   quantity: number;
   addedAt: Date;
+  isMintProduct?: boolean;
+  mintProductData?: any;
 }
 
 /**
@@ -530,6 +532,8 @@ export interface Order {
   status: 'pending' | 'paid' | 'cancelled' | 'failed' | 'refunded';
   paymentProvider: 'manual' | 'netopia';
   paymentReference: string | null;
+  isMintProduct?: boolean;
+  mintProductData?: any; // RawProduct data for mint products
   createdAt: Date;
   updatedAt: Date;
 }

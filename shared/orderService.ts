@@ -51,6 +51,8 @@ function mapOrderSnapshot(orderDoc: any): Order {
 export async function createDirectOrderForProduct(
   productId: string,
   buyerId: string,
+  isMintProduct?: boolean,
+  mintProductData?: any,
 ): Promise<string> {
   if (!db) {
     throw new Error('Firestore not initialized');
@@ -62,122 +64,175 @@ export async function createDirectOrderForProduct(
   let createdOrderId = '';
 
   await runTransaction(db, async (tx) => {
-    const productSnap = await tx.get(productRef);
-    if (!productSnap.exists()) {
-      throw new Error('Produsul nu există');
+    let price: number;
+    let sellerId: string;
+    let productData: any;
+
+    // Create order document reference first
+    const orderDocRef = doc(ordersCol);
+
+    if (isMintProduct && mintProductData) {
+      // For mint products, use provided data
+      price = parseFloat(mintProductData.price.replace(' Lei', '').replace(',', ''));
+      sellerId = 'monetaria-statului'; // Special seller for mint products
+      productData = mintProductData;
+    } else {
+      // For regular products, fetch from Firebase
+      const productSnap = await tx.get(productRef);
+      if (!productSnap.exists()) {
+        throw new Error('Produsul nu există');
+      }
+
+      const data = productSnap.data() as any;
+
+      const product: Product = {
+        id: productSnap.id,
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt || new Date(),
+        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt || new Date(),
+      };
+
+      if (product.status !== 'approved') {
+        throw new Error('Produsul nu este disponibil pentru cumpărare.');
+      }
+
+      if ((data as any).isSold) {
+        throw new Error('Produsul a fost deja vândut.');
+      }
+
+      if (product.ownerId === buyerId) {
+        throw new Error('Nu poți cumpăra propriul produs.');
+      }
+
+      price = product.price;
+      sellerId = product.ownerId;
+      productData = data;
+
+      // Mark product as sold and link the order.
+      tx.update(productRef, {
+        isSold: true,
+        soldAt: serverTimestamp(),
+        buyerId,
+        orderId: orderDocRef.id,
+        updatedAt: serverTimestamp(),
+      });
     }
 
-    const data = productSnap.data() as any;
-
-    const product: Product = {
-      id: productSnap.id,
-      ...data,
-      createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt || new Date(),
-      updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt || new Date(),
-    };
-
-    if (product.status !== 'approved') {
-      throw new Error('Produsul nu este disponibil pentru cumpărare.');
-    }
-
-    if ((data as any).isSold) {
-      throw new Error('Produsul a fost deja vândut.');
-    }
-
-    if (product.ownerId === buyerId) {
-      throw new Error('Nu poți cumpăra propriul produs.');
-    }
-
-    const price = product.price;
     if (typeof price !== 'number' || price <= 0) {
       throw new Error('Produsul nu are un preț valid.');
     }
 
-    // Create order in "paid" state for now (no external payment).
-    const orderDocRef = doc(ordersCol);
-
     const orderData = {
       productId,
       buyerId,
-      sellerId: product.ownerId,
+      sellerId,
       price,
       currency: 'RON',
       status: 'paid',
       paymentProvider: 'manual',
       paymentReference: null,
+      isMintProduct: isMintProduct || false,
+      mintProductData: isMintProduct ? mintProductData : null,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
 
     tx.set(orderDocRef, orderData);
 
-    // Mark product as sold and link the order.
-    tx.update(productRef, {
-      isSold: true,
-      soldAt: serverTimestamp(),
-      buyerId,
-      orderId: orderDocRef.id,
-      updatedAt: serverTimestamp(),
-    });
-
     createdOrderId = orderDocRef.id;
   });
 
   // Add the bought product into buyer's personal collection and send emails
   try {
-    const productSnap = await getDoc(doc(db, 'products', productId));
-    if (productSnap.exists()) {
-      const data = productSnap.data() as any;
-      
+    let productName: string;
+    let productPrice: number;
+    let productImages: string[];
+    let sellerEmail: string | null = null;
+
+    if (isMintProduct && mintProductData) {
+      // For mint products
+      productName = mintProductData.title || 'Produs Monetaria Statului';
+      productPrice = parseFloat(mintProductData.price.replace(' Lei', '').replace(',', ''));
+      productImages = [`/Monetaria_statului/romanian_mint_products/${mintProductData.category_slug}/${mintProductData.image_files}`];
+
       // Add to collection
       await addCollectionItem(buyerId, {
-        name: data.name || 'Articol cumpărat',
-        description: data.description || '',
-        images: data.images || [],
-        country: data.country || undefined,
-        year: data.year || undefined,
-        era: data.era || undefined,
-        denomination: data.denomination || undefined,
-        metal: data.metal || undefined,
-        grade: data.grade || undefined,
-        rarity: data.rarity || undefined,
-        weight: data.weight || undefined,
-        diameter: data.diameter || undefined,
-        category: data.category || undefined,
-        acquisitionPrice: data.price,
-        currentValue: data.price,
-        notes: `Cumpărat direct din magazin (produs ${productId})`,
-        tags: ['shop-purchase'],
+        name: productName,
+        description: mintProductData.full_description || '',
+        images: productImages,
+        category: mintProductData.category || 'Monetaria Statului',
+        acquisitionPrice: productPrice,
+        currentValue: productPrice,
+        notes: `Cumpărat de la Monetaria Statului (produs ${productId})`,
+        tags: ['monetaria-statului', 'mint-product'],
       });
+    } else {
+      // For regular products
+      const productSnap = await getDoc(doc(db, 'products', productId));
+      if (productSnap.exists()) {
+        const data = productSnap.data() as any;
 
-      // Send email to buyer (non-blocking)
-      const buyerDoc = await getDoc(doc(db, 'users', buyerId));
-      if (buyerDoc.exists()) {
-        const buyerData = buyerDoc.data();
-        sendPurchaseConfirmationEmail(
-          buyerData.email,
-          data.name || 'Produs',
-          data.price || 0,
-          createdOrderId
-        ).catch(error => {
-          console.error('Failed to send purchase confirmation email:', error);
+        // Add to collection
+        await addCollectionItem(buyerId, {
+          name: data.name || 'Articol cumpărat',
+          description: data.description || '',
+          images: data.images || [],
+          country: data.country || undefined,
+          year: data.year || undefined,
+          era: data.era || undefined,
+          denomination: data.denomination || undefined,
+          metal: data.metal || undefined,
+          grade: data.grade || undefined,
+          rarity: data.rarity || undefined,
+          weight: data.weight || undefined,
+          diameter: data.diameter || undefined,
+          category: data.category || undefined,
+          acquisitionPrice: data.price,
+          currentValue: data.price,
+          notes: `Cumpărat direct din magazin (produs ${productId})`,
+          tags: ['shop-purchase'],
         });
-      }
 
-      // Send email to seller (non-blocking)
-      if (data.ownerId) {
-        const sellerDoc = await getDoc(doc(db, 'users', data.ownerId));
-        if (sellerDoc.exists()) {
-          const sellerData = sellerDoc.data();
-          const buyerName = buyerDoc.exists() ? (buyerDoc.data().displayName || 'Cumpărător') : 'Cumpărător';
-          sendProductSoldEmail(
-            sellerData.email,
-            data.name || 'Produs',
-            data.price || 0,
-            buyerName
-          ).catch(error => {
-            console.error('Failed to send product sold email:', error);
-          });
+        productName = data.name || 'Produs';
+        productPrice = data.price || 0;
+        productImages = data.images || [];
+        sellerEmail = data.ownerId ? null : null; // Will fetch below
+      }
+    }
+
+    // Send email to buyer (non-blocking)
+    const buyerDoc = await getDoc(doc(db, 'users', buyerId));
+    if (buyerDoc.exists()) {
+      const buyerData = buyerDoc.data();
+      sendPurchaseConfirmationEmail(
+        buyerData.email,
+        productName,
+        productPrice,
+        createdOrderId
+      ).catch(error => {
+        console.error('Failed to send purchase confirmation email:', error);
+      });
+    }
+
+    // For regular products, send email to seller
+    if (!isMintProduct && sellerEmail === null) {
+      const productSnap = await getDoc(doc(db, 'products', productId));
+      if (productSnap.exists()) {
+        const data = productSnap.data() as any;
+        if (data.ownerId) {
+          const sellerDoc = await getDoc(doc(db, 'users', data.ownerId));
+          if (sellerDoc.exists()) {
+            const sellerData = sellerDoc.data();
+            const buyerName = buyerDoc.exists() ? (buyerDoc.data().displayName || 'Cumpărător') : 'Cumpărător';
+            sendProductSoldEmail(
+              sellerData.email,
+              productName,
+              productPrice,
+              buyerName
+            ).catch(error => {
+              console.error('Failed to send product sold email:', error);
+            });
+          }
         }
       }
     }

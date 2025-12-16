@@ -5,6 +5,11 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import MintProductCard from '../../components/MintProductCard';
+import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../hooks/useCart';
+import { createDirectOrderForProduct } from 'shared/orderService';
+import { useToast } from '../../components/ToastProvider';
+import { logEvent } from '../../hooks/useActivityLogger';
 
 interface RawProduct {
   title: string;
@@ -32,6 +37,11 @@ export default function MintProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [buying, setBuying] = useState(false);
+  const [showBuyConfirm, setShowBuyConfirm] = useState(false);
+  const { user } = useAuth();
+  const { addToCart } = useCart(user?.uid);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -58,6 +68,87 @@ export default function MintProductDetailPage() {
     };
     loadProduct();
   }, [id]);
+
+  const handleBuyClick = () => {
+    if (!product) return;
+
+    if (!user) {
+      showToast({
+        type: 'error',
+        title: 'Autentificare necesară',
+        message: 'Trebuie să te autentifici pentru a cumpăra acest produs.',
+      });
+      return;
+    }
+
+    setShowBuyConfirm(true);
+  };
+
+  const handleBuy = async () => {
+    if (!product || !user) return;
+
+    try {
+      setBuying(true);
+      const orderId = await createDirectOrderForProduct(id, user.uid, true, product);
+
+      // Admin activity log: direct shop purchase from mint product detail page
+      await logEvent(user, 'mint_product_buy', {
+        productId: id,
+        productName: product.title,
+        price: parseFloat(product.price.replace(' Lei', '').replace(',', '')),
+        orderId,
+        source: 'mint_product_detail',
+      });
+
+      showToast({
+        type: 'success',
+        title: 'Cumpărare reușită',
+        message: `Ai cumpărat acest produs. Comanda ta a fost înregistrată (ID: ${orderId}).`,
+      });
+    } catch (error) {
+      console.error('Failed to buy product:', error);
+      const message =
+        error instanceof Error ? error.message : 'A apărut o eroare la cumpărarea produsului.';
+      showToast({
+        type: 'error',
+        title: 'Eroare la cumpărare',
+        message,
+      });
+    } finally {
+      setBuying(false);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+
+    if (!user) {
+      showToast({
+        type: 'error',
+        title: 'Autentificare necesară',
+        message: 'Trebuie să te autentifici pentru a adăuga produse în coș.',
+      });
+      return;
+    }
+
+    try {
+      await addToCart(id, 1, true, product);
+      showToast({
+        type: 'success',
+        title: 'Adăugat în coș',
+        message: `${product.title} a fost adăugat în coșul tău.`,
+      });
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      const message =
+        error instanceof Error ? error.message : 'A apărut o eroare la adăugarea produsului în coș.';
+      showToast({
+        type: 'error',
+        title: 'Eroare la coș',
+        message,
+      });
+    }
+  };
 
   if (loading) return <LoadingSpinner />;
   if (error || !product) {
@@ -135,12 +226,15 @@ export default function MintProductDetailPage() {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       type="button"
-                      className="flex-1 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors shadow-[0_0_24px_rgba(231,183,60,0.8)]"
+                      onClick={handleBuyClick}
+                      disabled={buying}
+                      className="flex-1 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors shadow-[0_0_24px_rgba(231,183,60,0.8)] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Cumpără acum
+                      {buying ? 'Se procesează...' : 'Cumpără acum'}
                     </button>
                     <button
                       type="button"
+                      onClick={handleAddToCart}
                       className="flex-1 bg-navy-900/80 hover:bg-navy-800 text-gold-200 px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors border border-gold-500/60 shadow-[0_0_18px_rgba(15,23,42,0.9)]"
                     >
                       Adaugă în coș
@@ -218,7 +312,37 @@ export default function MintProductDetailPage() {
                     link: `/monetaria-statului/${similarProduct.product_id}`,
                   };
                   return (
-                    <MintProductCard key={similarProduct.product_id} product={transformedProduct} />
+                    <MintProductCard
+                      key={similarProduct.product_id}
+                      product={transformedProduct}
+                      onCartClick={async (productId, productData) => {
+                        if (!user) {
+                          showToast({
+                            type: 'error',
+                            title: 'Autentificare necesară',
+                            message: 'Trebuie să te autentifici pentru a adăuga produse în coș.',
+                          });
+                          return;
+                        }
+                        try {
+                          await addToCart(productId, 1, true, productData);
+                          showToast({
+                            type: 'success',
+                            title: 'Adăugat în coș',
+                            message: `${productData.title} a fost adăugat în coșul tău.`,
+                          });
+                        } catch (error) {
+                          console.error('Failed to add to cart:', error);
+                          const message =
+                            error instanceof Error ? error.message : 'A apărut o eroare la adăugarea produsului în coș.';
+                          showToast({
+                            type: 'error',
+                            title: 'Eroare la coș',
+                            message,
+                          });
+                        }
+                      }}
+                    />
                   );
                 })}
               </div>
@@ -247,6 +371,38 @@ export default function MintProductDetailPage() {
               alt={product.title || 'Imagine produs'}
               className="max-h-[80vh] max-w-full object-contain rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.9)]"
             />
+          </div>
+        </div>
+      )}
+
+      {/* Buy Confirmation Dialog */}
+      {showBuyConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <div className="bg-navy-900 border border-gold-500/20 rounded-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-white mb-4">Confirmă cumpărarea</h3>
+            <p className="text-slate-300 mb-6">
+              Ești sigur că vrei să cumperi "{product.title}" pentru {product.price}?
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowBuyConfirm(false)}
+                className="flex-1 bg-navy-800 hover:bg-navy-700 text-slate-200 px-4 py-2 rounded-xl font-medium transition-colors"
+              >
+                Anulează
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowBuyConfirm(false);
+                  handleBuy();
+                }}
+                disabled={buying}
+                className="flex-1 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-4 py-2 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {buying ? 'Se procesează...' : 'Confirmă'}
+              </button>
+            </div>
           </div>
         </div>
       )}

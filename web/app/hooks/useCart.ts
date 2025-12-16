@@ -60,6 +60,8 @@ export function useCart(userId?: string) {
             productId: raw.productId,
             quantity: typeof raw.quantity === 'number' && raw.quantity > 0 ? raw.quantity : 1,
             addedAt: raw.addedAt?.toDate ? raw.addedAt.toDate() : new Date(),
+            isMintProduct: raw.isMintProduct || false,
+            mintProductData: raw.mintProductData || null,
           });
         });
         setItems(data);
@@ -79,7 +81,7 @@ export function useCart(userId?: string) {
   }, [userId]);
 
   const addToCart = useCallback(
-    async (productId: string, quantity: number = 1) => {
+    async (productId: string, quantity: number = 1, isMintProduct?: boolean, mintProductData?: any) => {
       if (!userId) {
         throw new Error('Trebuie să fii autentificat pentru a adăuga produse în coș.');
       }
@@ -98,6 +100,8 @@ export function useCart(userId?: string) {
         userId,
         productId,
         quantity,
+        isMintProduct: isMintProduct || false,
+        mintProductData: isMintProduct ? mintProductData : null,
         addedAt: serverTimestamp(),
       });
     },

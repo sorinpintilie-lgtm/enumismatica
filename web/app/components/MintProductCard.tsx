@@ -12,7 +12,7 @@ interface MintProduct {
   link: string;
 }
 
-export default function MintProductCard({ product }: { product: MintProduct }) {
+export default function MintProductCard({ product, onCartClick }: { product: MintProduct; onCartClick?: (productId: string, productData: any) => void }) {
   const [imageError, setImageError] = useState(false);
 
   const handleImageError = () => {
@@ -53,6 +53,11 @@ export default function MintProductCard({ product }: { product: MintProduct }) {
       </Link>
       <button
         type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onCartClick?.(product.id, product);
+        }}
         className="absolute bottom-4 right-4 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] p-2 rounded-full shadow-lg transition-colors opacity-0 group-hover:opacity-100"
         title="Adaugă în coș"
       >
