@@ -219,9 +219,6 @@ export default function MintProductDetailPage() {
                   <p className="text-4xl font-bold text-[#e7b73c] mb-2">
                     {product.price}
                   </p>
-                  <p className="text-sm text-slate-300 mb-6">
-                    Preț fără TVA: {product.price_without_vat}
-                  </p>
 
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
