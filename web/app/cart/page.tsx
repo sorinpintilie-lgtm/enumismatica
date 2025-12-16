@@ -30,7 +30,7 @@ export default function CartPage() {
           product = {
             id: item.productId,
             name: item.mintProductData.title || 'Produs Monetaria Statului',
-            price: parseFloat(item.mintProductData.price.replace(' Lei', '').replace(',', '')),
+            price: parseFloat(item.mintProductData.price.replace(' Lei', '').replace('.', '').replace(',', '')),
             images: [`/Monetaria_statului/romanian_mint_products/${item.mintProductData.category_slug}/${item.mintProductData.image_files}`],
           } as any;
         }

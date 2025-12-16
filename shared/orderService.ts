@@ -73,7 +73,7 @@ export async function createDirectOrderForProduct(
 
     if (isMintProduct && mintProductData) {
       // For mint products, use provided data
-      price = parseFloat(mintProductData.price.replace(' Lei', '').replace(',', ''));
+      price = parseFloat(mintProductData.price.replace(' Lei', '').replace('.', '').replace(',', ''));
       sellerId = 'monetaria-statului'; // Special seller for mint products
       productData = mintProductData;
     } else {
