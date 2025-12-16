@@ -89,6 +89,7 @@ dist
 .cache/
 public
 !public/assets/
+!web/public/
 
 # Storybook build outputs
 .out
