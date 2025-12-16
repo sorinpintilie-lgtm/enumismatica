@@ -34,14 +34,18 @@ export const signInWithEmail = async (email: string, password: string) => {
     // Ensure Firestore user profile exists (idempotent, no referral on login)
     await createUserProfileAfterSignup(userCredential.user, null);
 
-    // Log the login
-    await logActivity(
-      userCredential.user.uid,
-      'user_login',
-      { method: 'email' },
-      userCredential.user.email || undefined,
-      userCredential.user.displayName || undefined
-    );
+    // Log the login (non-blocking)
+    try {
+      await logActivity(
+        userCredential.user.uid,
+        'user_login',
+        { method: 'email' },
+        userCredential.user.email || undefined,
+        userCredential.user.displayName || undefined
+      );
+    } catch (logError) {
+      console.warn('Failed to log login activity:', logError);
+    }
 
     return { user: userCredential.user, error: null };
   } catch (error: any) {
@@ -81,14 +85,18 @@ export const signUpWithEmail = async (email: string, password: string, referralC
       console.error('Failed to send welcome email:', error);
     });
 
-    // Log the registration
-    await logActivity(
-      userCredential.user.uid,
-      'user_register',
-      { method: 'email', referralCode: referralCode || undefined },
-      userCredential.user.email || undefined,
-      userCredential.user.displayName || undefined
-    );
+    // Log the registration (non-blocking)
+    try {
+      await logActivity(
+        userCredential.user.uid,
+        'user_register',
+        { method: 'email', referralCode: referralCode || undefined },
+        userCredential.user.email || undefined,
+        userCredential.user.displayName || undefined
+      );
+    } catch (logError) {
+      console.warn('Failed to log registration activity:', logError);
+    }
 
     return { user: userCredential.user, error: null };
   } catch (error: any) {
@@ -116,14 +124,18 @@ export const signInWithGoogle = async (referralCode?: string) => {
       });
     }
 
-    // Log the login/register
-    await logActivity(
-      result.user.uid,
-      isNewUser ? 'user_register' : 'user_login',
-      { method: 'google', referralCode: referralCode || undefined },
-      result.user.email || undefined,
-      result.user.displayName || undefined
-    );
+    // Log the login/register (non-blocking)
+    try {
+      await logActivity(
+        result.user.uid,
+        isNewUser ? 'user_register' : 'user_login',
+        { method: 'google', referralCode: referralCode || undefined },
+        result.user.email || undefined,
+        result.user.displayName || undefined
+      );
+    } catch (logError) {
+      console.warn('Failed to log Google auth activity:', logError);
+    }
 
     return { user: result.user, error: null };
   } catch (error: any) {
@@ -145,7 +157,7 @@ export const logout = async () => {
         user.displayName || undefined
       );
     } catch (error) {
-      console.error('Failed to log logout activity:', error);
+      console.warn('Failed to log logout activity:', error);
     }
   }
 

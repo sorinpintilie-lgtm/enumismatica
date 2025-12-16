@@ -196,7 +196,7 @@ export function getResponsiveImageProps(asset: SiteAsset): {
   srcSet: string;
   sizes: string;
   src: string;
-  alt: string;
+  alt?: string;
 } {
   const { srcSet, sizes } = createResponsiveImageProps(asset.imageUrl, {
     widths: [400, 800, 1200, 1600],
@@ -207,6 +207,6 @@ export function getResponsiveImageProps(asset: SiteAsset): {
     srcSet,
     sizes,
     src: asset.imageUrl,
-    alt: asset.altText,
+    alt: (asset.altText || '') as string,
   };
 }

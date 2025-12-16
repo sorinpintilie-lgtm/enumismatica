@@ -49,7 +49,7 @@ const DashboardScreen: React.FC = () => {
         </View>
 
         {/* Stats Cards */}
-        <View className="grid grid-cols-1 gap-4 mb-8">
+        <View className="mb-8">
           <View className="bg-white p-6 rounded-lg shadow-md">
             <Text className="text-lg font-semibold text-gray-900 mb-2">My Products</Text>
             <Text className="text-3xl font-bold text-blue-600">{products.length}</Text>
@@ -64,7 +64,7 @@ const DashboardScreen: React.FC = () => {
 
           <View className="bg-white p-6 rounded-lg shadow-md">
             <Text className="text-lg font-semibold text-gray-900 mb-2">Quick Actions</Text>
-            <View className="space-y-2">
+            <View className="space-y-2" style={{ gap: 8 }}>
               <TouchableOpacity
                 className="bg-blue-600 py-2 px-4 rounded-md"
                 onPress={() => navigation.navigate('MainTabs', { screen: 'ProductCatalog' })}

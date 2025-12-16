@@ -114,6 +114,12 @@ export async function createUserProfileAfterSignup(
   authUser: AuthUser,
   referralCode?: string | null,
 ): Promise<void> {
+  // Skip credit operations in React Native for now to avoid Firebase compatibility issues
+  if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.includes('React Native')) {
+    console.log('Skipping credit operations in React Native');
+    return;
+  }
+
   if (!db || !authUser) return;
 
   const uid = authUser.uid;

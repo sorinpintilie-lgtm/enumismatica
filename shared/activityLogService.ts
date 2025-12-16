@@ -156,6 +156,11 @@ export interface ActivityLogFilter {
 
 // Get browser and device information
 function getBrowserInfo(): { browser: string; os: string; device: string } {
+  // Check if we're in a browser environment
+  if (typeof navigator === 'undefined' || !navigator.userAgent) {
+    return { browser: 'React Native', os: 'Mobile', device: 'Mobile' };
+  }
+
   const ua = navigator.userAgent;
   let browser = 'Unknown';
   let os = 'Unknown';
@@ -183,14 +188,21 @@ function getBrowserInfo(): { browser: string; os: string; device: string } {
   return { browser, os, device };
 }
 
-// Generate session ID (stored in sessionStorage)
+// Generate session ID (stored in sessionStorage for web, memory for React Native)
 function getSessionId(): string {
-  let sessionId = sessionStorage.getItem('activitySessionId');
-  if (!sessionId) {
-    sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    sessionStorage.setItem('activitySessionId', sessionId);
+  // Check if we're in a browser environment with sessionStorage
+  if (typeof sessionStorage !== 'undefined') {
+    let sessionId = sessionStorage.getItem('activitySessionId');
+    if (!sessionId) {
+      sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      sessionStorage.setItem('activitySessionId', sessionId);
+    }
+    return sessionId;
+  } else {
+    // For React Native or server environments, use a simple in-memory approach
+    // In a real app, you'd want to use AsyncStorage or similar
+    return `rn_session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
-  return sessionId;
 }
 
 /**
@@ -204,6 +216,11 @@ export async function logActivity(
   userName?: string,
   isAdmin: boolean = false
 ): Promise<string> {
+  // Skip activity logging in React Native for now to avoid Firebase compatibility issues
+  if (typeof navigator === 'undefined' || !navigator.userAgent || navigator.userAgent.includes('React Native')) {
+    return `skipped_${Date.now()}`;
+  }
+
   try {
     const { browser, os, device } = getBrowserInfo();
     const sessionId = getSessionId();
@@ -211,15 +228,25 @@ export async function logActivity(
     // Build metadata without undefined values for Firestore
     const baseMetadata: ActivityLogMetadata = {
       ...metadata,
-      userAgent: navigator.userAgent,
       browser,
       os,
       device,
-      screenResolution: `${window.screen.width}x${window.screen.height}`,
-      page: window.location.pathname,
     };
 
-    if (document.referrer) {
+    // Add browser-specific metadata if available
+    if (typeof navigator !== 'undefined' && navigator.userAgent) {
+      baseMetadata.userAgent = navigator.userAgent;
+    }
+
+    if (typeof window !== 'undefined' && window.screen) {
+      baseMetadata.screenResolution = `${window.screen.width}x${window.screen.height}`;
+    }
+
+    if (typeof window !== 'undefined' && window.location) {
+      baseMetadata.page = window.location.pathname;
+    }
+
+    if (typeof document !== 'undefined' && document.referrer) {
       baseMetadata.referrer = document.referrer;
     }
 

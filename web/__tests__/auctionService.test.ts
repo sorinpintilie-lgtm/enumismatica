@@ -1,4 +1,4 @@
-import { validateBid, placeBid, setAutoBid, getAutoBids, endAuction } from '../app/services/auctionService';
+import { validateBid, placeBid, setAutoBid, getAutoBids, endAuction } from '../../shared/auctionService';
 
 jest.mock('../../shared/firebaseConfig', () => ({
   db: {},

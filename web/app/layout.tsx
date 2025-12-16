@@ -5,6 +5,7 @@ import NavigationWrapper from './components/NavigationWrapper'
 import ScrollToTop from './components/ScrollToTop'
 import LoadingSpinner from './components/LoadingSpinner'
 import PasswordProtection from './components/PasswordProtection'
+import Footer from './components/Footer'
  
 export const metadata: Metadata = {
   title: 'eNumismatica - Magazin de Monede & Licitatii',
@@ -47,6 +48,7 @@ export default function RootLayout({
             <main className="min-h-screen">
               {children}
             </main>
+            <Footer />
           </ClientProvider>
         </PasswordProtection>
       </body>

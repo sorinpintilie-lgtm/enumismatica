@@ -340,7 +340,7 @@ export interface SiteAsset {
   name: string;
   description: string;
   imageUrl: string;
-  altText: string;
+  altText?: string;
   type: 'logo' | 'hero' | 'banner' | 'icon' | 'other';
   active: boolean;
   createdAt: Date;

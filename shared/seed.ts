@@ -235,7 +235,7 @@ export async function seedUsers(): Promise<string[]> {
     const docRef = await addDoc(collection(db, 'users'), {
       ...userData,
       createdAt: Timestamp.fromDate(userData.createdAt),
-      updatedAt: Timestamp.fromDate(userData.updatedAt),
+      updatedAt: Timestamp.fromDate(userData.updatedAt || new Date()),
     });
     userIds.push(docRef.id);
   }

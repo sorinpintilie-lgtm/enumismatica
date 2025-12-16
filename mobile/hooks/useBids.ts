@@ -1,5 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { collection, query, orderBy, onSnapshot, limit, startAfter, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  limit,
+  startAfter,
+  type QueryDocumentSnapshot,
+  type DocumentData,
+} from '@shared/firebaseConfig';
 import { db } from '@shared/firebaseConfig';
 import { Bid } from '@shared/types';
 

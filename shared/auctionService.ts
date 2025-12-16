@@ -392,7 +392,7 @@ export async function endAuction(auctionId: string): Promise<void> {
 
   let winnerId: string | null = null;
   let auctionTitle: string | undefined;
-  let winningBidAmount: number | null = null;
+  let winningBidAmount: number | undefined = undefined;
   let winnerProductId: string | null = null;
 
   await runTransaction(db, async (transaction) => {
@@ -421,7 +421,7 @@ export async function endAuction(auctionId: string): Promise<void> {
       winnerProductId = auction.productId;
     } else {
       winnerId = null;
-      winningBidAmount = null;
+      winningBidAmount = undefined;
       winnerProductId = null;
     }
 
@@ -441,16 +441,16 @@ export async function endAuction(auctionId: string): Promise<void> {
         winnerId,
         'auction_won',
         auctionId,
-        winningBidAmount != null
-          ? `Felicitări! Ai câștigat licitația ${auctionTitle} cu oferta de ${winningBidAmount.toFixed(2)} RON`
+        winningBidAmount != undefined
+          ? `Felicitări! Ai câștigat licitația ${auctionTitle} cu oferta de ${(winningBidAmount as number).toFixed(2)} RON`
           : `Felicitări! Ai câștigat licitația ${auctionTitle}`,
         auctionTitle,
-        winningBidAmount != null ? winningBidAmount : undefined,
+        winningBidAmount,
       );
 
       // Send email notification to winner (non-blocking)
       const winnerDoc = await getDoc(doc(db, 'users', winnerId));
-      if (winnerDoc.exists() && winningBidAmount != null) {
+      if (winnerDoc.exists() && winningBidAmount != undefined) {
         const winnerData = winnerDoc.data();
         sendAuctionWonEmail(
           winnerData.email,
@@ -464,7 +464,7 @@ export async function endAuction(auctionId: string): Promise<void> {
 
       // Get auction owner and send sold notification
       const auctionDoc = await getDoc(doc(db, 'auctions', auctionId));
-      if (auctionDoc.exists() && winningBidAmount != null) {
+      if (auctionDoc.exists() && winningBidAmount != undefined) {
         const auctionData = auctionDoc.data();
         if (auctionData.ownerId) {
           const ownerDoc = await getDoc(doc(db, 'users', auctionData.ownerId));
@@ -583,7 +583,7 @@ export async function buyNowAuction(auctionId: string, buyerId: string): Promise
       buyerId,
       'auction_won',
       auctionId,
-      `Ai cumpărat imediat prin "Cumpără acum" licitația ${auctionTitle} pentru ${finalPrice.toFixed(2)} RON`,
+      `Ai cumpărat imediat prin "Cumpără acum" licitația ${auctionTitle} pentru ${(finalPrice as number).toFixed(2)} RON`,
       auctionTitle,
       finalPrice,
     );
