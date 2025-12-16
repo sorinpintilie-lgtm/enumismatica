@@ -1,0 +1,6432 @@
+[
+  {
+    "id": 1,
+    "face_value": "1 Leu",
+    "issue_year": "1952",
+    "diameter": "23 mm",
+    "weight": "4 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "Republica Populară Română"
+  },
+  {
+    "id": 2,
+    "face_value": "5 Lei",
+    "issue_year": "1952",
+    "diameter": "25 mm",
+    "weight": "5 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "Republica Populară Română"
+  },
+  {
+    "id": 3,
+    "face_value": "10 Lei",
+    "issue_year": "1952",
+    "diameter": "27 mm",
+    "weight": "6 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "Republica Populară Română"
+  },
+  {
+    "id": 4,
+    "face_value": "25 Lei",
+    "issue_year": "1952",
+    "diameter": "29 mm",
+    "weight": "7 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "Republica Populară Română"
+  },
+  {
+    "id": 5,
+    "face_value": "50 Lei",
+    "issue_year": "1952",
+    "diameter": "31 mm",
+    "weight": "8 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "Republica Populară Română"
+  },
+  {
+    "id": 6,
+    "face_value": "1 Leu",
+    "issue_year": "1966",
+    "diameter": "23 mm",
+    "weight": "4 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "Republica Socialistă România"
+  },
+  {
+    "id": 7,
+    "face_value": "3 Lei",
+    "issue_year": "1966",
+    "diameter": "25 mm",
+    "weight": "5 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "Republica Socialistă România"
+  },
+  {
+    "id": 8,
+    "face_value": "5 Lei",
+    "issue_year": "1966",
+    "diameter": "27 mm",
+    "weight": "6 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "Republica Socialistă România"
+  },
+  {
+    "id": 9,
+    "face_value": "10 Lei",
+    "issue_year": "1966",
+    "diameter": "29 mm",
+    "weight": "7 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "Republica Socialistă România"
+  },
+  {
+    "id": 10,
+    "face_value": "25 Lei",
+    "issue_year": "1966",
+    "diameter": "31 mm",
+    "weight": "8 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "Republica Socialistă România"
+  },
+  {
+    "id": 11,
+    "face_value": "50 Lei",
+    "issue_year": "1966",
+    "diameter": "33 mm",
+    "weight": "9 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "Republica Socialistă România"
+  },
+  {
+    "id": 12,
+    "face_value": "1 Leu",
+    "issue_year": "1990",
+    "diameter": "23 mm",
+    "weight": "4 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "România Modernă"
+  },
+  {
+    "id": 13,
+    "face_value": "5 Lei",
+    "issue_year": "1990",
+    "diameter": "25 mm",
+    "weight": "5 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "România Modernă"
+  },
+  {
+    "id": 14,
+    "face_value": "10 Lei",
+    "issue_year": "1990",
+    "diameter": "27 mm",
+    "weight": "6 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "România Modernă"
+  },
+  {
+    "id": 15,
+    "face_value": "50 Lei",
+    "issue_year": "1990",
+    "diameter": "29 mm",
+    "weight": "7 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "România Modernă"
+  },
+  {
+    "id": 16,
+    "face_value": "100 Lei",
+    "issue_year": "1990",
+    "diameter": "31 mm",
+    "weight": "8 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "România Modernă"
+  },
+  {
+    "id": 17,
+    "face_value": "500 Lei",
+    "issue_year": "1990",
+    "diameter": "33 mm",
+    "weight": "9 g",
+    "metal": "Aluminiu",
+    "mint": "București",
+    "era": "România Modernă"
+  },
+  {
+    "id": 18,
+    "face_value": "1 Leu",
+    "issue_year": "2005",
+    "diameter": "16.75 mm",
+    "weight": "2.5 g",
+    "metal": "Oțel placat cupru",
+    "mint": "București",
+    "era": "Uniunea Europeană"
+  },
+  {
+    "id": 19,
+    "face_value": "5 Lei",
+    "issue_year": "2005",
+    "diameter": "18.25 mm",
+    "weight": "3.1 g",
+    "metal": "Oțel placat cupru",
+    "mint": "București",
+    "era": "Uniunea Europeană"
+  },
+  {
+    "id": 20,
+    "face_value": "10 Lei",
+    "issue_year": "2005",
+    "diameter": "19.75 mm",
+    "weight": "3.6 g",
+    "metal": "Oțel placat cupru",
+    "mint": "București",
+    "era": "Uniunea Europeană"
+  },
+  {
+    "id": 21,
+    "face_value": "50 Lei",
+    "issue_year": "2005",
+    "diameter": "21.25 mm",
+    "weight": "4.3 g",
+    "metal": "Oțel placat cupru",
+    "mint": "București",
+    "era": "Uniunea Europeană"
+  },
+  {
+    "id": 22,
+    "face_value": "1 Leu",
+    "issue_year": "2010",
+    "diameter": "16.75 mm",
+    "weight": "2.5 g",
+    "metal": "Oțel placat cupru",
+    "mint": "București",
+    "era": "Uniunea Europeană"
+  },
+  {
+    "id": 23,
+    "face_value": "5 Lei",
+    "issue_year": "2010",
+    "diameter": "18.25 mm",
+    "weight": "3.1 g",
+    "metal": "Oțel placat cupru",
+    "mint": "București",
+    "era": "Uniunea Europeană"
+  },
+  {
+    "id": 24,
+    "face_value": "10 Lei",
+    "issue_year": "2010",
+    "diameter": "19.75 mm",
+    "weight": "3.6 g",
+    "metal": "Oțel placat cupru",
+    "mint": "București",
+    "era": "Uniunea Europeană"
+  },
+  {
+    "id": 25,
+    "face_value": "50 Lei",
+    "issue_year": "2010",
+    "diameter": "21.25 mm",
+    "weight": "4.3 g",
+    "metal": "Oțel placat cupru",
+    "mint": "București",
+    "era": "Uniunea Europeană"
+  },
+  {
+    "id": 26,
+    "face_value": "100 Lei",
+    "issue_year": "2010",
+    "diameter": "22.75 mm",
+    "weight": "5 g",
+    "metal": "Oțel placat cupru",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 27,
+    "face_value": "5 bani",
+    "issue_year": "1882",
+    "diameter": "25 mm",
+    "weight": "5 g",
+    "metal": "Cu 95%, Sn 4%, Zn 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 28,
+    "face_value": "5 lei",
+    "issue_year": "1881",
+    "diameter": "37 mm",
+    "weight": "25 g",
+    "metal": "Ag 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 29,
+    "face_value": "1 ban",
+    "issue_year": "1883",
+    "diameter": "15 mm",
+    "weight": "1 g",
+    "metal": "Cu 95%, Sn 4%, Zn 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 30,
+    "face_value": "5 bani",
+    "issue_year": "1883",
+    "diameter": "25 mm",
+    "weight": "5 g",
+    "metal": "Cu 95%, Sn 4%, Zn 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 31,
+    "face_value": "5 lei",
+    "issue_year": "1883",
+    "diameter": "37 mm",
+    "weight": "25 g",
+    "metal": "Ag 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 32,
+    "face_value": "20 lei",
+    "issue_year": "1883",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 33,
+    "face_value": "5 bani",
+    "issue_year": "1884",
+    "diameter": "25 mm",
+    "weight": "5 g",
+    "metal": "Cu 95%, Sn 4%, Zn 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 34,
+    "face_value": "50 bani",
+    "issue_year": "1884",
+    "diameter": "18 mm",
+    "weight": "2.5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 35,
+    "face_value": "1 leu",
+    "issue_year": "1884",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 36,
+    "face_value": "5 lei",
+    "issue_year": "1884",
+    "diameter": "37 mm",
+    "weight": "25 g",
+    "metal": "Ag 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 37,
+    "face_value": "20 lei",
+    "issue_year": "1884",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 38,
+    "face_value": "5 bani",
+    "issue_year": "1885",
+    "diameter": "25 mm",
+    "weight": "5 g",
+    "metal": "Cu 95%, Sn 4%, Zn 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 39,
+    "face_value": "50 bani",
+    "issue_year": "1885",
+    "diameter": "18 mm",
+    "weight": "2.5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 40,
+    "face_value": "1 leu",
+    "issue_year": "1885",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 41,
+    "face_value": "5 lei",
+    "issue_year": "1885",
+    "diameter": "37 mm",
+    "weight": "25 g",
+    "metal": "Ag 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 42,
+    "face_value": "1 ban",
+    "issue_year": "1888",
+    "diameter": "15 mm",
+    "weight": "1 g",
+    "metal": "Cu 95%, Sn 4%, Zn 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 43,
+    "face_value": "20 lei",
+    "issue_year": "1890",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 44,
+    "face_value": "50 bani",
+    "issue_year": "1894",
+    "diameter": "18 mm",
+    "weight": "2.5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 45,
+    "face_value": "1 leu",
+    "issue_year": "1894",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 46,
+    "face_value": "2 lei",
+    "issue_year": "1894",
+    "diameter": "27 mm",
+    "weight": "10 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 47,
+    "face_value": "1 ban",
+    "issue_year": "1900",
+    "diameter": "15 mm",
+    "weight": "1 g",
+    "metal": "Cu 95%, Sn 4%, Zn 1%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 48,
+    "face_value": "2 bani",
+    "issue_year": "1900",
+    "diameter": "20 mm",
+    "weight": "2 g",
+    "metal": "Cu 95%, Sn 4%, Zn 1%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 49,
+    "face_value": "5 bani",
+    "issue_year": "1900",
+    "diameter": "19 mm",
+    "weight": "3 g",
+    "metal": "Cu 75%, Ni 25%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 50,
+    "face_value": "10 bani",
+    "issue_year": "1900",
+    "diameter": "22 mm",
+    "weight": "4.5 g",
+    "metal": "Cu 75%, Ni 25%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 51,
+    "face_value": "20 bani",
+    "issue_year": "1900",
+    "diameter": "25 mm",
+    "weight": "7 g",
+    "metal": "Cu 75%, Ni 25%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 52,
+    "face_value": "50 bani",
+    "issue_year": "1900",
+    "diameter": "18 mm",
+    "weight": "2.5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 53,
+    "face_value": "1 leu",
+    "issue_year": "1900",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 54,
+    "face_value": "2 lei",
+    "issue_year": "1900",
+    "diameter": "27 mm",
+    "weight": "10 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 55,
+    "face_value": "50 bani",
+    "issue_year": "1901",
+    "diameter": "18 mm",
+    "weight": "2.5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 56,
+    "face_value": "1 leu",
+    "issue_year": "1901",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 57,
+    "face_value": "2 lei",
+    "issue_year": "1901",
+    "diameter": "27 mm",
+    "weight": "10 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 58,
+    "face_value": "5 lei",
+    "issue_year": "1901",
+    "diameter": "38 mm",
+    "weight": "25 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 59,
+    "face_value": "5 bani",
+    "issue_year": "1905",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu 75%, Ni 25%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 60,
+    "face_value": "10 bani",
+    "issue_year": "1905",
+    "diameter": "22 mm",
+    "weight": "4 g",
+    "metal": "Cu 75%, Ni 25%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 61,
+    "face_value": "20 bani",
+    "issue_year": "1905",
+    "diameter": "25 mm",
+    "weight": "6 g",
+    "metal": "Cu 75%, Ni 25%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 62,
+    "face_value": "5 bani",
+    "issue_year": "1906",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu 75%, Ni 25%",
+    "mint_or_theme": "Brussels \\ Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 63,
+    "face_value": "10 bani",
+    "issue_year": "1906",
+    "diameter": "22 mm",
+    "weight": "4 g",
+    "metal": "Cu 75%, Ni 25%",
+    "mint_or_theme": "Brussels \\ Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 64,
+    "face_value": "20 bani",
+    "issue_year": "1906",
+    "diameter": "25 mm",
+    "weight": "6 g",
+    "metal": "Cu 75%, Ni 25%",
+    "mint_or_theme": "Brussels \\ Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 65,
+    "face_value": "1 leu",
+    "issue_year": "1906",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 66,
+    "face_value": "5 lei",
+    "issue_year": "1906",
+    "diameter": "38 mm",
+    "weight": "25 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 67,
+    "face_value": "12 1/2 lei",
+    "issue_year": "1906",
+    "diameter": "21 mm",
+    "weight": "4.0325 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 68,
+    "face_value": "20 lei",
+    "issue_year": "1906",
+    "diameter": "21 mm",
+    "weight": "6.552 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 69,
+    "face_value": "25 lei",
+    "issue_year": "1906",
+    "diameter": "30 mm",
+    "weight": "8.065 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 70,
+    "face_value": "50 lei",
+    "issue_year": "1906",
+    "diameter": "35 mm",
+    "weight": "16.13 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 71,
+    "face_value": "100 lei",
+    "issue_year": "1906",
+    "diameter": "40 mm",
+    "weight": "32.26 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 72,
+    "face_value": "50 bani",
+    "issue_year": "1910",
+    "diameter": "18 mm",
+    "weight": "2.5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 73,
+    "face_value": "1 leu",
+    "issue_year": "1910",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 74,
+    "face_value": "2 lei",
+    "issue_year": "1910",
+    "diameter": "27 mm",
+    "weight": "10 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 75,
+    "face_value": "50 bani",
+    "issue_year": "1911",
+    "diameter": "18 mm",
+    "weight": "2.5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 76,
+    "face_value": "1 leu",
+    "issue_year": "1911",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 77,
+    "face_value": "2 lei",
+    "issue_year": "1911",
+    "diameter": "27 mm",
+    "weight": "10 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 78,
+    "face_value": "50 bani",
+    "issue_year": "1912",
+    "diameter": "18 mm",
+    "weight": "2.5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 79,
+    "face_value": "1 leu",
+    "issue_year": "1912",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 80,
+    "face_value": "2 lei",
+    "issue_year": "1912",
+    "diameter": "27 mm",
+    "weight": "10 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Hamburg",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 81,
+    "face_value": "50 bani",
+    "issue_year": "1914",
+    "diameter": "18 mm",
+    "weight": "2.5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 82,
+    "face_value": "1 leu",
+    "issue_year": "1914",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 83,
+    "face_value": "2 lei",
+    "issue_year": "1914",
+    "diameter": "27 mm",
+    "weight": "10 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Brussels",
+    "era": "Kingdom of Romania 1881-1914 Carol I"
+  },
+  {
+    "id": 84,
+    "face_value": "25 bani",
+    "issue_year": "1921",
+    "diameter": "19 mm",
+    "weight": "0.896 g",
+    "metal": "Al 100%",
+    "mint_or_theme": "Huguenin",
+    "era": "Kingdom of Romania 1914-1927 Ferdinand I"
+  },
+  {
+    "id": 85,
+    "face_value": "50 bani",
+    "issue_year": "1921",
+    "diameter": "21 mm",
+    "weight": "1.203 g",
+    "metal": "Al 100%",
+    "mint_or_theme": "Huguenin",
+    "era": "Kingdom of Romania 1914-1927 Ferdinand I"
+  },
+  {
+    "id": 86,
+    "face_value": "20 lei",
+    "issue_year": "1922",
+    "diameter": "21 mm",
+    "weight": "6.4521 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "London",
+    "era": "Kingdom of Romania 1914-1927 Ferdinand I"
+  },
+  {
+    "id": 87,
+    "face_value": "25 lei",
+    "issue_year": "1922",
+    "diameter": "30 mm",
+    "weight": "8.065 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "London",
+    "era": "Kingdom of Romania 1914-1927 Ferdinand I"
+  },
+  {
+    "id": 88,
+    "face_value": "50 lei",
+    "issue_year": "1922",
+    "diameter": "35 mm",
+    "weight": "16.13 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "London",
+    "era": "Kingdom of Romania 1914-1927 Ferdinand I"
+  },
+  {
+    "id": 89,
+    "face_value": "100 lei",
+    "issue_year": "1922",
+    "diameter": "40 mm",
+    "weight": "32.26 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "London",
+    "era": "Kingdom of Romania 1914-1927 Ferdinand I"
+  },
+  {
+    "id": 90,
+    "face_value": "1 lei",
+    "issue_year": "1924",
+    "diameter": "21 mm",
+    "weight": "3.5 g",
+    "metal": "Cu 75%, Ni 25%",
+    "mint_or_theme": "Brussels \\ Poissy",
+    "era": "Kingdom of Romania 1914-1927 Ferdinand I"
+  },
+  {
+    "id": 91,
+    "face_value": "2 lei",
+    "issue_year": "1924",
+    "diameter": "25 mm",
+    "weight": "7 g",
+    "metal": "Cu 75%, Ni 25%",
+    "mint_or_theme": "Brussels \\ Poissy",
+    "era": "Kingdom of Romania 1914-1927 Ferdinand I"
+  },
+  {
+    "id": 92,
+    "face_value": "5 lei",
+    "issue_year": "1930",
+    "diameter": "21 mm",
+    "weight": "3.5 g",
+    "metal": "Cu 79%, Zn 20%, Ni 1%",
+    "mint_or_theme": "Paris \\",
+    "era": "Kingdom of Romania 1927-1930 Mihai I"
+  },
+  {
+    "id": 93,
+    "face_value": "20 lei",
+    "issue_year": "1930",
+    "diameter": "27 mm",
+    "weight": "7.5 g",
+    "metal": "Cu 79%, Zn 20%, Ni 1%",
+    "mint_or_theme": "Paris \\",
+    "era": "Kingdom of Romania 1927-1930 Mihai I"
+  },
+  {
+    "id": 94,
+    "face_value": "10 lei",
+    "issue_year": "1930",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Cu 79%, Zn 20%, Ni 1%",
+    "mint_or_theme": "Paris \\",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 95,
+    "face_value": "20 lei",
+    "issue_year": "1930",
+    "diameter": "27 mm",
+    "weight": "7.5 g",
+    "metal": "Cu 79%, Zn 20%, Ni 1%",
+    "mint_or_theme": "Paris \\",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 96,
+    "face_value": "100 lei",
+    "issue_year": "1932",
+    "diameter": "31 mm",
+    "weight": "14 g",
+    "metal": "Ag 50%, Cu 40%, Zn 5%, Ni 5%",
+    "mint_or_theme": "Paris \\",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 97,
+    "face_value": "250 lei",
+    "issue_year": "1935",
+    "diameter": "29 mm",
+    "weight": "13.5 g",
+    "metal": "Ag 75%, Cu 25%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 98,
+    "face_value": "100 lei",
+    "issue_year": "1936",
+    "diameter": "27 mm",
+    "weight": "8.2 g",
+    "metal": "Ni 97.5%, Imp 2.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 99,
+    "face_value": "50 lei",
+    "issue_year": "1937",
+    "diameter": "24 mm",
+    "weight": "5.83 g",
+    "metal": "Ni 97.5%, Imp 2.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 100,
+    "face_value": "1 leu",
+    "issue_year": "1938",
+    "diameter": "18 mm",
+    "weight": "2.75 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 101,
+    "face_value": "50 lei",
+    "issue_year": "1938",
+    "diameter": "24 mm",
+    "weight": "5.83 g",
+    "metal": "Ni 97.5%, Imp 2.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 102,
+    "face_value": "100 lei",
+    "issue_year": "1938",
+    "diameter": "27 mm",
+    "weight": "8.2 g",
+    "metal": "Ni 97.5%, Imp 2.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 103,
+    "face_value": "1 leu",
+    "issue_year": "1939",
+    "diameter": "18 mm",
+    "weight": "2.75 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 104,
+    "face_value": "20 lei",
+    "issue_year": "1939",
+    "diameter": "21 mm",
+    "weight": "6.5 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 105,
+    "face_value": "20 lei",
+    "issue_year": "1939",
+    "diameter": "21 mm",
+    "weight": "6.5 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 106,
+    "face_value": "100 lei",
+    "issue_year": "1939",
+    "diameter": "35 mm",
+    "weight": "32.5 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 107,
+    "face_value": "100 lei",
+    "issue_year": "1939",
+    "diameter": "35 mm",
+    "weight": "32.5 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 108,
+    "face_value": "-",
+    "issue_year": "1939",
+    "diameter": "41 mm",
+    "weight": "42 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 109,
+    "face_value": "-",
+    "issue_year": "1939",
+    "diameter": "41 mm",
+    "weight": "42 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 110,
+    "face_value": "250 lei",
+    "issue_year": "1939",
+    "diameter": "30 mm",
+    "weight": "12 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 111,
+    "face_value": "1 leu",
+    "issue_year": "1940",
+    "diameter": "18 mm",
+    "weight": "2.75 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 112,
+    "face_value": "20 lei",
+    "issue_year": "1940",
+    "diameter": "21 mm",
+    "weight": "6.5 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 113,
+    "face_value": "20 lei",
+    "issue_year": "1940",
+    "diameter": "21 mm",
+    "weight": "6.5 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 114,
+    "face_value": "100 lei",
+    "issue_year": "1940",
+    "diameter": "35 mm",
+    "weight": "32.5 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 115,
+    "face_value": "100 lei",
+    "issue_year": "1940",
+    "diameter": "35 mm",
+    "weight": "32.5 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 116,
+    "face_value": "-",
+    "issue_year": "1940",
+    "diameter": "41 mm",
+    "weight": "42 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 117,
+    "face_value": "-",
+    "issue_year": "1940",
+    "diameter": "41 mm",
+    "weight": "42 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 118,
+    "face_value": "250 lei",
+    "issue_year": "1940",
+    "diameter": "30 mm",
+    "weight": "12 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1930-1940 Carol II"
+  },
+  {
+    "id": 119,
+    "face_value": "250 lei",
+    "issue_year": "1940",
+    "diameter": "30 mm",
+    "weight": "12 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 120,
+    "face_value": "1 leu",
+    "issue_year": "1941",
+    "diameter": "18 mm",
+    "weight": "2.75 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 121,
+    "face_value": "2 lei",
+    "issue_year": "1941",
+    "diameter": "20 mm",
+    "weight": "3.2 g",
+    "metal": "Zn 100%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 122,
+    "face_value": "250 lei",
+    "issue_year": "1941",
+    "diameter": "30 mm",
+    "weight": "12 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 123,
+    "face_value": "250 lei",
+    "issue_year": "1941",
+    "diameter": "30 mm",
+    "weight": "12 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 124,
+    "face_value": "500 lei",
+    "issue_year": "1941",
+    "diameter": "37 mm",
+    "weight": "25 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 125,
+    "face_value": "5 lei",
+    "issue_year": "1942",
+    "diameter": "23 mm",
+    "weight": "4.5 g",
+    "metal": "Zn 100%",
+    "mint_or_theme": "Berlin",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 126,
+    "face_value": "20 lei",
+    "issue_year": "1942",
+    "diameter": "26 mm",
+    "weight": "6 g",
+    "metal": "Zn 100%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 127,
+    "face_value": "200 lei",
+    "issue_year": "1942",
+    "diameter": "24 mm",
+    "weight": "6 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 128,
+    "face_value": "20 lei",
+    "issue_year": "1943",
+    "diameter": "26 mm",
+    "weight": "6 g",
+    "metal": "Zn 100%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 129,
+    "face_value": "100 lei",
+    "issue_year": "1943",
+    "diameter": "28 mm",
+    "weight": "8.5 g",
+    "metal": "Ni plated iron",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 130,
+    "face_value": "20 lei",
+    "issue_year": "1944",
+    "diameter": "26 mm",
+    "weight": "6 g",
+    "metal": "Zn 100%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 131,
+    "face_value": "100 lei",
+    "issue_year": "1944",
+    "diameter": "28 mm",
+    "weight": "8.5 g",
+    "metal": "Ni plated iron",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 132,
+    "face_value": "500 lei",
+    "issue_year": "1944",
+    "diameter": "32 mm",
+    "weight": "12 g",
+    "metal": "Ag 70%, Cu 30%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 133,
+    "face_value": "-",
+    "issue_year": "1944",
+    "diameter": "21 mm",
+    "weight": "6.55 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 134,
+    "face_value": "200 lei",
+    "issue_year": "1945",
+    "diameter": "27 mm",
+    "weight": "7.5 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 135,
+    "face_value": "500 lei",
+    "issue_year": "1945",
+    "diameter": "30 mm",
+    "weight": "10 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 136,
+    "face_value": "500 lei",
+    "issue_year": "1946",
+    "diameter": "24 mm",
+    "weight": "1.5 g",
+    "metal": "Al 100%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 137,
+    "face_value": "2000 lei",
+    "issue_year": "1946",
+    "diameter": "24 mm",
+    "weight": "5.2 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 138,
+    "face_value": "25000 lei",
+    "issue_year": "1946",
+    "diameter": "32 mm",
+    "weight": "12.5 g",
+    "metal": "Ag 70%, Cu 30%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 139,
+    "face_value": "100000 lei",
+    "issue_year": "1946",
+    "diameter": "37 mm",
+    "weight": "25 g",
+    "metal": "Ag 70%, Cu 30%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 140,
+    "face_value": "10000 lei",
+    "issue_year": "1947",
+    "diameter": "27 mm",
+    "weight": "10 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 141,
+    "face_value": "50 bani",
+    "issue_year": "1947",
+    "diameter": "16 mm",
+    "weight": "1.7 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Hungary",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 142,
+    "face_value": "1 leu",
+    "issue_year": "1947",
+    "diameter": "18 mm",
+    "weight": "2.5 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Hungary",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 143,
+    "face_value": "2 lei",
+    "issue_year": "1947",
+    "diameter": "21 mm",
+    "weight": "3.5 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Czechoslovakia",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 144,
+    "face_value": "5 lei",
+    "issue_year": "1947",
+    "diameter": "23 mm",
+    "weight": "1.5 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Hungary",
+    "era": "Kingdom of Romania 1940-1947 Mihai I"
+  },
+  {
+    "id": 145,
+    "face_value": "5 lei",
+    "issue_year": "1948",
+    "diameter": "23 mm",
+    "weight": "1.5 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 146,
+    "face_value": "-",
+    "issue_year": "1948",
+    "diameter": "37 mm",
+    "weight": "25 g",
+    "metal": "Ag 83.5%, Cu 16.5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 147,
+    "face_value": "1 leu",
+    "issue_year": "1949",
+    "diameter": "16 mm",
+    "weight": "1.83 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 148,
+    "face_value": "5 lei",
+    "issue_year": "1949",
+    "diameter": "23 mm",
+    "weight": "1.5 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 149,
+    "face_value": "1 leu",
+    "issue_year": "1950",
+    "diameter": "16 mm",
+    "weight": "1.83 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 150,
+    "face_value": "2 lei",
+    "issue_year": "1950",
+    "diameter": "18 mm",
+    "weight": "2.44 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 151,
+    "face_value": "5 lei",
+    "issue_year": "1950",
+    "diameter": "23 mm",
+    "weight": "1.5 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 152,
+    "face_value": "1 leu",
+    "issue_year": "1951",
+    "diameter": "16 mm",
+    "weight": "1.83 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 153,
+    "face_value": "1 leu",
+    "issue_year": "1951",
+    "diameter": "16 mm",
+    "weight": "0.61 g",
+    "metal": "Al 100%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 154,
+    "face_value": "2 lei",
+    "issue_year": "1951",
+    "diameter": "18 mm",
+    "weight": "2.44 g",
+    "metal": "Cu 80%, Zn 19%, Ni 1%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 155,
+    "face_value": "2 lei",
+    "issue_year": "1951",
+    "diameter": "18 mm",
+    "weight": "0.84 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 156,
+    "face_value": "5 lei",
+    "issue_year": "1951",
+    "diameter": "23 mm",
+    "weight": "1.5 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 157,
+    "face_value": "20 lei",
+    "issue_year": "1951",
+    "diameter": "26 mm",
+    "weight": "2.12 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 158,
+    "face_value": "1 leu",
+    "issue_year": "1952-01-01 00:00:00",
+    "diameter": "16 mm",
+    "weight": "0.61 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 159,
+    "face_value": "2 lei",
+    "issue_year": "1952-01-01 00:00:00",
+    "diameter": "18 mm",
+    "weight": "0.84 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 160,
+    "face_value": "1 ban",
+    "issue_year": "1952",
+    "diameter": "15 mm",
+    "weight": "1 g",
+    "metal": "bronze",
+    "mint_or_theme": "Moscow",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 161,
+    "face_value": "3 bani",
+    "issue_year": "1952",
+    "diameter": "18 mm",
+    "weight": "2 g",
+    "metal": "bronze",
+    "mint_or_theme": "Moscow",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 162,
+    "face_value": "5 bani",
+    "issue_year": "1952",
+    "diameter": "20 mm",
+    "weight": "2.4 g",
+    "metal": "bronze",
+    "mint_or_theme": "Moscow",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 163,
+    "face_value": "10 bani",
+    "issue_year": "1952",
+    "diameter": "17 mm",
+    "weight": "1.7 g",
+    "metal": "cupronickel",
+    "mint_or_theme": "Moscow",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 164,
+    "face_value": "25 bani",
+    "issue_year": "1952",
+    "diameter": "22 mm",
+    "weight": "3.6 g",
+    "metal": "cupronickel",
+    "mint_or_theme": "Moscow",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 165,
+    "face_value": "1 ban",
+    "issue_year": "1953",
+    "diameter": "15 mm",
+    "weight": "1 g",
+    "metal": "bronze",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 166,
+    "face_value": "3 bani",
+    "issue_year": "1953",
+    "diameter": "18 mm",
+    "weight": "2 g",
+    "metal": "bronze",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 167,
+    "face_value": "5 bani",
+    "issue_year": "1953",
+    "diameter": "20 mm",
+    "weight": "2.4 g",
+    "metal": "bronze",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 168,
+    "face_value": "25 bani",
+    "issue_year": "1953",
+    "diameter": "22 mm",
+    "weight": "3.6 g",
+    "metal": "cupronickel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 169,
+    "face_value": "1 ban",
+    "issue_year": "1954",
+    "diameter": "15 mm",
+    "weight": "1 g",
+    "metal": "bronze",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 170,
+    "face_value": "3 bani",
+    "issue_year": "1954",
+    "diameter": "18 mm",
+    "weight": "2 g",
+    "metal": "bronze",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 171,
+    "face_value": "5 bani",
+    "issue_year": "1954",
+    "diameter": "20 mm",
+    "weight": "2.4 g",
+    "metal": "bronze",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 172,
+    "face_value": "10 bani",
+    "issue_year": "1954",
+    "diameter": "17 mm",
+    "weight": "1.7 g",
+    "metal": "cupronickel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 173,
+    "face_value": "25 bani",
+    "issue_year": "1954",
+    "diameter": "22 mm",
+    "weight": "3.6 g",
+    "metal": "cupronickel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 174,
+    "face_value": "5 bani",
+    "issue_year": "1955",
+    "diameter": "20 mm",
+    "weight": "2.4 g",
+    "metal": "bronze",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 175,
+    "face_value": "10 bani",
+    "issue_year": "1955",
+    "diameter": "17 mm",
+    "weight": "1.7 g",
+    "metal": "cupronickel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 176,
+    "face_value": "25 bani",
+    "issue_year": "1955",
+    "diameter": "22 mm",
+    "weight": "3.6 g",
+    "metal": "cupronickel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 177,
+    "face_value": "50 bani",
+    "issue_year": "1955",
+    "diameter": "25 mm",
+    "weight": "4.55 g",
+    "metal": "cupronickel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 178,
+    "face_value": "5 bani",
+    "issue_year": "1956",
+    "diameter": "20 mm",
+    "weight": "2.4 g",
+    "metal": "bronze",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 179,
+    "face_value": "10 bani",
+    "issue_year": "1956",
+    "diameter": "17 mm",
+    "weight": "1.7 g",
+    "metal": "cupronickel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 180,
+    "face_value": "50 bani",
+    "issue_year": "1956",
+    "diameter": "25 mm",
+    "weight": "4.55 g",
+    "metal": "cupronickel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 181,
+    "face_value": "5 bani",
+    "issue_year": "1957",
+    "diameter": "20 mm",
+    "weight": "2.4 g",
+    "metal": "bronze",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 182,
+    "face_value": "15 bani",
+    "issue_year": "1960",
+    "diameter": "19.5 mm",
+    "weight": "2.87 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 183,
+    "face_value": "25 bani",
+    "issue_year": "1960",
+    "diameter": "22 mm",
+    "weight": "3.38 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 184,
+    "face_value": "5 bani",
+    "issue_year": "1963",
+    "diameter": "16 mm",
+    "weight": "1.7 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 185,
+    "face_value": "1 leu",
+    "issue_year": "1963",
+    "diameter": "24 mm",
+    "weight": "5.06 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 186,
+    "face_value": "3 lei",
+    "issue_year": "1963",
+    "diameter": "27 mm",
+    "weight": "5.86 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romanian People's Republic 1947-1965"
+  },
+  {
+    "id": 187,
+    "face_value": "5 bani",
+    "issue_year": "1966",
+    "diameter": "16 mm",
+    "weight": "1.7 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 188,
+    "face_value": "15 bani",
+    "issue_year": "1966",
+    "diameter": "19.5 mm",
+    "weight": "2.87 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 189,
+    "face_value": "25 bani",
+    "issue_year": "1966",
+    "diameter": "22 mm",
+    "weight": "3.38 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 190,
+    "face_value": "1 leu",
+    "issue_year": "1966",
+    "diameter": "24 mm",
+    "weight": "5.06 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 191,
+    "face_value": "3 lei",
+    "issue_year": "1966",
+    "diameter": "27 mm",
+    "weight": "5.86 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 192,
+    "face_value": "5 bani",
+    "issue_year": "1975",
+    "diameter": "16 mm",
+    "weight": "0.6 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 193,
+    "face_value": "15 bani",
+    "issue_year": "1975",
+    "diameter": "19.5 mm",
+    "weight": "1 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 194,
+    "face_value": "5 lei",
+    "issue_year": "1978",
+    "diameter": "29 mm",
+    "weight": "2.8 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 195,
+    "face_value": "25 bani",
+    "issue_year": "1982",
+    "diameter": "22 mm",
+    "weight": "1.3 g",
+    "metal": "aluminum",
+    "mint_or_theme": "Bucharest",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 196,
+    "face_value": "50 lei",
+    "issue_year": "1983",
+    "diameter": "? mm",
+    "weight": "13.88 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Philadelphia",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 197,
+    "face_value": "100 lei",
+    "issue_year": "1982",
+    "diameter": "? mm",
+    "weight": "27.75 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Philadelphia",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 198,
+    "face_value": "100 lei",
+    "issue_year": "1983",
+    "diameter": "? mm",
+    "weight": "27.75 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Philadelphia",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 199,
+    "face_value": "500 lei",
+    "issue_year": "1982",
+    "diameter": "23 mm",
+    "weight": "7.2 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Philadelphia",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 200,
+    "face_value": "500 lei",
+    "issue_year": "1983",
+    "diameter": "23 mm",
+    "weight": "7.2 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Philadelphia",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 201,
+    "face_value": "1000 lei",
+    "issue_year": "1983",
+    "diameter": "27 mm",
+    "weight": "14.4 g",
+    "metal": "Au 90%, Cu 10%",
+    "mint_or_theme": "Philadelphia",
+    "era": "Socialist Republic of Romania 1965-1989"
+  },
+  {
+    "id": 202,
+    "face_value": "10 lei",
+    "issue_year": "1990",
+    "diameter": "23 mm",
+    "weight": "4.65 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 203,
+    "face_value": "10 lei",
+    "issue_year": "1991",
+    "diameter": "23 mm",
+    "weight": "4.65 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 204,
+    "face_value": "20 lei",
+    "issue_year": "1991",
+    "diameter": "24 mm",
+    "weight": "5 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 205,
+    "face_value": "50 lei",
+    "issue_year": "1991",
+    "diameter": "26 mm",
+    "weight": "5.9 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 206,
+    "face_value": "100 lei",
+    "issue_year": "1991",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 207,
+    "face_value": "1 leu",
+    "issue_year": "1992",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 208,
+    "face_value": "5 lei",
+    "issue_year": "1992",
+    "diameter": "21 mm",
+    "weight": "3.35 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 209,
+    "face_value": "10 lei",
+    "issue_year": "1992",
+    "diameter": "23 mm",
+    "weight": "4.65 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 210,
+    "face_value": "20 lei",
+    "issue_year": "1992",
+    "diameter": "24 mm",
+    "weight": "5 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 211,
+    "face_value": "50 lei",
+    "issue_year": "1992",
+    "diameter": "26 mm",
+    "weight": "5.9 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 212,
+    "face_value": "100 lei",
+    "issue_year": "1992",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 213,
+    "face_value": "1 leu",
+    "issue_year": "1993",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 214,
+    "face_value": "5 lei",
+    "issue_year": "1993",
+    "diameter": "21 mm",
+    "weight": "3.35 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 215,
+    "face_value": "10 lei",
+    "issue_year": "1993",
+    "diameter": "23 mm",
+    "weight": "4.65 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 216,
+    "face_value": "20 lei",
+    "issue_year": "1993",
+    "diameter": "24 mm",
+    "weight": "5 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 217,
+    "face_value": "50 lei",
+    "issue_year": "1993",
+    "diameter": "26 mm",
+    "weight": "5.9 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 218,
+    "face_value": "100 lei",
+    "issue_year": "1993",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 219,
+    "face_value": "1 leu",
+    "issue_year": "1994",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 220,
+    "face_value": "5 lei",
+    "issue_year": "1994",
+    "diameter": "21 mm",
+    "weight": "3.35 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 221,
+    "face_value": "10 lei",
+    "issue_year": "1994",
+    "diameter": "23 mm",
+    "weight": "4.65 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 222,
+    "face_value": "20 lei",
+    "issue_year": "1994",
+    "diameter": "24 mm",
+    "weight": "5 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 223,
+    "face_value": "50 lei",
+    "issue_year": "1994",
+    "diameter": "26 mm",
+    "weight": "5.9 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 224,
+    "face_value": "100 lei",
+    "issue_year": "1994",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 225,
+    "face_value": "1 leu",
+    "issue_year": "1995",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 226,
+    "face_value": "5 lei",
+    "issue_year": "1995",
+    "diameter": "21 mm",
+    "weight": "3.35 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 227,
+    "face_value": "10 lei",
+    "issue_year": "1995",
+    "diameter": "23 mm",
+    "weight": "4.65 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 228,
+    "face_value": "20 lei",
+    "issue_year": "1995",
+    "diameter": "24 mm",
+    "weight": "5 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 229,
+    "face_value": "50 lei",
+    "issue_year": "1995",
+    "diameter": "26 mm",
+    "weight": "5.9 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 230,
+    "face_value": "100 lei",
+    "issue_year": "1995",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 231,
+    "face_value": "10 lei",
+    "issue_year": "1995",
+    "diameter": "23 mm",
+    "weight": "4.65 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest - FAO 50",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 232,
+    "face_value": "100 lei",
+    "issue_year": "1995",
+    "diameter": "37 mm",
+    "weight": "27.5 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest FAO 50",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 233,
+    "face_value": "1 leu",
+    "issue_year": "1996",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 234,
+    "face_value": "20 lei",
+    "issue_year": "1996",
+    "diameter": "24 mm",
+    "weight": "5 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 235,
+    "face_value": "50 lei",
+    "issue_year": "1996",
+    "diameter": "26 mm",
+    "weight": "5.9 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 236,
+    "face_value": "100 lei",
+    "issue_year": "1996",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 237,
+    "face_value": "10 lei",
+    "issue_year": "1996",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest - EC England",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 238,
+    "face_value": "100 lei",
+    "issue_year": "1996",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest EC England",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 239,
+    "face_value": "10 lei",
+    "issue_year": "1996",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest - Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 240,
+    "face_value": "10 lei",
+    "issue_year": "1996",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest - Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 241,
+    "face_value": "10 lei",
+    "issue_year": "1996",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest - Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 242,
+    "face_value": "10 lei",
+    "issue_year": "1996",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest - Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 243,
+    "face_value": "10 lei",
+    "issue_year": "1996",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest - Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 244,
+    "face_value": "10 lei",
+    "issue_year": "1996",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest - Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 245,
+    "face_value": "100 lei",
+    "issue_year": "1996",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 246,
+    "face_value": "100 lei",
+    "issue_year": "1996",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 247,
+    "face_value": "100 lei",
+    "issue_year": "1996",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 248,
+    "face_value": "100 lei",
+    "issue_year": "1996",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 249,
+    "face_value": "100 lei",
+    "issue_year": "1996",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 250,
+    "face_value": "100 lei",
+    "issue_year": "1996",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest Atlanta",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 251,
+    "face_value": "10 lei",
+    "issue_year": "1996",
+    "diameter": "23 mm",
+    "weight": "5 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest FAO Rome",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 252,
+    "face_value": "100 lei",
+    "issue_year": "1996",
+    "diameter": "37 mm",
+    "weight": "27.5 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest FAO Rome",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 253,
+    "face_value": "100 lei",
+    "issue_year": "1996",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest UNICEF",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 254,
+    "face_value": "100 lei",
+    "issue_year": "1998",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest FWC France",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 255,
+    "face_value": "100 lei",
+    "issue_year": "1998",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest Independence",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 256,
+    "face_value": "100 lei",
+    "issue_year": "1998",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest Nagano",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 257,
+    "face_value": "100 lei",
+    "issue_year": "1998",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest Nagano",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 258,
+    "face_value": "100 lei",
+    "issue_year": "1998",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Bucharest Nagano",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 259,
+    "face_value": "500 lei",
+    "issue_year": "1998",
+    "diameter": "24 mm",
+    "weight": "8.64 g",
+    "metal": "Au 90%",
+    "mint_or_theme": "1848 Revolution",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 260,
+    "face_value": "1000 lei",
+    "issue_year": "1998",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "1848 Revolution",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 261,
+    "face_value": "1000 lei",
+    "issue_year": "1998",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Transilvania",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 262,
+    "face_value": "100 lei",
+    "issue_year": "1998",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Andrei Şaguna",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 263,
+    "face_value": "500 lei",
+    "issue_year": "1999",
+    "diameter": "25 mm",
+    "weight": "3.7 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 264,
+    "face_value": "500 lei",
+    "issue_year": "1999",
+    "diameter": "25 mm",
+    "weight": "3.7 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Eclipse",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 265,
+    "face_value": "500 lei",
+    "issue_year": "1999",
+    "diameter": "25 mm",
+    "weight": "3.7 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Eclipse",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 266,
+    "face_value": "100 lei",
+    "issue_year": "1999",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Belgica Racovitã",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 267,
+    "face_value": "100 lei",
+    "issue_year": "1999",
+    "diameter": "13.93 mm",
+    "weight": "1.224 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Coţofeneşti Helmet",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 268,
+    "face_value": "100 lei",
+    "issue_year": "1999",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "silver",
+    "mint_or_theme": "Pope visit in Romania",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 269,
+    "face_value": "1000 lei",
+    "issue_year": "1999",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "gold",
+    "mint_or_theme": "Pope visit in Romania",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 270,
+    "face_value": "500 lei",
+    "issue_year": "2000",
+    "diameter": "25 mm",
+    "weight": "3.7 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 271,
+    "face_value": "1000 lei",
+    "issue_year": "2000",
+    "diameter": "22.4 mm",
+    "weight": "2 g",
+    "metal": "Al 100%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 272,
+    "face_value": "1 leu",
+    "issue_year": "2000",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 273,
+    "face_value": "5 lei",
+    "issue_year": "2000",
+    "diameter": "21 mm",
+    "weight": "3.35 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 274,
+    "face_value": "10 lei",
+    "issue_year": "2000",
+    "diameter": "23 mm",
+    "weight": "4.65 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 275,
+    "face_value": "20 lei",
+    "issue_year": "2000",
+    "diameter": "24 mm",
+    "weight": "5 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 276,
+    "face_value": "50 lei",
+    "issue_year": "2000",
+    "diameter": "26 mm",
+    "weight": "5.9 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 277,
+    "face_value": "100 lei",
+    "issue_year": "2000",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 278,
+    "face_value": "500 lei",
+    "issue_year": "2000",
+    "diameter": "25 mm",
+    "weight": "3.7 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 279,
+    "face_value": "1000 lei",
+    "issue_year": "2000",
+    "diameter": "22 mm",
+    "weight": "2 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 280,
+    "face_value": "500 lei",
+    "issue_year": "2000",
+    "diameter": "37 mm",
+    "weight": "27 g",
+    "metal": "Ag 92.5%",
+    "mint_or_theme": "Alexander the Good",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 281,
+    "face_value": "2000 lei",
+    "issue_year": "2000",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Mihai Eminescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 282,
+    "face_value": "5000 lei",
+    "issue_year": "2000",
+    "diameter": "35 mm",
+    "weight": "31.105 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Union of 1600",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 283,
+    "face_value": "5000 lei",
+    "issue_year": "2000",
+    "diameter": "24 mm",
+    "weight": "2.5 g",
+    "metal": "Au",
+    "mint_or_theme": "2000 years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 284,
+    "face_value": "1000 lei",
+    "issue_year": "2001",
+    "diameter": "22.4 mm",
+    "weight": "2 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 285,
+    "face_value": "5000 lei",
+    "issue_year": "2001",
+    "diameter": "24 mm",
+    "weight": "2.5 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 286,
+    "face_value": "50 lei",
+    "issue_year": "2001",
+    "diameter": "14.5 mm",
+    "weight": "15.551 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Vuia",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 287,
+    "face_value": "50 lei",
+    "issue_year": "2001",
+    "diameter": "14.5 mm",
+    "weight": "15.551 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Coandă",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 288,
+    "face_value": "50 lei",
+    "issue_year": "2001",
+    "diameter": "27 mm",
+    "weight": "15.551 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Carafoli",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 289,
+    "face_value": "500 lei",
+    "issue_year": "2001",
+    "diameter": "11.75 mm",
+    "weight": "6.22 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Pietroasa",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 290,
+    "face_value": "500 lei",
+    "issue_year": "2001",
+    "diameter": "11.75 mm",
+    "weight": "6.22 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Pietroasa",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 291,
+    "face_value": "500 lei",
+    "issue_year": "2001",
+    "diameter": "11.75 mm",
+    "weight": "6.22 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Pietroasa",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 292,
+    "face_value": "500 lei",
+    "issue_year": "2001",
+    "diameter": "11.75 mm",
+    "weight": "6.22 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Pietroasa",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 293,
+    "face_value": "1000 lei",
+    "issue_year": "2001",
+    "diameter": "14.5 mm",
+    "weight": "15.551 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Dacian-Roman War",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 294,
+    "face_value": "5000 lei",
+    "issue_year": "2001",
+    "diameter": "35 mm",
+    "weight": "31.105 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Brâncusi",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 295,
+    "face_value": "1000 lei",
+    "issue_year": "2002",
+    "diameter": "22 mm",
+    "weight": "2 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 296,
+    "face_value": "5000 lei",
+    "issue_year": "2002",
+    "diameter": "24 mm",
+    "weight": "2.5 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 297,
+    "face_value": "1 leu",
+    "issue_year": "2002",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 298,
+    "face_value": "5 lei",
+    "issue_year": "2002",
+    "diameter": "21 mm",
+    "weight": "3.35 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 299,
+    "face_value": "10 lei",
+    "issue_year": "2002",
+    "diameter": "23 mm",
+    "weight": "4.65 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 300,
+    "face_value": "20 lei",
+    "issue_year": "2002",
+    "diameter": "24 mm",
+    "weight": "5 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 301,
+    "face_value": "50 lei",
+    "issue_year": "2002",
+    "diameter": "26 mm",
+    "weight": "5.9 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 302,
+    "face_value": "100 lei",
+    "issue_year": "2002",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 303,
+    "face_value": "500 lei",
+    "issue_year": "2002",
+    "diameter": "25 mm",
+    "weight": "3.7 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 304,
+    "face_value": "1000 lei",
+    "issue_year": "2002",
+    "diameter": "22 mm",
+    "weight": "2 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 305,
+    "face_value": "5000 lei",
+    "issue_year": "2002",
+    "diameter": "24 mm",
+    "weight": "2.5 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 306,
+    "face_value": "5000 lei",
+    "issue_year": "2002",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Caragiale",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 307,
+    "face_value": "5000 lei",
+    "issue_year": "2002",
+    "diameter": "35 mm",
+    "weight": "15/10 g",
+    "metal": "Au 99.9% ring, Ag 99.9% kernel",
+    "mint_or_theme": "I.H.Rădulescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 308,
+    "face_value": "50 lei",
+    "issue_year": "2002",
+    "diameter": "29.54 mm",
+    "weight": "15.551 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "National Parks",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 309,
+    "face_value": "50 lei",
+    "issue_year": "2002",
+    "diameter": "29.54 mm",
+    "weight": "15.551 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "National Parks",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 310,
+    "face_value": "50 lei",
+    "issue_year": "2002",
+    "diameter": "29.54 mm",
+    "weight": "15.551 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "National Parks",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 311,
+    "face_value": "100 lei",
+    "issue_year": "2002",
+    "diameter": "13.93 mm",
+    "weight": "1.224 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Coţofeneşti Helmet",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 312,
+    "face_value": "500 lei",
+    "issue_year": "2002",
+    "diameter": "23.19 mm",
+    "weight": "6.22 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Feudal Art",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 313,
+    "face_value": "500 lei",
+    "issue_year": "2002",
+    "diameter": "23.19 mm",
+    "weight": "6.22 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Feudal Art",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 314,
+    "face_value": "500 lei",
+    "issue_year": "2002",
+    "diameter": "23.19 mm",
+    "weight": "6.22 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Feudal Art",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 315,
+    "face_value": "1000 lei",
+    "issue_year": "2003",
+    "diameter": "22 mm",
+    "weight": "2 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 316,
+    "face_value": "5000 lei",
+    "issue_year": "2003",
+    "diameter": "24 mm",
+    "weight": "2.5 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 317,
+    "face_value": "100 lei",
+    "issue_year": "2003",
+    "diameter": "13.93 mm",
+    "weight": "1.224 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Apahida vulture",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 318,
+    "face_value": "500 lei",
+    "issue_year": "2003",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Porumbescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 319,
+    "face_value": "500 lei",
+    "issue_year": "2003",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Rîmnic Bishopric",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 320,
+    "face_value": "5000 lei",
+    "issue_year": "2003",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Feudal Art",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 321,
+    "face_value": "50 lei",
+    "issue_year": "2003",
+    "diameter": "27 mm",
+    "weight": "15.551 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Danube Delta - pelican",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 322,
+    "face_value": "50 lei",
+    "issue_year": "2003",
+    "diameter": "27 mm",
+    "weight": "15.551 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Danube Delta - egret",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 323,
+    "face_value": "50 lei",
+    "issue_year": "2003",
+    "diameter": "27 mm",
+    "weight": "15.551 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Danube Delta - gull",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 324,
+    "face_value": "500 lei",
+    "issue_year": "2003",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Numismatic Society",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 325,
+    "face_value": "1 leu",
+    "issue_year": "2003",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 326,
+    "face_value": "5 lei",
+    "issue_year": "2003",
+    "diameter": "21 mm",
+    "weight": "3.35 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 327,
+    "face_value": "10 lei",
+    "issue_year": "2003",
+    "diameter": "23 mm",
+    "weight": "4.65 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 328,
+    "face_value": "20 lei",
+    "issue_year": "2003",
+    "diameter": "24 mm",
+    "weight": "5 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 329,
+    "face_value": "50 lei",
+    "issue_year": "2003",
+    "diameter": "26 mm",
+    "weight": "5.9 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 330,
+    "face_value": "100 lei",
+    "issue_year": "2003",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 331,
+    "face_value": "500 lei",
+    "issue_year": "2003",
+    "diameter": "25 mm",
+    "weight": "3.7 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 332,
+    "face_value": "1000 lei",
+    "issue_year": "2003",
+    "diameter": "22 mm",
+    "weight": "2 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 333,
+    "face_value": "5000 lei",
+    "issue_year": "2003",
+    "diameter": "24 mm",
+    "weight": "2.5 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 334,
+    "face_value": "5000 lei",
+    "issue_year": "2004",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "gold",
+    "mint_or_theme": "Stephen the Great",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 335,
+    "face_value": "1000 lei",
+    "issue_year": "2004",
+    "diameter": "22 mm",
+    "weight": "2 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 336,
+    "face_value": "5000 lei",
+    "issue_year": "2004",
+    "diameter": "24 mm",
+    "weight": "2.5 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 337,
+    "face_value": "500 lei",
+    "issue_year": "2004",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Feudal Art - Trei Ierarhi",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 338,
+    "face_value": "500 lei",
+    "issue_year": "2004",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Feudal Art - Cotroceni",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 339,
+    "face_value": "500 lei",
+    "issue_year": "2004",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Anghel Saligny",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 340,
+    "face_value": "500 lei",
+    "issue_year": "2004",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Bucharest University",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 341,
+    "face_value": "100 lei",
+    "issue_year": "2004",
+    "diameter": "13.93 mm",
+    "weight": "1.224 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Engolpion",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 342,
+    "face_value": "1 leu",
+    "issue_year": "2004",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 343,
+    "face_value": "100 lei",
+    "issue_year": "2004",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 344,
+    "face_value": "500 lei",
+    "issue_year": "2004",
+    "diameter": "25 mm",
+    "weight": "3.7 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 345,
+    "face_value": "1000 lei",
+    "issue_year": "2004",
+    "diameter": "22 mm",
+    "weight": "2 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 346,
+    "face_value": "5000 lei",
+    "issue_year": "2004",
+    "diameter": "24 mm",
+    "weight": "2.5 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 347,
+    "face_value": "stater",
+    "issue_year": "2005",
+    "diameter": "20 mm",
+    "weight": "8.5 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Koson - replica",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 348,
+    "face_value": "500 lei",
+    "issue_year": "2005",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "125 years BNR",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 349,
+    "face_value": "1 ban",
+    "issue_year": "2005",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 350,
+    "face_value": "5 bani",
+    "issue_year": "2005",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 351,
+    "face_value": "10 bani",
+    "issue_year": "2005",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 352,
+    "face_value": "50 bani",
+    "issue_year": "2005",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 353,
+    "face_value": "1 leu",
+    "issue_year": "2005",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 354,
+    "face_value": "100 lei",
+    "issue_year": "2005",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 355,
+    "face_value": "500 lei",
+    "issue_year": "2005",
+    "diameter": "25 mm",
+    "weight": "3.7 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 356,
+    "face_value": "1000 lei",
+    "issue_year": "2005",
+    "diameter": "22 mm",
+    "weight": "2 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 357,
+    "face_value": "5000 lei",
+    "issue_year": "2005",
+    "diameter": "24 mm",
+    "weight": "2.5 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 358,
+    "face_value": "1 ban",
+    "issue_year": "2005",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 359,
+    "face_value": "5 bani",
+    "issue_year": "2005",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 360,
+    "face_value": "10 bani",
+    "issue_year": "2005",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 361,
+    "face_value": "50 bani",
+    "issue_year": "2005",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 362,
+    "face_value": "500 lei",
+    "issue_year": "2005",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "George Enescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 363,
+    "face_value": "10 lei",
+    "issue_year": "2005",
+    "diameter": "13.93 mm",
+    "weight": "1.224 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Perşinari Hoard",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 364,
+    "face_value": "5 lei",
+    "issue_year": "2005",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "Ag 99.9%",
+    "mint_or_theme": "Vasiliu Birlic",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 365,
+    "face_value": "1 ban",
+    "issue_year": "2006",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 366,
+    "face_value": "5 bani",
+    "issue_year": "2006",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 367,
+    "face_value": "10 bani",
+    "issue_year": "2006",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 368,
+    "face_value": "50 bani",
+    "issue_year": "2006",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 369,
+    "face_value": "1 leu",
+    "issue_year": "2006",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "140 years Academy",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 370,
+    "face_value": "5 lei",
+    "issue_year": "2006",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "140 years Academy",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 371,
+    "face_value": "50 lei",
+    "issue_year": "2006",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "140 years Academy",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 372,
+    "face_value": "5 or 6 ducats",
+    "issue_year": "2006",
+    "diameter": "34.7 mm",
+    "weight": "17.349 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Brancoveanu medal-coin - replica",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 373,
+    "face_value": "1 leu",
+    "issue_year": "2006",
+    "diameter": "19 mm",
+    "weight": "2.5 g",
+    "metal": "Cu plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 374,
+    "face_value": "100 lei",
+    "issue_year": "2006",
+    "diameter": "29 mm",
+    "weight": "8.75 g",
+    "metal": "Ni plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 375,
+    "face_value": "500 lei",
+    "issue_year": "2006",
+    "diameter": "25 mm",
+    "weight": "3.7 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 376,
+    "face_value": "1000 lei",
+    "issue_year": "2006",
+    "diameter": "22 mm",
+    "weight": "2 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 377,
+    "face_value": "5000 lei",
+    "issue_year": "2006",
+    "diameter": "24 mm",
+    "weight": "2.5 g",
+    "metal": "AlMg3",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 378,
+    "face_value": "1 ban",
+    "issue_year": "2006",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 379,
+    "face_value": "5 bani",
+    "issue_year": "2006",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 380,
+    "face_value": "10 bani",
+    "issue_year": "2006",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 381,
+    "face_value": "50 bani",
+    "issue_year": "2006",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 382,
+    "face_value": "5 lei",
+    "issue_year": "2006",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Feudal Art - Ieud Church",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 383,
+    "face_value": "5 lei",
+    "issue_year": "2006",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Danube Commission",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 384,
+    "face_value": "500 lei",
+    "issue_year": "2006",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Patriarchal Cathedral",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 385,
+    "face_value": "denarius",
+    "issue_year": "2006",
+    "diameter": "20 mm",
+    "weight": "3.36 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "emperor Trajan - replica",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 386,
+    "face_value": "sesterce",
+    "issue_year": "2006",
+    "diameter": "33 mm",
+    "weight": "24 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "emperor Trajan - replica",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 387,
+    "face_value": "aureus",
+    "issue_year": "2006",
+    "diameter": "20 mm",
+    "weight": "7.243 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "emperor Trajan - replica",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 388,
+    "face_value": "aureus",
+    "issue_year": "2006",
+    "diameter": "20 mm",
+    "weight": "7.38 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "emperor Hadrian - replica",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 389,
+    "face_value": "10 lei",
+    "issue_year": "2006",
+    "diameter": "13.92 mm",
+    "weight": "1.224 g",
+    "metal": "Au 99.9%",
+    "mint_or_theme": "Cucuteni-Băiceni Hoard",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 390,
+    "face_value": "5 lei",
+    "issue_year": "2006",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Densuş Church",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 391,
+    "face_value": "5 lei",
+    "issue_year": "2006",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Sibiu - Cultural Capital",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 392,
+    "face_value": "500 lei",
+    "issue_year": "2007",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Romania - member in EU",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 393,
+    "face_value": "500 lei",
+    "issue_year": "2007",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Nicolae Bălcescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 394,
+    "face_value": "1 ban",
+    "issue_year": "2007",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 395,
+    "face_value": "5 bani",
+    "issue_year": "2007",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 396,
+    "face_value": "10 bani",
+    "issue_year": "2007",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 397,
+    "face_value": "1 leu",
+    "issue_year": "2007",
+    "diameter": "37 mm",
+    "weight": "23.25 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Mircea Eliade",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 398,
+    "face_value": "5 lei",
+    "issue_year": "2007",
+    "diameter": "30 mm",
+    "weight": "15.55 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Mircea Eliade",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 399,
+    "face_value": "100 lei",
+    "issue_year": "2007",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Mircea Eliade",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 400,
+    "face_value": "1 ban",
+    "issue_year": "1867",
+    "diameter": "15 mm",
+    "weight": "1.75 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "replica - 140 years of leu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 401,
+    "face_value": "2 bani",
+    "issue_year": "1867",
+    "diameter": "20 mm",
+    "weight": "3.5 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "replica - 140 years of leu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 402,
+    "face_value": "5 bani",
+    "issue_year": "1867",
+    "diameter": "25 mm",
+    "weight": "8.65 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "replica - 140 years of leu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 403,
+    "face_value": "10 bani",
+    "issue_year": "1867",
+    "diameter": "30 mm",
+    "weight": "17.2 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "replica - 140 years of leu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 404,
+    "face_value": "10 lei",
+    "issue_year": "2007",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Treaty of Rome - 50 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 405,
+    "face_value": "1 leu",
+    "issue_year": "2007",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Dimitrie Cantemir",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 406,
+    "face_value": "5 lei",
+    "issue_year": "2007",
+    "diameter": "30 mm",
+    "weight": "15.55 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Dimitrie Cantemir",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 407,
+    "face_value": "100 lei",
+    "issue_year": "2007",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Dimitrie Cantemir",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 408,
+    "face_value": "1 leu",
+    "issue_year": "2007",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Stephen the Great",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 409,
+    "face_value": "5 lei",
+    "issue_year": "2007",
+    "diameter": "30 mm",
+    "weight": "15.55 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Stephen the Great",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 410,
+    "face_value": "100 lei",
+    "issue_year": "2007",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Stephen the Great",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 411,
+    "face_value": "1 leu",
+    "issue_year": "2007",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "130 Years Independence",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 412,
+    "face_value": "5 lei",
+    "issue_year": "2007",
+    "diameter": "30 mm",
+    "weight": "15.55 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "130 Years Independence",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 413,
+    "face_value": "100 lei",
+    "issue_year": "2007",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "130 Years Independence",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 414,
+    "face_value": "10 lei",
+    "issue_year": "2007",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "150 Years of Petroleum Industry in Romania",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 415,
+    "face_value": "1 ban",
+    "issue_year": "2007",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest - Mint Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 416,
+    "face_value": "5 bani",
+    "issue_year": "2007",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest - Mint Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 417,
+    "face_value": "10 bani",
+    "issue_year": "2007",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest - Mint Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 418,
+    "face_value": "50 bani",
+    "issue_year": "2007",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest - Mint Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 419,
+    "face_value": "100 lei",
+    "issue_year": "2007",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "90 Years Mărăşeşti",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 420,
+    "face_value": "10 lei",
+    "issue_year": "2007",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Snagov Monastery",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 421,
+    "face_value": "10 lei",
+    "issue_year": "2007",
+    "diameter": "13.92 mm",
+    "weight": "1.1224 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "rhyton of Poroina",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 422,
+    "face_value": "1 ban",
+    "issue_year": "2008",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 423,
+    "face_value": "5 bani",
+    "issue_year": "2008",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 424,
+    "face_value": "10 bani",
+    "issue_year": "2008",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 425,
+    "face_value": "50 bani",
+    "issue_year": "2008",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 426,
+    "face_value": "1 leu",
+    "issue_year": "2008",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "2000 Years Ovid Exile",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 427,
+    "face_value": "5 lei",
+    "issue_year": "2008",
+    "diameter": "30 mm",
+    "weight": "15.55 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "2000 Years Ovid Exile",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 428,
+    "face_value": "100 lei",
+    "issue_year": "2008",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "2000 Years Ovid Exile",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 429,
+    "face_value": "1 leu",
+    "issue_year": "2008",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "NATO Summit",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 430,
+    "face_value": "5 lei",
+    "issue_year": "2008",
+    "diameter": "30 mm",
+    "weight": "15.55 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "NATO Summit",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 431,
+    "face_value": "100 lei",
+    "issue_year": "2008",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "NATO Summit",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 432,
+    "face_value": "10 lei",
+    "issue_year": "2008",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Bull Head Stamps",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 433,
+    "face_value": "10 lei",
+    "issue_year": "2008",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Costin Kiriţescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 434,
+    "face_value": "10 lei",
+    "issue_year": "2008",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "liturgical book of Macarie",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 435,
+    "face_value": "10 lei",
+    "issue_year": "2008",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Simion Bărnuţiu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 436,
+    "face_value": "1 ban",
+    "issue_year": "2008",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 437,
+    "face_value": "5 bani",
+    "issue_year": "2008",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 438,
+    "face_value": "10 bani",
+    "issue_year": "2008",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 439,
+    "face_value": "50 bani",
+    "issue_year": "2008",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 440,
+    "face_value": "10 lei",
+    "issue_year": "2008",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Cozia Monastery",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 441,
+    "face_value": "10 lei",
+    "issue_year": "2008",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Voroneţ Monastery",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 442,
+    "face_value": "10 lei",
+    "issue_year": "2008",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Sîmbăta de Sus Monastery",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 443,
+    "face_value": "10 lei",
+    "issue_year": "2008",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "80 Years Radio Romania",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 444,
+    "face_value": "20 lei",
+    "issue_year": "1922",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "replica - 20 lei 1922",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 445,
+    "face_value": "500 lei",
+    "issue_year": "2008",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Union of 1918 - 90 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 446,
+    "face_value": "10 lei",
+    "issue_year": "2008",
+    "diameter": "13.92 mm",
+    "weight": "1.1224 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "hoard of Hinova",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 447,
+    "face_value": "10 lei",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "European Economic and Monetary Union",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 448,
+    "face_value": "500 lei",
+    "issue_year": "2009",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Union of 1859",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 449,
+    "face_value": "500 lei",
+    "issue_year": "2009",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Carol I - 170 Years from Birth",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 450,
+    "face_value": "5 bani",
+    "issue_year": "2009",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 451,
+    "face_value": "10 bani",
+    "issue_year": "2009",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 452,
+    "face_value": "50 bani",
+    "issue_year": "2009",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 453,
+    "face_value": "10 lei",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Alexandru Macedonski",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 454,
+    "face_value": "10 lei",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Walachia Metropolitan",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 455,
+    "face_value": "10 lei",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Statistical Office",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 456,
+    "face_value": "10 lei",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Bucharest - Giurgiu Railway",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 457,
+    "face_value": "1 ban",
+    "issue_year": "2009",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 458,
+    "face_value": "5 bani",
+    "issue_year": "2009",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 459,
+    "face_value": "10 bani",
+    "issue_year": "2009",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 460,
+    "face_value": "50 bani",
+    "issue_year": "2009",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 461,
+    "face_value": "1 leu",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Bucharest - 550 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 462,
+    "face_value": "10 lei",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Bucharest - 550 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 463,
+    "face_value": "500 lei",
+    "issue_year": "2009",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Bucharest - 550 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 464,
+    "face_value": "10 lei",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Constanţa Harbor",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 465,
+    "face_value": "10 lei",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Adamclisi Monument",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 466,
+    "face_value": "1 leu",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "23.25 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "General Staff of the Army",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 467,
+    "face_value": "5 lei",
+    "issue_year": "2009",
+    "diameter": "30 mm",
+    "weight": "15.55 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "General Staff of the Army",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 468,
+    "face_value": "100 lei",
+    "issue_year": "2009",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "General Staff of the Army",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 469,
+    "face_value": "10 lei",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Timişoara - 125 Years of Public Electric Lighting",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 470,
+    "face_value": "10 lei",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Bishop Petru Pavel Aron",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 471,
+    "face_value": "1 leu",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Bălcescu - 190 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 472,
+    "face_value": "10 lei",
+    "issue_year": "2009",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Bălcescu - 190 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 473,
+    "face_value": "500 lei",
+    "issue_year": "2009",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Bălcescu - 190 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 474,
+    "face_value": "5 bani",
+    "issue_year": "2010",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 475,
+    "face_value": "10 bani",
+    "issue_year": "2010",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 476,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "13.92 mm",
+    "weight": "1.1224 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Someşeni Hoard",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 477,
+    "face_value": "500 lei",
+    "issue_year": "2010",
+    "diameter": "35 mm",
+    "weight": "31.103 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Eminescu - 160 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 478,
+    "face_value": "1 leu",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "National Bank of Romania - 130 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 479,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "NBR - 130 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 480,
+    "face_value": "200 lei",
+    "issue_year": "2010",
+    "diameter": "27 mm",
+    "weight": "15.551 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "NBR - 130 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 481,
+    "face_value": "100 lei",
+    "issue_year": "2010",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Eugeniu Carada - founder of NBR",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 482,
+    "face_value": "200 lei",
+    "issue_year": "2010",
+    "diameter": "27 mm",
+    "weight": "15.551 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "BOR (ROC) - 125 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 483,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Patriarch Miron Cristea",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 484,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Patriarch Nicodim Munteanu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 485,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Patriarch Justinian Marina",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 486,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Patriarch Iustin Moisescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 487,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Patriarch Teoctist Arăpaşu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 488,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Hariclea Darclée",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 489,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "August Treboniu Laurian",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 490,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "actor Ştefan Ciobotăraşu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 491,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "airplane of Henri Coandă",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 492,
+    "face_value": "50 bani",
+    "issue_year": "2010",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Aurel Vlaicu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 493,
+    "face_value": "50 bani",
+    "issue_year": "2010",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Aurel Vlaicu - proof",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 494,
+    "face_value": "1 ban",
+    "issue_year": "2010",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 495,
+    "face_value": "5 bani",
+    "issue_year": "2010",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 496,
+    "face_value": "10 bani",
+    "issue_year": "2010",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 497,
+    "face_value": "50 bani",
+    "issue_year": "2010",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 498,
+    "face_value": "100 lei",
+    "issue_year": "2010",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Queen Marie of Romania",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 499,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "poet Grigore Alexandrescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 500,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "writer Liviu Rebreanu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 501,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "NBR Palace in Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 502,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Palace of Justice",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 503,
+    "face_value": "10 lei",
+    "issue_year": "2010",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Stock Exchange Palace",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 504,
+    "face_value": "1 ban",
+    "issue_year": "2011",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 505,
+    "face_value": "5 bani",
+    "issue_year": "2011",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 506,
+    "face_value": "10 bani",
+    "issue_year": "2011",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 507,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.104 g",
+    "metal": "silver 92.5%",
+    "mint_or_theme": "Aeronautic Medicine",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 508,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "13.92 mm",
+    "weight": "1.1224 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "buckle of Curtea de Argeş",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 509,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Strei Church",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 510,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Humor Monastery",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 511,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Hurezi Monastery",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 512,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "State Mint - 140 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 513,
+    "face_value": "100 lei",
+    "issue_year": "2011",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Proclamation of Kingdom of Romania - 130 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 514,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Chemist Costin Neniţescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 515,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "coat of arms of Romania",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 516,
+    "face_value": "100 lei",
+    "issue_year": "2011",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Nicolae Iorga - 140 Years from Birth",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 517,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "painter Tonitza",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 518,
+    "face_value": "50 bani",
+    "issue_year": "2011",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Mircea cel Bătrîn",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 519,
+    "face_value": "200 lei",
+    "issue_year": "2010",
+    "diameter": "27 mm",
+    "weight": "15.551 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Mircea cel Bătrîn",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 520,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "gospel book of Coresi",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 521,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "George Bacovia",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 522,
+    "face_value": "1 ban",
+    "issue_year": "2011",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 523,
+    "face_value": "5 bani",
+    "issue_year": "2011",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 524,
+    "face_value": "10 bani",
+    "issue_year": "2011",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 525,
+    "face_value": "50 bani",
+    "issue_year": "2011",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 526,
+    "face_value": "50 bani",
+    "issue_year": "2011",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 527,
+    "face_value": "50 bani",
+    "issue_year": "2011",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 528,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Nicolae Milescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 529,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "ASTRA Sibiu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 530,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "military institutions",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 531,
+    "face_value": "100 lei",
+    "issue_year": "2011",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Tudor Vladimirescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 532,
+    "face_value": "10 lei",
+    "issue_year": "2011",
+    "diameter": "13.92 mm",
+    "weight": "1.1224 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "cross from Dinogetia",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 533,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Euro coins and Banknotes - 10 years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 534,
+    "face_value": "1 ban",
+    "issue_year": "2012",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 535,
+    "face_value": "5 bani",
+    "issue_year": "2012",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 536,
+    "face_value": "10 bani",
+    "issue_year": "2012",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 537,
+    "face_value": "50 bani",
+    "issue_year": "2012",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 538,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Carol Popp de Szatmari - 200 Years from Birth",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 539,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "First Romanian Law of Passports - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 540,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Ministry of Foreign Affairs - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 541,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Sergiu Celibidache",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 542,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Romanian Parliament - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 543,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Romanian Government - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 544,
+    "face_value": "50 bani",
+    "issue_year": "2012",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Neagoe Basarab and Curtea de Argeş Monastery",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 545,
+    "face_value": "100 lei",
+    "issue_year": "2012",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Neagoe Basarab and Curtea de Argeş Monastery",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 546,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Nicolae Steinhardt - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 547,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Elena Caragiani-Stoinescu - 125 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 548,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Marin Preda - 90 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 549,
+    "face_value": "100 lei",
+    "issue_year": "2012",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "George Bariţiu - 200 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 550,
+    "face_value": "1 ban",
+    "issue_year": "2012",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 551,
+    "face_value": "5 bani",
+    "issue_year": "2012",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 552,
+    "face_value": "10 bani",
+    "issue_year": "2012",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 553,
+    "face_value": "50 bani",
+    "issue_year": "2012",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 554,
+    "face_value": "50 bani",
+    "issue_year": "2012",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 555,
+    "face_value": "50 bani",
+    "issue_year": "2012",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 556,
+    "face_value": "50 bani",
+    "issue_year": "2012",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 557,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Cardinal Alexandru Todea - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 558,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Romanian Scientist George Emil Palade - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 559,
+    "face_value": "10 lei",
+    "issue_year": "2012",
+    "diameter": "13.92 mm",
+    "weight": "1.1224 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "patera of Pietroasa Hoard",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 560,
+    "face_value": "1 ban",
+    "issue_year": "2013",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 561,
+    "face_value": "5 bani",
+    "issue_year": "2013",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 562,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Rogoz Church - 350 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 563,
+    "face_value": "100 lei",
+    "issue_year": "2013",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Trajan's Column - 1900 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 564,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Antim Monastery - 300 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 565,
+    "face_value": "1 leu",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "ASE Bucharest - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 566,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "ASE Bucharest - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 567,
+    "face_value": "100 lei",
+    "issue_year": "2013",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "ASE Bucharest - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 568,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Nicolae Grigorescu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 569,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Saint Emperors Constantine and Helen",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 570,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Actress Lucia Sturdza Bulandra",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 571,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Ammunition Factory of the Army Arsenal - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 572,
+    "face_value": "1 leu",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "140 Years of Military Telecommunications",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 573,
+    "face_value": "5 lei",
+    "issue_year": "2013",
+    "diameter": "30 mm",
+    "weight": "15.55 g",
+    "metal": "silver 92.5%",
+    "mint_or_theme": "140 Years of Military Telecommunications",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 574,
+    "face_value": "100 lei",
+    "issue_year": "2013",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "140 Years of Military Telecommunications",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 575,
+    "face_value": "100 lei",
+    "issue_year": "2013",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Bogdan Petriceicu Hasdeu - 175 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 576,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "First Official Rugby Match in Romania - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 577,
+    "face_value": "1 leu",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Maria Tănase - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 578,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Maria Tănase - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 579,
+    "face_value": "100 lei",
+    "issue_year": "2013",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Maria Tănase - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 580,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "First Congress of the Romanian Economists - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 581,
+    "face_value": "100 lei",
+    "issue_year": "2013",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Junimea Literary Society from Iaşi - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 582,
+    "face_value": "1 ban",
+    "issue_year": "2013",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 583,
+    "face_value": "5 bani",
+    "issue_year": "2013",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 584,
+    "face_value": "10 bani",
+    "issue_year": "2013",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 585,
+    "face_value": "50 bani",
+    "issue_year": "2013",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 586,
+    "face_value": "50 bani",
+    "issue_year": "2013",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 587,
+    "face_value": "50 bani",
+    "issue_year": "2013",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 588,
+    "face_value": "50 bani",
+    "issue_year": "2013",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 589,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "neurologist Gheorghe Marinescu - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 590,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "microbiologist Ioan Cantacuzino - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 591,
+    "face_value": "10 lei",
+    "issue_year": "2013",
+    "diameter": "13.92 mm",
+    "weight": "1.1224 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "the Four Gospels of Hurezi Monastery",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 592,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Romanian olympic committee - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 593,
+    "face_value": "1 leu",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Romania’s Court of Accounts - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 594,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Romania’s Court of Accounts - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 595,
+    "face_value": "100 lei",
+    "issue_year": "2014",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Romania’s Court of Accounts - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 596,
+    "face_value": "50 bani",
+    "issue_year": "2014",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Vladislav I Vlaicu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 597,
+    "face_value": "100 lei",
+    "issue_year": "2014",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Vladislav I Vlaicu",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 598,
+    "face_value": "1 leu",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "king Carol I - 175 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 599,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "king Carol I - 175 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 600,
+    "face_value": "100 lei",
+    "issue_year": "2014",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "king Carol I - 175 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 601,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Superior War School - 125 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 602,
+    "face_value": "1 ban",
+    "issue_year": "2014",
+    "diameter": "16.75 mm",
+    "weight": "2.4 g",
+    "metal": "brass plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 603,
+    "face_value": "5 bani",
+    "issue_year": "2014",
+    "diameter": "18.25 mm",
+    "weight": "2.78 g",
+    "metal": "copper plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 604,
+    "face_value": "10 bani",
+    "issue_year": "2014",
+    "diameter": "20.5 mm",
+    "weight": "4 g",
+    "metal": "nickel plated steel",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 605,
+    "face_value": "50 bani",
+    "issue_year": "2014",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 606,
+    "face_value": "50 bani",
+    "issue_year": "2014",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 607,
+    "face_value": "50 bani",
+    "issue_year": "2014",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 608,
+    "face_value": "50 bani",
+    "issue_year": "2014",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 609,
+    "face_value": "50 bani",
+    "issue_year": "2014",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest Set",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 610,
+    "face_value": "1 leu",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Romania's Senate - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 611,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Romania's Senate - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 612,
+    "face_value": "100 lei",
+    "issue_year": "2014",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Romania's Senate - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 613,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Year of Brâncoveanu Saint Martyrs",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 614,
+    "face_value": "100 lei",
+    "issue_year": "2014",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 90%",
+    "mint_or_theme": "Year of Brâncoveanu Saint Martyrs",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 615,
+    "face_value": "1 leu",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Bucharest University - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 616,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Bucharest University - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 617,
+    "face_value": "100 lei",
+    "issue_year": "2014",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Bucharest University - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 618,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Elena Văcărescu - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 619,
+    "face_value": "1 leu",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Ion I.C. Brătianu - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 620,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Ion I.C. Brătianu - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 621,
+    "face_value": "100 lei",
+    "issue_year": "2014",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Ion I.C. Brătianu - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 622,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "architectural education in Romania - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 623,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "artist Eugen Drăguţescu - 100 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 624,
+    "face_value": "200 lei",
+    "issue_year": "2014",
+    "diameter": "27 mm",
+    "weight": "15.551 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "National Cathedral",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 625,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "13.92 mm",
+    "weight": "1.1224 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "gold coins struck at Histria",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 626,
+    "face_value": "1 leu",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "establishment of CEC Bank - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 627,
+    "face_value": "10 lei",
+    "issue_year": "2014",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "establishment of CEC Bank - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 628,
+    "face_value": "100 lei",
+    "issue_year": "2014",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "establishment of CEC Bank - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 629,
+    "face_value": "1 leu",
+    "issue_year": "2015",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Titu Maiorescu - 175 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 630,
+    "face_value": "10 lei",
+    "issue_year": "2015",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Titu Maiorescu - 175 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 631,
+    "face_value": "100 lei",
+    "issue_year": "2015",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Titu Maiorescu - 175 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 632,
+    "face_value": "10 lei",
+    "issue_year": "2015",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Iuliu Hossu - 130 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 633,
+    "face_value": "10 lei",
+    "issue_year": "2015",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Romanian Intelligence Service - 25 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 634,
+    "face_value": "10 lei",
+    "issue_year": "2015",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "National Bank - 135 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 635,
+    "face_value": "10 lei",
+    "issue_year": "2015",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "70 Years since the End of WW2",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 636,
+    "face_value": "10 lei",
+    "issue_year": "2015",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "State Mint - 145 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 637,
+    "face_value": "1 leu",
+    "issue_year": "2015",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "king Ferdinand - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 638,
+    "face_value": "10 lei",
+    "issue_year": "2015",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "king Ferdinand - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 639,
+    "face_value": "100 lei",
+    "issue_year": "2015",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "king Ferdinand - 150 Years",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 640,
+    "face_value": "50 bani",
+    "issue_year": "2015",
+    "diameter": "23.75 mm",
+    "weight": "6.1 g",
+    "metal": "copper 80%, zinc 15%, nickel 5%",
+    "mint_or_theme": "Bucharest",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 641,
+    "face_value": "1 leu",
+    "issue_year": "2015",
+    "diameter": "37 mm",
+    "weight": "23.5 g",
+    "metal": "coppered tombac",
+    "mint_or_theme": "Peleş Castle",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 642,
+    "face_value": "10 lei",
+    "issue_year": "2015",
+    "diameter": "37 mm",
+    "weight": "31.103 g",
+    "metal": "silver 99.9%",
+    "mint_or_theme": "Peleş Castle",
+    "era": "Romania 1989-"
+  },
+  {
+    "id": 643,
+    "face_value": "100 lei",
+    "issue_year": "2015",
+    "diameter": "21 mm",
+    "weight": "6.452 g",
+    "metal": "gold 99.9%",
+    "mint_or_theme": "Peleş Castle",
+    "era": "Romania 1989-"
+  }
+]
