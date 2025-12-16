@@ -27,6 +27,9 @@ export default function MintProductCard({ product }: { product: MintProduct }) {
               src={product.image || '/placeholder.jpg'}
               alt={product.title}
               fill
+              quality={75}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              loading="lazy"
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               onError={handleImageError}
             />

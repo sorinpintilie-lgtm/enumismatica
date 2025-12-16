@@ -59,7 +59,7 @@ export default function MonetariaStatuluiPage() {
           description: p.full_description,
           price: p.price,
           category: p.category,
-          image: `/monetaria-images/${p.category_slug}/${p.image_files}`,
+          image: `/Monetaria_statului/romanian_mint_products/${p.category_slug}/${p.image_files}`,
           link: p.product_url,
         }));
         setProducts(transformedProducts);
