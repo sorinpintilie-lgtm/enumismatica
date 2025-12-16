@@ -1,210 +1,80 @@
 import { useState, useEffect, useMemo } from 'react';
 
-// Romanian coin data structure
+// Romanian coin data structure (matches products.json structure)
 interface RomanianCoin {
-  id: string;
-  era: string;
-  issue_year: number;
+  id: number;
   face_value: string;
-  metal: string;
+  issue_year: string;
   diameter: string;
   weight: string;
-  mint_or_theme?: string;
-  mint?: string;
+  metal: string;
+  mint_or_theme: string;
+  era: string;
 }
-
-// Sample Romanian coins data
-const ROMANIAN_COINS: RomanianCoin[] = [
-  // Monede românești moderne (2005-prezent)
-  {
-    id: '1',
-    era: 'Monede românești moderne (2005-prezent)',
-    issue_year: 2005,
-    face_value: '1 Leu',
-    metal: 'Aur',
-    diameter: '20 mm',
-    weight: '6.22 g',
-    mint: 'Bucharest'
-  },
-  {
-    id: '2',
-    era: 'Monede românești moderne (2005-prezent)',
-    issue_year: 2005,
-    face_value: '5 Lei',
-    metal: 'Aur',
-    diameter: '23 mm',
-    weight: '7.5 g',
-    mint: 'Bucharest'
-  },
-  {
-    id: '3',
-    era: 'Monede românești moderne (2005-prezent)',
-    issue_year: 2010,
-    face_value: '10 Lei',
-    metal: 'Aur',
-    diameter: '26.3 mm',
-    weight: '8.5 g',
-    mint: 'Bucharest'
-  },
-  {
-    id: '4',
-    era: 'Monede românești moderne (2005-prezent)',
-    issue_year: 2015,
-    face_value: '50 Lei',
-    metal: 'Aur',
-    diameter: '24 mm',
-    weight: '10 g',
-    mint: 'Bucharest'
-  },
-  // Monede românești interbelice (1918-1947)
-  {
-    id: '5',
-    era: 'Monede românești interbelice (1918-1947)',
-    issue_year: 1920,
-    face_value: '1 Leu',
-    metal: 'Argint',
-    diameter: '23 mm',
-    weight: '5 g',
-    mint: 'Bucharest'
-  },
-  {
-    id: '6',
-    era: 'Monede românești interbelice (1918-1947)',
-    issue_year: 1930,
-    face_value: '2 Lei',
-    metal: 'Argint',
-    diameter: '27 mm',
-    weight: '10 g',
-    mint: 'Bucharest'
-  },
-  {
-    id: '7',
-    era: 'Monede românești interbelice (1918-1947)',
-    issue_year: 1940,
-    face_value: '5 Lei',
-    metal: 'Argint',
-    diameter: '30 mm',
-    weight: '15 g',
-    mint: 'Bucharest'
-  },
-  // Monede românești din perioada Regatului (1867-1918)
-  {
-    id: '8',
-    era: 'Monede românești din perioada Regatului (1867-1918)',
-    issue_year: 1870,
-    face_value: '1 Leu',
-    metal: 'Argint',
-    diameter: '23 mm',
-    weight: '5 g',
-    mint: 'Bucharest'
-  },
-  {
-    id: '9',
-    era: 'Monede românești din perioada Regatului (1867-1918)',
-    issue_year: 1880,
-    face_value: '2 Lei',
-    metal: 'Argint',
-    diameter: '27 mm',
-    weight: '10 g',
-    mint: 'Bucharest'
-  },
-  {
-    id: '10',
-    era: 'Monede românești din perioada Regatului (1867-1918)',
-    issue_year: 1900,
-    face_value: '5 Lei',
-    metal: 'Aur',
-    diameter: '19 mm',
-    weight: '1.5 g',
-    mint: 'Bucharest'
-  },
-  // Monede românești din epoca fanariotă (1711-1821)
-  {
-    id: '11',
-    era: 'Monede românești din epoca fanariotă (1711-1821)',
-    issue_year: 1750,
-    face_value: '1 Leu',
-    metal: 'Argint',
-    diameter: '25 mm',
-    weight: '7 g',
-    mint: 'Bucharest'
-  },
-  {
-    id: '12',
-    era: 'Monede românești din epoca fanariotă (1711-1821)',
-    issue_year: 1800,
-    face_value: '2 Lei',
-    metal: 'Argint',
-    diameter: '28 mm',
-    weight: '12 g',
-    mint: 'Bucharest'
-  },
-  // Monede românești medievale (sec. XIV-XVII)
-  {
-    id: '13',
-    era: 'Monede românești medievale (sec. XIV-XVII)',
-    issue_year: 1600,
-    face_value: '1 Leu',
-    metal: 'Argint',
-    diameter: '22 mm',
-    weight: '4 g',
-    mint: 'Sibiu'
-  },
-  {
-    id: '14',
-    era: 'Monede românești medievale (sec. XIV-XVII)',
-    issue_year: 1650,
-    face_value: '2 Lei',
-    metal: 'Argint',
-    diameter: '26 mm',
-    weight: '8 g',
-    mint: 'Alba Iulia'
-  }
-];
 
 export function useCoinAutocomplete() {
   const [selectedDenomination, setSelectedDenomination] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedMint, setSelectedMint] = useState('');
+  const [coinsData, setCoinsData] = useState<RomanianCoin[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch coins data from products.json
+  useEffect(() => {
+    const fetchCoinsData = async () => {
+      try {
+        const response = await fetch('/products.json');
+        const data: RomanianCoin[] = await response.json();
+        setCoinsData(data);
+      } catch (error) {
+        console.error('Failed to fetch coins data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCoinsData();
+  }, []);
 
   // Get unique denominations
   const availableDenominations = useMemo(() => {
-    const denominations = [...new Set(ROMANIAN_COINS.map(coin => coin.face_value))];
+    if (loading) return [];
+    const denominations = [...new Set(coinsData.map(coin => coin.face_value))];
     return denominations.sort();
-  }, []);
+  }, [coinsData, loading]);
 
   // Get available years for selected denomination
   const availableYears = useMemo(() => {
-    if (!selectedDenomination) return [];
-    const years = ROMANIAN_COINS
+    if (!selectedDenomination || loading) return [];
+    const years = coinsData
       .filter(coin => coin.face_value === selectedDenomination)
-      .map(coin => coin.issue_year.toString())
+      .map(coin => coin.issue_year)
       .filter((year, index, arr) => arr.indexOf(year) === index)
       .sort((a, b) => parseInt(a) - parseInt(b));
     return years;
-  }, [selectedDenomination]);
+  }, [selectedDenomination, coinsData, loading]);
 
   // Get available mints for selected denomination and year
   const availableMints = useMemo(() => {
-    if (!selectedDenomination || !selectedYear) return [];
-    const mints = ROMANIAN_COINS
-      .filter(coin => coin.face_value === selectedDenomination && coin.issue_year.toString() === selectedYear)
-      .map(coin => coin.mint_or_theme || coin.mint || '')
+    if (!selectedDenomination || !selectedYear || loading) return [];
+    const mints = coinsData
+      .filter(coin => coin.face_value === selectedDenomination && coin.issue_year === selectedYear)
+      .map(coin => coin.mint_or_theme)
       .filter((mint, index, arr) => arr.indexOf(mint) === index && mint)
       .sort();
     return mints;
-  }, [selectedDenomination, selectedYear]);
+  }, [selectedDenomination, selectedYear, coinsData, loading]);
 
   // Find matched coin
   const matchedCoin = useMemo(() => {
-    if (!selectedDenomination || !selectedYear || !selectedMint) return null;
-    return ROMANIAN_COINS.find(
+    if (!selectedDenomination || !selectedYear || !selectedMint || loading) return null;
+    return coinsData.find(
       coin =>
         coin.face_value === selectedDenomination &&
-        coin.issue_year.toString() === selectedYear &&
-        (coin.mint_or_theme === selectedMint || coin.mint === selectedMint)
+        coin.issue_year === selectedYear &&
+        coin.mint_or_theme === selectedMint
     ) || null;
-  }, [selectedDenomination, selectedYear, selectedMint]);
+  }, [selectedDenomination, selectedYear, selectedMint, coinsData, loading]);
 
   // Reset function
   const reset = () => {
@@ -240,5 +110,6 @@ export function useCoinAutocomplete() {
     availableYears,
     availableMints,
     reset,
+    loading,
   };
 }

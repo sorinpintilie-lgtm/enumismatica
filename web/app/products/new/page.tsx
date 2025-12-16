@@ -93,11 +93,11 @@ export default function NewProductPage() {
       setMetal(matchedCoin.metal || '');
       setDiameter(matchedCoin.diameter || '');
       setWeight(matchedCoin.weight || '');
-      setMintLocation(matchedCoin.mint_or_theme || matchedCoin.mint || '');
+      setMintLocation(matchedCoin.mint_or_theme || '');
 
       // Auto-generate name if empty
       if (!name) {
-        setName(`${matchedCoin.face_value} ${matchedCoin.issue_year} - ${matchedCoin.mint_or_theme || matchedCoin.mint}`);
+        setName(`${matchedCoin.face_value} ${matchedCoin.issue_year} - ${matchedCoin.mint_or_theme}`);
       }
     }
   }, [matchedCoin, useAutocomplete]);
@@ -437,7 +437,7 @@ export default function NewProductPage() {
                   <div><span className="text-slate-400">Diametru:</span> {matchedCoin.diameter}</div>
                   <div><span className="text-slate-400">Greutate:</span> {matchedCoin.weight}</div>
                   <div><span className="text-slate-400">Metal:</span> {matchedCoin.metal}</div>
-                  <div><span className="text-slate-400">Monetărie:</span> {matchedCoin.mint_or_theme || matchedCoin.mint}</div>
+                  <div><span className="text-slate-400">Monetărie:</span> {matchedCoin.mint_or_theme}</div>
                 </div>
               </div>
             )}
