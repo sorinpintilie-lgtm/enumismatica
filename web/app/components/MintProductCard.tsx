@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 
 interface MintProduct {
@@ -20,7 +21,7 @@ export default function MintProductCard({ product }: { product: MintProduct }) {
 
   return (
     <div className="bg-white/95 border border-[#e7b73c]/30 rounded-2xl shadow-[0_18px_55px_rgba(0,0,0,0.65)] p-4 backdrop-blur-sm hover:shadow-[0_25px_75px_rgba(0,0,0,0.8)] transition-all duration-300 group">
-      <a href={product.link} target="_blank" rel="noopener noreferrer" className="block">
+      <Link href={product.link} className="block">
         <div className="aspect-square relative mb-4 overflow-hidden rounded-xl bg-gray-100">
           {!imageError ? (
             <Image
@@ -49,7 +50,7 @@ export default function MintProductCard({ product }: { product: MintProduct }) {
             {product.price}
           </p>
         </div>
-      </a>
+      </Link>
     </div>
   );
 }
