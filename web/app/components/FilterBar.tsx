@@ -14,6 +14,7 @@ export interface FilterOptions {
   grade: string;
   // Romanian coin specific filters
   faceValue: string;
+  issueYear: string;
   diameter: string;
   weight: string;
   mint: string;
@@ -104,6 +105,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
   const [localFilters, setLocalFilters] = useState(filters);
   const [romanianOptions, setRomanianOptions] = useState({
     faceValues: ['Toate Valorile'],
+    issueYears: ['Toți Anii'],
     diameters: ['Toate Diametrele'],
     weights: ['Toate Greutățile'],
     mints: ['Toate Monetăriile'],
@@ -119,13 +121,15 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
         const data = await response.json();
 
         const faceValues = ['Toate Valorile', ...new Set(data.map((item: any) => item.face_value))];
+        const issueYears = ['Toți Anii', ...new Set(data.map((item: any) => item.issue_year))];
         const diameters = ['Toate Diametrele', ...new Set(data.map((item: any) => item.diameter))];
         const weights = ['Toate Greutățile', ...new Set(data.map((item: any) => item.weight))];
-        const mints = ['Toate Monetăriile', ...new Set(data.map((item: any) => item.mint))];
+        const mints = ['Toate Monetăriile', ...new Set(data.map((item: any) => item.mint_or_theme))];
         const eras = ['Toate Epocile', ...new Set(data.map((item: any) => item.era))];
 
         setRomanianOptions({
           faceValues: faceValues as string[],
+          issueYears: issueYears as string[],
           diameters: diameters as string[],
           weights: weights as string[],
           mints: mints as string[],
@@ -174,6 +178,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
       rarity: 'Toate Raritățile',
       grade: 'Toate Gradele',
       faceValue: 'Toate Valorile',
+      issueYear: 'Toți Anii',
       diameter: 'Toate Diametrele',
       weight: 'Toate Greutățile',
       mint: 'Toate Monetăriile',
@@ -333,6 +338,21 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
                       {romanianOptions.faceValues.map((value) => (
                         <option key={value} value={value} className="bg-navy-900 text-slate-100">
                           {value}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-100 mb-2">An Emisiune</label>
+                    <select
+                      value={localFilters.issueYear}
+                      onChange={(e) => handleFilterUpdate('issueYear', e.target.value)}
+                      className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
+                    >
+                      {romanianOptions.issueYears.map((year) => (
+                        <option key={year} value={year} className="bg-navy-900 text-slate-100">
+                          {year}
                         </option>
                       ))}
                     </select>

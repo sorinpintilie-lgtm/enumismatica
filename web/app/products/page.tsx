@@ -30,6 +30,7 @@ function ProductsListContent() {
     rarity: 'Toate Raritățile',
     grade: 'Toate Gradele',
     faceValue: 'Toate Valorile',
+    issueYear: 'Toți Anii',
     diameter: 'Toate Diametrele',
     weight: 'Toate Greutățile',
     mint: 'Toate Monetăriile',
@@ -111,6 +112,9 @@ function ProductsListContent() {
     if (filters.country === 'România') {
       if (filters.faceValue && filters.faceValue !== 'Toate Valorile') {
         filtered = filtered.filter((product) => (product as any).faceValue === filters.faceValue);
+      }
+      if (filters.issueYear && filters.issueYear !== 'Toți Anii') {
+        filtered = filtered.filter((product) => (product as any).issueYear === filters.issueYear);
       }
       if (filters.diameter && filters.diameter !== 'Toate Diametrele') {
         filtered = filtered.filter((product) => (product as any).diameter === filters.diameter);

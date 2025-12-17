@@ -42,6 +42,7 @@ export default function MonetariaStatuluiPage() {
 
   // Romanian coin filters
   const [faceValue, setFaceValue] = useState<string>('Toate Valorile');
+  const [issueYear, setIssueYear] = useState<string>('Toți Anii');
   const [diameter, setDiameter] = useState<string>('Toate Diametrele');
   const [weight, setWeight] = useState<string>('Toate Greutățile');
   const [mint, setMint] = useState<string>('Toate Monetăriile');
@@ -120,6 +121,9 @@ export default function MonetariaStatuluiPage() {
   // Apply Romanian coin filters
   if (faceValue !== 'Toate Valorile') {
     filteredProducts = filteredProducts.filter(p => (p as any).faceValue === faceValue);
+  }
+  if (issueYear !== 'Toți Anii') {
+    filteredProducts = filteredProducts.filter(p => (p as any).issueYear === issueYear);
   }
   if (diameter !== 'Toate Diametrele') {
     filteredProducts = filteredProducts.filter(p => (p as any).diameter === diameter);
