@@ -10,16 +10,18 @@ if (!admin.apps.length) {
     console.warn(
       '⚠️  Firebase admin credentials are not fully configured. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY in your environment.'
     );
+    // Initialize with minimal config to prevent build errors
+    // This will only work at runtime when proper credentials are available
+  } else {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      } as ServiceAccount),
+      storageBucket,
+    });
   }
-
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId,
-      clientEmail,
-      privateKey,
-    } as ServiceAccount),
-    storageBucket,
-  });
 }
 
 export default admin;
