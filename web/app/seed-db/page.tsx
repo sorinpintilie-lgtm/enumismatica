@@ -27,7 +27,7 @@ export default function SeedDatabase() {
   };
 
   const handleReset = async () => {
-    if (!confirm('⚠️ WARNING: This will DELETE ALL data from your database! This action cannot be undone. Are you absolutely sure?')) return;
+    if (!confirm('⚠️ WARNING: This will DELETE ONLY seeded data from your database! Manually created data will be preserved. Are you sure?')) return;
     
     setLoading(true);
     setMessage('');
@@ -35,7 +35,7 @@ export default function SeedDatabase() {
 
     try {
       await resetDatabase();
-      setMessage('Database reset successfully! All data has been deleted.');
+      setMessage('Seeded data reset successfully! Manually created data has been preserved.');
     } catch (err: any) {
       setError(`Error resetting database: ${err.message}`);
     } finally {
@@ -119,14 +119,14 @@ export default function SeedDatabase() {
             disabled={loading}
             className="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Processing...' : '⚠️ Reset Database (Delete All Data)'}
+            {loading ? 'Processing...' : '⚠️ Reset Seeded Data'}
           </button>
         </div>
 
         <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
           <p className="text-sm text-yellow-800">
             <strong>Note:</strong> Make sure you have deployed the Firestore rules before seeding data.
-            The reset function will delete ALL data including users, products, auctions, and bids.
+            The reset function will only delete seeded data (marked with 'seeded: true'), preserving manually created users, products, and auctions.
           </p>
         </div>
 

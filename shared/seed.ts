@@ -234,6 +234,7 @@ export async function seedUsers(): Promise<string[]> {
   for (const userData of sampleUsers) {
     const docRef = await addDoc(collection(db, 'users'), {
       ...userData,
+      seeded: true,
       createdAt: Timestamp.fromDate(userData.createdAt),
       updatedAt: Timestamp.fromDate(userData.updatedAt || new Date()),
     });
@@ -337,6 +338,7 @@ export async function seedProducts(userIds: string[]): Promise<string[]> {
 
     const docRef = await addDoc(collection(db, 'products'), {
       ...productData,
+      seeded: true,
       createdAt: Timestamp.fromDate(productData.createdAt),
       updatedAt: Timestamp.fromDate(productData.updatedAt),
     });
@@ -376,7 +378,10 @@ export async function seedAuctions(productIds: string[], userIds: string[]): Pro
       auctionData.buyNowPrice = auction.buyNowPrice;
     }
     
-    const docRef = await addDoc(collection(db, 'auctions'), auctionData);
+    const docRef = await addDoc(collection(db, 'auctions'), {
+      ...auctionData,
+      seeded: true,
+    });
     auctionIds.push(docRef.id);
   }
   return auctionIds;
@@ -632,41 +637,45 @@ export async function resetDatabase(): Promise<void> {
   try {
     console.log('Resetting database...');
     
-    // Delete all auctions and their subcollections
+    // Delete seeded auctions and their subcollections
     const auctionsSnapshot = await getDocs(collection(db, 'auctions'));
     for (const auctionDoc of auctionsSnapshot.docs) {
-      // Delete bids subcollection
-      const bidsSnapshot = await getDocs(collection(db, 'auctions', auctionDoc.id, 'bids'));
-      for (const bidDoc of bidsSnapshot.docs) {
-        await deleteDoc(bidDoc.ref);
+      if (auctionDoc.data().seeded) {
+        // Delete bids subcollection
+        const bidsSnapshot = await getDocs(collection(db, 'auctions', auctionDoc.id, 'bids'));
+        for (const bidDoc of bidsSnapshot.docs) {
+          await deleteDoc(bidDoc.ref);
+        }
+        // Delete autoBids subcollection
+        const autoBidsSnapshot = await getDocs(collection(db, 'auctions', auctionDoc.id, 'autoBids'));
+        for (const autoBidDoc of autoBidsSnapshot.docs) {
+          await deleteDoc(autoBidDoc.ref);
+        }
+        // Delete auction
+        await deleteDoc(auctionDoc.ref);
       }
-      // Delete autoBids subcollection
-      const autoBidsSnapshot = await getDocs(collection(db, 'auctions', auctionDoc.id, 'autoBids'));
-      for (const autoBidDoc of autoBidsSnapshot.docs) {
-        await deleteDoc(autoBidDoc.ref);
-      }
-      // Delete auction
-      await deleteDoc(auctionDoc.ref);
     }
-    console.log('Deleted all auctions');
+    console.log('Deleted seeded auctions');
 
-    // Delete all products
+    // Delete seeded products
     const productsSnapshot = await getDocs(collection(db, 'products'));
     for (const productDoc of productsSnapshot.docs) {
-      await deleteDoc(productDoc.ref);
+      if (productDoc.data().seeded) {
+        await deleteDoc(productDoc.ref);
+      }
     }
-    console.log('Deleted all products');
+    console.log('Deleted seeded products');
 
-    // Delete all users EXCEPT super admin
+    // Delete seeded users EXCEPT super admin
     const usersSnapshot = await getDocs(collection(db, 'users'));
     let deletedCount = 0;
     for (const userDoc of usersSnapshot.docs) {
-      if (userDoc.id !== SUPER_ADMIN_UID) {
+      if (userDoc.id !== SUPER_ADMIN_UID && userDoc.data().seeded) {
         await deleteDoc(userDoc.ref);
         deletedCount++;
       }
     }
-    console.log(`Deleted ${deletedCount} users (preserved super admin)`);
+    console.log(`Deleted ${deletedCount} seeded users (preserved super admin and manual users)`);
 
     console.log('Database reset completed successfully!');
   } catch (error) {
