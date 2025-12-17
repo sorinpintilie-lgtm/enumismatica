@@ -232,7 +232,7 @@ export default function PronumismaticaPage() {
                     name="lastName"
                     value={form.lastName}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   />
                 </div>
@@ -245,7 +245,7 @@ export default function PronumismaticaPage() {
                     name="firstName"
                     value={form.firstName}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   />
                 </div>
@@ -259,7 +259,7 @@ export default function PronumismaticaPage() {
                     value={form.cnp}
                     onChange={handleChange}
                     maxLength={13}
-                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   />
                 </div>
@@ -333,7 +333,7 @@ export default function PronumismaticaPage() {
                     name="idType"
                     value={form.idType}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   >
                     <option value="">Selectează...</option>
@@ -351,7 +351,7 @@ export default function PronumismaticaPage() {
                     name="idSeries"
                     value={form.idSeries}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   />
                 </div>
