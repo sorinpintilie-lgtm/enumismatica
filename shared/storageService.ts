@@ -24,6 +24,22 @@ export async function uploadImage(file: File, path: string): Promise<string> {
 }
 
 /**
+ * Upload a video to Firebase Storage (without conversion)
+ * @param file - The video file to upload
+ * @param path - The storage path (e.g., 'products/userId/videos/filename.mp4')
+ * @returns The download URL of the uploaded video
+ */
+export async function uploadVideo(file: File, path: string): Promise<string> {
+  if (!storage) throw new Error('Firebase Storage not initialized');
+
+  const storageRef = ref(storage, path);
+  const snapshot = await uploadBytes(storageRef, file);
+  const downloadURL = await getDownloadURL(snapshot.ref);
+
+  return downloadURL;
+}
+
+/**
  * Upload multiple images
  * @param files - Array of image files
  * @param basePath - Base path for storage (e.g., 'products/userId')

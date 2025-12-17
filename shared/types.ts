@@ -59,6 +59,7 @@ export interface Product {
   name: string;
   description: string;
   images: string[]; // Array of image URLs
+  video?: string; // Optional video URL for demonstration
   price: number; // Base price in the platform's currency
   ownerId: string; // Reference to the user who owns this product
   status: 'pending' | 'approved' | 'rejected'; // Approval status
@@ -75,6 +76,11 @@ export interface Product {
   weight?: number; // Weight in grams
   diameter?: number; // Diameter in millimeters
   category?: string; // General category (e.g., "coins", "banknotes", "medals")
+
+  // NGC Certification fields
+  hasNgcCertification?: boolean;
+  ngcCode?: string;
+  ngcGrade?: string;
 
   /**
    * Basic paid shop listing:
@@ -381,8 +387,14 @@ export interface CollectionItem {
   currentValue?: number;
   purchaseSource?: string;
   images?: string[];
+  video?: string; // Video URL for demonstration
   notes?: string;
   isPublic?: boolean;
+
+  // NGC Certification fields
+  hasNgcCertification?: boolean;
+  ngcCode?: string;
+  ngcGrade?: string;
 
   /**
    * Mark when an item from the collection has been sold.
