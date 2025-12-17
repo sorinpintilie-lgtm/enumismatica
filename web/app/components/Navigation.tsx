@@ -78,7 +78,6 @@ export default function Navigation() {
             <Link href="/products" className="hover:text-gold-400 transition-colors whitespace-nowrap">
               E-shop
             </Link>
-            <span className="text-gold-400/80">|</span>
             <Link href="/auctions" className="hover:text-gold-400 transition-colors whitespace-nowrap">
               Licitații
             </Link>
