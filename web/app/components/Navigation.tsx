@@ -56,45 +56,42 @@ export default function Navigation() {
         <div className="max-w-7xl w-full sm:w-auto pointer-events-auto">
           <nav className="relative flex items-center justify-between rounded-full border border-gold-500/30 bg-navy-500/90 px-4 sm:px-6 py-3 shadow-[0_12px_50px_rgba(231,183,60,0.25)] backdrop-blur-md">
           {/* Left: logo + title */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Image
               src="/assets/eNumismatica.ro_logo.png"
               alt="eNumismatica Logo"
-              width={80}
-              height={80}
-              className="h-20 w-20 object-contain"
+              width={60}
+              height={60}
+              className="h-15 w-15 object-contain"
               priority
             />
-            <div className="flex flex-col leading-tight">
-              <Link href="/" className="text-lg font-semibold text-white hover:text-gold-400 transition-colors">
-                eNumismatica
-              </Link>
-              <span className="text-xs uppercase tracking-[0.24em] text-gold-400">de colectie.</span>
-            </div>
+            <Link href="/" className="text-base font-semibold text-white hover:text-gold-400 transition-colors whitespace-nowrap">
+              eNumismatica <span className="text-xs uppercase tracking-[0.18em] text-gold-400">de colectie.</span>
+            </Link>
           </div>
 
           {/* Divider between logo/title and menu */}
           <div className="hidden sm:block h-8 w-px bg-[#e7b73c]/35 mx-2" />
 
           {/* Center: menu items with separators */}
-          <div className="hidden sm:flex items-center gap-3 text-sm font-medium text-slate-300">
-            <Link href="/products" className="hover:text-gold-400 transition-colors">
+          <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-300">
+            <Link href="/products" className="hover:text-gold-400 transition-colors whitespace-nowrap">
               E-shop
             </Link>
             <span className="text-gold-400/80">|</span>
-            <Link href="/monetaria-statului" className="hover:text-gold-400 transition-colors">
+            <Link href="/monetaria-statului" className="hover:text-gold-400 transition-colors whitespace-nowrap">
               Monetăria Statului
             </Link>
             <span className="text-gold-400/80">|</span>
-            <Link href="/auctions" className="hover:text-gold-400 transition-colors">
+            <Link href="/auctions" className="hover:text-gold-400 transition-colors whitespace-nowrap">
               Licitații
             </Link>
             <span className="text-gold-400/80">|</span>
-            <Link href="/pronumismatica" className="hover:text-gold-400 transition-colors">
+            <Link href="/pronumismatica" className="hover:text-gold-400 transition-colors whitespace-nowrap">
               PRONUMISMATICA
             </Link>
             <span className="text-gold-400/80">|</span>
-            <Link href="/about" className="hover:text-gold-400 transition-colors">
+            <Link href="/about" className="hover:text-gold-400 transition-colors whitespace-nowrap">
               Despre noi
             </Link>
             {user && isAdminUser && (
