@@ -81,60 +81,22 @@ const grades = [
 
 const romanianFaceValues = [
   'Toate Valorile',
-  '1 Leu',
-  '3 Lei',
-  '5 Lei',
-  '10 Lei',
-  '25 Lei',
-  '50 Lei',
-  '100 Lei',
-  '200 Lei',
-  '500 Lei',
 ];
 
 const romanianDiameters = [
   'Toate Diametrele',
-  '16.75 mm',
-  '18.25 mm',
-  '19.75 mm',
-  '21.25 mm',
-  '22.75 mm',
-  '23 mm',
-  '24.25 mm',
-  '25 mm',
-  '27 mm',
-  '29 mm',
-  '31 mm',
-  '33 mm',
 ];
 
 const romanianWeights = [
   'Toate Greutățile',
-  '2.5 g',
-  '3.1 g',
-  '3.6 g',
-  '4 g',
-  '4.3 g',
-  '5 g',
-  '5.7 g',
-  '6 g',
-  '6.4 g',
-  '7 g',
-  '8 g',
-  '9 g',
 ];
 
 const romanianMints = [
   'Toate Monetăriile',
-  'București',
 ];
 
 const romanianEras = [
   'Toate Epocile',
-  'Republica Populară Română',
-  'Republica Socialistă România',
-  'România Modernă',
-  'Uniunea Europeană',
 ];
 
 export default function FilterBar({ filters, onFilterChange, showAuctionFilters = false }: FilterBarProps) {
@@ -152,7 +114,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
   useEffect(() => {
     const loadRomanianOptions = async () => {
       try {
-        const response = await fetch('/data/products.json');
+        const response = await fetch('/products.json');
         if (!response.ok) throw new Error('Failed to load products.json');
         const data = await response.json();
 

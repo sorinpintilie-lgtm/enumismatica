@@ -87,7 +87,7 @@ export default function MonetariaStatuluiPage() {
 
     const loadRomanianOptions = async () => {
       try {
-        const response = await fetch('/data/products.json');
+        const response = await fetch('/products.json');
         if (!response.ok) throw new Error('Failed to load products.json');
         const data = await response.json();
 
