@@ -1,0 +1,439 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+
+type Step = 1 | 2 | 3 | 4;
+
+interface PronumismaticaForm {
+  lastName: string;
+  firstName: string;
+  cnp: string;
+  country: string;
+  county: string;
+  city: string;
+  address: string;
+  idType: 'CI' | 'BI' | 'Pasaport' | '';
+  idSeries: string;
+  phone: string;
+  email: string;
+}
+
+const initialForm: PronumismaticaForm = {
+  lastName: '',
+  firstName: '',
+  cnp: '',
+  country: '',
+  county: '',
+  city: '',
+  address: '',
+  idType: '',
+  idSeries: '',
+  phone: '',
+  email: '',
+};
+
+export default function PronumismaticaPage() {
+  const [step, setStep] = useState<Step>(1);
+  const [form, setForm] = useState<PronumismaticaForm>(initialForm);
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const canGoNext = () => {
+    if (step === 1) {
+      return (
+        form.lastName.trim() !== '' &&
+        form.firstName.trim() !== '' &&
+        form.cnp.trim().length >= 10
+      );
+    }
+    if (step === 2) {
+      return (
+        form.country.trim() !== '' &&
+        form.county.trim() !== '' &&
+        form.city.trim() !== '' &&
+        form.address.trim() !== ''
+      );
+    }
+    if (step === 3) {
+      return form.idType !== '' && form.idSeries.trim() !== '';
+    }
+    if (step === 4) {
+      return form.phone.trim() !== '' && form.email.trim() !== '';
+    }
+    return false;
+  };
+
+  const nextStep = () => {
+    if (step < 4 && canGoNext()) {
+      setStep((prev) => (prev + 1) as Step);
+    }
+  };
+
+  const prevStep = () => {
+    if (step > 1) {
+      setStep((prev) => (prev - 1) as Step);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    if (!canGoNext() || step !== 4) {
+      setError('Te rugăm să completezi toate câmpurile obligatorii.');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await fetch('/api/pronumismatica', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        throw new Error('Cererea nu a putut fi trimisă. Încearcă din nou mai târziu.');
+      }
+
+      setSuccess('Formularul a fost trimis cu succes. Vei fi contactat în curând.');
+      setForm(initialForm);
+      setStep(1);
+    } catch (err: any) {
+      console.error('Pronumismatica form submit error:', err);
+      setError(
+        err?.message ||
+          'A apărut o eroare la trimiterea formularului. Te rugăm să încerci din nou.',
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-10 max-w-4xl">
+      <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-bold text-[#e7b73c] mb-2">Asociația PRONUMISMATICA</h1>
+          <p className="text-slate-300 text-sm max-w-2xl">
+            Asociația PRONUMISMATICA este o organizație dedicată promovării, conservării și
+            valorificării patrimoniului numismatic al României.
+          </p>
+        </div>
+        <Link
+          href="/"
+          className="inline-flex items-center rounded-full border border-[#e7b73c]/70 px-4 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
+        >
+          ← Înapoi la pagina principală
+        </Link>
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2 items-start">
+        <section className="space-y-4 text-sm text-slate-200 leading-relaxed">
+          <p>
+            Asociația PRONUMISMATICA este o organizație dedicată promovării, conservării și
+            valorificării patrimoniului numismatic al României. Prin activitatea sa, asociația
+            susține educația culturală și stimulează interesul pentru monede, medalii și artefacte
+            numismatice, adresându-se atât colecționarilor, cât și publicului larg. Numismatica
+            este privită ca un instrument de transmitere a valorilor naționale și a identității
+            culturale între generații.
+          </p>
+          <div>
+            <h2 className="text-lg font-semibold text-[#e7b73c] mb-2">
+              Direcții și obiective principale
+            </h2>
+            <ul className="list-disc list-inside space-y-1 text-slate-200">
+              <li>
+                promovarea numismaticii ca parte integrantă a patrimoniului cultural;
+              </li>
+              <li>
+                organizarea de expoziții, evenimente și inițiative educaționale;
+              </li>
+              <li>colaborarea cu instituții culturale de prestigiu;</li>
+              <li>
+                conservarea și documentarea colecțiilor numismatice, inclusiv prin tehnologii
+                moderne;
+              </li>
+              <li>
+                realizarea de medalii și obiecte comemorative dedicate personalităților și
+                momentelor istorice;
+              </li>
+              <li>susținerea și dezvoltarea comunității numismatice.</li>
+            </ul>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-[#e7b73c] mb-2">Parteneriat</h2>
+            <p>
+              eNumismatica.ro are plăcerea de a colabora cu Asociația PRONUMISMATICA, susținând
+              prin acest parteneriat inițiative dedicate promovării și protejării patrimoniului
+              numismatic românesc.
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-gold-500/30 bg-navy-900/80 p-6 shadow-[0_14px_40px_rgba(0,0,0,0.8)]">
+          <h2 className="text-xl font-semibold text-[#e7b73c] mb-1">
+            Formular de contact PRONUMISMATICA
+          </h2>
+          <p className="text-xs text-slate-400 mb-4">
+            Completează pașii de mai jos pentru a trimite datele tale către Asociația
+            PRONUMISMATICA. Informațiile vor fi transmise în siguranță către organizator.
+          </p>
+
+          {/* Stepper indicator */}
+          <div className="flex items-center justify-between mb-6 text-xs text-slate-200">
+            {['Identitate', 'Adresă', 'Act de identitate', 'Contact'].map((label, index) => {
+              const currentStep = (index + 1) as Step;
+              const isActive = step === currentStep;
+              const isCompleted = step > currentStep;
+              return (
+                <div key={label} className="flex-1 flex items-center">
+                  <div
+                    className={`flex items-center justify-center h-7 w-7 rounded-full border text-[11px] font-semibold ${
+                      isCompleted
+                        ? 'bg-[#e7b73c] border-[#e7b73c] text-navy-900'
+                        : isActive
+                        ? 'bg-navy-800 border-[#e7b73c] text-[#e7b73c]'
+                        : 'bg-navy-950 border-slate-600 text-slate-400'
+                    }`}
+                  >
+                    {index + 1}
+                  </div>
+                  <span className="ml-2 hidden sm:inline-block">{label}</span>
+                  {index < 3 && (
+                    <div className="flex-1 h-px bg-slate-700 ml-2" aria-hidden="true" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4 text-sm">
+            {step === 1 && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                    Nume
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={form.lastName}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                    Prenume
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={form.firstName}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                    CNP
+                  </label>
+                  <input
+                    type="text"
+                    name="cnp"
+                    value={form.cnp}
+                    onChange={handleChange}
+                    maxLength={13}
+                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                    Țara
+                  </label>
+                  <input
+                    type="text"
+                    name="country"
+                    value={form.country}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                    Județ
+                  </label>
+                  <input
+                    type="text"
+                    name="county"
+                    value={form.county}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                    Oraș
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={form.city}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                    Adresă
+                  </label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={form.address}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                    Tip act de identitate
+                  </label>
+                  <select
+                    name="idType"
+                    value={form.idType}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    required
+                  >
+                    <option value="">Selectează...</option>
+                    <option value="CI">CI</option>
+                    <option value="BI">BI</option>
+                    <option value="Pasaport">Pașaport</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                    Serie / număr document identitate
+                  </label>
+                  <input
+                    type="text"
+                    name="idSeries"
+                    value={form.idSeries}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {step === 4 && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                    Număr de telefon
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="rounded-xl border border-red-500/40 bg-red-900/40 px-3 py-2 text-xs text-red-100">
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="rounded-xl border border-emerald-500/40 bg-emerald-900/40 px-3 py-2 text-xs text-emerald-100">
+                {success}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-2">
+              <button
+                type="button"
+                onClick={prevStep}
+                disabled={step === 1 || submitting}
+                className="inline-flex items-center rounded-full border border-slate-600 px-4 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800/60 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Înapoi
+              </button>
+
+              {step < 4 ? (
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  disabled={!canGoNext() || submitting}
+                  className="inline-flex items-center rounded-full bg-[#e7b73c] px-5 py-1.5 text-xs font-semibold text-[#000940] shadow-[0_0_18px_rgba(231,183,60,0.6)] hover:bg-[#f0c955] disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  Următorul pas
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={!canGoNext() || submitting}
+                  className="inline-flex items-center rounded-full bg-[#e7b73c] px-5 py-1.5 text-xs font-semibold text-[#000940] shadow-[0_0_18px_rgba(231,183,60,0.6)] hover:bg-[#f0c955] disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {submitting ? 'Se trimite...' : 'Trimite formularul'}
+                </button>
+              )}
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  );
+}
+
