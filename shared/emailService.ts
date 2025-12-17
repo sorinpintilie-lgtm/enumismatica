@@ -465,6 +465,71 @@ export async function sendAuctionRejectedEmail(
   });
 }
 
+interface PronumismaticaFormData {
+  lastName: string;
+  firstName: string;
+  cnp: string;
+  country: string;
+  county: string;
+  city: string;
+  address: string;
+  idType: string;
+  idSeries: string;
+  phone: string;
+  email: string;
+}
+
+export async function sendPronumismaticaFormEmail(
+  data: PronumismaticaFormData,
+): Promise<void> {
+  const content = `
+    <h2>Formular nou PRONUMISMATICA</h2>
+    <p>A fost completat un nou formular de interes pentru Asociația PRONUMISMATICA.</p>
+    <h3>Detalii persoană</h3>
+    <ul>
+      <li><strong>Nume:</strong> ${data.lastName}</li>
+      <li><strong>Prenume:</strong> ${data.firstName}</li>
+      <li><strong>CNP:</strong> ${data.cnp}</li>
+    </ul>
+    <h3>Adresă</h3>
+    <ul>
+      <li><strong>Țara:</strong> ${data.country}</li>
+      <li><strong>Județ:</strong> ${data.county}</li>
+      <li><strong>Oraș:</strong> ${data.city}</li>
+      <li><strong>Adresă:</strong> ${data.address}</li>
+    </ul>
+    <h3>Act de identitate</h3>
+    <ul>
+      <li><strong>Tip:</strong> ${data.idType}</li>
+      <li><strong>Serie / număr:</strong> ${data.idSeries}</li>
+    </ul>
+    <h3>Date de contact</h3>
+    <ul>
+      <li><strong>Telefon:</strong> ${data.phone}</li>
+      <li><strong>Email:</strong> ${data.email}</li>
+    </ul>
+  `;
+
+  await sendEmail({
+    to: 'bogdan.epure@sky.ro',
+    subject: 'Formular nou PRONUMISMATICA - eNumismatica.ro',
+    htmlBody: emailTemplate(content),
+    textBody:
+      `Formular nou PRONUMISMATICA:\n` +
+      `Nume: ${data.lastName}\n` +
+      `Prenume: ${data.firstName}\n` +
+      `CNP: ${data.cnp}\n` +
+      `Țara: ${data.country}\n` +
+      `Județ: ${data.county}\n` +
+      `Oraș: ${data.city}\n` +
+      `Adresă: ${data.address}\n` +
+      `Tip act: ${data.idType}\n` +
+      `Serie/număr: ${data.idSeries}\n` +
+      `Telefon: ${data.phone}\n` +
+      `Email: ${data.email}`,
+  });
+}
+
 export default {
   sendWelcomeEmail,
   sendPasswordResetEmail,
@@ -479,4 +544,5 @@ export default {
   sendProductRejectedEmail,
   sendAuctionApprovedEmail,
   sendAuctionRejectedEmail,
+  sendPronumismaticaFormEmail,
 };

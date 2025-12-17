@@ -9,12 +9,15 @@ import { useEffect, useState } from 'react';
 import { isAdmin } from 'shared/adminService';
 import NotificationCenter from './NotificationCenter';
 import { useCart } from '../hooks/useCart';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export default function Navigation() {
   const { user } = useAuth();
   const router = useRouter();
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
   const { items: cartItems } = useCart(user?.uid);
 
   useEffect(() => {
@@ -22,8 +25,20 @@ export default function Navigation() {
       if (user) {
         const adminStatus = await isAdmin(user.uid);
         setIsAdminUser(adminStatus);
+
+        // Check verification status
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setIsVerified(userData.verificationStatus === 'verified');
+          }
+        } catch (error) {
+          console.error('Error checking verification status:', error);
+        }
       } else {
         setIsAdminUser(false);
+        setIsVerified(false);
       }
     };
     checkAdmin();
@@ -61,24 +76,37 @@ export default function Navigation() {
           {/* Divider between logo/title and menu */}
           <div className="hidden sm:block h-8 w-px bg-[#e7b73c]/35 mx-2" />
 
-          {/* Center: menu items */}
-          <div className="hidden sm:flex items-center gap-3">
-            <Link href="/products" className="text-sm font-medium text-slate-300 hover:text-gold-400 transition-colors">
+          {/* Center: menu items with separators */}
+          <div className="hidden sm:flex items-center gap-3 text-sm font-medium text-slate-300">
+            <Link href="/products" className="hover:text-gold-400 transition-colors">
               E-shop
             </Link>
-            <Link href="/monetaria-statului" className="text-sm font-medium text-slate-300 hover:text-gold-400 transition-colors">
+            <span className="text-gold-400/80">|</span>
+            <Link href="/monetaria-statului" className="hover:text-gold-400 transition-colors">
               Monetăria Statului
             </Link>
-            <Link href="/auctions" className="text-sm font-medium text-slate-300 hover:text-gold-400 transition-colors">
-              Licitatii
+            <span className="text-gold-400/80">|</span>
+            <Link href="/auctions" className="hover:text-gold-400 transition-colors">
+              Licitații
             </Link>
-            <Link href="/about" className="text-sm font-medium text-slate-300 hover:text-gold-400 transition-colors">
+            <span className="text-gold-400/80">|</span>
+            <Link href="/pronumismatica" className="hover:text-gold-400 transition-colors">
+              PRONUMISMATICA
+            </Link>
+            <span className="text-gold-400/80">|</span>
+            <Link href="/about" className="hover:text-gold-400 transition-colors">
               Despre noi
             </Link>
             {user && isAdminUser && (
-              <Link href="/admin" className="text-sm font-semibold text-gold-400 hover:text-gold-300 transition-colors">
-                Administrare
-              </Link>
+              <>
+                <span className="text-gold-400/80">|</span>
+                <Link
+                  href="/admin"
+                  className="text-gold-400 font-semibold hover:text-gold-300 transition-colors"
+                >
+                  Administrare
+                </Link>
+              </>
             )}
           </div>
 
@@ -154,7 +182,17 @@ export default function Navigation() {
                   className="hidden sm:inline-flex h-9 items-center justify-center rounded-full border border-gold-500/50 px-3 text-sm font-medium text-gold-400 hover:border-gold-400 hover:bg-gold-500/10 transition-colors"
                   title="Panou"
                 >
-                  Cont
+                  <div className="flex items-center gap-1">
+                    Cont
+                    {isVerified && (
+                      <span className="px-1.5 py-0.5 text-xs rounded-full bg-green-100 text-green-800 flex items-center gap-0.5">
+                        <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Verificat
+                      </span>
+                    )}
+                  </div>
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -209,6 +247,13 @@ export default function Navigation() {
                     className="inline-flex items-center justify-center rounded-full border border-gold-500/70 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
                   >
                     Licitații
+                  </Link>
+                  <Link
+                    href="/pronumismatica"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="inline-flex items-center justify-center rounded-full border border-gold-500/70 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
+                  >
+                    PRONUMISMATICA
                   </Link>
                   <Link
                     href="/about"
