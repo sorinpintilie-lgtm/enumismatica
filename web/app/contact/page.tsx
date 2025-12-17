@@ -123,7 +123,7 @@ export default function ContactPage() {
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white/95 rounded-2xl border border-[#e7b73c]/30 shadow-[0_18px_55px_rgba(0,0,0,0.65)] p-8 backdrop-blur-sm">
+            <div className="bg-white/95 rounded-2xl border border-[#e7b73c]/30 shadow-[0_18px_55px_rgba(0,0,0,0.65)] p-8 backdrop-blur-sm text-gray-900">
               <h2 className="text-2xl font-bold text-[#000940] mb-6">Trimite-ne un mesaj</h2>
               
               {submitted && (
