@@ -79,20 +79,16 @@ export default function Navigation() {
               E-shop
             </Link>
             <span className="text-gold-400/80">|</span>
-            <Link href="/monetaria-statului" className="hover:text-gold-400 transition-colors whitespace-nowrap">
-              Monetăria Statului
-            </Link>
-            <span className="text-gold-400/80">|</span>
             <Link href="/auctions" className="hover:text-gold-400 transition-colors whitespace-nowrap">
               Licitații
             </Link>
             <span className="text-gold-400/80">|</span>
-            <Link href="/pronumismatica" className="hover:text-gold-400 transition-colors whitespace-nowrap">
-              PRONUMISMATICA
+            <Link href="/monetaria-statului" className="hover:text-gold-400 transition-colors whitespace-nowrap">
+              Monetăria Statului
             </Link>
             <span className="text-gold-400/80">|</span>
-            <Link href="/about" className="hover:text-gold-400 transition-colors whitespace-nowrap">
-              Despre noi
+            <Link href="/pronumismatica" className="hover:text-gold-400 transition-colors whitespace-nowrap">
+              Pronumismatica
             </Link>
             {user && isAdminUser && (
               <>
@@ -232,13 +228,6 @@ export default function Navigation() {
                     E-shop
                   </Link>
                   <Link
-                    href="/monetaria-statului"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="inline-flex items-center justify-center rounded-full border border-gold-500/70 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
-                  >
-                    Monetăria Statului
-                  </Link>
-                  <Link
                     href="/auctions"
                     onClick={() => setMobileMenuOpen(false)}
                     className="inline-flex items-center justify-center rounded-full border border-gold-500/70 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
@@ -246,18 +235,18 @@ export default function Navigation() {
                     Licitații
                   </Link>
                   <Link
+                    href="/monetaria-statului"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="inline-flex items-center justify-center rounded-full border border-gold-500/70 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
+                  >
+                    Monetăria Statului
+                  </Link>
+                  <Link
                     href="/pronumismatica"
                     onClick={() => setMobileMenuOpen(false)}
                     className="inline-flex items-center justify-center rounded-full border border-gold-500/70 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
                   >
-                    PRONUMISMATICA
-                  </Link>
-                  <Link
-                    href="/about"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="inline-flex items-center justify-center rounded-full border border-gold-500/70 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
-                  >
-                    Despre noi
+                    Pronumismatica
                   </Link>
                   {user && isAdminUser && (
                     <Link
