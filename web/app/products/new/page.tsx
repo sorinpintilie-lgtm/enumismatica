@@ -217,14 +217,18 @@ export default function NewProductPage() {
       return;
     }
 
-    const numericPrice = Number(price);
-    if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
-      showToast({
-        type: 'error',
-        title: 'Preț invalid',
-        message: 'Introdu un preț valid mai mare decât 0.',
-      });
-      return;
+    // Validate price only for direct sales
+    let numericPrice = 0;
+    if (listingType === 'direct') {
+      numericPrice = Number(price);
+      if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+        showToast({
+          type: 'error',
+          title: 'Preț invalid',
+          message: 'Introdu un preț valid mai mare decât 0.',
+        });
+        return;
+      }
     }
 
     if (listingType === 'auction') {
@@ -567,8 +571,8 @@ export default function NewProductPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all ${
                 listingType === 'direct'
-                  ? 'border-gold-500/40 bg-navy-800/50 text-slate-300'
-                  : 'border-gold-400 bg-gold-400/10 text-gold-300 hover:border-gold-500/60'
+                  ? 'border-gold-400 bg-gold-400/10 text-gold-300'
+                  : 'border-gold-500/40 bg-navy-800/50 text-slate-300 hover:border-gold-500/60'
               }`}>
                 <input
                   type="radio"
@@ -593,8 +597,8 @@ export default function NewProductPage() {
 
               <label className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all ${
                 listingType === 'auction'
-                  ? 'border-gold-500/40 bg-navy-800/50 text-slate-300'
-                  : 'border-gold-400 bg-gold-400/10 text-gold-300 hover:border-gold-500/60'
+                  ? 'border-gold-400 bg-gold-400/10 text-gold-300'
+                  : 'border-gold-500/40 bg-navy-800/50 text-slate-300 hover:border-gold-500/60'
               }`}>
                 <input
                   type="radio"
@@ -637,36 +641,24 @@ export default function NewProductPage() {
             />
           </div>
 
-          {/* Description Input */}
-          <div>
-            <label className="block text-sm font-medium text-slate-200 mb-1">
-              Descriere *
-            </label>
-            <textarea
-              className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-              rows={4}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Price */}
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-1">
-                Preț fix (RON) *
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
-              />
-            </div>
+             {/* Price - only show for direct sales */}
+             {listingType === 'direct' && (
+               <div>
+                 <label className="block text-sm font-medium text-slate-200 mb-1">
+                   Preț fix (RON) *
+                 </label>
+                 <input
+                   type="number"
+                   min="0"
+                   step="0.01"
+                   className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                   value={price}
+                   onChange={(e) => setPrice(e.target.value)}
+                   required
+                 />
+               </div>
+             )}
 
             {/* Country */}
             <div>
@@ -829,6 +821,20 @@ export default function NewProductPage() {
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Alte informatii (moved from earlier position) */}
+          <div>
+            <label className="block text-sm font-medium text-slate-200 mb-1">
+              Alte informații *
+            </label>
+            <textarea
+              className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
           </div>
 
           {/* NGC Certification Section */}
