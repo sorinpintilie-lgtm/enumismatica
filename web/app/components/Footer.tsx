@@ -102,46 +102,51 @@ export default function Footer() {
         </div>
 
         {/* Partners */}
-        <div className="mt-10 border-t border-navy-700 pt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="text-sm text-gray-300">
-            <span className="font-semibold text-gold-400">Parteneri:</span>{' '}
-            <span className="text-gray-400">
-              Monetăria Statului și Asociația PRONUMISMATICA
-            </span>
+        <div className="mt-10 border-t border-navy-700 pt-6">
+          <div className="text-center mb-6">
+            <h3 className="text-xl font-bold text-gold-400 mb-2">Parteneri</h3>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6">
-            <a
-              href="https://www.monetariastatului.ro"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 group"
-            >
-              <div className="relative h-10 w-32">
-                <Image
-                  src="/logomonetaria statului.png"
-                  alt="Monetaria Statului"
-                  fill
-                  className="object-contain opacity-80 group-hover:opacity-100 transition-opacity"
-                />
-              </div>
-            </a>
+          <div className="grid grid-cols-2 gap-6 max-w-md mx-auto">
+            {/* Monetaria Statului */}
+            <div className="text-center">
+              <div className="text-sm font-semibold text-gray-300 mb-2">Monetaria Statului</div>
+              <a
+                href="https://www.monetariastatului.ro"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block group"
+              >
+                <div className="relative h-16 w-32 mx-auto">
+                  <Image
+                    src="/logomonetaria statului.png"
+                    alt="Monetaria Statului"
+                    fill
+                    className="object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                  />
+                </div>
+              </a>
+            </div>
 
-            <a
-              href="https://www.pronumismatica.ro"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 group"
-            >
-              <div className="relative h-10 w-32">
-                <Image
-                  src="/pronumilogo.png"
-                  alt="Asociația PRONUMISMATICA"
-                  fill
-                  className="object-contain opacity-80 group-hover:opacity-100 transition-opacity"
-                />
-              </div>
-            </a>
+            {/* Pronumismatica */}
+            <div className="text-center">
+              <div className="text-sm font-semibold text-gray-300 mb-2">Pronumismatica</div>
+              <a
+                href="https://www.pronumismatica.ro"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block group"
+              >
+                <div className="relative h-16 w-32 mx-auto">
+                  <Image
+                    src="/pronumilogo.png"
+                    alt="Asociația PRONUMISMATICA"
+                    fill
+                    className="object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                  />
+                </div>
+              </a>
+            </div>
           </div>
         </div>
 
