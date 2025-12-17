@@ -147,6 +147,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
     mints: ['Toate Monetăriile'],
     eras: ['Toate Epocile'],
   });
+  const [romanianOptionsLoaded, setRomanianOptionsLoaded] = useState(false);
 
   useEffect(() => {
     const loadRomanianOptions = async () => {
@@ -168,6 +169,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
           mints: mints as string[],
           eras: eras as string[],
         });
+        setRomanianOptionsLoaded(true);
       } catch (error) {
         console.error('Error loading Romanian coin options:', error);
       }
@@ -199,7 +201,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
   const resetFilters = () => {
     const defaultFilters: FilterOptions = {
       searchTerm: '',
-      country: 'Toate Țările',
+      country: 'România',
       // 0 / 0 = fără filtru de preț; utilizatorul setează limite doar dacă dorește.
       minPrice: 0,
       maxPrice: 0,
@@ -353,8 +355,8 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
             </div>
           </div>
 
-          {/* Romanian Coin Filters - Only show when country is Romania */}
-          {localFilters.country === 'România' && (
+          {/* Romanian Coin Filters - Only show when country is Romania and options loaded */}
+          {localFilters.country === 'România' && romanianOptionsLoaded && (
             <>
               <div className="border-t border-[#e7b73c]/25 pt-6">
                 <h3 className="text-lg font-semibold text-slate-100 mb-4">Filtre Monede Românești</h3>

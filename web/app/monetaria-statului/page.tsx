@@ -53,6 +53,7 @@ export default function MonetariaStatuluiPage() {
     mints: ['Toate Monetăriile'],
     eras: ['Toate Epocile'],
   });
+  const [romanianOptionsLoaded, setRomanianOptionsLoaded] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -103,6 +104,7 @@ export default function MonetariaStatuluiPage() {
           mints: mints as string[],
           eras: eras as string[],
         });
+        setRomanianOptionsLoaded(true);
       } catch (error) {
         console.error('Error loading Romanian coin options:', error);
       }
@@ -171,7 +173,8 @@ export default function MonetariaStatuluiPage() {
         </div>
 
         {/* Romanian Coin Filters */}
-        <div className="bg-navy-800/50 rounded-2xl p-6 mb-8">
+        {romanianOptionsLoaded && (
+          <div className="bg-navy-800/50 rounded-2xl p-6 mb-8">
           <h3 className="text-lg font-semibold text-white mb-4 text-center">Filtre Monede Românești</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
@@ -236,6 +239,7 @@ export default function MonetariaStatuluiPage() {
             </div>
           </div>
         </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
           {currentProducts.map((product) => (

@@ -19,7 +19,7 @@ function AuctionsListContent() {
   
   const [filters, setFilters] = useState<FilterOptions>({
     searchTerm: '',
-    country: 'Toate Țările',
+    country: 'România',
     // 0 values mean "no filter" for price and year
     minPrice: 0,
     maxPrice: 0,

@@ -19,7 +19,7 @@ function ProductsListContent() {
   
   const [filters, setFilters] = useState<FilterOptions>({
     searchTerm: '',
-    country: 'Toate Țările',
+    country: 'România',
     // 0 / 0 = fără filtru de preț în mod implicit. Utilizatorul setează limitele doar dacă dorește.
     minPrice: 0,
     maxPrice: 0,
