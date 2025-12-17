@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export interface FilterOptions {
   searchTerm: string;
@@ -12,6 +12,12 @@ export interface FilterOptions {
   metal: string;
   rarity: string;
   grade: string;
+  // Romanian coin specific filters
+  faceValue: string;
+  diameter: string;
+  weight: string;
+  mint: string;
+  era: string;
   // Common sort options used by both products and auctions.
   // Products will only expose a subset (best-match, price-asc/desc, newly-listed),
   // while auctions can also expose "ending-soonest".
@@ -73,9 +79,102 @@ const grades = [
   'MS-70',
 ];
 
+const romanianFaceValues = [
+  'Toate Valorile',
+  '1 Leu',
+  '3 Lei',
+  '5 Lei',
+  '10 Lei',
+  '25 Lei',
+  '50 Lei',
+  '100 Lei',
+  '200 Lei',
+  '500 Lei',
+];
+
+const romanianDiameters = [
+  'Toate Diametrele',
+  '16.75 mm',
+  '18.25 mm',
+  '19.75 mm',
+  '21.25 mm',
+  '22.75 mm',
+  '23 mm',
+  '24.25 mm',
+  '25 mm',
+  '27 mm',
+  '29 mm',
+  '31 mm',
+  '33 mm',
+];
+
+const romanianWeights = [
+  'Toate Greutățile',
+  '2.5 g',
+  '3.1 g',
+  '3.6 g',
+  '4 g',
+  '4.3 g',
+  '5 g',
+  '5.7 g',
+  '6 g',
+  '6.4 g',
+  '7 g',
+  '8 g',
+  '9 g',
+];
+
+const romanianMints = [
+  'Toate Monetăriile',
+  'București',
+];
+
+const romanianEras = [
+  'Toate Epocile',
+  'Republica Populară Română',
+  'Republica Socialistă România',
+  'România Modernă',
+  'Uniunea Europeană',
+];
+
 export default function FilterBar({ filters, onFilterChange, showAuctionFilters = false }: FilterBarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [localFilters, setLocalFilters] = useState(filters);
+  const [romanianOptions, setRomanianOptions] = useState({
+    faceValues: ['Toate Valorile'],
+    diameters: ['Toate Diametrele'],
+    weights: ['Toate Greutățile'],
+    mints: ['Toate Monetăriile'],
+    eras: ['Toate Epocile'],
+  });
+
+  useEffect(() => {
+    const loadRomanianOptions = async () => {
+      try {
+        const response = await fetch('/data/products.json');
+        if (!response.ok) throw new Error('Failed to load products.json');
+        const data = await response.json();
+
+        const faceValues = ['Toate Valorile', ...new Set(data.map((item: any) => item.face_value))];
+        const diameters = ['Toate Diametrele', ...new Set(data.map((item: any) => item.diameter))];
+        const weights = ['Toate Greutățile', ...new Set(data.map((item: any) => item.weight))];
+        const mints = ['Toate Monetăriile', ...new Set(data.map((item: any) => item.mint))];
+        const eras = ['Toate Epocile', ...new Set(data.map((item: any) => item.era))];
+
+        setRomanianOptions({
+          faceValues: faceValues as string[],
+          diameters: diameters as string[],
+          weights: weights as string[],
+          mints: mints as string[],
+          eras: eras as string[],
+        });
+      } catch (error) {
+        console.error('Error loading Romanian coin options:', error);
+      }
+    };
+
+    loadRomanianOptions();
+  }, []);
 
   const handleFilterUpdate = (key: keyof FilterOptions, value: any) => {
     const updatedFilters = { ...localFilters, [key]: value };
@@ -110,6 +209,11 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
       metal: 'Toate Metalele',
       rarity: 'Toate Raritățile',
       grade: 'Toate Gradele',
+      faceValue: 'Toate Valorile',
+      diameter: 'Toate Diametrele',
+      weight: 'Toate Greutățile',
+      mint: 'Toate Monetăriile',
+      era: 'Toate Epocile',
       sortBy: 'best-match',
     };
     setLocalFilters(defaultFilters);
@@ -248,6 +352,91 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
               </select>
             </div>
           </div>
+
+          {/* Romanian Coin Filters - Only show when country is Romania */}
+          {localFilters.country === 'România' && (
+            <>
+              <div className="border-t border-[#e7b73c]/25 pt-6">
+                <h3 className="text-lg font-semibold text-slate-100 mb-4">Filtre Monede Românești</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-100 mb-2">Valoare Nominală</label>
+                    <select
+                      value={localFilters.faceValue}
+                      onChange={(e) => handleFilterUpdate('faceValue', e.target.value)}
+                      className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
+                    >
+                      {romanianOptions.faceValues.map((value) => (
+                        <option key={value} value={value} className="bg-navy-900 text-slate-100">
+                          {value}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-100 mb-2">Diametru</label>
+                    <select
+                      value={localFilters.diameter}
+                      onChange={(e) => handleFilterUpdate('diameter', e.target.value)}
+                      className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
+                    >
+                      {romanianOptions.diameters.map((diameter) => (
+                        <option key={diameter} value={diameter} className="bg-navy-900 text-slate-100">
+                          {diameter}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-100 mb-2">Greutate</label>
+                    <select
+                      value={localFilters.weight}
+                      onChange={(e) => handleFilterUpdate('weight', e.target.value)}
+                      className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
+                    >
+                      {romanianOptions.weights.map((weight) => (
+                        <option key={weight} value={weight} className="bg-navy-900 text-slate-100">
+                          {weight}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-100 mb-2">Monetărie</label>
+                    <select
+                      value={localFilters.mint}
+                      onChange={(e) => handleFilterUpdate('mint', e.target.value)}
+                      className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
+                    >
+                      {romanianOptions.mints.map((mint) => (
+                        <option key={mint} value={mint} className="bg-navy-900 text-slate-100">
+                          {mint}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-100 mb-2">Epocă</label>
+                    <select
+                      value={localFilters.era}
+                      onChange={(e) => handleFilterUpdate('era', e.target.value)}
+                      className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
+                    >
+                      {romanianOptions.eras.map((era) => (
+                        <option key={era} value={era} className="bg-navy-900 text-slate-100">
+                          {era}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Price Range */}
           <div>

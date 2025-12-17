@@ -28,6 +28,11 @@ function AuctionsListContent() {
     metal: 'Toate Metalele',
     rarity: 'Toate Raritățile',
     grade: 'Toate Gradele',
+    faceValue: 'Toate Valorile',
+    diameter: 'Toate Diametrele',
+    weight: 'Toate Greutățile',
+    mint: 'Toate Monetăriile',
+    era: 'Toate Epocile',
     sortBy: 'best-match',
   });
 
@@ -117,6 +122,25 @@ function AuctionsListContent() {
       // Grade filter
       if (filters.grade && filters.grade !== 'Toate Gradele') {
         if (product.grade !== filters.grade) return false;
+      }
+
+      // Romanian coin filters (only when country is Romania)
+      if (filters.country === 'România') {
+        if (filters.faceValue && filters.faceValue !== 'Toate Valorile') {
+          if ((product as any).faceValue !== filters.faceValue) return false;
+        }
+        if (filters.diameter && filters.diameter !== 'Toate Diametrele') {
+          if ((product as any).diameter !== filters.diameter) return false;
+        }
+        if (filters.weight && filters.weight !== 'Toate Greutățile') {
+          if ((product as any).weight !== filters.weight) return false;
+        }
+        if (filters.mint && filters.mint !== 'Toate Monetăriile') {
+          if ((product as any).mint !== filters.mint) return false;
+        }
+        if (filters.era && filters.era !== 'Toate Epocile') {
+          if ((product as any).era !== filters.era) return false;
+        }
       }
 
       return true;
