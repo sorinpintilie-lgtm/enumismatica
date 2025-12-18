@@ -234,11 +234,11 @@ function ProductsListContent() {
               d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <h3 className="text-xl font-semibold text-white mb-2">Nu s-au găsit produse</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">Nu s-au găsit articole</h3>
           <p className="text-slate-300 mb-6">
             {filters.searchTerm
               ? 'Încearcă să ajustezi căutarea sau filtrele'
-              : 'Nu există produse disponibile momentan'}
+              : 'Nu există articole disponibile momentan'}
           </p>
           {filters.searchTerm && (
             <button
