@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 
 export interface FilterOptions {
   searchTerm: string;
+  category: string;
   country: string;
   minPrice: number;
   maxPrice: number;
@@ -30,6 +31,18 @@ interface FilterBarProps {
   onFilterChange: (filters: FilterOptions) => void;
   showAuctionFilters?: boolean;
 }
+
+const categories = [
+  'Toate Categoriile',
+  'Monede',
+  'Bancnote',
+  'Medalii',
+  'Jetoane',
+  'Insigne',
+  'Ordine',
+  'Decorații',
+  'Altele',
+];
 
 const countries = [
   'Toate Țările',
@@ -167,6 +180,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
   const resetFilters = () => {
     const defaultFilters: FilterOptions = {
       searchTerm: '',
+      category: 'Toate Categoriile',
       country: 'România',
       // 0 / 0 = fără filtru de preț; utilizatorul setează limite doar dacă dorește.
       minPrice: 0,
@@ -191,13 +205,35 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
 
   return (
     <div className="bg-gradient-to-br from-navy-900 via-navy-950 to-black rounded-2xl border border-[#e7b73c]/40 shadow-[0_18px_55px_rgba(0,0,0,0.9)] p-6 mb-6 text-slate-100">
+      {/* Category Selector */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-slate-100 mb-2">Categorie</label>
+        <select
+          value={localFilters.category}
+          onChange={(e) => handleFilterUpdate('category', e.target.value)}
+          className="w-full px-4 py-3 rounded-xl border border-[#e7b73c]/40 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23e7b73c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+            backgroundPosition: 'right 12px center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '16px 12px'
+          }}
+        >
+          {categories.map((category) => (
+            <option key={category} value={category} className="bg-navy-900 text-slate-100">
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Search and Quick Filters */}
       <div className="flex flex-col lg:flex-row gap-4 mb-4">
         {/* Search Bar */}
         <div className="flex-1">
           <input
             type="text"
-            placeholder="Caută monede după nume, descriere..."
+            placeholder="Caută după nume, descriere..."
             value={localFilters.searchTerm}
             onChange={(e) => handleFilterUpdate('searchTerm', e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-[#e7b73c]/40 bg-navy-900/70 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
@@ -236,25 +272,27 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
           </select>
         </div>
 
-        {/* Toggle Advanced Filters */}
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="lg:w-auto px-6 py-3 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[0_0_20px_rgba(231,183,60,0.7)]"
-        >
-          <svg
-            className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        {/* Toggle Advanced Filters - only show if category is selected */}
+        {localFilters.category !== 'Toate Categoriile' && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="lg:w-auto px-6 py-3 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[0_0_20px_rgba(231,183,60,0.7)]"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-          Filtre
-        </button>
+            <svg
+              className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+            Filtre Avansate
+          </button>
+        )}
       </div>
 
-      {/* Advanced Filters */}
-      {isExpanded && (
+      {/* Advanced Filters - only show if category is selected */}
+      {isExpanded && localFilters.category !== 'Toate Categoriile' && (
         <div className="border-t border-[#e7b73c]/25 pt-6 space-y-6">
           {/* Country and Metal */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -13,12 +13,13 @@ function ProductsListContent() {
   const { products, loading, error } = useProducts(
     undefined, // ownerId
     20, // pageSize
-    ['name', 'images', 'price', 'description', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt']
+    ['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt']
   );
   const searchParams = useSearchParams();
   
   const [filters, setFilters] = useState<FilterOptions>({
     searchTerm: '',
+    category: 'Toate Categoriile',
     country: 'România',
     // 0 / 0 = fără filtru de preț în mod implicit. Utilizatorul setează limitele doar dacă dorește.
     minPrice: 0,
@@ -66,6 +67,11 @@ function ProductsListContent() {
           product.country?.toLowerCase().includes(searchLower) ||
           product.denomination?.toLowerCase().includes(searchLower)
       );
+    }
+
+    // Apply category filter
+    if (filters.category && filters.category !== 'Toate Categoriile') {
+      filtered = filtered.filter((product) => (product as any).category === filters.category);
     }
 
     // Apply country filter
