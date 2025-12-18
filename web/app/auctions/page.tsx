@@ -14,11 +14,12 @@ function AuctionsListContent() {
   const { products, loading: productsLoading } = useProducts(
     undefined, // ownerId
     20, // pageSize
-    ['name', 'images', 'price', 'description', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt']
+    ['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt']
   );
   
   const [filters, setFilters] = useState<FilterOptions>({
     searchTerm: '',
+    category: 'Toate Categoriile',
     country: 'România',
     // 0 values mean "no filter" for price and year
     minPrice: 0,
@@ -79,6 +80,11 @@ function AuctionsListContent() {
           product.denomination?.toLowerCase().includes(searchLower) ||
           auction.id.toLowerCase().includes(searchLower);
         if (!matchesSearch) return false;
+      }
+
+      // Category filter
+      if (filters.category && filters.category !== 'Toate Categoriile') {
+        if (product.category !== filters.category) return false;
       }
 
       // Country filter
@@ -325,6 +331,7 @@ function AuctionsListContent() {
                setFilters({
                  ...filters,
                  searchTerm: '',
+                 category: 'Toate Categoriile',
                  country: 'Toate Țările',
                  metal: 'Toate Metalele',
                  rarity: 'Toate Raritățile',
