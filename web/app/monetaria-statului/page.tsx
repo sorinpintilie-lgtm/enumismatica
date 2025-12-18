@@ -40,21 +40,18 @@ export default function MonetariaStatuluiPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
 
-  // Romanian coin filters
-  const [faceValue, setFaceValue] = useState<string>('Toate Valorile');
-  const [issueYear, setIssueYear] = useState<string>('Toți Anii');
+  // Monetaria Statului filters
+  const [material, setMaterial] = useState<string>('Toate Materialele');
   const [diameter, setDiameter] = useState<string>('Toate Diametrele');
   const [weight, setWeight] = useState<string>('Toate Greutățile');
-  const [mint, setMint] = useState<string>('Toate Monetăriile');
-  const [era, setEra] = useState<string>('Toate Epocile');
-  const [romanianOptions, setRomanianOptions] = useState({
-    faceValues: ['Toate Valorile'],
+  const [quality, setQuality] = useState<string>('Toate Calitățile');
+  const [monetariaOptions, setMonetariaOptions] = useState({
+    materials: ['Toate Materialele'],
     diameters: ['Toate Diametrele'],
     weights: ['Toate Greutățile'],
-    mints: ['Toate Monetăriile'],
-    eras: ['Toate Epocile'],
+    qualities: ['Toate Calitățile'],
   });
-  const [romanianOptionsLoaded, setRomanianOptionsLoaded] = useState(false);
+  const [monetariaOptionsLoaded, setMonetariaOptionsLoaded] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -68,17 +65,94 @@ export default function MonetariaStatuluiPage() {
           throw new Error('Invalid data format: missing products array');
         }
 
-        const transformedProducts = data.products.map((p: RawProduct) => ({
-          ...p,
-          id: p.product_id,
-          title: p.title || 'Produs fără titlu',
-          description: p.full_description,
-          price: p.price,
-          category: p.category,
-          image: `/Monetaria_statului/romanian_mint_products/${p.category_slug}/${p.image_files}`,
-          link: `/monetaria-statului/${p.product_id}`,
-        }));
+        const transformedProducts = data.products.map((p: RawProduct) => {
+          // Extract properties from specifications
+          const specs = p.specifications || '';
+          const lines = specs.split('|').map(line => line.trim());
+
+          let diameter = '';
+          let weight = '';
+          let material = '';
+          let quality = '';
+
+          lines.forEach(line => {
+            if (line.includes('Diametru:')) {
+              diameter = line.split('Diametru:')[1]?.trim() || '';
+            }
+            if (line.includes('Greutate:')) {
+              weight = line.split('Greutate:')[1]?.trim() || '';
+            }
+            if (line.includes('Material:')) {
+              material = line.split('Material:')[1]?.trim() || '';
+            }
+            if (line.includes('Calitate:')) {
+              quality = line.split('Calitate:')[1]?.trim() || '';
+            }
+          });
+
+          return {
+            ...p,
+            id: p.product_id,
+            title: p.title || 'Produs fără titlu',
+            description: p.full_description,
+            price: p.price,
+            category: p.category,
+            image: `/Monetaria_statului/romanian_mint_products/${p.category_slug}/${p.image_files}`,
+            link: `/monetaria-statului/${p.product_id}`,
+            diameter,
+            weight,
+            mint: material,
+            era: quality,
+          };
+        });
         setProducts(transformedProducts);
+
+        // Extract filter options from monetaria-data.json
+        const materials = ['Toate Materialele'];
+        const diameters = ['Toate Diametrele'];
+        const weights = ['Toate Greutățile'];
+        const qualities = ['Toate Calitățile'];
+
+        data.products.forEach((product: RawProduct) => {
+          // Parse specifications to extract filter values
+          const specs = product.specifications || '';
+          const lines = specs.split('|').map(line => line.trim());
+
+          lines.forEach(line => {
+            if (line.includes('Diametru:')) {
+              const diameter = line.split('Diametru:')[1]?.trim();
+              if (diameter && !diameters.includes(diameter)) {
+                diameters.push(diameter);
+              }
+            }
+            if (line.includes('Greutate:')) {
+              const weight = line.split('Greutate:')[1]?.trim();
+              if (weight && !weights.includes(weight)) {
+                weights.push(weight);
+              }
+            }
+            if (line.includes('Material:')) {
+              const material = line.split('Material:')[1]?.trim();
+              if (material && !materials.includes(material)) {
+                materials.push(material);
+              }
+            }
+            if (line.includes('Calitate:')) {
+              const quality = line.split('Calitate:')[1]?.trim();
+              if (quality && !qualities.includes(quality)) {
+                qualities.push(quality);
+              }
+            }
+          });
+        });
+
+        setMonetariaOptions({
+          materials: materials as string[],
+          diameters: diameters as string[],
+          weights: weights as string[],
+          qualities: qualities as string[],
+        });
+        setMonetariaOptionsLoaded(true);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -86,44 +160,15 @@ export default function MonetariaStatuluiPage() {
       }
     };
 
-    const loadRomanianOptions = async () => {
-      try {
-        const response = await fetch('/products.json');
-        if (!response.ok) throw new Error('Failed to load products.json');
-        const data = await response.json();
-
-        const faceValues = ['Toate Valorile', ...new Set(data.map((item: any) => item.face_value))];
-        const diameters = ['Toate Diametrele', ...new Set(data.map((item: any) => item.diameter))];
-        const weights = ['Toate Greutățile', ...new Set(data.map((item: any) => item.weight))];
-        const mints = ['Toate Monetăriile', ...new Set(data.map((item: any) => item.mint))];
-        const eras = ['Toate Epocile', ...new Set(data.map((item: any) => item.era))];
-
-        setRomanianOptions({
-          faceValues: faceValues as string[],
-          diameters: diameters as string[],
-          weights: weights as string[],
-          mints: mints as string[],
-          eras: eras as string[],
-        });
-        setRomanianOptionsLoaded(true);
-      } catch (error) {
-        console.error('Error loading Romanian coin options:', error);
-      }
-    };
-
     loadData();
-    loadRomanianOptions();
   }, []);
 
   const categories = ['all', ...new Set(products.map(p => p.category))];
   let filteredProducts = selectedCategory === 'all' ? products : products.filter(p => p.category === selectedCategory);
 
-  // Apply Romanian coin filters
-  if (faceValue !== 'Toate Valorile') {
-    filteredProducts = filteredProducts.filter(p => (p as any).faceValue === faceValue);
-  }
-  if (issueYear !== 'Toți Anii') {
-    filteredProducts = filteredProducts.filter(p => (p as any).issueYear === issueYear);
+  // Apply Monetaria Statului filters
+  if (material !== 'Toate Materialele') {
+    filteredProducts = filteredProducts.filter(p => (p as any).mint === material);
   }
   if (diameter !== 'Toate Diametrele') {
     filteredProducts = filteredProducts.filter(p => (p as any).diameter === diameter);
@@ -131,11 +176,8 @@ export default function MonetariaStatuluiPage() {
   if (weight !== 'Toate Greutățile') {
     filteredProducts = filteredProducts.filter(p => (p as any).weight === weight);
   }
-  if (mint !== 'Toate Monetăriile') {
-    filteredProducts = filteredProducts.filter(p => (p as any).mint === mint);
-  }
-  if (era !== 'Toate Epocile') {
-    filteredProducts = filteredProducts.filter(p => (p as any).era === era);
+  if (quality !== 'Toate Calitățile') {
+    filteredProducts = filteredProducts.filter(p => (p as any).era === quality);
   }
 
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
@@ -176,73 +218,61 @@ export default function MonetariaStatuluiPage() {
           ))}
         </div>
 
-        {/* Romanian Coin Filters */}
-        {romanianOptionsLoaded && (
+        {/* Monetaria Statului Filters */}
+        {monetariaOptionsLoaded && (
           <div className="bg-navy-800/50 rounded-2xl p-6 mb-8">
-          <h3 className="text-lg font-semibold text-white mb-4 text-center">Filtre Monede Românești</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">Valoare Nominală</label>
-              <select
-                value={faceValue}
-                onChange={(e) => setFaceValue(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
-              >
-                {romanianOptions.faceValues.map((value) => (
-                  <option key={value} value={value}>{value}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">Diametru</label>
-              <select
-                value={diameter}
-                onChange={(e) => setDiameter(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
-              >
-                {romanianOptions.diameters.map((d) => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">Greutate</label>
-              <select
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
-              >
-                {romanianOptions.weights.map((w) => (
-                  <option key={w} value={w}>{w}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">Monetărie</label>
-              <select
-                value={mint}
-                onChange={(e) => setMint(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
-              >
-                {romanianOptions.mints.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">Epocă</label>
-              <select
-                value={era}
-                onChange={(e) => setEra(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
-              >
-                {romanianOptions.eras.map((e) => (
-                  <option key={e} value={e}>{e}</option>
-                ))}
-              </select>
+            <h3 className="text-lg font-semibold text-white mb-4 text-center">Filtre Produse Monetaria Statului</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">Material</label>
+                <select
+                  value={material}
+                  onChange={(e) => setMaterial(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
+                >
+                  {monetariaOptions.materials.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">Diametru</label>
+                <select
+                  value={diameter}
+                  onChange={(e) => setDiameter(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
+                >
+                  {monetariaOptions.diameters.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">Greutate</label>
+                <select
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
+                >
+                  {monetariaOptions.weights.map((w) => (
+                    <option key={w} value={w}>{w}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">Calitate</label>
+                <select
+                  value={quality}
+                  onChange={(e) => setQuality(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
+                >
+                  {monetariaOptions.qualities.map((q) => (
+                    <option key={q} value={q}>{q}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
-        </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
