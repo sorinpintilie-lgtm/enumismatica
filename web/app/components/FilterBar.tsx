@@ -36,12 +36,6 @@ const categories = [
   'Toate Categoriile',
   'Monede',
   'Bancnote',
-  'Medalii',
-  'Jetoane',
-  'Insigne',
-  'Ordine',
-  'Decorații',
-  'Altele',
 ];
 
 const countries = [
