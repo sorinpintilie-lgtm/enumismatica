@@ -1000,18 +1000,33 @@ export default function NewProductPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-200 mb-1">
+                  <label className="block text-sm font-medium text-slate-200 mb-3">
                     Durată licitație *
                   </label>
-                  <select
-                    className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
-                    value={auctionDuration}
-                    onChange={(e) => setAuctionDuration(Number(e.target.value))}
-                    required
-                  >
-                    <option value={3}>3 zile</option>
-                    <option value={5}>5 zile</option>
-                  </select>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="auctionDuration"
+                        value={3}
+                        checked={auctionDuration === 3}
+                        onChange={(e) => setAuctionDuration(Number(e.target.value))}
+                        className="w-4 h-4 text-gold-500 bg-navy-700 border-gold-500/40 rounded focus:ring-gold-500/50"
+                      />
+                      <span className="ml-3 text-sm text-slate-200">3 zile</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="auctionDuration"
+                        value={5}
+                        checked={auctionDuration === 5}
+                        onChange={(e) => setAuctionDuration(Number(e.target.value))}
+                        className="w-4 h-4 text-gold-500 bg-navy-700 border-gold-500/40 rounded focus:ring-gold-500/50"
+                      />
+                      <span className="ml-3 text-sm text-slate-200">5 zile</span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
