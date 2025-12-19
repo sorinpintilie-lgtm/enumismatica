@@ -534,19 +534,30 @@ export default function NewProductPage() {
         if (!certificationCode.trim()) {
           showToast({
             type: 'error',
-            title: 'Cod NGC lipsă',
+            title: 'Cod certificare lipsă',
             message: `Introdu codul de certificare pentru ${certificationCompany}.`,
           });
           return;
         }
   
-        // Validate NGC code format (should be like "1234567-999")
-        const certCodeRegex = /^\d{7}-\d{3}$/;
-        if (!certCodeRegex.test(certificationCode.trim())) {
+        // Validate certification code format based on company
+        let isValidCode = false;
+        if (certificationCompany === 'NGC') {
+          // NGC format: XXXXXXX-YYY (7 digits - 3 digits)
+          const ngcRegex = /^\d{7}-\d{3}$/;
+          isValidCode = ngcRegex.test(certificationCode.trim());
+        } else if (certificationCompany === 'PCGS') {
+          // PCGS format: XXXXXX.XX/XXXXXXXX (6 digits.2 digits/8 digits)
+          const pcgsRegex = /^\d{6}\.\d{2}\/\d{8}$/;
+          isValidCode = pcgsRegex.test(certificationCode.trim());
+        }
+        
+        if (!isValidCode) {
+          const formatExample = certificationCompany === 'NGC' ? '1234567-999' : '123456.78/12345678';
           showToast({
             type: 'error',
-            title: 'Format cod NGC invalid',
-            message: 'Codul de certificare trebuie să fie în formatul XXXXXXX-YYY (ex: 1234567-999).',
+            title: 'Format cod certificare invalid',
+            message: `Codul de certificare pentru ${certificationCompany} trebuie să fie în formatul ${formatExample}.`,
           });
           return;
         }
@@ -554,7 +565,7 @@ export default function NewProductPage() {
         if (!certificationGrade) {
           showToast({
             type: 'error',
-            title: 'Grad NGC lipsă',
+            title: 'Grad certificare lipsă',
             message: `Selectează gradul pentru certificarea ${certificationCompany}.`,
           });
           return;
@@ -1099,12 +1110,14 @@ export default function NewProductPage() {
                       type="text"
                       value={certificationCode}
                       onChange={(e) => setCertificationCode(e.target.value)}
-                      placeholder="Ex: 1234567-999"
+                      placeholder={certificationCompany === 'NGC' ? 'Ex: 1234567-999' : 'Ex: 123456.78/12345678'}
                       className="w-full rounded-lg border border-blue-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-blue-400 focus:outline-none"
                       required={hasCertification}
                     />
                     <p className="text-xs text-slate-400 mt-1">
-                      Format: XXXXXXX-YYY (7 cifre - 3 cifre)
+                      {certificationCompany === 'NGC' 
+                        ? 'Format: XXXXXXX-YYY (7 cifre - 3 cifre)'
+                        : 'Format: XXXXXX.XX/XXXXXXXX (6 cifre.2 cifre/8 cifre)'}
                     </p>
                   </div>
                   <div>
