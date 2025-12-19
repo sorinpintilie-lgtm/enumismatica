@@ -155,7 +155,7 @@ export default function NewProductPage() {
               }
             } else {
               // Set price to current value for regular collection items
-              if (item.currentValue) {
+              if (item.currentValue && item.currentValue > 0) {
                 setPrice(String(item.currentValue));
               }
             }
