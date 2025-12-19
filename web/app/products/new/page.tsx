@@ -233,16 +233,30 @@ export default function NewProductPage() {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
     if (!fileList) {
-      setFiles([]);
+      console.log('No files selected');
       return;
     }
 
+    console.log(`File input triggered with ${fileList.length} files`);
     const selected: File[] = [];
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList.item(i);
       if (!file) continue;
+
+      console.log(`Processing file: ${file.name} (${file.size} bytes)`);
+
+      // Check for duplicates based on name and size
+      const isDuplicate = files.some(existingFile =>
+        existingFile.name === file.name && existingFile.size === file.size
+      );
+      if (isDuplicate) {
+        console.log(`Skipping duplicate file: ${file.name}`);
+        continue; // Skip duplicate files
+      }
+
       const { valid, error } = validateImageFile(file);
       if (!valid) {
+        console.log(`Invalid file: ${file.name} - ${error}`);
         showToast({
           type: 'error',
           title: 'Eroare la încărcarea imaginilor',
@@ -252,7 +266,14 @@ export default function NewProductPage() {
       }
       selected.push(file);
     }
-    setFiles(selected);
+
+    console.log(`Adding ${selected.length} new files to existing ${files.length} files`);
+    // Append new files to existing ones
+    setFiles(prevFiles => {
+      const newFiles = [...prevFiles, ...selected];
+      console.log(`Total files now: ${newFiles.length}`);
+      return newFiles;
+    });
   };
 
   const handleVideoChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -1069,13 +1090,36 @@ export default function NewProductPage() {
                 type="file"
                 multiple
                 accept="image/*"
+                capture="environment"
                 onChange={handleFileChange}
                 className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-gold-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-navy-900 hover:file:bg-gold-400"
               />
               {files.length > 0 && (
-                <p className="mt-1 text-xs text-slate-300">
-                  {files.length} imagine{files.length > 1 ? 'i' : ''} selectate
-                </p>
+                <>
+                  <p className="mt-1 text-xs text-slate-300">
+                    {files.length} imagine{files.length > 1 ? 'i' : ''} selectate
+                  </p>
+                  <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {files.map((file, index) => (
+                      <div key={`${file.name}-${file.size}-${index}`} className="relative">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Imagine ${index + 1}`}
+                          className="w-full h-20 object-cover rounded-lg border border-gold-500/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+                          }}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           )}

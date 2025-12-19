@@ -805,7 +805,15 @@ function CollectionItemModal({
     const files = e.target.files;
     if (files) {
       const selectedFiles = Array.from(files);
-      setImageFiles(selectedFiles);
+
+      // Check for duplicates and append new files
+      const newFiles = selectedFiles.filter(newFile =>
+        !imageFiles.some(existingFile =>
+          existingFile.name === newFile.name && existingFile.size === newFile.size
+        )
+      );
+
+      setImageFiles(prevFiles => [...prevFiles, ...newFiles]);
     }
   };
 
@@ -983,13 +991,36 @@ function CollectionItemModal({
                 type="file"
                 multiple
                 accept="image/*"
+                capture="environment"
                 onChange={handleImageChange}
                 className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-gold-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-navy-900 hover:file:bg-gold-400"
               />
               {imageFiles.length > 0 && (
-                <p className="mt-1 text-xs text-slate-300">
-                  {imageFiles.length} imagine{imageFiles.length > 1 ? 'i' : ''} selectate
-                </p>
+                <>
+                  <p className="mt-1 text-xs text-slate-300">
+                    {imageFiles.length} imagine{imageFiles.length > 1 ? 'i' : ''} selectate pentru încărcare
+                  </p>
+                  <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {imageFiles.map((file, index) => (
+                      <div key={`${file.name}-${file.size}-${index}`} className="relative">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Imagine ${index + 1}`}
+                          className="w-full h-20 object-cover rounded-lg border border-gold-500/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImageFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+                          }}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
               {formData.images && formData.images.length > 0 && (
                 <div className="mt-2">
