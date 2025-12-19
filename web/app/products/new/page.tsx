@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useState, ChangeEvent, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
@@ -9,8 +9,6 @@ import { uploadMultipleImages, uploadVideo, validateImageFile } from 'shared/sto
 import { addCollectionItem, getCollectionItem, updateCollectionItem } from 'shared/collectionService';
 import { useToast } from '../../components/ToastProvider';
 import { useCoinAutocomplete } from '../../hooks/useCoinAutocomplete';
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
 
 // Keep your existing constants
 const COUNTRIES = [
