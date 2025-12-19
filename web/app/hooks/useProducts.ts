@@ -1,5 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { collection, query, orderBy, onSnapshot, where, doc, limit, startAfter, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  where,
+  doc,
+  limit,
+  startAfter,
+  QueryDocumentSnapshot,
+  DocumentData,
+  getDocs,
+} from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Product } from 'shared/types';
 
@@ -18,6 +30,7 @@ export function useProducts(
 	fields: string[] = DEFAULT_PRODUCT_FIELDS,
 	enabled: boolean = true,
 	listingType: 'direct' | 'auction' | 'all' = 'direct',
+	live: boolean = true,
 	) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,66 +85,132 @@ export function useProducts(
       q = query(q, where('ownerId', '==', ownerId));
     }
 
-    const unsubscribe = onSnapshot(
-      q,
-      (querySnapshot) => {
-        console.log('[useProducts] Query returned', querySnapshot.size, 'products');
+    // Live mode: keep the existing listener behavior.
+    // Non-live mode: use getDocs so pagination doesn't get overwritten by realtime updates.
+    if (live) {
+      const unsubscribe = onSnapshot(
+        q,
+        (querySnapshot) => {
+          console.log('[useProducts] Query returned', querySnapshot.size, 'products');
+          const productsData: Product[] = [];
+          querySnapshot.forEach((doc) => {
+            console.log('[useProducts] Product:', doc.id, 'status:', doc.data().status);
+            const data = doc.data();
+            const productData: any = { id: doc.id };
+
+            // Only include requested fields for performance
+            fields.forEach((field) => {
+              if (data[field] !== undefined) {
+                productData[field] = data[field];
+              }
+            });
+
+            // Always include dates for proper typing
+            if (fields.includes('createdAt')) {
+              productData.createdAt =
+                data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt || new Date();
+            }
+            if (fields.includes('updatedAt')) {
+              productData.updatedAt =
+                data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt || new Date();
+            }
+            if (fields.includes('boostExpiresAt') && data.boostExpiresAt) {
+              productData.boostExpiresAt =
+                data.boostExpiresAt?.toDate ? data.boostExpiresAt.toDate() : data.boostExpiresAt;
+            }
+            if (fields.includes('boostedAt') && data.boostedAt) {
+              productData.boostedAt =
+                data.boostedAt?.toDate ? data.boostedAt.toDate() : data.boostedAt;
+            }
+
+            productsData.push(productData as Product);
+          });
+
+          console.log('[useProducts] Setting products:', productsData.length);
+          setProducts(productsData);
+          setHasMore(productsData.length === pageSize);
+          if (productsData.length > 0) {
+            setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+          }
+          setLoading(false);
+        },
+        (err) => {
+          console.error('Firestore error in useProducts:', err);
+          setError(err.message);
+          setLoading(false);
+        },
+      );
+
+      unsubscribeRef.current = unsubscribe;
+
+      return () => {
+        if (unsubscribeRef.current) {
+          unsubscribeRef.current();
+          unsubscribeRef.current = null;
+        }
+      };
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const snap = await getDocs(q);
+        if (cancelled) return;
+
         const productsData: Product[] = [];
-        querySnapshot.forEach((doc) => {
-          console.log('[useProducts] Product:', doc.id, 'status:', doc.data().status);
+        snap.forEach((doc) => {
           const data = doc.data();
           const productData: any = { id: doc.id };
 
-          // Only include requested fields for performance
-          fields.forEach(field => {
+          fields.forEach((field) => {
             if (data[field] !== undefined) {
               productData[field] = data[field];
             }
           });
 
-          // Always include dates for proper typing
           if (fields.includes('createdAt')) {
-            productData.createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt || new Date();
+            productData.createdAt =
+              data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt || new Date();
           }
           if (fields.includes('updatedAt')) {
-            productData.updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt || new Date();
+            productData.updatedAt =
+              data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt || new Date();
           }
           if (fields.includes('boostExpiresAt') && data.boostExpiresAt) {
-            productData.boostExpiresAt = data.boostExpiresAt?.toDate ? data.boostExpiresAt.toDate() : data.boostExpiresAt;
+            productData.boostExpiresAt =
+              data.boostExpiresAt?.toDate ? data.boostExpiresAt.toDate() : data.boostExpiresAt;
           }
           if (fields.includes('boostedAt') && data.boostedAt) {
-            productData.boostedAt = data.boostedAt?.toDate ? data.boostedAt.toDate() : data.boostedAt;
+            productData.boostedAt =
+              data.boostedAt?.toDate ? data.boostedAt.toDate() : data.boostedAt;
           }
 
           productsData.push(productData as Product);
         });
 
-        console.log('[useProducts] Setting products:', productsData.length);
         setProducts(productsData);
         setHasMore(productsData.length === pageSize);
         if (productsData.length > 0) {
-          setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+          setLastVisible(snap.docs[snap.docs.length - 1]);
         }
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Firestore error in useProducts:', err);
-        setError(err.message);
-        setLoading(false);
+      } catch (err: any) {
+        console.error('Firestore error in useProducts (getDocs):', err);
+        if (!cancelled) {
+          setError(err.message);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-    );
-
-    unsubscribeRef.current = unsubscribe;
+    })();
 
     return () => {
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-        unsubscribeRef.current = null;
-      }
+      cancelled = true;
     };
-	}, [ownerId, pageSize, JSON.stringify(fields), enabled, listingType]);
+	}, [ownerId, pageSize, JSON.stringify(fields), enabled, listingType, live]);
 
-  const loadMore = useCallback(() => {
+  const loadMore = useCallback(async () => {
     if (!enabled || !hasMore || !lastVisible || loading || !db) return;
 
 		setLoading(true);
@@ -160,53 +239,47 @@ export function useProducts(
       q = query(q, where('ownerId', '==', ownerId));
     }
 
-    const unsubscribe = onSnapshot(
-      q,
-      (querySnapshot) => {
-        const productsData: Product[] = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const productData: any = { id: doc.id };
+    try {
+      const snap = await getDocs(q);
+      const productsData: Product[] = [];
+      snap.forEach((doc) => {
+        const data = doc.data();
+        const productData: any = { id: doc.id };
 
-          fields.forEach(field => {
-            if (data[field] !== undefined) {
-              productData[field] = data[field];
-            }
-          });
-
-          if (fields.includes('createdAt')) {
-            productData.createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt || new Date();
+        fields.forEach((field) => {
+          if (data[field] !== undefined) {
+            productData[field] = data[field];
           }
-          if (fields.includes('updatedAt')) {
-            productData.updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt || new Date();
-          }
-          if (fields.includes('boostExpiresAt') && data.boostExpiresAt) {
-            productData.boostExpiresAt = data.boostExpiresAt?.toDate ? data.boostExpiresAt.toDate() : data.boostExpiresAt;
-          }
-          if (fields.includes('boostedAt') && data.boostedAt) {
-            productData.boostedAt = data.boostedAt?.toDate ? data.boostedAt.toDate() : data.boostedAt;
-          }
-
-          productsData.push(productData as Product);
         });
 
-        setProducts(prev => [...prev, ...productsData]);
-        setHasMore(productsData.length === pageSize);
-        if (productsData.length > 0) {
-          setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+        if (fields.includes('createdAt')) {
+          productData.createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt || new Date();
         }
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Firestore error in loadMore:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    );
+        if (fields.includes('updatedAt')) {
+          productData.updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt || new Date();
+        }
+        if (fields.includes('boostExpiresAt') && data.boostExpiresAt) {
+          productData.boostExpiresAt = data.boostExpiresAt?.toDate ? data.boostExpiresAt.toDate() : data.boostExpiresAt;
+        }
+        if (fields.includes('boostedAt') && data.boostedAt) {
+          productData.boostedAt = data.boostedAt?.toDate ? data.boostedAt.toDate() : data.boostedAt;
+        }
 
-    // Clean up the pagination listener after it fires once
-    return () => unsubscribe();
-	}, [hasMore, lastVisible, loading, ownerId, pageSize, fields, enabled, listingType]);
+        productsData.push(productData as Product);
+      });
+
+      setProducts((prev) => [...prev, ...productsData]);
+      setHasMore(productsData.length === pageSize);
+      if (productsData.length > 0) {
+        setLastVisible(snap.docs[snap.docs.length - 1]);
+      }
+    } catch (err: any) {
+      console.error('Firestore error in loadMore:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+	}, [enabled, hasMore, lastVisible, loading, ownerId, pageSize, fields, listingType]);
 
   return { products, loading, error, hasMore, loadMore };
 }

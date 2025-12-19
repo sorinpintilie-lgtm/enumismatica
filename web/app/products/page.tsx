@@ -13,11 +13,15 @@ function ProductsListContent() {
   const { products, loading, error, hasMore, loadMore } = useProducts(
     undefined, // ownerId
     20, // pageSize
-    ['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt']
+    ['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt'],
+    true, // enabled
+    'direct', // listingType
+    false, // live (disable realtime so pagination can prefetch safely)
   );
   const searchParams = useSearchParams();
 
   const PAGE_SIZE = 20;
+  const PREFETCH_PAGES_AHEAD = 3;
   const [page, setPage] = useState(1);
   const [requestedPage, setRequestedPage] = useState<number | null>(null);
   
@@ -185,6 +189,17 @@ function ProductsListContent() {
     console.log('[ProductsPage] Filtered products:', filtered.length);
     return filtered;
   }, [products, filters]);
+
+  // Prefetch next N pages so page navigation feels instant.
+  // This keeps a buffer of (current page + PREFETCH_PAGES_AHEAD) loaded.
+  useEffect(() => {
+    if (loading || !hasMore) return;
+
+    const targetCount = (page + PREFETCH_PAGES_AHEAD) * PAGE_SIZE;
+    if (products.length < targetCount) {
+      loadMore();
+    }
+  }, [page, products.length, loading, hasMore, loadMore, PAGE_SIZE, PREFETCH_PAGES_AHEAD]);
 
   // Ensure we have enough loaded products when user navigates to a higher page.
   useEffect(() => {
