@@ -521,13 +521,21 @@ export default function ProductDetailPage() {
                     {product.boostExpiresAt && (
                       <div className="flex justify-between">
                         <span className="text-slate-300">Promovat până la:</span>
-                        <span className="text-emerald-300">{product.boostExpiresAt.toLocaleDateString()}</span>
+                        <span className="text-emerald-300">
+                          {product.boostExpiresAt instanceof Date
+                            ? product.boostExpiresAt.toLocaleDateString()
+                            : new Date(product.boostExpiresAt).toLocaleDateString()}
+                        </span>
                       </div>
                     )}
                     {product.promotionExpiresAt && (
                       <div className="flex justify-between">
                         <span className="text-slate-300">Promoție până la:</span>
-                        <span className="text-emerald-300">{product.promotionExpiresAt.toLocaleDateString()}</span>
+                        <span className="text-emerald-300">
+                          {product.promotionExpiresAt instanceof Date
+                            ? product.promotionExpiresAt.toLocaleDateString()
+                            : new Date(product.promotionExpiresAt).toLocaleDateString()}
+                        </span>
                       </div>
                     )}
                   </div>
