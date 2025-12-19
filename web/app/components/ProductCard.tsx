@@ -82,7 +82,7 @@ function ProductCard({ product, showWatchlistButton = true, variant = 'grid' }: 
                   onClick={() => setShowOfferModal(true)}
                   className="inline-flex items-center gap-1 rounded-full bg-blue-500 hover:bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
                 >
-                  Fă ofertă
+                  Fă o ofertă
                 </button>
               )}
               <Link
@@ -151,7 +151,7 @@ function ProductCard({ product, showWatchlistButton = true, variant = 'grid' }: 
                  onClick={() => setShowOfferModal(true)}
                  className="inline-flex items-center gap-1 rounded-full bg-blue-500 hover:bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
                >
-                 Fă ofertă
+                 Fă o ofertă
                </button>
              )}
            </div>

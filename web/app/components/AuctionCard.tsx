@@ -301,7 +301,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
               onClick={() => setShowOfferModal(true)}
               className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-md text-sm font-semibold transition-colors duration-200"
             >
-              Fă ofertă
+              Fă o ofertă
             </button>
           )}
           <Link
