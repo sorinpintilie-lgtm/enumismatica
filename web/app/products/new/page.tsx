@@ -1104,9 +1104,13 @@ export default function NewProductPage() {
                 type="file"
                 multiple
                 accept="image/*"
+                capture="environment"
                 onChange={handleFileChange}
                 className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-gold-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-navy-900 hover:file:bg-gold-400"
               />
+              <p className="mt-1 text-xs text-slate-400">
+                Poți selecta imagini din galerie sau să faci fotografii direct
+              </p>
               {files.length > 0 && (
                 <>
                   <p className="mt-1 text-xs text-slate-300">
