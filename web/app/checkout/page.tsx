@@ -1,13 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../hooks/useCart';
 import { useProducts } from '../hooks/useProducts';
 import { createDirectOrderForProduct } from 'shared/orderService';
 import { formatRON } from '../utils/currency';
 import { useToast } from '../components/ToastProvider';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export default function CheckoutPage() {
   const { user, loading: authLoading } = useAuth();
@@ -68,6 +70,49 @@ export default function CheckoutPage() {
       message: 'Adresa de livrare a fost copiată la adresa de facturare.',
     });
   };
+
+  // Load user's saved personal details to autocomplete the form
+  useEffect(() => {
+    let mounted = true;
+    const loadPersonalDetails = async () => {
+      if (!userId) return;
+      try {
+        const snap = await getDoc(doc(db, 'users', userId));
+        if (!snap.exists() || !mounted) return;
+        const data = snap.data() as any;
+        const details = (data.personalDetails || {}) as any;
+        
+        // Autocomplete delivery address
+        if (details.firstName && details.lastName) {
+          setFullName(`${details.firstName} ${details.lastName}`.trim());
+        }
+        if (details.phone) setPhone(details.phone);
+        if (details.address) setAddressLine1(details.address);
+        if (details.county) setCounty(details.county);
+        if (details.postalCode) setPostalCode(details.postalCode);
+        if (details.country) {
+          // Extract city from address or county if available
+          // For now, we'll leave city empty as it's not stored separately
+        }
+        
+        // Autocomplete billing address
+        if (details.billingAddress) setBillingAddressLine1(details.billingAddress);
+        if (details.billingCounty) setBillingCounty(details.billingCounty);
+        if (details.billingPostalCode) setBillingPostalCode(details.billingPostalCode);
+        if (details.firstName && details.lastName) {
+          setBillingFullName(`${details.firstName} ${details.lastName}`.trim());
+        }
+        if (details.phone) setBillingPhone(details.phone);
+      } catch (err) {
+        console.error('Failed to load personal details for checkout', err);
+      }
+    };
+
+    loadPersonalDetails();
+    return () => {
+      mounted = false;
+    };
+  }, [userId]);
 
   const loading = authLoading || cartLoading || productsLoading;
 
