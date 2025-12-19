@@ -346,11 +346,11 @@ export default function NewProductPage() {
       return;
     }
 
-    if (!name.trim() || !description.trim()) {
+    if (!name.trim()) {
       showToast({
         type: 'error',
-        title: 'Câmpuri obligatorii',
-        message: 'Numele și descrierea sunt obligatorii.',
+        title: 'Câmp obligatoriu',
+        message: 'Numele produsului este obligatoriu.',
       });
       return;
     }
@@ -1020,14 +1020,13 @@ export default function NewProductPage() {
           {/* Alte informatii (moved from earlier position) */}
           <div>
             <label className="block text-sm font-medium text-slate-200 mb-1">
-              Alte informații *
+              Alte informații (opțional)
             </label>
             <textarea
               className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              required
             />
           </div>
 
