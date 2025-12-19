@@ -880,95 +880,107 @@ export default function NewProductPage() {
               />
             </div>
 
-            {/* Era (Manual or Auto-filled) */}
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-1">
-                Epocă {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
-              </label>
-              <input
-                type="text"
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                value={era}
-                onChange={(e) => setEra(e.target.value)}
-                readOnly={!!matchedCoin && useAutocomplete}
-              />
-            </div>
+            {/* Era - Only show for coins */}
+            {category === 'Monede' && (
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Epocă {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                  value={era}
+                  onChange={(e) => setEra(e.target.value)}
+                  readOnly={!!matchedCoin && useAutocomplete}
+                />
+              </div>
+            )}
 
-            {/* Metal (Auto-filled or Manual) */}
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-1">
-                Metal {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
-              </label>
-              <input
-                type="text"
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                value={metal}
-                onChange={(e) => setMetal(e.target.value)}
-                readOnly={!!matchedCoin && useAutocomplete}
-              />
-            </div>
+            {/* Metal - Only show for coins */}
+            {category === 'Monede' && (
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Metal {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                  value={metal}
+                  onChange={(e) => setMetal(e.target.value)}
+                  readOnly={!!matchedCoin && useAutocomplete}
+                />
+              </div>
+            )}
 
-            {/* Denomination */}
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-1">
-                Denominație {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
-              </label>
-              <input
-                type="text"
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                value={denomination}
-                onChange={(e) => setDenomination(e.target.value)}
-                placeholder="Ex: 1 Leu"
-                readOnly={!!matchedCoin && useAutocomplete}
-              />
-            </div>
+            {/* Denomination - Only show for coins */}
+            {category === 'Monede' && (
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Denominație {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                  value={denomination}
+                  onChange={(e) => setDenomination(e.target.value)}
+                  placeholder="Ex: 1 Leu"
+                  readOnly={!!matchedCoin && useAutocomplete}
+                />
+              </div>
+            )}
 
-            {/* Diameter */}
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-1">
-                Diametru {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
-              </label>
-              <input
-                type="text"
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                value={diameter}
-                onChange={(e) => setDiameter(e.target.value)}
-                placeholder="Ex: 23 mm"
-                readOnly={!!matchedCoin && useAutocomplete}
-              />
-            </div>
+            {/* Diameter - Only show for coins */}
+            {category === 'Monede' && (
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Diametru {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                  value={diameter}
+                  onChange={(e) => setDiameter(e.target.value)}
+                  placeholder="Ex: 23 mm"
+                  readOnly={!!matchedCoin && useAutocomplete}
+                />
+              </div>
+            )}
 
-            {/* Weight */}
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-1">
-                Greutate {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
-              </label>
-              <input
-                type="text"
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                placeholder="Ex: 5 g"
-                readOnly={!!matchedCoin && useAutocomplete}
-              />
-            </div>
+            {/* Weight - Only show for coins */}
+            {category === 'Monede' && (
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Greutate {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  placeholder="Ex: 5 g"
+                  readOnly={!!matchedCoin && useAutocomplete}
+                />
+              </div>
+            )}
 
-            {/* Mint Location */}
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-1">
-                Monetărie / Temă {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
-              </label>
-              <input
-                type="text"
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                value={mintLocation}
-                onChange={(e) => setMintLocation(e.target.value)}
-                placeholder="Ex: Bucharest"
-                readOnly={!!matchedCoin && useAutocomplete}
-              />
-            </div>
+            {/* Mint Location - Only show for coins */}
+            {category === 'Monede' && (
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Monetărie / Temă {matchedCoin && <span className="text-xs text-green-400">(auto-completat)</span>}
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-lg border border-gold-500/40 bg-navy-800/80 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                  value={mintLocation}
+                  onChange={(e) => setMintLocation(e.target.value)}
+                  placeholder="Ex: Bucharest"
+                  readOnly={!!matchedCoin && useAutocomplete}
+                />
+              </div>
+            )}
 
-            {/* Rarity */}
+            {/* Rarity - Show for both coins and banknotes */}
             <div>
               <label className="block text-sm font-medium text-slate-200 mb-1">
                 Raritate
@@ -985,22 +997,24 @@ export default function NewProductPage() {
               </select>
             </div>
 
-            {/* Grade */}
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-1">
-                Grad / stare
-              </label>
-              <select
-                className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
-                value={grade}
-                onChange={(e) => setGrade(e.target.value)}
-              >
-                <option value="">Selectează gradul</option>
-                {GRADES.map(g => (
-                  <option key={g} value={g}>{g}</option>
-                ))}
-              </select>
-            </div>
+            {/* Grade - Only show for coins */}
+            {category === 'Monede' && (
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Grad / stare
+                </label>
+                <select
+                  className="w-full rounded-lg border border-gold-500/40 bg-navy-900/90 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500/20 [&>option]:bg-navy-900 [&>option]:text-white [&>option]:backdrop-blur-sm"
+                  value={grade}
+                  onChange={(e) => setGrade(e.target.value)}
+                >
+                  <option value="">Selectează gradul</option>
+                  {GRADES.map(g => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Alte informatii (moved from earlier position) */}
@@ -1090,7 +1104,6 @@ export default function NewProductPage() {
                 type="file"
                 multiple
                 accept="image/*"
-                capture="environment"
                 onChange={handleFileChange}
                 className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-gold-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-navy-900 hover:file:bg-gold-400"
               />
@@ -1156,7 +1169,6 @@ export default function NewProductPage() {
                 <input
                   type="file"
                   accept="video/*"
-                  capture="environment"
                   onChange={handleVideoChange}
                   className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-red-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-red-400"
                 />

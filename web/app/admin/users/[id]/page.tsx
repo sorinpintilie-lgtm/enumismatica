@@ -74,6 +74,7 @@ export default function AdminUserDetail() {
     county: '',
     postalCode: '',
     country: 'România',
+    bankAccount: '',
   });
 
   useEffect(() => {
@@ -129,6 +130,7 @@ export default function AdminUserDetail() {
           county: details.county || '',
           postalCode: details.postalCode || '',
           country: details.country || 'România',
+          bankAccount: details.bankAccount || '',
         });
       }
 
@@ -175,6 +177,7 @@ export default function AdminUserDetail() {
           county: personalDetailsDraft.county.trim(),
           postalCode: personalDetailsDraft.postalCode.trim(),
           country: personalDetailsDraft.country.trim() || 'România',
+          bankAccount: personalDetailsDraft.bankAccount.trim(),
         },
         updatedAt: serverTimestamp(),
       });
@@ -677,6 +680,16 @@ export default function AdminUserDetail() {
                       className="w-full rounded-lg border border-gold-500/30 bg-navy-900/60 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Cont bancar (IBAN)</label>
+                  <input
+                    value={personalDetailsDraft.bankAccount}
+                    onChange={(e) => setPersonalDetailsDraft((p) => ({ ...p, bankAccount: e.target.value }))}
+                    className="w-full rounded-lg border border-gold-500/30 bg-navy-900/60 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                    placeholder="RO..."
+                  />
                 </div>
 
                 {personalDetailsError && (

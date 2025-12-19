@@ -1,4 +1,10 @@
-import { SESClient, SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-ses';
+import {
+  SESClient,
+  SendEmailCommand,
+  SendEmailCommandInput,
+  SendRawEmailCommand,
+  SendRawEmailCommandInput,
+} from '@aws-sdk/client-ses';
 
 // Initialize SES client
 const sesClient = new SESClient({
@@ -55,6 +61,32 @@ async function sendEmail({ to, subject, htmlBody, textBody }: EmailParams): Prom
     console.log(`Email sent successfully to ${to}`);
   } catch (error) {
     console.error('Error sending email:', error);
+    throw error;
+  }
+}
+
+function chunkBase64(value: string, lineLength: number = 76): string {
+  const chunks: string[] = [];
+  for (let i = 0; i < value.length; i += lineLength) {
+    chunks.push(value.slice(i, i + lineLength));
+  }
+  return chunks.join('\r\n');
+}
+
+async function sendRawEmail(rawMessage: string): Promise<void> {
+  const params: SendRawEmailCommandInput = {
+    RawMessage: {
+      Data: Buffer.from(rawMessage),
+    },
+    Source: FROM_EMAIL,
+  };
+
+  try {
+    const command = new SendRawEmailCommand(params);
+    await sesClient.send(command);
+    console.log('Raw email sent successfully');
+  } catch (error) {
+    console.error('Error sending raw email:', error);
     throw error;
   }
 }
@@ -507,6 +539,11 @@ interface PronumismaticaFormData {
   email: string;
 }
 
+export interface PronumismaticaIdImages {
+  front: { filename: string; contentType: string; data: Buffer };
+  back: { filename: string; contentType: string; data: Buffer };
+}
+
 export async function sendPronumismaticaFormEmail(
   data: PronumismaticaFormData,
 ): Promise<void> {
@@ -558,6 +595,81 @@ export async function sendPronumismaticaFormEmail(
   });
 }
 
+export async function sendPronumismaticaFormEmailWithIdImages(
+  data: PronumismaticaFormData,
+  images: PronumismaticaIdImages,
+): Promise<void> {
+  const html = emailTemplate(`
+    <h2>Formular nou PRONUMISMATICA</h2>
+    <p>A fost completat un nou formular de interes pentru Asociația PRONUMISMATICA.</p>
+    <h3>Detalii persoană</h3>
+    <ul>
+      <li><strong>Nume:</strong> ${data.lastName}</li>
+      <li><strong>Prenume:</strong> ${data.firstName}</li>
+      <li><strong>CNP:</strong> ${data.cnp}</li>
+    </ul>
+    <h3>Adresă</h3>
+    <ul>
+      <li><strong>Țara:</strong> ${data.country}</li>
+      <li><strong>Județ:</strong> ${data.county}</li>
+      <li><strong>Oraș:</strong> ${data.city}</li>
+      <li><strong>Adresă:</strong> ${data.address}</li>
+    </ul>
+    <h3>Act de identitate</h3>
+    <ul>
+      <li><strong>Tip:</strong> ${data.idType}</li>
+      <li><strong>Serie / număr:</strong> ${data.idSeries}</li>
+    </ul>
+    <h3>Date de contact</h3>
+    <ul>
+      <li><strong>Telefon:</strong> ${data.phone}</li>
+      <li><strong>Email:</strong> ${data.email}</li>
+    </ul>
+    <p style="font-size: 12px; color: #555;">Imaginile actului de identitate sunt atașate (față / verso).</p>
+  `);
+
+  const to = 'bogdan.epure@sky.ro';
+  const subject = 'Formular nou PRONUMISMATICA - eNumismatica.ro (cu acte)';
+  const boundary = `enumismatica_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+
+  const htmlBase64 = chunkBase64(Buffer.from(html, 'utf8').toString('base64'));
+  const frontBase64 = chunkBase64(images.front.data.toString('base64'));
+  const backBase64 = chunkBase64(images.back.data.toString('base64'));
+
+  const raw = [
+    `From: ${FROM_EMAIL}`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    `MIME-Version: 1.0`,
+    `Content-Type: multipart/mixed; boundary="${boundary}"`,
+    '',
+    `--${boundary}`,
+    `Content-Type: text/html; charset="UTF-8"`,
+    `Content-Transfer-Encoding: base64`,
+    '',
+    htmlBase64,
+    '',
+    `--${boundary}`,
+    `Content-Type: ${images.front.contentType}; name="${images.front.filename}"`,
+    `Content-Disposition: attachment; filename="${images.front.filename}"`,
+    `Content-Transfer-Encoding: base64`,
+    '',
+    frontBase64,
+    '',
+    `--${boundary}`,
+    `Content-Type: ${images.back.contentType}; name="${images.back.filename}"`,
+    `Content-Disposition: attachment; filename="${images.back.filename}"`,
+    `Content-Transfer-Encoding: base64`,
+    '',
+    backBase64,
+    '',
+    `--${boundary}--`,
+    '',
+  ].join('\r\n');
+
+  await sendRawEmail(raw);
+}
+
 export default {
   sendWelcomeEmail,
   sendPasswordResetEmail,
@@ -573,4 +685,5 @@ export default {
   sendAuctionApprovedEmail,
   sendAuctionRejectedEmail,
   sendPronumismaticaFormEmail,
+  sendPronumismaticaFormEmailWithIdImages,
 };

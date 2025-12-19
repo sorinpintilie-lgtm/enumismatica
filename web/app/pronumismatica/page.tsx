@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3 | 4 | 5;
 
 interface PronumismaticaForm {
   lastName: string;
@@ -36,6 +36,8 @@ const initialForm: PronumismaticaForm = {
 export default function PronumismaticaPage() {
   const [step, setStep] = useState<Step>(1);
   const [form, setForm] = useState<PronumismaticaForm>(initialForm);
+  const [idFront, setIdFront] = useState<File | null>(null);
+  const [idBack, setIdBack] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +47,19 @@ export default function PronumismaticaPage() {
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, files } = e.target;
+    const file = files?.[0] || null;
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('Fișierul trebuie să fie o imagine.');
+      return;
+    }
+    setError(null);
+    if (name === 'idFront') setIdFront(file);
+    if (name === 'idBack') setIdBack(file);
   };
 
   const canGoNext = () => {
@@ -69,11 +84,14 @@ export default function PronumismaticaPage() {
     if (step === 4) {
       return form.phone.trim() !== '' && form.email.trim() !== '';
     }
+    if (step === 5) {
+      return !!idFront && !!idBack;
+    }
     return false;
   };
 
   const nextStep = () => {
-    if (step < 4 && canGoNext()) {
+    if (step < 5 && canGoNext()) {
       setStep((prev) => (prev + 1) as Step);
     }
   };
@@ -89,19 +107,23 @@ export default function PronumismaticaPage() {
     setError(null);
     setSuccess(null);
 
-    if (!canGoNext() || step !== 4) {
+    if (!canGoNext() || step !== 5) {
       setError('Te rugăm să completezi toate câmpurile obligatorii.');
       return;
     }
 
     try {
       setSubmitting(true);
+      const payload = new FormData();
+      (Object.keys(form) as Array<keyof PronumismaticaForm>).forEach((key) => {
+        payload.append(key, String(form[key] ?? ''));
+      });
+      if (idFront) payload.append('idFront', idFront, idFront.name);
+      if (idBack) payload.append('idBack', idBack, idBack.name);
+
       const response = await fetch('/api/pronumismatica', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
+        body: payload,
       });
 
       if (!response.ok) {
@@ -110,6 +132,8 @@ export default function PronumismaticaPage() {
 
       setSuccess('Formularul a fost trimis cu succes. Vei fi contactat în curând.');
       setForm(initialForm);
+      setIdFront(null);
+      setIdBack(null);
       setStep(1);
     } catch (err: any) {
       console.error('Pronumismatica form submit error:', err);
@@ -196,19 +220,19 @@ export default function PronumismaticaPage() {
             {/* Mobile: Current step display */}
             <div className="block sm:hidden text-center mb-4">
               <div className="text-sm text-slate-200 font-medium">
-                Pasul {step} din 4: {['Identitate', 'Adresă', 'Act de identitate', 'Contact'][step - 1]}
-              </div>
-              <div className="w-full bg-slate-700 rounded-full h-2 mt-2">
-                <div
-                  className="bg-[#e7b73c] h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${(step / 4) * 100}%` }}
-                />
-              </div>
-            </div>
+                 Pasul {step} din 5: {['Identitate', 'Adresă', 'Act de identitate', 'Contact', 'Încarcă acte'][step - 1]}
+               </div>
+               <div className="w-full bg-slate-700 rounded-full h-2 mt-2">
+                 <div
+                   className="bg-[#e7b73c] h-2 rounded-full transition-all duration-300"
+                   style={{ width: `${(step / 5) * 100}%` }}
+                 />
+               </div>
+             </div>
 
             {/* Desktop: Full stepper */}
             <div className="hidden sm:flex items-center justify-between text-xs text-slate-200">
-              {['Identitate', 'Adresă', 'Act de identitate', 'Contact'].map((label, index) => {
+              {['Identitate', 'Adresă', 'Act de identitate', 'Contact', 'Încarcă acte'].map((label, index) => {
                 const currentStep = (index + 1) as Step;
                 const isActive = step === currentStep;
                 const isCompleted = step > currentStep;
@@ -226,7 +250,7 @@ export default function PronumismaticaPage() {
                       {index + 1}
                     </div>
                     <span className="ml-2">{label}</span>
-                    {index < 3 && (
+                    {index < 4 && (
                       <div className="flex-1 h-px bg-slate-700 ml-2" aria-hidden="true" />
                     )}
                   </div>
@@ -404,6 +428,44 @@ export default function PronumismaticaPage() {
               </div>
             )}
 
+            {step === 5 && (
+              <div className="space-y-3">
+                <div className="rounded-xl border border-gold-500/30 bg-navy-950/60 px-3 py-2 text-xs text-slate-200">
+                  Încarcă poze clare ale actului selectat ({form.idType || 'act'}): <strong>față</strong> și <strong>verso</strong>.
+                </div>
+
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">Act identitate - Față *</label>
+                  <input
+                    type="file"
+                    name="idFront"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900"
+                    required
+                  />
+                  {idFront && (
+                    <p className="mt-1 text-xs text-slate-300">Selectat: {idFront.name}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-slate-200 mb-1 text-xs font-semibold">Act identitate - Verso *</label>
+                  <input
+                    type="file"
+                    name="idBack"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900"
+                    required
+                  />
+                  {idBack && (
+                    <p className="mt-1 text-xs text-slate-300">Selectat: {idBack.name}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {error && (
               <div className="rounded-xl border border-red-500/40 bg-red-900/40 px-3 py-2 text-xs text-red-100">
                 {error}
@@ -426,7 +488,7 @@ export default function PronumismaticaPage() {
                 Înapoi
               </button>
 
-              {step < 4 ? (
+              {step < 5 ? (
                 <button
                   type="button"
                   onClick={nextStep}

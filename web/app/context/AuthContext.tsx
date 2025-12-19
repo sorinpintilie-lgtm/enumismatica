@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { onAuthStateChange } from 'shared/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 interface ExtendedUser extends FirebaseUser {
@@ -32,65 +32,87 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     let mounted = true;
+    let unsubscribeUserDoc: null | (() => void) = null;
 
-    const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+    const unsubscribeAuth = onAuthStateChange(async (firebaseUser) => {
       if (!mounted) return;
 
       console.log('Auth state changed:', !!firebaseUser, firebaseUser?.email);
 
-      if (firebaseUser) {
-        // Fetch user role from Firestore with caching
+      // Clean up previous user doc listener when switching users / logging out
+      if (unsubscribeUserDoc) {
         try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          const userData = userDoc.data();
-          const role = userData?.role || 'user';
-          const idVerificationStatus = userData?.idVerificationStatus;
-          const idDocumentType = userData?.idDocumentType;
-          const idDocumentNumber = userData?.idDocumentNumber;
-
-          if (mounted) {
-            const extendedUser = {
-              ...firebaseUser,
-              role,
-              isAdmin: role === 'admin' || role === 'superadmin',
-              isSuperAdmin: role === 'superadmin',
-              displayName: userData?.displayName || firebaseUser.displayName || firebaseUser.email || 'User',
-              idVerificationStatus,
-              idDocumentType,
-              idDocumentNumber,
-            } as ExtendedUser;
-
-            setUser(extendedUser);
-            setAuthKey(prev => prev + 1); // Force re-render
-          }
-        } catch (error) {
-          console.error('Failed to fetch user role:', error);
-          if (mounted) {
-            const extendedUser = {
-              ...firebaseUser,
-              role: 'user',
-              isAdmin: false,
-              displayName: firebaseUser.displayName || firebaseUser.email || 'User',
-            } as ExtendedUser;
-
-            setUser(extendedUser);
-            setAuthKey(prev => prev + 1); // Force re-render
-          }
+          unsubscribeUserDoc();
+        } catch {
+          // ignore
         }
+        unsubscribeUserDoc = null;
+      }
+
+      if (firebaseUser) {
+        // Subscribe to user doc changes so role/verification updates apply in realtime
+        setLoading(true);
+        unsubscribeUserDoc = onSnapshot(
+          doc(db, 'users', firebaseUser.uid),
+          (userDoc) => {
+            const userData = userDoc.data();
+            const role = userData?.role || 'user';
+            const idVerificationStatus = userData?.idVerificationStatus;
+            const idDocumentType = userData?.idDocumentType;
+            const idDocumentNumber = userData?.idDocumentNumber;
+
+            if (mounted) {
+              const extendedUser = {
+                ...firebaseUser,
+                role,
+                isAdmin: role === 'admin' || role === 'superadmin',
+                isSuperAdmin: role === 'superadmin',
+                displayName: userData?.displayName || firebaseUser.displayName || firebaseUser.email || 'User',
+                idVerificationStatus,
+                idDocumentType,
+                idDocumentNumber,
+              } as ExtendedUser;
+
+              setUser(extendedUser);
+              setAuthKey((prev) => prev + 1); // Force re-render
+              setLoading(false);
+            }
+          },
+          (error) => {
+            console.error('Failed to subscribe to user profile:', error);
+            if (mounted) {
+              const extendedUser = {
+                ...firebaseUser,
+                role: 'user',
+                isAdmin: false,
+                displayName: firebaseUser.displayName || firebaseUser.email || 'User',
+              } as ExtendedUser;
+
+              setUser(extendedUser);
+              setAuthKey((prev) => prev + 1);
+              setLoading(false);
+            }
+          },
+        );
       } else {
         if (mounted) {
           setUser(null);
           setAuthKey(prev => prev + 1); // Force re-render
+          setLoading(false);
         }
-      }
-      if (mounted) {
-        setLoading(false);
       }
     });
 
     return () => {
       mounted = false;
-      unsubscribe();
+      if (unsubscribeUserDoc) {
+        try {
+          unsubscribeUserDoc();
+        } catch {
+          // ignore
+        }
+      }
+      unsubscribeAuth();
     };
   }, []);
 

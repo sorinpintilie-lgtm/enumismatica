@@ -35,6 +35,66 @@ service cloud.firestore {
       return data.keys().hasAll(requiredFields);
     }
 
+    // Identity verification rules:
+    // - Admins/superadmins can manage all identity fields.
+    // - Users can only SET identity fields once (typically at signup) and only to a pending state.
+    // - Users cannot self-verify or modify verification audit fields.
+    function isOwnerIdentityWriteAllowed(userId) {
+      // Only relevant for the owner.
+      if (!isOwner(userId)) return false;
+
+      // On create (doc doesn't exist yet): allow optional identity data but never allow verified state.
+      if (!exists(/databases/$(database)/documents/users/$(userId))) {
+        // If identity is provided at creation, it must be pending.
+        return (
+          (!request.resource.data.keys().hasAny(['idVerifiedAt', 'idVerifiedBy']) ||
+            (request.resource.data.idVerifiedAt == null && request.resource.data.idVerifiedBy == null))
+          &&
+          (
+            !request.resource.data.keys().hasAny(['idVerificationStatus']) ||
+            request.resource.data.idVerificationStatus in ['pending', 'not_provided']
+          )
+          &&
+          (
+            !request.resource.data.keys().hasAny(['idDocumentNumber', 'idDocumentType']) ||
+            (
+              request.resource.data.idDocumentNumber is string &&
+              request.resource.data.idDocumentNumber.size() > 0 &&
+              request.resource.data.idDocumentType in ['ci', 'passport'] &&
+              request.resource.data.idVerificationStatus == 'pending'
+            )
+          )
+        );
+      }
+
+      // On update: restrict identity-related changes.
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+
+      // Owner can never touch verification audit fields.
+      if (changed.hasAny(['idVerifiedAt', 'idVerifiedBy'])) {
+        return false;
+      }
+
+      // If the owner is not changing identity fields, allow.
+      if (!changed.hasAny(['idDocumentType', 'idDocumentNumber', 'idVerificationStatus'])) {
+        return true;
+      }
+
+      // Owner is attempting to change identity fields.
+      // Allow only if identity was not previously provided (set-once) and status is set to pending.
+      return (
+        (resource.data.idDocumentNumber == null || resource.data.idDocumentNumber == '')
+        &&
+        request.resource.data.idDocumentNumber is string
+        &&
+        request.resource.data.idDocumentNumber.size() > 0
+        &&
+        request.resource.data.idDocumentType in ['ci', 'passport']
+        &&
+        request.resource.data.idVerificationStatus == 'pending'
+      );
+    }
+
     function isValidTimestamp(ts) {
       return ts is timestamp;
     }
@@ -50,6 +110,8 @@ service cloud.firestore {
                         isOwner(userId))) ||
                        (isAdmin() && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])) ||
                        (request.resource.data.email == null || isValidEmail(request.resource.data.email))) &&
+                      // Identity verification: owner can only set once to pending; admins can manage.
+                      (isAdmin() || isOwnerIdentityWriteAllowed(userId)) &&
                       hasRequiredFields(request.resource.data, ['email', 'displayName']);
       // Only superadmin can delete admin or superadmin accounts
       allow delete: if isSuperAdmin() || (isAdmin() && get(/databases/$(database)/documents/users/$(userId)).data.role == 'user');

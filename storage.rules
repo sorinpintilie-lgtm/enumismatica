@@ -14,7 +14,7 @@ service firebase.storage {
     function isAdmin() {
       return isAuthenticated() &&
              (request.auth.uid == 'QEm0DSIzylNQIHpQAZlgtWQkYYE3' ||
-              firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin');
+              firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin']);
     }
 
     function isValidImageFile() {

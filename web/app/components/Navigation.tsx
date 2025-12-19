@@ -9,36 +9,23 @@ import { useEffect, useState } from 'react';
 import { isAdmin } from 'shared/adminService';
 import NotificationCenter from './NotificationCenter';
 import { useCart } from '../hooks/useCart';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
 
 export default function Navigation() {
   const { user } = useAuth();
   const router = useRouter();
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
   const { items: cartItems } = useCart(user?.uid);
+
+  const isVerified = user?.idVerificationStatus === 'verified';
 
   useEffect(() => {
     const checkAdmin = async () => {
       if (user) {
         const adminStatus = await isAdmin(user.uid);
         setIsAdminUser(adminStatus);
-
-        // Check verification status
-        try {
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setIsVerified(userData.verificationStatus === 'verified');
-          }
-        } catch (error) {
-          console.error('Error checking verification status:', error);
-        }
       } else {
         setIsAdminUser(false);
-        setIsVerified(false);
       }
     };
     checkAdmin();
