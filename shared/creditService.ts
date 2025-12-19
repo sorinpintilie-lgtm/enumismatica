@@ -304,7 +304,6 @@ export async function boostProductWithCredits(
     }
 
     // Compute boost expiry. If there's an active boost, extend it (stack duration).
-    const now = new Date();
     const rawBoostExpiry = productData.boostExpiresAt;
     let currentBoostExpiry: Date | null = null;
     if (rawBoostExpiry instanceof Timestamp) {
