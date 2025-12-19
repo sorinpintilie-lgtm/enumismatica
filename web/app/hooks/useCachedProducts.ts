@@ -143,6 +143,7 @@ export function useBoostedProducts(limitCount: number = 3) {
     queryKey: ['boosted-products', limitCount],
     queryFn: async () => {
       const now = new Date();
+      console.log('🔍 Debug: Checking for boosted products at', now.toISOString());
       
       // Query for products with active boosts
       let q = query(
@@ -156,11 +157,20 @@ export function useBoostedProducts(limitCount: number = 3) {
         limit(limitCount),
       );
 
+      console.log('🔍 Debug: Executing Firestore query for boosted products');
       const querySnapshot = await getDocs(q);
+      console.log('🔍 Debug: Query completed, documents found:', querySnapshot.size);
+      
       const boostedProducts: Product[] = [];
 
       querySnapshot.forEach((doc) => {
         const data = doc.data();
+        console.log('🔍 Debug: Found boosted product:', doc.id, {
+          name: data.name,
+          boostExpiresAt: data.boostExpiresAt?.toDate?.() || data.boostExpiresAt,
+          boostedAt: data.boostedAt?.toDate?.() || data.boostedAt
+        });
+        
         const productData: any = {
           id: doc.id,
           name: data.name,
@@ -175,6 +185,7 @@ export function useBoostedProducts(limitCount: number = 3) {
         boostedProducts.push(productData as Product);
       });
 
+      console.log('🔍 Debug: Final boosted products count:', boostedProducts.length);
       return boostedProducts;
     },
     staleTime: 2 * 60 * 1000, // 2 minutes for boosted products (more dynamic)
