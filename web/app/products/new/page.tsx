@@ -392,6 +392,13 @@ export default function NewProductPage() {
     try {
       setSubmitting(true);
 
+      // Calculate product price
+      let productPrice = numericPrice;
+      if (listingType === 'auction') {
+        const reserve = reservePrice ? Number(reservePrice) : (price ? Number(price) : 0);
+        productPrice = reserve;
+      }
+
       let imageUrls: string[] = [];
       if (collectionItem && collectionItem.images && collectionItem.images.length > 0) {
         // Use existing images from collection item
@@ -415,7 +422,7 @@ export default function NewProductPage() {
         description: description.trim(),
         images: imageUrls,
         video: videoUrl,
-        price: numericPrice,
+        price: productPrice,
         category: category || null,
         listingType: listingType,
         ownerId: user.uid,
@@ -458,8 +465,8 @@ export default function NewProductPage() {
             hasNgcCertification: hasNgcCertification || false,
             ngcCode: hasNgcCertification ? ngcCode.trim() : undefined,
             ngcGrade: hasNgcCertification ? ngcGrade : undefined,
-            acquisitionPrice: numericPrice,
-            currentValue: numericPrice,
+            acquisitionPrice: productPrice,
+            currentValue: productPrice,
             notes: 'Articol creat în magazin',
             tags: ['listare-magazin'],
           });
