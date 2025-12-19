@@ -28,16 +28,9 @@ export default function AdminUsers() {
 				return;
 			}
 
-			// User management is restricted to super-admins.
 			const adminStatus = await isAdmin(user.uid);
 			if (!adminStatus) {
 				router.push('/dashboard');
-				return;
-			}
-
-			const superAdminStatus = await isSuperAdmin(user.uid);
-			if (!superAdminStatus) {
-				router.push('/admin/moderator');
 				return;
 			}
 
