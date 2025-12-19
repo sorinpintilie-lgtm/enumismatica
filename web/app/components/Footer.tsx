@@ -150,10 +150,20 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-navy-700 mt-6 pt-4 text-center">
+        <div className="border-t border-navy-700 mt-6 pt-4 text-center space-y-2">
           <p className="text-gray-400 text-sm">
-            © 2024 eNumismatica.ro. Toate drepturile rezervate.
+            © 2026 eNumismatica.ro. Toate drepturile rezervate.
           </p>
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-gray-400 text-xs">Powered by</span>
+            <Image
+              src="/skyrologo.png"
+              alt="Skyro"
+              width={80}
+              height={20}
+              className="object-contain"
+            />
+          </div>
         </div>
       </div>
     </footer>

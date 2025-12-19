@@ -126,9 +126,9 @@ export default function PronumismaticaPage() {
     <div className="container mx-auto px-4 py-10 max-w-4xl">
       <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold text-[#e7b73c] mb-2">Asociația PRONUMISMATICA</h1>
+          <h1 className="text-3xl font-bold text-[#e7b73c] mb-2">Asociația Pronumismatica</h1>
           <p className="text-slate-300 text-sm max-w-2xl">
-            Asociația PRONUMISMATICA este o organizație dedicată promovării, conservării și
+            Asociația Pronumismatica este o organizație dedicată promovării, conservării și
             valorificării patrimoniului numismatic al României.
           </p>
         </div>
@@ -140,10 +140,10 @@ export default function PronumismaticaPage() {
         </Link>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-2 items-start">
+      <div className="grid gap-6 md:gap-8 md:grid-cols-2 items-start">
         <section className="space-y-4 text-sm text-slate-200 leading-relaxed">
           <p>
-            Asociația PRONUMISMATICA este o organizație dedicată promovării, conservării și
+            Asociația Pronumismatica este o organizație dedicată promovării, conservării și
             valorificării patrimoniului numismatic al României. Prin activitatea sa, asociația
             susține educația culturală și stimulează interesul pentru monede, medalii și artefacte
             numismatice, adresându-se atât colecționarilor, cât și publicului larg. Numismatica
@@ -176,7 +176,7 @@ export default function PronumismaticaPage() {
           <div>
             <h2 className="text-lg font-semibold text-[#e7b73c] mb-2">Parteneriat</h2>
             <p>
-              eNumismatica.ro are plăcerea de a colabora cu Asociația PRONUMISMATICA, susținând
+              eNumismatica.ro are plăcerea de a colabora cu Asociația Pronumismatica, susținând
               prin acest parteneriat inițiative dedicate promovării și protejării patrimoniului
               numismatic românesc.
             </p>
@@ -185,39 +185,54 @@ export default function PronumismaticaPage() {
 
         <section className="rounded-2xl border border-gold-500/30 bg-navy-900/80 p-6 shadow-[0_14px_40px_rgba(0,0,0,0.8)]">
           <h2 className="text-xl font-semibold text-[#e7b73c] mb-1">
-            Formular de contact PRONUMISMATICA
+            Formular de înscriere
           </h2>
           <p className="text-xs text-slate-400 mb-4">
-            Completează pașii de mai jos pentru a trimite datele tale către Asociația
-            PRONUMISMATICA. Informațiile vor fi transmise în siguranță către organizator.
+            Completează formularul de mai jos pentru a te înscrie în Asociația Pronumismatica. Datele tale ajung direct la asociație.
           </p>
 
           {/* Stepper indicator */}
-          <div className="flex items-center justify-between mb-6 text-xs text-slate-200">
-            {['Identitate', 'Adresă', 'Act de identitate', 'Contact'].map((label, index) => {
-              const currentStep = (index + 1) as Step;
-              const isActive = step === currentStep;
-              const isCompleted = step > currentStep;
-              return (
-                <div key={label} className="flex-1 flex items-center">
-                  <div
-                    className={`flex items-center justify-center h-7 w-7 rounded-full border text-[11px] font-semibold ${
-                      isCompleted
-                        ? 'bg-[#e7b73c] border-[#e7b73c] text-navy-900'
-                        : isActive
-                        ? 'bg-navy-800 border-[#e7b73c] text-[#e7b73c]'
-                        : 'bg-navy-950 border-slate-600 text-slate-400'
-                    }`}
-                  >
-                    {index + 1}
+          <div className="mb-6">
+            {/* Mobile: Current step display */}
+            <div className="block sm:hidden text-center mb-4">
+              <div className="text-sm text-slate-200 font-medium">
+                Pasul {step} din 4: {['Identitate', 'Adresă', 'Act de identitate', 'Contact'][step - 1]}
+              </div>
+              <div className="w-full bg-slate-700 rounded-full h-2 mt-2">
+                <div
+                  className="bg-[#e7b73c] h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(step / 4) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Desktop: Full stepper */}
+            <div className="hidden sm:flex items-center justify-between text-xs text-slate-200">
+              {['Identitate', 'Adresă', 'Act de identitate', 'Contact'].map((label, index) => {
+                const currentStep = (index + 1) as Step;
+                const isActive = step === currentStep;
+                const isCompleted = step > currentStep;
+                return (
+                  <div key={label} className="flex-1 flex items-center">
+                    <div
+                      className={`flex items-center justify-center h-7 w-7 rounded-full border text-[11px] font-semibold ${
+                        isCompleted
+                          ? 'bg-[#e7b73c] border-[#e7b73c] text-navy-900'
+                          : isActive
+                          ? 'bg-navy-800 border-[#e7b73c] text-[#e7b73c]'
+                          : 'bg-navy-950 border-slate-600 text-slate-400'
+                      }`}
+                    >
+                      {index + 1}
+                    </div>
+                    <span className="ml-2">{label}</span>
+                    {index < 3 && (
+                      <div className="flex-1 h-px bg-slate-700 ml-2" aria-hidden="true" />
+                    )}
                   </div>
-                  <span className="ml-2 hidden sm:inline-block">{label}</span>
-                  {index < 3 && (
-                    <div className="flex-1 h-px bg-slate-700 ml-2" aria-hidden="true" />
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 text-sm">
