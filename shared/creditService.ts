@@ -280,9 +280,6 @@ export async function boostProductWithCredits(
   const userRef = doc(db, 'users', userId);
   const productRef = doc(db, 'products', productId);
 
-  const boostUntil = new Date();
-  boostUntil.setDate(boostUntil.getDate() + durationDays);
-
   await runTransaction(db, async (tx) => {
     const userSnap = await tx.get(userRef);
     if (!userSnap.exists()) {
@@ -305,6 +302,20 @@ export async function boostProductWithCredits(
     if (productData.ownerId !== userId) {
       throw new Error('Poți boosta doar produsele tale');
     }
+
+    // Compute boost expiry. If there's an active boost, extend it (stack duration).
+    const now = new Date();
+    const rawBoostExpiry = productData.boostExpiresAt;
+    let currentBoostExpiry: Date | null = null;
+    if (rawBoostExpiry instanceof Timestamp) {
+      currentBoostExpiry = rawBoostExpiry.toDate();
+    } else if (rawBoostExpiry instanceof Date) {
+      currentBoostExpiry = rawBoostExpiry;
+    }
+
+    const baseDate = currentBoostExpiry && currentBoostExpiry > now ? currentBoostExpiry : now;
+    const boostUntil = new Date(baseDate);
+    boostUntil.setDate(boostUntil.getDate() + durationDays);
 
     const newCredits = normalized.credits - cost;
 

@@ -289,6 +289,17 @@ export function useProduct(id: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const toDateSafe = (value: any): Date | undefined => {
+    if (!value) return undefined;
+    if (value instanceof Date) return value;
+    if (value?.toDate && typeof value.toDate === 'function') return value.toDate();
+    if (typeof value === 'string' || typeof value === 'number') {
+      const d = new Date(value);
+      if (!Number.isNaN(d.getTime())) return d;
+    }
+    return undefined;
+  };
+
   useEffect(() => {
     if (!id || !db) return;
 
@@ -296,11 +307,17 @@ export function useProduct(id: string) {
       doc(db, 'products', id),
       (doc) => {
         if (doc.exists()) {
+          const data = doc.data() as any;
           setProduct({
             id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate() || new Date(),
-            updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+            ...data,
+            createdAt: toDateSafe(data.createdAt) || new Date(),
+            updatedAt: toDateSafe(data.updatedAt) || new Date(),
+            listingExpiresAt: toDateSafe(data.listingExpiresAt),
+            boostExpiresAt: toDateSafe(data.boostExpiresAt),
+            boostedAt: toDateSafe(data.boostedAt),
+            promotedAt: toDateSafe(data.promotedAt),
+            promotionExpiresAt: toDateSafe(data.promotionExpiresAt),
           } as Product);
         } else {
           setProduct(null);

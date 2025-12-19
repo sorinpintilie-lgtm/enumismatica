@@ -149,7 +149,10 @@ export function useBoostedProducts(limitCount: number = 3) {
         collection(db, 'products'),
         where('status', '==', 'approved'),
         where('boostExpiresAt', '>', now), // Only active boosts
-        orderBy('boostedAt', 'desc'), // Most recently boosted first
+        // Firestore requires the first orderBy to match the inequality field.
+        // We'll order by expiry first, then by boostedAt for stable ordering.
+        orderBy('boostExpiresAt', 'desc'),
+        orderBy('boostedAt', 'desc'),
         limit(limitCount),
       );
 

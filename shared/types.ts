@@ -65,6 +65,12 @@ export interface UserPersonalDetails {
   county?: string;
   postalCode?: string;
   country?: string;
+  // Billing details (optional separate billing address)
+  billingAddress?: string;
+  billingCounty?: string;
+  billingPostalCode?: string;
+  billingCountry?: string;
+  bankAccount?: string;
 }
 
 export interface UserPreferences {
