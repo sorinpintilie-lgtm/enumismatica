@@ -79,7 +79,10 @@ function ProductCard({ product, showWatchlistButton = true, variant = 'grid' }: 
             <div className="flex gap-2">
               {user && user.uid !== product.ownerId && !product.isSold && (
                 <button
-                  onClick={() => setShowOfferModal(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowOfferModal(true);
+                  }}
                   className="inline-flex items-center gap-1 rounded-full bg-blue-500 hover:bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
                 >
                   Fă o ofertă
@@ -148,7 +151,10 @@ function ProductCard({ product, showWatchlistButton = true, variant = 'grid' }: 
              </span>
              {user && user.uid !== product.ownerId && !product.isSold && (
                <button
-                 onClick={() => setShowOfferModal(true)}
+                 onClick={(e) => {
+                   e.stopPropagation();
+                   setShowOfferModal(true);
+                 }}
                  className="inline-flex items-center gap-1 rounded-full bg-blue-500 hover:bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
                >
                  Fă o ofertă
