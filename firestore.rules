@@ -169,9 +169,7 @@ service cloud.firestore {
                     hasRequiredFields(request.resource.data, ['productId', 'ownerId', 'reservePrice', 'startTime', 'endTime', 'status']) &&
                     isValidTimestamp(request.resource.data.startTime) && isValidTimestamp(request.resource.data.endTime) &&
                     request.resource.data.reservePrice >= 0 &&
-                    // Validate that the authenticated user is the owner of the product being auctioned
-                    exists(/databases/$(database)/documents/products/$(request.resource.data.productId)) &&
-                    get(/databases/$(database)/documents/products/$(request.resource.data.productId)).data.ownerId == request.auth.uid &&
+                    // Validate that the authenticated user owns this auction
                     request.resource.data.ownerId == request.auth.uid &&
                     (request.resource.data.status == 'pending' || (isAdmin() && request.resource.data.status in ['pending', 'active', 'ended', 'cancelled', 'rejected']));
       allow update: if isAuthenticated() &&
