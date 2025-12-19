@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { isAdmin } from 'shared/adminService';
+import { isAdmin, isSuperAdmin } from 'shared/adminService';
 import BehavioralAnalysisPanel from './components/BehavioralAnalysisPanel';
 import SessionAnalyticsView from './components/SessionAnalyticsView';
 
@@ -16,20 +16,27 @@ export default function AnalyticsDashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      if (!user) {
-        router.push('/login');
-        return;
-      }
+		const checkAdmin = async () => {
+			if (!user) {
+				router.push('/login');
+				return;
+			}
 
-      const adminStatus = await isAdmin(user.uid);
-      if (!adminStatus) {
-        router.push('/dashboard');
-        return;
-      }
+			const adminStatus = await isAdmin(user.uid);
+			if (!adminStatus) {
+				router.push('/dashboard');
+				return;
+			}
 
-      setIsAdminUser(true);
-      setLoading(false);
+			// Analytics dashboard is restricted to super-admins.
+			const superAdminStatus = await isSuperAdmin(user.uid);
+			if (!superAdminStatus) {
+				router.push('/admin/moderator');
+				return;
+			}
+
+			setIsAdminUser(true);
+			setLoading(false);
     };
 
     if (!authLoading) {

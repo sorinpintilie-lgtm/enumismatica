@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { isAdmin } from 'shared/adminService';
+import { isAdmin, isSuperAdmin } from 'shared/adminService';
 import { formatDistanceToNow, format } from 'date-fns';
 import { ro } from 'date-fns/locale';
 
@@ -36,20 +36,27 @@ export default function UserActivityAnalyticsPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      if (!user) {
-        router.push('/login');
-        return;
-      }
+		const checkAdmin = async () => {
+			if (!user) {
+				router.push('/login');
+				return;
+			}
 
-      const adminStatus = await isAdmin(user.uid);
-      if (!adminStatus) {
-        router.push('/dashboard');
-        return;
-      }
+			const adminStatus = await isAdmin(user.uid);
+			if (!adminStatus) {
+				router.push('/dashboard');
+				return;
+			}
 
-      setIsAdminUser(true);
-      setLoading(false);
+			// User activity analytics is restricted to super-admins.
+			const superAdminStatus = await isSuperAdmin(user.uid);
+			if (!superAdminStatus) {
+				router.push('/admin/moderator');
+				return;
+			}
+
+			setIsAdminUser(true);
+			setLoading(false);
     };
 
     if (!authLoading) {

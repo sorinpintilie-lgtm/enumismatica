@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
-  isAdmin,
-  getAllConversations,
-  getConversationMessages,
-  deleteConversation,
+	isAdmin,
+	isSuperAdmin,
+	getAllConversations,
+	getConversationMessages,
+	deleteConversation,
 } from 'shared/adminService';
 import { Conversation, ChatMessage } from 'shared/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -25,21 +26,28 @@ export default function AdminConversations() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      if (!user) {
-        router.push('/login');
-        return;
-      }
+		const checkAdmin = async () => {
+			if (!user) {
+				router.push('/login');
+				return;
+			}
 
-      const adminStatus = await isAdmin(user.uid);
-      if (!adminStatus) {
-        router.push('/dashboard');
-        return;
-      }
+			const adminStatus = await isAdmin(user.uid);
+			if (!adminStatus) {
+				router.push('/dashboard');
+				return;
+			}
 
-      setIsAdminUser(true);
-      await loadConversations();
-      setLoading(false);
+			// Full conversation monitoring/deletion is restricted to super-admins.
+			const superAdminStatus = await isSuperAdmin(user.uid);
+			if (!superAdminStatus) {
+				router.push('/admin/moderator');
+				return;
+			}
+
+			setIsAdminUser(true);
+			await loadConversations();
+			setLoading(false);
     };
 
     if (!authLoading) {

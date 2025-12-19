@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { isAdmin } from 'shared/adminService';
+import { isAdmin, isSuperAdmin } from 'shared/adminService';
 import {
   getRecentActivity,
   subscribeToActivityLogs,
@@ -50,6 +50,13 @@ export default function AdminDashboard() {
       const adminStatus = await isAdmin(user.uid);
       if (!adminStatus) {
         router.push('/dashboard');
+        return;
+      }
+
+      // Only super-admins get access to the full admin dashboard.
+      const superAdminStatus = await isSuperAdmin(user.uid);
+      if (!superAdminStatus) {
+        router.push('/admin/moderator');
         return;
       }
 

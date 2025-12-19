@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { isAdmin } from 'shared/adminService';
+import { isAdmin, isSuperAdmin } from 'shared/adminService';
 import {
   getActivityLogs,
   subscribeToActivityLogs,
@@ -91,7 +91,7 @@ const EVENT_CATEGORIES = {
 };
 
 export default function ActivityLogsPage() {
-  const { user, loading: authLoading } = useAuth();
+	const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
@@ -103,21 +103,28 @@ export default function ActivityLogsPage() {
   const [expandedLog, setExpandedLog] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkAdminAndLoad = async () => {
-      if (!user) {
-        router.push('/login');
-        return;
-      }
+		const checkAdminAndLoad = async () => {
+			if (!user) {
+				router.push('/login');
+				return;
+			}
 
-      const adminStatus = await isAdmin(user.uid);
-      if (!adminStatus) {
-        router.push('/dashboard');
-        return;
-      }
+			const adminStatus = await isAdmin(user.uid);
+			if (!adminStatus) {
+				router.push('/dashboard');
+				return;
+			}
 
-      setIsAdminUser(true);
-      await loadLogs();
-      setLoading(false);
+			// Detailed activity logs are restricted to super-admins.
+			const superAdminStatus = await isSuperAdmin(user.uid);
+			if (!superAdminStatus) {
+				router.push('/admin/moderator');
+				return;
+			}
+
+			setIsAdminUser(true);
+			await loadLogs();
+			setLoading(false);
     };
 
     if (!authLoading) {

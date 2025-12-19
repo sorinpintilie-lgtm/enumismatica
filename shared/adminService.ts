@@ -28,18 +28,44 @@ import {
 const ADMIN_UID = 'QEm0DSIzylNQIHpQAZlgtWQkYYE3';
 
 /**
- * Check if a user is an admin based on their UID or role in Firestore
+ * Check if a user is a super-admin (full control) based on their UID or role in Firestore.
+ *
+ * Super-admins:
+ *  - The hardcoded ADMIN_UID
+ *  - Any user document with role === 'superadmin'
+ */
+export async function isSuperAdmin(userId: string): Promise<boolean> {
+  try {
+    // Hardcoded super admin UID
+    if (userId === ADMIN_UID) return true;
+
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (!userDoc.exists()) return false;
+
+    const userData = userDoc.data();
+    return userData.role === 'superadmin';
+  } catch (error) {
+    console.error('Error checking super admin status:', error);
+    return false;
+  }
+}
+
+/**
+ * Check if a user is an admin (normal admin OR super-admin).
+ *
+ * This is used for general admin access (products/auctions approval, etc.).
+ * For super-admin-only features (user management, analytics, logs), use isSuperAdmin().
  */
 export async function isAdmin(userId: string): Promise<boolean> {
   try {
-    // Check if user is the super admin by UID
-    if (userId === ADMIN_UID) return true;
-    
+    // Super admin is always considered admin
+    if (await isSuperAdmin(userId)) return true;
+
     const userDoc = await getDoc(doc(db, 'users', userId));
     if (!userDoc.exists()) return false;
-    
+
     const userData = userDoc.data();
-    // Check if user has admin role
+    // Normal admin role
     return userData.role === 'admin';
   } catch (error) {
     console.error('Error checking admin status:', error);
