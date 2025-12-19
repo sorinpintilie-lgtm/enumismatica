@@ -42,7 +42,23 @@ export default function Dashboard() {
     county: '',
     postalCode: '',
     country: 'România',
+    billingAddress: '',
+    billingCounty: '',
+    billingPostalCode: '',
+    billingCountry: 'România',
+    bankAccount: '',
   });
+
+  // Funcție pentru copierea adresei de livrare la adresa de facturare
+  const copyDeliveryToBilling = () => {
+    setPersonalDetails((p) => ({
+      ...p,
+      billingAddress: p.address,
+      billingCounty: p.county,
+      billingPostalCode: p.postalCode,
+      billingCountry: p.country,
+    }));
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -100,6 +116,11 @@ export default function Dashboard() {
           county: details.county || '',
           postalCode: details.postalCode || '',
           country: details.country || 'România',
+          billingAddress: details.billingAddress || '',
+          billingCounty: details.billingCounty || '',
+          billingPostalCode: details.billingPostalCode || '',
+          billingCountry: details.billingCountry || 'România',
+          bankAccount: details.bankAccount || '',
         });
       } catch (err: any) {
         console.error('Failed to load personal details', err);
@@ -149,6 +170,11 @@ export default function Dashboard() {
           county: personalDetails.county.trim(),
           postalCode: personalDetails.postalCode.trim(),
           country: personalDetails.country.trim() || 'România',
+          billingAddress: personalDetails.billingAddress.trim(),
+          billingCounty: personalDetails.billingCounty.trim(),
+          billingPostalCode: personalDetails.billingPostalCode.trim(),
+          billingCountry: personalDetails.billingCountry.trim() || 'România',
+          bankAccount: personalDetails.bankAccount.trim(),
         },
         updatedAt: serverTimestamp(),
       });
@@ -405,9 +431,6 @@ export default function Dashboard() {
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <h2 className="text-xl font-semibold text-white">Date personale</h2>
-                <p className="text-sm text-slate-200 mt-1">
-                  Vizibile doar pentru tine și administratori. Folosite pentru livrare și contact.
-                </p>
               </div>
             </div>
 
@@ -449,44 +472,116 @@ export default function Dashboard() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-200 mb-1">Adresă *</label>
-                  <input
-                    value={personalDetails.address}
-                    onChange={(e) => setPersonalDetails((p) => ({ ...p, address: e.target.value }))}
-                    className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                    placeholder="Stradă, număr, bloc, scară, apartament"
-                  />
+                <div className="border-t border-gold-500/20 pt-4 mt-2">
+                  <h3 className="text-base font-semibold text-white mb-3">Adresă de livrare</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-200 mb-1">Adresă *</label>
+                      <input
+                        value={personalDetails.address}
+                        onChange={(e) => setPersonalDetails((p) => ({ ...p, address: e.target.value }))}
+                        className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                        placeholder="Stradă, număr, bloc, scară, apartament"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-200 mb-1">Județ *</label>
+                        <input
+                          value={personalDetails.county}
+                          onChange={(e) => setPersonalDetails((p) => ({ ...p, county: e.target.value }))}
+                          className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                          placeholder="Ex: Ilfov"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-200 mb-1">Cod poștal *</label>
+                        <input
+                          value={personalDetails.postalCode}
+                          onChange={(e) => setPersonalDetails((p) => ({ ...p, postalCode: e.target.value }))}
+                          className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                          placeholder="Ex: 010101"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-200 mb-1">Țară *</label>
+                        <input
+                          value={personalDetails.country}
+                          onChange={(e) => setPersonalDetails((p) => ({ ...p, country: e.target.value }))}
+                          className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                          placeholder="România"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-200 mb-1">Județ *</label>
-                    <input
-                      value={personalDetails.county}
-                      onChange={(e) => setPersonalDetails((p) => ({ ...p, county: e.target.value }))}
-                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                      placeholder="Ex: Ilfov"
-                    />
+                <div className="border-t border-gold-500/20 pt-4 mt-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-base font-semibold text-white">Adresă de facturare</h3>
+                    <button
+                      type="button"
+                      onClick={copyDeliveryToBilling}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#e7b73c]/50 bg-[#e7b73c]/10 px-3 py-1.5 text-xs font-medium text-[#e7b73c] hover:bg-[#e7b73c]/20 transition-colors"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copiază din livrare
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-200 mb-1">Cod poștal *</label>
-                    <input
-                      value={personalDetails.postalCode}
-                      onChange={(e) => setPersonalDetails((p) => ({ ...p, postalCode: e.target.value }))}
-                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                      placeholder="Ex: 010101"
-                    />
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-200 mb-1">Adresă</label>
+                      <input
+                        value={personalDetails.billingAddress}
+                        onChange={(e) => setPersonalDetails((p) => ({ ...p, billingAddress: e.target.value }))}
+                        className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                        placeholder="Stradă, număr, bloc, scară, apartament"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-200 mb-1">Județ</label>
+                        <input
+                          value={personalDetails.billingCounty}
+                          onChange={(e) => setPersonalDetails((p) => ({ ...p, billingCounty: e.target.value }))}
+                          className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                          placeholder="Ex: Ilfov"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-200 mb-1">Cod poștal</label>
+                        <input
+                          value={personalDetails.billingPostalCode}
+                          onChange={(e) => setPersonalDetails((p) => ({ ...p, billingPostalCode: e.target.value }))}
+                          className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                          placeholder="Ex: 010101"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-200 mb-1">Țară</label>
+                        <input
+                          value={personalDetails.billingCountry}
+                          onChange={(e) => setPersonalDetails((p) => ({ ...p, billingCountry: e.target.value }))}
+                          className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                          placeholder="România"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-200 mb-1">Țară *</label>
-                    <input
-                      value={personalDetails.country}
-                      onChange={(e) => setPersonalDetails((p) => ({ ...p, country: e.target.value }))}
-                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                      placeholder="România"
-                    />
-                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">Cont bancar (IBAN)</label>
+                  <input
+                    value={personalDetails.bankAccount}
+                    onChange={(e) => setPersonalDetails((p) => ({ ...p, bankAccount: e.target.value }))}
+                    className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                    placeholder="Ex: RO49AAAA1B31007593840000"
+                  />
                 </div>
 
                 {personalDetailsError && (
