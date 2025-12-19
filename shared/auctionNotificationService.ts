@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 import { AuctionNotification } from './types';
+import { showBrowserNotification } from './chatService';
 
 /**
  * Creates an auction notification for a user
@@ -42,7 +43,37 @@ export async function createAuctionNotification(
   if (auctionTitle) notificationData.auctionTitle = auctionTitle;
   if (bidAmount !== undefined) notificationData.bidAmount = bidAmount;
 
-  await addDoc(notificationsRef, notificationData);
+  const docRef = await addDoc(notificationsRef, notificationData);
+
+  // Try to show a browser notification (only works in web environment with granted permission)
+  try {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      const title =
+        type === 'outbid'
+          ? 'Ai fost depășit la licitație'
+          : type === 'auction_won'
+          ? 'Ai câștigat licitația'
+          : 'Licitație încheiată';
+
+      showBrowserNotification(title, {
+        body: auctionTitle ? `${auctionTitle}: ${message}` : message,
+        data: {
+          auctionId,
+          notificationId: docRef.id,
+        },
+        tag: auctionId ? `auction-${auctionId}` : undefined,
+        requireInteraction: false,
+      });
+
+      // Mark as pushed so we know a browser notification was attempted
+      await updateDoc(docRef, {
+        pushed: true,
+        updatedAt: Timestamp.fromDate(new Date()),
+      });
+    }
+  } catch (error) {
+    console.error('Failed to show browser auction notification:', error);
+  }
 }
 
 /**
