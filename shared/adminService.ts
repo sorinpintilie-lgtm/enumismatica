@@ -74,41 +74,41 @@ export async function isAdmin(userId: string): Promise<boolean> {
 }
 
 /**
- * Set a user as admin (only callable by existing admin)
+ * Set a user as admin (only callable by super-admin)
  */
-export async function setUserAsAdmin(userId: string, isCurrentUserAdmin: boolean): Promise<{ success: boolean; error?: string }> {
-  if (!isCurrentUserAdmin) {
-    return { success: false, error: 'Unauthorized: Only admins can set other users as admin' };
-  }
+export async function setUserAsAdmin(userId: string, isCurrentUserSuperAdmin: boolean): Promise<{ success: boolean; error?: string }> {
+	if (!isCurrentUserSuperAdmin) {
+		return { success: false, error: 'Unauthorized: Only super-admin can set other users as admin' };
+	}
 
-  try {
-    await updateDoc(doc(db, 'users', userId), {
-      role: 'admin',
-      updatedAt: Timestamp.fromDate(new Date()),
-    });
-    return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
+	try {
+		await updateDoc(doc(db, 'users', userId), {
+			role: 'admin',
+			updatedAt: Timestamp.fromDate(new Date()),
+		});
+		return { success: true };
+	} catch (error: any) {
+		return { success: false, error: error.message };
+	}
 }
 
 /**
- * Remove admin role from a user
+ * Remove admin role from a user (only callable by super-admin)
  */
-export async function removeAdminRole(userId: string, isCurrentUserAdmin: boolean): Promise<{ success: boolean; error?: string }> {
-  if (!isCurrentUserAdmin) {
-    return { success: false, error: 'Unauthorized: Only admins can remove admin role' };
-  }
+export async function removeAdminRole(userId: string, isCurrentUserSuperAdmin: boolean): Promise<{ success: boolean; error?: string }> {
+	if (!isCurrentUserSuperAdmin) {
+		return { success: false, error: 'Unauthorized: Only super-admin can remove admin role' };
+	}
 
-  try {
-    await updateDoc(doc(db, 'users', userId), {
-      role: 'user',
-      updatedAt: Timestamp.fromDate(new Date()),
-    });
-    return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
+	try {
+		await updateDoc(doc(db, 'users', userId), {
+			role: 'user',
+			updatedAt: Timestamp.fromDate(new Date()),
+		});
+		return { success: true };
+	} catch (error: any) {
+		return { success: false, error: error.message };
+	}
 }
 
 /**

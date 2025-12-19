@@ -17,7 +17,8 @@ import { User } from 'shared/types';
 export default function AdminUsers() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [isAdminUser, setIsAdminUser] = useState(false);
+	const [isAdminUser, setIsAdminUser] = useState(false);
+	const [isSuperAdminUser, setIsSuperAdminUser] = useState(false);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
 
@@ -34,10 +35,13 @@ export default function AdminUsers() {
 				return;
 			}
 
-      setIsAdminUser(true);
-      await loadUsers();
-      setLoading(false);
-    };
+			setIsAdminUser(true);
+			// Track if current admin is super-admin, to control dangerous actions
+			const superStatus = await isSuperAdmin(user.uid);
+			setIsSuperAdminUser(superStatus);
+			await loadUsers();
+			setLoading(false);
+		};
 
     if (!authLoading) {
       checkAdmin();
@@ -49,10 +53,15 @@ export default function AdminUsers() {
     setUsers(allUsers);
   };
 
-  const handleMakeAdmin = async (userId: string) => {
-    if (!confirm('Ești sigur că vrei să faci acest utilizator admin?')) return;
-    
-    const result = await setUserAsAdmin(userId, true);
+	const handleMakeAdmin = async (userId: string) => {
+		if (!isSuperAdminUser) {
+			alert('Doar super-adminul poate crea alți admini.');
+			return;
+		}
+
+		if (!confirm('Ești sigur că vrei să faci acest utilizator admin?')) return;
+		
+		const result = await setUserAsAdmin(userId, true);
     if (result.success) {
       await loadUsers();
     } else {
@@ -60,19 +69,29 @@ export default function AdminUsers() {
     }
   };
 
-  const handleRemoveAdmin = async (userId: string) => {
-    if (!confirm('Ești sigur că vrei să elimini privilegiile de admin ale acestui utilizator?')) return;
-    
-    const result = await removeAdminRole(userId, true);
-    if (result.success) {
-      await loadUsers();
-    } else {
+	const handleRemoveAdmin = async (userId: string) => {
+		if (!isSuperAdminUser) {
+			alert('Doar super-adminul poate elimina privilegiile de admin.');
+			return;
+		}
+
+		if (!confirm('Ești sigur că vrei să elimini privilegiile de admin ale acestui utilizator?')) return;
+		
+		const result = await removeAdminRole(userId, true);
+		if (result.success) {
+			await loadUsers();
+		} else {
       alert(`Error: ${result.error}`);
     }
   };
 
-  const handleDelete = async (userId: string) => {
-    if (!confirm('Ești sigur că vrei să ștergi acest utilizator? Acest lucru NU va șterge contul lor Firebase Auth.')) return;
+	const handleDelete = async (userId: string) => {
+		if (!isSuperAdminUser) {
+			alert('Doar super-adminul poate șterge utilizatori.');
+			return;
+		}
+
+		if (!confirm('Ești sigur că vrei să ștergi acest utilizator? Acest lucru NU va șterge contul lor Firebase Auth.')) return;
     
     const result = await deleteUser(userId);
     if (result.success) {
