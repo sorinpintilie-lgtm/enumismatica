@@ -12,6 +12,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getUserCredits, payCollectionSubscriptionWithCredits } from 'shared/creditService';
 import { useToast } from '../components/ToastProvider';
+import { uploadMultipleImages } from 'shared/storageService';
 
 export default function MyCollectionPage() {
   const { user } = useAuth();
@@ -779,6 +780,7 @@ function CollectionItemModal({
   onClose: () => void;
   onSave: (data: Partial<CollectionItem>) => Promise<void>;
 }) {
+  const { user } = useAuth();
   const [formData, setFormData] = useState<Partial<CollectionItem>>(
     item || {
       name: '',
@@ -793,15 +795,36 @@ function CollectionItemModal({
       acquisitionPrice: undefined,
       notes: '',
       tags: [],
+      images: [],
     }
   );
   const [saving, setSaving] = useState(false);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const selectedFiles = Array.from(files);
+      setImageFiles(selectedFiles);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await onSave(formData);
+      let imageUrls: string[] = formData.images || [];
+
+      // Upload new images if any
+      if (imageFiles.length > 0 && user?.uid) {
+        const uploadedUrls = await uploadMultipleImages(imageFiles, `collections/${user.uid}`);
+        imageUrls = [...imageUrls, ...uploadedUrls];
+      }
+
+      await onSave({
+        ...formData,
+        images: imageUrls,
+      });
     } catch (err) {
       console.error('Failed to save:', err);
     } finally {
@@ -952,6 +975,37 @@ function CollectionItemModal({
                 className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
                 placeholder="Notițe despre acest articol..."
               />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-slate-200 mb-1">Imagini</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+                className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-gold-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-navy-900 hover:file:bg-gold-400"
+              />
+              {imageFiles.length > 0 && (
+                <p className="mt-1 text-xs text-slate-300">
+                  {imageFiles.length} imagine{imageFiles.length > 1 ? 'i' : ''} selectate
+                </p>
+              )}
+              {formData.images && formData.images.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-xs text-slate-400 mb-2">Imagini existente:</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {formData.images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={image}
+                        alt={`Imagine ${index + 1}`}
+                        className="w-full h-20 object-cover rounded-lg border border-gold-500/30"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
