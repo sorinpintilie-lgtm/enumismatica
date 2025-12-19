@@ -6,9 +6,11 @@ import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firesto
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { uploadMultipleImages, uploadVideo, validateImageFile } from 'shared/storageService';
-import { addCollectionItem } from 'shared/collectionService';
+import { addCollectionItem, getCollectionItem, updateCollectionItem } from 'shared/collectionService';
 import { useToast } from '../../components/ToastProvider';
 import { useCoinAutocomplete } from '../../hooks/useCoinAutocomplete';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // Keep your existing constants
 const COUNTRIES = [
@@ -54,6 +56,9 @@ export default function NewProductPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
+  const searchParams = useSearchParams();
+  const [collectionItem, setCollectionItem] = useState<any>(null);
+  const [loadingCollectionItem, setLoadingCollectionItem] = useState(false);
   
   // Use the autocomplete hook
   const {
@@ -99,6 +104,57 @@ export default function NewProductPage() {
   const [hasNgcCertification, setHasNgcCertification] = useState(false);
   const [ngcCode, setNgcCode] = useState('');
   const [ngcGrade, setNgcGrade] = useState('');
+
+  // Load collection item if provided
+  useEffect(() => {
+    const collectionItemId = searchParams.get('collectionItemId');
+    const listingTypeParam = searchParams.get('listingType');
+
+    if (collectionItemId && user?.uid) {
+      setLoadingCollectionItem(true);
+      getCollectionItem(user.uid, collectionItemId)
+        .then((item) => {
+          if (item) {
+            setCollectionItem(item);
+            // Pre-fill form with collection item data
+            setName(item.name || '');
+            setDescription(item.description || '');
+            setCategory(item.category || 'Monede');
+            setCountry(item.country || 'România');
+            setYear(item.year ? String(item.year) : '');
+            setEra(item.era || '');
+            setMetal(item.metal || '');
+            setDenomination(item.denomination || '');
+            setGrade(item.grade || '');
+            setRarity(item.rarity || '');
+            setDiameter(item.diameter ? String(item.diameter) : '');
+            setWeight(item.weight ? String(item.weight) : '');
+            setMintLocation(item.mintMark || '');
+            // Set price to current value if available
+            if (item.currentValue) {
+              setPrice(String(item.currentValue));
+            }
+            // Set listing type from URL param
+            if (listingTypeParam === 'auction') {
+              setListingType('auction');
+            } else {
+              setListingType('direct');
+            }
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to load collection item:', error);
+          showToast({
+            type: 'error',
+            title: 'Eroare',
+            message: 'Nu s-a putut încărca articolul din colecție.',
+          });
+        })
+        .finally(() => {
+          setLoadingCollectionItem(false);
+        });
+    }
+  }, [searchParams, user?.uid, showToast]);
 
   // Auto-fill fields when matched coin is found
   useEffect(() => {
@@ -415,6 +471,20 @@ export default function NewProductPage() {
         });
       }
 
+      // Update collection item if it was from collection
+      if (collectionItem && user?.uid) {
+        try {
+          await updateCollectionItem(user.uid, collectionItem.id, {
+            isSold: true,
+            soldAt: new Date(),
+            tags: [...(collectionItem.tags || []), listingType === 'auction' ? 'auction-listed' : 'direct-sale-listed'],
+          });
+        } catch (error) {
+          console.error('Failed to update collection item:', error);
+          // Don't fail the whole process for this
+        }
+      }
+
       showToast({
         type: 'success',
         title: listingType === 'auction' ? 'Licitație trimisă spre aprobare' : 'Produs trimis spre aprobare',
@@ -436,11 +506,14 @@ export default function NewProductPage() {
     }
   };
 
-  if (loading || !user) {
+  if (loading || !user || loadingCollectionItem) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500" />
+          <p className="ml-4 text-slate-300">
+            {loadingCollectionItem ? 'Se încarcă articolul din colecție...' : 'Se verifică sesiunea de utilizator...'}
+          </p>
         </div>
       </div>
     );

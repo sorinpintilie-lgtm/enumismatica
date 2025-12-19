@@ -665,19 +665,35 @@ function CollectionItemCard({
         })()}
 
         {/* Actions */}
-        <div className="flex gap-2">
-          <button
-            onClick={onEdit}
-            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-          >
-            Editează
-          </button>
-          <button
-            onClick={onDelete}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-          >
-            Șterge
-          </button>
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <button
+              onClick={onEdit}
+              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Editează
+            </button>
+            <button
+              onClick={onDelete}
+              className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Șterge
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <Link
+              href={`/products/new?collectionItemId=${item.id}&listingType=direct`}
+              className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
+            >
+              Vinde
+            </Link>
+            <Link
+              href={`/products/new?collectionItemId=${item.id}&listingType=auction`}
+              className="flex-1 bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
+            >
+              Licitează
+            </Link>
+          </div>
         </div>
       </div>
     </div>
