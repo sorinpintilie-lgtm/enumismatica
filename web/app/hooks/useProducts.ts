@@ -13,11 +13,12 @@ const DEFAULT_PRODUCT_FIELDS = ['name', 'images', 'price', 'createdAt', 'updated
  * is locked (e.g. user not authenticated).
  */
 export function useProducts(
-  ownerId?: string,
-  pageSize: number = 20,
-  fields: string[] = DEFAULT_PRODUCT_FIELDS,
-  enabled: boolean = true
-) {
+	ownerId?: string,
+	pageSize: number = 20,
+	fields: string[] = DEFAULT_PRODUCT_FIELDS,
+	enabled: boolean = true,
+	listingType: 'direct' | 'auction' | 'all' = 'direct',
+	) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,16 +44,29 @@ export function useProducts(
       return;
     }
 
-    setLoading(true);
-    setError(null);
-    
-    let q = query(
-      collection(db, 'products'),
-      where('status', '==', 'approved'),
-      where('listingType', '==', 'direct'),
-      orderBy('createdAt', 'desc'),
-      limit(pageSize)
-    );
+		setLoading(true);
+		setError(null);
+		
+		// Base query: only approved products
+		let q = query(
+			collection(db, 'products'),
+			where('status', '==', 'approved'),
+		);
+
+		// Apply listing type filter unless we explicitly want all listing types
+		if (listingType !== 'all') {
+			q = query(
+				q,
+				where('listingType', '==', listingType),
+			);
+		}
+
+		// Order and limit
+		q = query(
+			q,
+			orderBy('createdAt', 'desc'),
+			limit(pageSize),
+		);
 
     if (ownerId) {
       q = query(q, where('ownerId', '==', ownerId));
@@ -115,21 +129,32 @@ export function useProducts(
         unsubscribeRef.current = null;
       }
     };
-  }, [ownerId, pageSize, JSON.stringify(fields), enabled]);
+	}, [ownerId, pageSize, JSON.stringify(fields), enabled, listingType]);
 
   const loadMore = useCallback(() => {
     if (!enabled || !hasMore || !lastVisible || loading || !db) return;
 
-    setLoading(true);
-    
-    let q = query(
-      collection(db, 'products'),
-      where('status', '==', 'approved'),
-      where('listingType', '==', 'direct'),
-      orderBy('createdAt', 'desc'),
-      limit(pageSize),
-      startAfter(lastVisible)
-    );
+		setLoading(true);
+		
+		// Base query for pagination: approved products
+		let q = query(
+			collection(db, 'products'),
+			where('status', '==', 'approved'),
+		);
+
+		if (listingType !== 'all') {
+			q = query(
+				q,
+				where('listingType', '==', listingType),
+			);
+		}
+
+		q = query(
+			q,
+			orderBy('createdAt', 'desc'),
+			limit(pageSize),
+			startAfter(lastVisible),
+		);
 
     if (ownerId) {
       q = query(q, where('ownerId', '==', ownerId));
@@ -181,7 +206,7 @@ export function useProducts(
 
     // Clean up the pagination listener after it fires once
     return () => unsubscribe();
-  }, [hasMore, lastVisible, loading, ownerId, pageSize, fields, enabled]);
+	}, [hasMore, lastVisible, loading, ownerId, pageSize, fields, enabled, listingType]);
 
   return { products, loading, error, hasMore, loadMore };
 }

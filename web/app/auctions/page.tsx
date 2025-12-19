@@ -9,13 +9,16 @@ import FilterBar, { FilterOptions } from '../components/FilterBar';
 import { useAuth } from '../context/AuthContext';
 
 function AuctionsListContent() {
-  const { auctions, loading: auctionsLoading, error: auctionsError } = useAuctions('active');
-  // Fetch all fields needed for filtering and display
-  const { products, loading: productsLoading } = useProducts(
-    undefined, // ownerId
-    20, // pageSize
-    ['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt']
-  );
+	const { auctions, loading: auctionsLoading, error: auctionsError } = useAuctions('active');
+	// Fetch all fields needed for filtering and display.
+	// IMPORTANT: use listingType = 'all' so we also load products listed as 'auction'.
+	const { products, loading: productsLoading } = useProducts(
+		undefined, // ownerId
+		20, // pageSize
+		['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt'],
+		true,
+		'all',
+	);
   
   const [filters, setFilters] = useState<FilterOptions>({
     searchTerm: '',
