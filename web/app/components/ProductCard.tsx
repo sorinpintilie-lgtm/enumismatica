@@ -10,10 +10,11 @@ import OfferModal from './OfferModal'
 interface ProductCardProps {
   product: Product
   showWatchlistButton?: boolean
+  showOfferButton?: boolean
   variant?: 'grid' | 'list'
 }
 
-function ProductCard({ product, showWatchlistButton = true, variant = 'grid' }: ProductCardProps) {
+function ProductCard({ product, showWatchlistButton = true, showOfferButton = true, variant = 'grid' }: ProductCardProps) {
   const { user } = useAuth();
   const [showOfferModal, setShowOfferModal] = useState(false);
   const now = new Date();
@@ -77,7 +78,7 @@ function ProductCard({ product, showWatchlistButton = true, variant = 'grid' }: 
             </div>
 
             <div className="flex gap-2">
-              {user && user.uid !== product.ownerId && !product.isSold && (
+              {showOfferButton && user && user.uid !== product.ownerId && !product.isSold && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -149,7 +150,7 @@ function ProductCard({ product, showWatchlistButton = true, variant = 'grid' }: 
              <span className="text-xl font-semibold text-[#e7b73c]">
                {formatRON(product.price)}
              </span>
-             {user && user.uid !== product.ownerId && !product.isSold && (
+             {showOfferButton && user && user.uid !== product.ownerId && !product.isSold && (
                <button
                  onClick={(e) => {
                    e.stopPropagation();
