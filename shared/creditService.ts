@@ -196,10 +196,11 @@ export async function createUserProfileAfterSignup(
     }
   }
 
-  // Apply referral bonuses (extra 50 credits to new user + 50 to inviter)
-  if (referralCode && referralCode !== uid) {
-    await applyReferralBonus(uid, referralCode);
-  }
+  // Referral bonuses (extra 50 credits to new user + 50 to inviter)
+  // are now applied by a Cloud Function on user document creation,
+  // using the `referredBy` and `referralBonusApplied` fields.
+  // We deliberately avoid cross-user writes from the client here
+  // to respect Firestore security rules.
 }
 
 async function applyReferralBonus(newUserId: string, inviterId: string): Promise<void> {

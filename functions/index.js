@@ -33,6 +33,10 @@ const ESEMNEAZA_CONFIG = {
   baseUrl: 'https://app.esemneaza.ro/api/v1',
 };
 
+// Referral bonus configuration (keep in sync with shared/creditService.ts)
+const REFERRAL_NEW_USER_BONUS = 50;  // Extra for the referred new user
+const REFERRAL_INVITER_BONUS = 50;   // Bonus per successful referral for inviter
+
 /**
  * downloadContractTemplate()
  *
@@ -431,5 +435,131 @@ exports.getCompletedContract = functions
       console.error('Error getting completed contract:', error);
       throw new functions.https.HttpsError('internal', error.message);
     }
+  });
+
+/**
+ * onUserCreatedApplyReferral
+ *
+ * TRIGGER: Firestore document create on users/{userId}
+ *
+ * When a new user document is created with a `referredBy` field, this function:
+ *  - awards an extra 50 credits to the new user
+ *  - awards 50 credits to the inviter
+ *  - records both transactions under users/{userId}/creditTransactions
+ *
+ * This mirrors the referral bonus rules from shared/creditService.ts but runs
+ * on the server with admin privileges, so it is not blocked by client security rules.
+ */
+exports.onUserCreatedApplyReferral = functions
+  .region('europe-west1')
+  .firestore.document('users/{userId}')
+  .onCreate(async (snap, context) => {
+    const newUserId = context.params.userId;
+    const data = snap.data() || {};
+
+    const referredBy = data.referredBy;
+    const referralBonusApplied = data.referralBonusApplied === true;
+
+    if (!referredBy || referralBonusApplied) {
+      // No referral code or already processed
+      return null;
+    }
+
+    const db = admin.firestore();
+    const newUserRef = db.collection('users').doc(newUserId);
+    const inviterRef = db.collection('users').doc(referredBy);
+
+    // Apply credit updates in a transaction to keep balances consistent
+    let inviterExists = false;
+    await db.runTransaction(async (tx) => {
+      const [newUserSnap, inviterSnap] = await Promise.all([
+        tx.get(newUserRef),
+        tx.get(inviterRef),
+      ]);
+
+      if (!newUserSnap.exists) {
+        console.warn('onUserCreatedApplyReferral: new user doc missing', {
+          newUserId,
+        });
+        return;
+      }
+
+      if (!inviterSnap.exists) {
+        console.warn('onUserCreatedApplyReferral: inviter not found', {
+          newUserId,
+          referredBy,
+        });
+        return;
+      }
+
+      inviterExists = true;
+
+      const newUserData = newUserSnap.data() || {};
+      const inviterData = inviterSnap.data() || {};
+
+      if (newUserData.referralBonusApplied) {
+        // Already processed (idempotency guard)
+        return;
+      }
+
+      const newUserCurrentCredits = typeof newUserData.credits === 'number'
+        ? newUserData.credits
+        : 0;
+      const inviterCurrentCredits = typeof inviterData.credits === 'number'
+        ? inviterData.credits
+        : 0;
+
+      const newUserCredits = newUserCurrentCredits + REFERRAL_NEW_USER_BONUS;
+      const inviterCredits = inviterCurrentCredits + REFERRAL_INVITER_BONUS;
+
+      const currentSignupRemaining = typeof newUserData.signupBonusCreditsRemaining === 'number'
+        ? newUserData.signupBonusCreditsRemaining
+        : 0;
+      const newSignupRemaining = currentSignupRemaining + REFERRAL_NEW_USER_BONUS;
+
+      tx.update(newUserRef, {
+        credits: newUserCredits,
+        signupBonusCreditsRemaining: newSignupRemaining,
+        referralBonusApplied: true,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      tx.update(inviterRef, {
+        credits: inviterCredits,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    });
+
+    if (!inviterExists) {
+      return null;
+    }
+
+    // Record creditTransactions for both users
+    const batch = admin.firestore().batch();
+    const now = admin.firestore.FieldValue.serverTimestamp();
+
+    const newUserTxRef = newUserRef.collection('creditTransactions').doc();
+    batch.set(newUserTxRef, {
+      userId: newUserId,
+      type: 'referral_new_user_bonus',
+      amount: REFERRAL_NEW_USER_BONUS,
+      relatedUserId: referredBy,
+      // Keep expiry aligned with signup bonus if present
+      expiresAt: data.signupBonusExpiresAt || null,
+      createdAt: now,
+    });
+
+    const inviterTxRef = inviterRef.collection('creditTransactions').doc();
+    batch.set(inviterTxRef, {
+      userId: referredBy,
+      type: 'referral_inviter_bonus',
+      amount: REFERRAL_INVITER_BONUS,
+      relatedUserId: newUserId,
+      createdAt: now,
+    });
+
+    await batch.commit();
+    console.log('Referral bonuses applied', { newUserId, referredBy });
+    return null;
   });
 
