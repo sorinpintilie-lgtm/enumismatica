@@ -33,6 +33,11 @@ export default function MyCollectionPage() {
 
   const { showToast } = useToast();
 
+  // Check if item is pending approval
+  const isPendingApproval = (item: CollectionItem) => {
+    return item.tags?.some(tag => tag.includes('-pending'));
+  };
+
   useEffect(() => {
     if (!user?.uid) {
       setSubscriptionActive(null);
@@ -445,6 +450,55 @@ export default function MyCollectionPage() {
                   deleteItem(item.id);
                 }
               }}
+              onCancelRequest={async () => {
+                if (!user?.uid) return;
+
+                try {
+                  // Find the pending product/auction ID
+                  const pendingTag = item.tags?.find(tag => tag.includes('-pending'));
+                  if (!pendingTag) return;
+
+                  const isAuction = pendingTag.startsWith('auction');
+                  const pendingId = (item as any)[isAuction ? 'auctionPendingId' : 'salePendingId'];
+
+                  if (pendingId) {
+                    // Delete the pending product
+                    const { doc, deleteDoc } = await import('firebase/firestore');
+                    const { db } = await import('../lib/firebase');
+
+                    const productRef = doc(db, 'products', pendingId);
+                    await deleteDoc(productRef);
+
+                    // If auction, also delete from auctions
+                    if (isAuction) {
+                      const auctionRef = doc(db, 'auctions', pendingId);
+                      await deleteDoc(auctionRef);
+                    }
+                  }
+
+                  // Update collection item to remove pending status
+                  const updatedTags = item.tags?.filter(tag => !tag.includes('-pending')) || [];
+                  await updateItem(item.id, {
+                    tags: updatedTags,
+                    auctionPendingId: undefined,
+                    salePendingId: undefined,
+                  } as any);
+
+                  showToast({
+                    type: 'success',
+                    title: 'Cerere anulată',
+                    message: 'Cererea de listare a fost anulată cu succes.',
+                  });
+                } catch (error) {
+                  console.error('Failed to cancel request:', error);
+                  showToast({
+                    type: 'error',
+                    title: 'Eroare',
+                    message: 'Nu s-a putut anula cererea. Încearcă din nou.',
+                  });
+                }
+              }}
+              isPendingApproval={isPendingApproval(item)}
             />
           ))}
         </div>
@@ -538,15 +592,19 @@ export default function MyCollectionPage() {
 }
 
  // Collection Item Card Component
-function CollectionItemCard({
-  item,
-  onEdit,
-  onDelete
-}: {
-  item: CollectionItem;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
+ function CollectionItemCard({
+   item,
+   onEdit,
+   onDelete,
+   onCancelRequest,
+   isPendingApproval
+ }: {
+   item: CollectionItem;
+   onEdit: () => void;
+   onDelete: () => void;
+   onCancelRequest: () => void;
+   isPendingApproval: boolean;
+ }) {
   // Badges:
   // - "Nou": first 12 hours after createdAt
   // - "Vândut": 24 hours after soldAt (if isSold)
@@ -670,30 +728,41 @@ function CollectionItemCard({
             <button
               onClick={onEdit}
               className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              disabled={isPendingApproval}
             >
               Editează
             </button>
             <button
               onClick={onDelete}
               className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              disabled={isPendingApproval}
             >
               Șterge
             </button>
           </div>
-          <div className="flex gap-2">
-            <Link
-              href={`/products/new?collectionItemId=${item.id}&listingType=direct`}
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
+          {isPendingApproval ? (
+            <button
+              onClick={onCancelRequest}
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
-              Pune la Vânzare
-            </Link>
-            <Link
-              href={`/products/new?collectionItemId=${item.id}&listingType=auction`}
-              className="flex-1 bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
-            >
-              Pune la Licitație
-            </Link>
-          </div>
+              Anulează Cererea
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <Link
+                href={`/products/new?collectionItemId=${item.id}&listingType=direct`}
+                className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
+              >
+                Pune la Vânzare
+              </Link>
+              <Link
+                href={`/products/new?collectionItemId=${item.id}&listingType=auction`}
+                className="flex-1 bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
+              >
+                Pune la Licitație
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

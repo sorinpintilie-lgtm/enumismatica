@@ -377,7 +377,11 @@ export default function NewProductPage() {
       setSubmitting(true);
 
       let imageUrls: string[] = [];
-      if (files.length > 0) {
+      if (collectionItem && collectionItem.images && collectionItem.images.length > 0) {
+        // Use existing images from collection item
+        imageUrls = collectionItem.images;
+      } else if (files.length > 0) {
+        // Upload new images
         imageUrls = await uploadMultipleImages(files, `products/${user.uid}`);
       }
 
@@ -497,14 +501,14 @@ export default function NewProductPage() {
         });
       }
 
-      // Update collection item if it was from collection
+      // Update collection item if it was from collection - mark as pending approval
       if (collectionItem && user?.uid) {
         try {
           await updateCollectionItem(user.uid, collectionItem.id, {
-            isSold: true,
-            soldAt: new Date(),
-            tags: [...(collectionItem.tags || []), listingType === 'auction' ? 'auction-listed' : 'direct-sale-listed'],
-          });
+            tags: [...(collectionItem.tags || []), listingType === 'auction' ? 'auction-pending' : 'sale-pending'],
+            // Add reference to the pending product
+            ...(listingType === 'auction' ? { auctionPendingId: productRef.id } : { salePendingId: productRef.id }),
+          } as any);
         } catch (error) {
           console.error('Failed to update collection item:', error);
           // Don't fail the whole process for this
@@ -1009,24 +1013,48 @@ export default function NewProductPage() {
             )}
           </div>
 
-          {/* Images */}
-          <div>
-            <label className="block text-sm font-medium text-slate-200 mb-1">
-              Imagini
-            </label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleFileChange}
-              className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-gold-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-navy-900 hover:file:bg-gold-400"
-            />
-            {files.length > 0 && (
-              <p className="mt-1 text-xs text-slate-300">
-                {files.length} imagine{files.length > 1 ? 'i' : ''} selectate
+          {/* Images - only show if not from collection */}
+          {!collectionItem && (
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-1">
+                Imagini
+              </label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileChange}
+                className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-gold-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-navy-900 hover:file:bg-gold-400"
+              />
+              {files.length > 0 && (
+                <p className="mt-1 text-xs text-slate-300">
+                  {files.length} imagine{files.length > 1 ? 'i' : ''} selectate
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Show existing images from collection */}
+          {collectionItem && collectionItem.images && collectionItem.images.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-1">
+                Imagini din colecție
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {collectionItem.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`Imagine ${index + 1}`}
+                    className="w-full h-20 object-cover rounded-lg border border-gold-500/30"
+                  />
+                ))}
+              </div>
+              <p className="mt-1 text-xs text-slate-400">
+                Se vor folosi imaginile existente din colecție
               </p>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Video */}
           <div>
