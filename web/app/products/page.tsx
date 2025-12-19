@@ -224,6 +224,8 @@ function ProductsListContent() {
     // If user tries to go beyond what we have loaded, request that page and trigger fetches.
     const neededCount = nextPage * PAGE_SIZE;
     if (products.length < neededCount && hasMore) {
+      // Switch UI immediately to the requested page, then fetch in background.
+      setPage(nextPage);
       setRequestedPage(nextPage);
       return;
     }
@@ -279,9 +281,15 @@ function ProductsListContent() {
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">
         <p className="text-slate-300">
-          Se afișează <span className="font-semibold text-gold-400">{pagedProducts.length}</span> produse (pagina{' '}
-          <span className="font-semibold text-gold-400">{page}</span>) din{' '}
+          Se afișează{' '}
+          <span className="font-semibold text-gold-400">
+            {requestedPage === page && pagedProducts.length === 0 ? '—' : pagedProducts.length}
+          </span>{' '}
+          produse (pagina <span className="font-semibold text-gold-400">{page}</span>) din{' '}
           <span className="font-semibold text-gold-400">{filteredProducts.length}</span> rezultate încărcate
+          {requestedPage === page && (
+            <span className="ml-2 text-xs text-slate-400">(Se încarcă pagina…)</span>
+          )}
         </p>
 
         {/* View Toggle (Grid/List) */}
@@ -405,7 +413,7 @@ function ProductsListContent() {
             disabled={loading || (!hasMore && page >= totalPagesKnown) || requestedPage !== null}
             className="px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-200 hover:bg-navy-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {requestedPage === page + 1 || loading ? 'Se încarcă…' : 'Înainte →'}
+            {requestedPage === page || loading ? 'Se încarcă…' : 'Înainte →'}
           </button>
         </div>
       )}
