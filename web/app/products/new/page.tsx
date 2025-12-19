@@ -419,7 +419,7 @@ export default function NewProductPage() {
         category: category || null,
         listingType: listingType,
         ownerId: user.uid,
-        status: listingType === 'auction' ? 'approved' : 'pending',
+        status: 'pending',
         country: country || null,
         year: year ? Number(year) : null,
         era: era || null,
