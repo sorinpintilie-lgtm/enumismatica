@@ -113,7 +113,13 @@ export interface Product {
   diameter?: number; // Diameter in millimeters
   category?: string; // General category (e.g., "coins", "banknotes", "medals")
 
-  // NGC Certification fields
+  // Certification fields (NGC, PCGS, etc.)
+  hasCertification?: boolean;
+  certificationCompany?: 'NGC' | 'PCGS';
+  certificationCode?: string;
+  certificationGrade?: string;
+  
+  // Legacy NGC fields for backward compatibility
   hasNgcCertification?: boolean;
   ngcCode?: string;
   ngcGrade?: string;
@@ -427,7 +433,13 @@ export interface CollectionItem {
   notes?: string;
   isPublic?: boolean;
 
-  // NGC Certification fields
+  // Certification fields (NGC, PCGS, etc.)
+  hasCertification?: boolean;
+  certificationCompany?: 'NGC' | 'PCGS';
+  certificationCode?: string;
+  certificationGrade?: string;
+  
+  // Legacy NGC fields for backward compatibility
   hasNgcCertification?: boolean;
   ngcCode?: string;
   ngcGrade?: string;
