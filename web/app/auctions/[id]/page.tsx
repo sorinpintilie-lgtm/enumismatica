@@ -611,6 +611,10 @@ export default function AuctionDetailPage() {
                 <p className="text-4xl font-extrabold text-[#e7b73c] drop-shadow-[0_0_24px_rgba(231,183,60,0.75)]">
                   {formatRON(currentBid)}
                 </p>
+                <p className="mt-1 text-[11px] text-slate-300 max-w-md mx-auto">
+                  Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data
+                  tranzacției.
+                </p>
                 {user && (
                   <p
                     className={`mt-2 text-sm font-medium ${

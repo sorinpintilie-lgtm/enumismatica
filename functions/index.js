@@ -105,7 +105,7 @@ async function fillContractTemplate(transactionData) {
       productName: (transactionData.product && transactionData.product.name) || '',
       productDescription:
         (transactionData.product && transactionData.product.description) || '',
-      price: `${transactionData.price} RON`,
+      price: `${transactionData.price} EUR`,
       transactionType:
         transactionData.type === 'auction' ? 'Licitație' : 'Cumpărare directă',
     };
@@ -232,7 +232,7 @@ async function sendToEsemneaza(contractFile, transactionData) {
         transactionData.type === 'auction' ? 'licitație' : 'vânzare-cumpărare'
       } pentru produsul: ${transactionData.product.name}\n\nPreț final: ${
         transactionData.price
-      } RON\n\nVă mulțumim!`,
+      } EUR. Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data tranzacției.\n\nVă mulțumim!`,
       tags: ['contract', transactionData.type, `transaction-${transactionData.transactionId}`],
     };
 

@@ -195,7 +195,7 @@ export default function ProductDetailPage() {
             <p className="text-sm text-slate-200 mb-4">
               Ești sigur că vrei să cumperi acest produs pentru{' '}
               <span className="font-semibold text-[#e7b73c]">
-                {product.price.toFixed(2)} RON
+                {product.price.toFixed(2)} EUR
               </span>
               ?
             </p>
@@ -313,8 +313,12 @@ export default function ProductDetailPage() {
               </div>
 
               <div>
-                <p className="text-4xl font-bold text-[#e7b73c] mb-2">
-                  {product.price.toFixed(2)} RON
+                <p className="text-4xl font-bold text-[#e7b73c] mb-1">
+                  {product.price.toFixed(2)} EUR
+                </p>
+                <p className="text-[11px] text-slate-300 mb-2 max-w-md">
+                  Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data
+                  tranzacției.
                 </p>
                 {product.isSold && (
                   <p className="text-sm font-semibold text-red-300 mb-2">

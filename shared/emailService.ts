@@ -256,7 +256,10 @@ export async function sendPurchaseConfirmationEmail(
     <h2>Confirmare Comandă</h2>
     <p>Comanda ta a fost plasată cu succes!</p>
     <p><strong>Produs:</strong> ${productName}</p>
-    <p><strong>Preț:</strong> ${price.toFixed(2)} RON</p>
+    <p><strong>Preț:</strong> ${price.toFixed(2)} EUR</p>
+    <p style="font-size: 11px; color: #555; margin-top: 4px;">
+      Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data tranzacției.
+    </p>
     <p><strong>Număr comandă:</strong> ${orderId}</p>
     <p>Vei primi un email de confirmare când produsul va fi expediat.</p>
     <a href="${SITE_URL}/orders/${orderId}" class="button">Vezi Comanda</a>
@@ -266,7 +269,9 @@ export async function sendPurchaseConfirmationEmail(
     to: email,
     subject: 'Confirmare Comandă - ' + SITE_NAME,
     htmlBody: emailTemplate(content),
-    textBody: `Comanda ta pentru ${productName} a fost plasată cu succes. Număr comandă: ${orderId}`,
+    textBody:
+      `Comanda ta pentru ${productName} a fost plasată cu succes. Număr comandă: ${orderId}. ` +
+      `Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data tranzacției.`,
   });
 }
 
@@ -282,7 +287,10 @@ export async function sendOutbidEmail(
   const content = `
     <h2>Ai Fost Depășit!</h2>
     <p>Cineva a licitat mai mult decât tine pentru <strong>${auctionTitle}</strong>.</p>
-    <p><strong>Licitație curentă:</strong> ${currentBid.toFixed(2)} RON</p>
+    <p><strong>Licitație curentă:</strong> ${currentBid.toFixed(2)} EUR</p>
+    <p style="font-size: 11px; color: #555; margin-top: 4px;">
+      Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data tranzacției.
+    </p>
     <p>Licitează din nou pentru a rămâne în cursă!</p>
     <a href="${SITE_URL}/auctions/${auctionId}" class="button">Licitează Acum</a>
   `;
@@ -291,7 +299,10 @@ export async function sendOutbidEmail(
     to: email,
     subject: `Ai fost depășit - ${auctionTitle}`,
     htmlBody: emailTemplate(content),
-    textBody: `Ai fost depășit la licitația pentru ${auctionTitle}. Licitație curentă: ${currentBid.toFixed(2)} RON`,
+    textBody:
+      `Ai fost depășit la licitația pentru ${auctionTitle}. ` +
+      `Licitație curentă: ${currentBid.toFixed(2)} EUR. ` +
+      `Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data tranzacției.`,
   });
 }
 
@@ -307,7 +318,10 @@ export async function sendAuctionWonEmail(
   const content = `
     <h2>🎉 Felicitări! Ai Câștigat Licitația!</h2>
     <p>Ai câștigat licitația pentru <strong>${auctionTitle}</strong>!</p>
-    <p><strong>Preț final:</strong> ${finalBid.toFixed(2)} RON</p>
+    <p><strong>Preț final:</strong> ${finalBid.toFixed(2)} EUR</p>
+    <p style="font-size: 11px; color: #555; margin-top: 4px;">
+      Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data tranzacției.
+    </p>
     <p>Vei fi contactat în curând pentru finalizarea tranzacției.</p>
     <a href="${SITE_URL}/auctions/${auctionId}" class="button">Vezi Detalii</a>
   `;
@@ -316,7 +330,10 @@ export async function sendAuctionWonEmail(
     to: email,
     subject: `🎉 Ai câștigat licitația - ${auctionTitle}`,
     htmlBody: emailTemplate(content),
-    textBody: `Felicitări! Ai câștigat licitația pentru ${auctionTitle}. Preț final: ${finalBid.toFixed(2)} RON`,
+    textBody:
+      `Felicitări! Ai câștigat licitația pentru ${auctionTitle}. ` +
+      `Preț final: ${finalBid.toFixed(2)} EUR. ` +
+      `Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data tranzacției.`,
   });
 }
 
@@ -332,7 +349,10 @@ export async function sendProductSoldEmail(
   const content = `
     <h2>Produsul Tău A Fost Vândut!</h2>
     <p>Felicitări! Produsul tău <strong>${productName}</strong> a fost vândut.</p>
-    <p><strong>Preț de vânzare:</strong> ${price.toFixed(2)} RON</p>
+    <p><strong>Preț de vânzare:</strong> ${price.toFixed(2)} EUR</p>
+    <p style="font-size: 11px; color: #555; margin-top: 4px;">
+      Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data tranzacției.
+    </p>
     <p><strong>Cumpărător:</strong> ${buyerName}</p>
     <p>Vei fi contactat în curând pentru finalizarea tranzacției.</p>
     <a href="${SITE_URL}/dashboard" class="button">Vezi Dashboard</a>
@@ -342,7 +362,9 @@ export async function sendProductSoldEmail(
     to: email,
     subject: `Produs vândut - ${productName}`,
     htmlBody: emailTemplate(content),
-    textBody: `Produsul tău ${productName} a fost vândut pentru ${price.toFixed(2)} RON.`,
+    textBody:
+      `Produsul tău ${productName} a fost vândut pentru ${price.toFixed(2)} EUR. ` +
+      `Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data tranzacției.`,
   });
 }
 
@@ -359,7 +381,10 @@ export async function sendAuctionSoldEmail(
   const content = `
     <h2>Licitația Ta S-a Încheiat Cu Succes!</h2>
     <p>Licitația pentru <strong>${auctionTitle}</strong> s-a încheiat.</p>
-    <p><strong>Preț final:</strong> ${finalBid.toFixed(2)} RON</p>
+    <p><strong>Preț final:</strong> ${finalBid.toFixed(2)} EUR</p>
+    <p style="font-size: 11px; color: #555; margin-top: 4px;">
+      Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data tranzacției.
+    </p>
     <p><strong>Câștigător:</strong> ${winnerName}</p>
     <p>Vei fi contactat în curând pentru finalizarea tranzacției.</p>
     <a href="${SITE_URL}/auctions/${auctionId}" class="button">Vezi Detalii</a>
@@ -369,7 +394,10 @@ export async function sendAuctionSoldEmail(
     to: email,
     subject: `Licitație încheiată - ${auctionTitle}`,
     htmlBody: emailTemplate(content),
-    textBody: `Licitația pentru ${auctionTitle} s-a încheiat. Preț final: ${finalBid.toFixed(2)} RON`,
+    textBody:
+      `Licitația pentru ${auctionTitle} s-a încheiat. ` +
+      `Preț final: ${finalBid.toFixed(2)} EUR. ` +
+      `Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data tranzacției.`,
   });
 }
 

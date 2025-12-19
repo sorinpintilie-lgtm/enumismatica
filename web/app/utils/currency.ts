@@ -1,8 +1,8 @@
 /**
- * Format a number as Romanian Lei (RON)
+ * Format a number for display as EUR (label only; underlying values remain the same).
  * @param amount - The amount to format
  * @param decimals - Number of decimal places (default: 2)
- * @returns Formatted string with RON currency
+ * @returns Formatted string with EUR currency
  */
 export function formatRON(amount: number, decimals: number = 2): string {
   // Check if the amount has decimal places
@@ -11,7 +11,7 @@ export function formatRON(amount: number, decimals: number = 2): string {
   if (hasDecimals) {
     return new Intl.NumberFormat('ro-RO', {
       style: 'currency',
-      currency: 'RON',
+      currency: 'EUR',
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     }).format(amount);
@@ -19,7 +19,7 @@ export function formatRON(amount: number, decimals: number = 2): string {
     // No decimals, format as whole number
     return new Intl.NumberFormat('ro-RO', {
       style: 'currency',
-      currency: 'RON',
+      currency: 'EUR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
@@ -27,14 +27,14 @@ export function formatRON(amount: number, decimals: number = 2): string {
 }
 
 /**
- * Format a number as Romanian Lei with thousand separators
+ * Format a number as EUR with thousand separators (display only).
  * @param amount - The amount to format
- * @returns Formatted string with RON currency
+ * @returns Formatted string with EUR currency
  */
 export function formatRONWithSeparators(amount: number): string {
   return new Intl.NumberFormat('ro-RO', {
     style: 'currency',
-    currency: 'RON',
+    currency: 'EUR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);

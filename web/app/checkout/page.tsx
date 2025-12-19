@@ -420,7 +420,11 @@ export default function CheckoutPage() {
                 <span className="text-slate-100">Total</span>
                 <span className="text-[#e7b73c]">{formatRON(total)}</span>
               </div>
-              <p className="mt-2 text-[11px] text-slate-400">
+              <p className="mt-2 text-[11px] text-slate-300">
+                Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data
+                tranzacției.
+              </p>
+              <p className="mt-1 text-[11px] text-slate-400">
                 Fiecare produs din coș este tratat ca piesă unică, cu cantitate 1. Momentan plata nu este
                 procesată online; comenzile sunt înregistrate intern și vor fi revizuite de un administrator.
               </p>
