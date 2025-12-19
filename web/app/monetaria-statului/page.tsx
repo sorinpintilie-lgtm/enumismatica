@@ -45,13 +45,6 @@ export default function MonetariaStatuluiPage() {
   const [diameter, setDiameter] = useState<string>('Toate Diametrele');
   const [weight, setWeight] = useState<string>('Toate Greutățile');
   const [quality, setQuality] = useState<string>('Toate Calitățile');
-  const [monetariaOptions, setMonetariaOptions] = useState({
-    materials: ['Toate Materialele'],
-    diameters: ['Toate Diametrele'],
-    weights: ['Toate Greutățile'],
-    qualities: ['Toate Calitățile'],
-  });
-  const [monetariaOptionsLoaded, setMonetariaOptionsLoaded] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -107,52 +100,6 @@ export default function MonetariaStatuluiPage() {
         });
         setProducts(transformedProducts);
 
-        // Extract filter options from monetaria-data.json
-        const materials = ['Toate Materialele'];
-        const diameters = ['Toate Diametrele'];
-        const weights = ['Toate Greutățile'];
-        const qualities = ['Toate Calitățile'];
-
-        data.products.forEach((product: RawProduct) => {
-          // Parse specifications to extract filter values
-          const specs = product.specifications || '';
-          const lines = specs.split('|').map(line => line.trim());
-
-          lines.forEach(line => {
-            if (line.includes('Diametru:')) {
-              const diameter = line.split('Diametru:')[1]?.trim();
-              if (diameter && !diameters.includes(diameter)) {
-                diameters.push(diameter);
-              }
-            }
-            if (line.includes('Greutate:')) {
-              const weight = line.split('Greutate:')[1]?.trim();
-              if (weight && !weights.includes(weight)) {
-                weights.push(weight);
-              }
-            }
-            if (line.includes('Material:')) {
-              const material = line.split('Material:')[1]?.trim();
-              if (material && !materials.includes(material)) {
-                materials.push(material);
-              }
-            }
-            if (line.includes('Calitate:')) {
-              const quality = line.split('Calitate:')[1]?.trim();
-              if (quality && !qualities.includes(quality)) {
-                qualities.push(quality);
-              }
-            }
-          });
-        });
-
-        setMonetariaOptions({
-          materials: materials as string[],
-          diameters: diameters as string[],
-          weights: weights as string[],
-          qualities: qualities as string[],
-        });
-        setMonetariaOptionsLoaded(true);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -162,6 +109,33 @@ export default function MonetariaStatuluiPage() {
 
     loadData();
   }, []);
+
+  // Calculate dynamic filter options based on current selections
+  const getFilteredProductsExcluding = (excludeFilter: string) => {
+    let baseProducts = selectedCategory === 'all' ? products : products.filter(p => p.category === selectedCategory);
+
+    // Apply current filters EXCEPT the one we're calculating options for
+    if (excludeFilter !== 'material' && material !== 'Toate Materialele') {
+      baseProducts = baseProducts.filter(p => (p as any).mint === material);
+    }
+    if (excludeFilter !== 'diameter' && diameter !== 'Toate Diametrele') {
+      baseProducts = baseProducts.filter(p => (p as any).diameter === diameter);
+    }
+    if (excludeFilter !== 'weight' && weight !== 'Toate Greutățile') {
+      baseProducts = baseProducts.filter(p => (p as any).weight === weight);
+    }
+    if (excludeFilter !== 'quality' && quality !== 'Toate Calitățile') {
+      baseProducts = baseProducts.filter(p => (p as any).era === quality);
+    }
+
+    return baseProducts;
+  };
+
+  // Calculate available options for each filter based on other filters
+  const availableMaterials = ['Toate Materialele', ...new Set(getFilteredProductsExcluding('material').map(p => (p as any).mint).filter(Boolean))];
+  const availableDiameters = ['Toate Diametrele', ...new Set(getFilteredProductsExcluding('diameter').map(p => (p as any).diameter).filter(Boolean))];
+  const availableWeights = ['Toate Greutățile', ...new Set(getFilteredProductsExcluding('weight').map(p => (p as any).weight).filter(Boolean))];
+  const availableQualities = ['Toate Calitățile', ...new Set(getFilteredProductsExcluding('quality').map(p => (p as any).era).filter(Boolean))];
 
   const categories = ['all', ...new Set(products.map(p => p.category))];
   let filteredProducts = selectedCategory === 'all' ? products : products.filter(p => p.category === selectedCategory);
@@ -219,7 +193,7 @@ export default function MonetariaStatuluiPage() {
         </div>
 
         {/* Monetaria Statului Filters */}
-        {monetariaOptionsLoaded && (
+        {products.length > 0 && (
           <div className="bg-navy-800/50 rounded-2xl p-6 mb-8">
             <h3 className="text-lg font-semibold text-white mb-4 text-center">Filtre Produse Monetaria Statului</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -230,7 +204,7 @@ export default function MonetariaStatuluiPage() {
                   onChange={(e) => setMaterial(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
                 >
-                  {monetariaOptions.materials.map((m) => (
+                  {availableMaterials.map((m) => (
                     <option key={m} value={m}>{m}</option>
                   ))}
                 </select>
@@ -242,7 +216,7 @@ export default function MonetariaStatuluiPage() {
                   onChange={(e) => setDiameter(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
                 >
-                  {monetariaOptions.diameters.map((d) => (
+                  {availableDiameters.map((d) => (
                     <option key={d} value={d}>{d}</option>
                   ))}
                 </select>
@@ -254,7 +228,7 @@ export default function MonetariaStatuluiPage() {
                   onChange={(e) => setWeight(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
                 >
-                  {monetariaOptions.weights.map((w) => (
+                  {availableWeights.map((w) => (
                     <option key={w} value={w}>{w}</option>
                   ))}
                 </select>
@@ -266,7 +240,7 @@ export default function MonetariaStatuluiPage() {
                   onChange={(e) => setQuality(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-gold-500/30 bg-navy-900/70 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
                 >
-                  {monetariaOptions.qualities.map((q) => (
+                  {availableQualities.map((q) => (
                     <option key={q} value={q}>{q}</option>
                   ))}
                 </select>
