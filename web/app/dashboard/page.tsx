@@ -11,6 +11,8 @@ import { getUserCredits, boostProductWithCredits } from 'shared/creditService';
 import { getUserAutoBidsForUser, cancelAutoBid } from 'shared/auctionService';
 import { formatRON } from '../utils/currency';
 import type { AutoBid, Auction } from 'shared/types';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -27,6 +29,20 @@ export default function Dashboard() {
   const [creditsError, setCreditsError] = useState<string | null>(null);
   const [autoBids, setAutoBids] = useState<{ autoBid: AutoBid; auction: Auction | null }[]>([]);
   const [autoBidsLoading, setAutoBidsLoading] = useState(false);
+
+  const [personalDetailsLoading, setPersonalDetailsLoading] = useState(false);
+  const [personalDetailsSaving, setPersonalDetailsSaving] = useState(false);
+  const [personalDetailsError, setPersonalDetailsError] = useState<string | null>(null);
+  const [personalDetailsSaved, setPersonalDetailsSaved] = useState(false);
+  const [personalDetails, setPersonalDetails] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    address: '',
+    county: '',
+    postalCode: '',
+    country: 'România',
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -63,6 +79,87 @@ export default function Dashboard() {
       isMounted = false;
     };
   }, [user?.uid]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadPersonalDetails = async () => {
+      if (!user?.uid) return;
+      setPersonalDetailsLoading(true);
+      setPersonalDetailsError(null);
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (!snap.exists()) return;
+        const data = snap.data() as any;
+        const details = (data.personalDetails || {}) as any;
+        if (!mounted) return;
+        setPersonalDetails({
+          firstName: details.firstName || '',
+          lastName: details.lastName || '',
+          phone: details.phone || '',
+          address: details.address || '',
+          county: details.county || '',
+          postalCode: details.postalCode || '',
+          country: details.country || 'România',
+        });
+      } catch (err: any) {
+        console.error('Failed to load personal details', err);
+        if (mounted) {
+          setPersonalDetailsError(err?.message || 'Nu s-au putut încărca datele personale.');
+        }
+      } finally {
+        if (mounted) {
+          setPersonalDetailsLoading(false);
+        }
+      }
+    };
+
+    loadPersonalDetails();
+    return () => {
+      mounted = false;
+    };
+  }, [user?.uid]);
+
+  const handleSavePersonalDetails = async () => {
+    if (!user?.uid) return;
+    setPersonalDetailsSaved(false);
+    setPersonalDetailsError(null);
+
+    // Basic validation
+    if (!personalDetails.firstName.trim() || !personalDetails.lastName.trim()) {
+      setPersonalDetailsError('Completează numele și prenumele.');
+      return;
+    }
+    if (!personalDetails.phone.trim()) {
+      setPersonalDetailsError('Completează numărul de telefon.');
+      return;
+    }
+    if (!personalDetails.address.trim()) {
+      setPersonalDetailsError('Completează adresa.');
+      return;
+    }
+
+    try {
+      setPersonalDetailsSaving(true);
+      await updateDoc(doc(db, 'users', user.uid), {
+        personalDetails: {
+          firstName: personalDetails.firstName.trim(),
+          lastName: personalDetails.lastName.trim(),
+          phone: personalDetails.phone.trim(),
+          address: personalDetails.address.trim(),
+          county: personalDetails.county.trim(),
+          postalCode: personalDetails.postalCode.trim(),
+          country: personalDetails.country.trim() || 'România',
+        },
+        updatedAt: serverTimestamp(),
+      });
+      setPersonalDetailsSaved(true);
+    } catch (err: any) {
+      console.error('Failed to save personal details', err);
+      setPersonalDetailsError(err?.message || 'Nu s-au putut salva datele personale.');
+    } finally {
+      setPersonalDetailsSaving(false);
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -303,6 +400,120 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Personal Details */}
+          <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Date personale</h2>
+                <p className="text-sm text-slate-200 mt-1">
+                  Vizibile doar pentru tine și administratori. Folosite pentru livrare și contact.
+                </p>
+              </div>
+            </div>
+
+            {personalDetailsLoading ? (
+              <div className="flex items-center gap-2 text-slate-200 text-sm">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gold-500"></div>
+                <span>Se încarcă datele personale...</span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-200 mb-1">Nume *</label>
+                    <input
+                      value={personalDetails.lastName}
+                      onChange={(e) => setPersonalDetails((p) => ({ ...p, lastName: e.target.value }))}
+                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                      placeholder="Ex: Popescu"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-200 mb-1">Prenume *</label>
+                    <input
+                      value={personalDetails.firstName}
+                      onChange={(e) => setPersonalDetails((p) => ({ ...p, firstName: e.target.value }))}
+                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                      placeholder="Ex: Andrei"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">Telefon *</label>
+                  <input
+                    value={personalDetails.phone}
+                    onChange={(e) => setPersonalDetails((p) => ({ ...p, phone: e.target.value }))}
+                    className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                    placeholder="Ex: +40 7xx xxx xxx"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">Adresă *</label>
+                  <input
+                    value={personalDetails.address}
+                    onChange={(e) => setPersonalDetails((p) => ({ ...p, address: e.target.value }))}
+                    className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                    placeholder="Stradă, număr, bloc, scară, apartament"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-200 mb-1">Județ *</label>
+                    <input
+                      value={personalDetails.county}
+                      onChange={(e) => setPersonalDetails((p) => ({ ...p, county: e.target.value }))}
+                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                      placeholder="Ex: Ilfov"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-200 mb-1">Cod poștal *</label>
+                    <input
+                      value={personalDetails.postalCode}
+                      onChange={(e) => setPersonalDetails((p) => ({ ...p, postalCode: e.target.value }))}
+                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                      placeholder="Ex: 010101"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-200 mb-1">Țară *</label>
+                    <input
+                      value={personalDetails.country}
+                      onChange={(e) => setPersonalDetails((p) => ({ ...p, country: e.target.value }))}
+                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                      placeholder="România"
+                    />
+                  </div>
+                </div>
+
+                {personalDetailsError && (
+                  <p className="text-sm text-red-200 border border-red-500/30 bg-red-500/10 rounded-lg px-3 py-2">
+                    {personalDetailsError}
+                  </p>
+                )}
+                {personalDetailsSaved && (
+                  <p className="text-sm text-emerald-200 border border-emerald-500/30 bg-emerald-500/10 rounded-lg px-3 py-2">
+                    Datele au fost salvate.
+                  </p>
+                )}
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleSavePersonalDetails}
+                    disabled={personalDetailsSaving}
+                    className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-6 py-2 text-sm font-semibold text-navy-900 shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.7)] transition hover:bg-[#f0c955] disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {personalDetailsSaving ? 'Se salvează...' : 'Salvează'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* My Products */}
           <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)] hover:-translate-y-1 hover:border-gold-400 transition-all">
             <div className="flex justify-between items-center mb-4">

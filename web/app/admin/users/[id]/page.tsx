@@ -28,7 +28,7 @@ import {
   ActivityLog,
 } from 'shared/activityLogService';
 import { User, CollectionItem, Conversation, ChatMessage } from 'shared/types';
-import { getDoc, doc } from 'firebase/firestore';
+import { getDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { formatDistanceToNow } from 'date-fns';
 import { ro } from 'date-fns/locale';
@@ -62,6 +62,19 @@ export default function AdminUserDetail() {
   const [newCredits, setNewCredits] = useState(0);
   const [showControlModal, setShowControlModal] = useState<string | null>(null);
   const [verificationLoading, setVerificationLoading] = useState(false);
+
+  const [personalDetailsSaving, setPersonalDetailsSaving] = useState(false);
+  const [personalDetailsError, setPersonalDetailsError] = useState<string | null>(null);
+  const [personalDetailsSaved, setPersonalDetailsSaved] = useState(false);
+  const [personalDetailsDraft, setPersonalDetailsDraft] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    address: '',
+    county: '',
+    postalCode: '',
+    country: 'România',
+  });
 
   useEffect(() => {
     const checkAdminAndLoad = async () => {
@@ -106,6 +119,17 @@ export default function AdminUserDetail() {
         } as User;
         setUser(userData);
         setNewCredits(userData.credits || 0);
+
+        const details = ((userDoc.data() as any).personalDetails || {}) as any;
+        setPersonalDetailsDraft({
+          firstName: details.firstName || '',
+          lastName: details.lastName || '',
+          phone: details.phone || '',
+          address: details.address || '',
+          county: details.county || '',
+          postalCode: details.postalCode || '',
+          country: details.country || 'România',
+        });
       }
 
       // Load analytics
@@ -132,6 +156,35 @@ export default function AdminUserDetail() {
       }
     } catch (error) {
       console.error('Error loading user data:', error);
+    }
+  };
+
+  const handleSavePersonalDetailsAdmin = async () => {
+    if (!currentUser) return;
+    setPersonalDetailsSaved(false);
+    setPersonalDetailsError(null);
+
+    try {
+      setPersonalDetailsSaving(true);
+      await updateDoc(doc(db, 'users', userId), {
+        personalDetails: {
+          firstName: personalDetailsDraft.firstName.trim(),
+          lastName: personalDetailsDraft.lastName.trim(),
+          phone: personalDetailsDraft.phone.trim(),
+          address: personalDetailsDraft.address.trim(),
+          county: personalDetailsDraft.county.trim(),
+          postalCode: personalDetailsDraft.postalCode.trim(),
+          country: personalDetailsDraft.country.trim() || 'România',
+        },
+        updatedAt: serverTimestamp(),
+      });
+      setPersonalDetailsSaved(true);
+      await loadUserData();
+    } catch (err: any) {
+      console.error('Failed to save personal details (admin)', err);
+      setPersonalDetailsError(err?.message || 'Nu s-au putut salva datele personale.');
+    } finally {
+      setPersonalDetailsSaving(false);
     }
   };
 
@@ -553,6 +606,101 @@ export default function AdminUserDetail() {
                   Utilizatorul nu a furnizat date de identitate la înregistrare.
                 </p>
               )}
+            </div>
+
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-6">
+              <h3 className="text-lg font-semibold text-white mb-2">Date personale (private)</h3>
+              <p className="text-xs text-slate-400 mb-4">
+                Vizibile doar pentru utilizator și administratori.
+              </p>
+
+              <div className="grid grid-cols-1 gap-3 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Nume</label>
+                    <input
+                      value={personalDetailsDraft.lastName}
+                      onChange={(e) => setPersonalDetailsDraft((p) => ({ ...p, lastName: e.target.value }))}
+                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/60 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Prenume</label>
+                    <input
+                      value={personalDetailsDraft.firstName}
+                      onChange={(e) => setPersonalDetailsDraft((p) => ({ ...p, firstName: e.target.value }))}
+                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/60 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Telefon</label>
+                  <input
+                    value={personalDetailsDraft.phone}
+                    onChange={(e) => setPersonalDetailsDraft((p) => ({ ...p, phone: e.target.value }))}
+                    className="w-full rounded-lg border border-gold-500/30 bg-navy-900/60 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Adresă</label>
+                  <input
+                    value={personalDetailsDraft.address}
+                    onChange={(e) => setPersonalDetailsDraft((p) => ({ ...p, address: e.target.value }))}
+                    className="w-full rounded-lg border border-gold-500/30 bg-navy-900/60 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Județ</label>
+                    <input
+                      value={personalDetailsDraft.county}
+                      onChange={(e) => setPersonalDetailsDraft((p) => ({ ...p, county: e.target.value }))}
+                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/60 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Cod poștal</label>
+                    <input
+                      value={personalDetailsDraft.postalCode}
+                      onChange={(e) => setPersonalDetailsDraft((p) => ({ ...p, postalCode: e.target.value }))}
+                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/60 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Țară</label>
+                    <input
+                      value={personalDetailsDraft.country}
+                      onChange={(e) => setPersonalDetailsDraft((p) => ({ ...p, country: e.target.value }))}
+                      className="w-full rounded-lg border border-gold-500/30 bg-navy-900/60 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {personalDetailsError && (
+                  <p className="text-xs text-red-200 border border-red-500/30 bg-red-500/10 rounded-lg px-3 py-2">
+                    {personalDetailsError}
+                  </p>
+                )}
+                {personalDetailsSaved && (
+                  <p className="text-xs text-emerald-200 border border-emerald-500/30 bg-emerald-500/10 rounded-lg px-3 py-2">
+                    Datele au fost salvate.
+                  </p>
+                )}
+
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={handleSavePersonalDetailsAdmin}
+                    disabled={personalDetailsSaving}
+                    className="inline-flex items-center rounded-md bg-gold-500/90 px-3 py-2 text-xs font-semibold text-navy-900 hover:bg-gold-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {personalDetailsSaving ? 'Se salvează…' : 'Salvează datele'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

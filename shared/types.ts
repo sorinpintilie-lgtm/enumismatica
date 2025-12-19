@@ -12,6 +12,12 @@ export interface User {
   helpPreferences?: UserHelpPreferences;
 
   /**
+   * Private personal/contact details.
+   * Visible and editable only by the user and admins.
+   */
+  personalDetails?: UserPersonalDetails;
+
+  /**
    * Identity verification fields (Romania CI / Passport).
    *
    * - idDocumentType / idDocumentNumber: raw document metadata provided at signup
@@ -49,6 +55,16 @@ export interface User {
    * user must pay 50 credits / year to keep collection features active.
    */
   collectionSubscriptionExpiresAt?: Date;
+}
+
+export interface UserPersonalDetails {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  address?: string;
+  county?: string;
+  postalCode?: string;
+  country?: string;
 }
 
 export interface UserPreferences {
