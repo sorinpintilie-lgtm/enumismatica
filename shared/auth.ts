@@ -53,7 +53,12 @@ export const signInWithEmail = async (email: string, password: string) => {
   }
 };
 
-export const signUpWithEmail = async (email: string, password: string, referralCode?: string) => {
+export const signUpWithEmail = async (
+  email: string,
+  password: string,
+  referralCode?: string,
+  idDocumentData?: { type?: 'ci' | 'passport'; number?: string },
+) => {
   try {
     // Sanitize inputs
     const sanitizedEmail = email.trim().toLowerCase();
@@ -74,8 +79,17 @@ export const signUpWithEmail = async (email: string, password: string, referralC
 
     const userCredential = await createUserWithEmailAndPassword(auth, sanitizedEmail, sanitizedPassword);
 
+    const documentNumber = idDocumentData?.number?.trim();
+    const extraProfileData = documentNumber
+      ? {
+          idDocumentType: idDocumentData?.type || 'ci',
+          idDocumentNumber: documentNumber,
+          idVerificationStatus: 'pending' as const,
+        }
+      : undefined;
+
     // Create Firestore profile and apply referral bonuses (if any)
-    await createUserProfileAfterSignup(userCredential.user, referralCode || null);
+    await createUserProfileAfterSignup(userCredential.user, referralCode || null, extraProfileData);
 
     // Send welcome email (non-blocking)
     sendWelcomeEmail(

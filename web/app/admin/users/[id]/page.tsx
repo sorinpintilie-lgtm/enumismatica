@@ -53,6 +53,7 @@ export default function AdminUserDetail() {
   const [actionReason, setActionReason] = useState('');
   const [newCredits, setNewCredits] = useState(0);
   const [showControlModal, setShowControlModal] = useState<string | null>(null);
+  const [verificationLoading, setVerificationLoading] = useState(false);
 
   useEffect(() => {
     const checkAdminAndLoad = async () => {
@@ -258,6 +259,29 @@ export default function AdminUserDetail() {
     }
   };
 
+  const handleUpdateVerificationStatus = async (status: 'verified' | 'rejected') => {
+    if (!currentUser || !user) return;
+    if (!user.idDocumentNumber) {
+      alert('Utilizatorul nu a furnizat un document de identitate.');
+      return;
+    }
+
+    try {
+      setVerificationLoading(true);
+      const { updateUserVerificationStatus } = await import('shared/adminService');
+      const result = await updateUserVerificationStatus(userId, status, currentUser.uid);
+      if (!result.success) {
+        alert(`Eroare: ${result.error}`);
+      } else {
+        await loadUserData();
+      }
+    } catch (error: any) {
+      alert(`Eroare: ${error?.message || error}`);
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
   const handleDeleteUser = async () => {
     if (!user || !currentUser) return;
     if (!actionReason.trim()) {
@@ -300,6 +324,17 @@ export default function AdminUserDetail() {
 
   const isBanned = (user as any).banned === true;
 
+  const hasIdentityData = !!user.idDocumentNumber;
+  const documentTypeLabel =
+    user.idDocumentType === 'passport'
+      ? 'Pașaport'
+      : user.idDocumentType === 'ci'
+      ? 'Carte de identitate'
+      : 'Document';
+  const maskedDocumentNumber = user.idDocumentNumber
+    ? String(user.idDocumentNumber).replace(/.(?=.{4})/g, '•')
+    : '';
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto">
@@ -325,6 +360,11 @@ export default function AdminUserDetail() {
                   {user.role === 'admin' && (
                     <span className="px-2 py-1 text-xs rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
                       Admin
+                    </span>
+                  )}
+                  {user.idVerificationStatus === 'verified' && (
+                    <span className="px-2 py-1 text-xs rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      VERIFICAT
                     </span>
                   )}
                   {isBanned && (
@@ -402,7 +442,7 @@ export default function AdminUserDetail() {
 
         {/* Tab Content */}
         {activeTab === 'overview' && analytics && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Statistici Produse</h3>
               <div className="space-y-3">
@@ -437,6 +477,59 @@ export default function AdminUserDetail() {
                   <span className="font-medium text-blue-400">{analytics.totalBids}</span>
                 </div>
               </div>
+            </div>
+
+            <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Verificare Identitate</h3>
+              {hasIdentityData ? (
+                <div className="space-y-2 text-sm">
+                  <p className="text-slate-300">
+                    Tip document:{' '}
+                    <span className="font-semibold text-gold-300">{documentTypeLabel}</span>
+                  </p>
+                  <p className="text-slate-300">
+                    Număr document:{' '}
+                    <span className="font-mono text-gold-200">{maskedDocumentNumber}</span>
+                  </p>
+                  <p className="text-slate-300">
+                    Status:{' '}
+                    <span className="font-semibold">
+                      {user.idVerificationStatus === 'verified'
+                        ? 'Verificat'
+                        : user.idVerificationStatus === 'pending'
+                        ? 'În așteptare'
+                        : user.idVerificationStatus === 'rejected'
+                        ? 'Respins'
+                        : 'Neverificat'}
+                    </span>
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateVerificationStatus('verified')}
+                      disabled={verificationLoading || user.idVerificationStatus === 'verified'}
+                      className="inline-flex items-center rounded-md bg-emerald-500/20 px-3 py-1.5 text-xs font-semibold text-emerald-200 border border-emerald-500/40 hover:bg-emerald-500/30 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      Marchează ca verificat
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateVerificationStatus('rejected')}
+                      disabled={verificationLoading}
+                      className="inline-flex items-center rounded-md bg-red-500/20 px-3 py-1.5 text-xs font-semibold text-red-200 border border-red-500/40 hover:bg-red-500/30 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      Marchează ca respins
+                    </button>
+                  </div>
+                  {verificationLoading && (
+                    <p className="mt-2 text-xs text-slate-400">Se actualizează statusul de verificare...</p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400">
+                  Utilizatorul nu a furnizat date de identitate la înregistrare.
+                </p>
+              )}
             </div>
           </div>
         )}

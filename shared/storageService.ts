@@ -9,18 +9,36 @@ import { convertToWebP } from './utils/imageUtils';
  * @returns The download URL of the uploaded image
  */
 export async function uploadImage(file: File, path: string): Promise<string> {
-  if (!storage) throw new Error('Firebase Storage not initialized');
+	if (!storage) throw new Error('Firebase Storage not initialized');
 
-  // Convert to WebP format for better compression
-  const webpFile = await convertToWebP(file);
+	console.log('[uploadImage] Preparing upload', {
+		path,
+		originalSize: file.size,
+		originalType: file.type,
+	});
 
-  // Update path to use .webp extension
-  const webpPath = path.replace(/\.[^/.]+$/, '.webp');
-  const storageRef = ref(storage, webpPath);
-  const snapshot = await uploadBytes(storageRef, webpFile);
-  const downloadURL = await getDownloadURL(snapshot.ref);
+	// Convert to WebP format for better compression (where supported)
+	const webpFile = await convertToWebP(file);
 
-  return downloadURL;
+	// Update path to use .webp extension
+	const webpPath = path.replace(/\.[^/.]+$/, '.webp');
+	const storageRef = ref(storage, webpPath);
+
+	console.log('[uploadImage] Uploading WebP image', {
+		path: webpPath,
+		size: webpFile.size,
+		type: (webpFile as any).type,
+	});
+
+	try {
+		const snapshot = await uploadBytes(storageRef, webpFile);
+		const downloadURL = await getDownloadURL(snapshot.ref);
+		console.log('[uploadImage] Upload successful', { path: webpPath });
+		return downloadURL;
+	} catch (error) {
+		console.error('[uploadImage] Upload failed', { path: webpPath, error });
+		throw error;
+	}
 }
 
 /**
@@ -155,16 +173,17 @@ export async function listImages(path: string): Promise<string[]> {
  * @returns Validation result
  */
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
-  const maxSize = 5 * 1024 * 1024; // 5MB
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+	// Keep this limit in sync with storage.rules:isValidImageFile (15MB)
+	const maxSize = 15 * 1024 * 1024; // 15MB
+	const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
-  if (!allowedTypes.includes(file.type)) {
-    return { valid: false, error: 'Tip de fișier invalid. Folosește JPG, PNG sau WebP.' };
-  }
+	if (!allowedTypes.includes(file.type)) {
+		return { valid: false, error: 'Tip de fișier invalid. Folosește JPG, PNG sau WebP.' };
+	}
 
-  if (file.size > maxSize) {
-    return { valid: false, error: 'Fișierul este prea mare. Dimensiunea maximă este 5MB.' };
-  }
+	if (file.size > maxSize) {
+		return { valid: false, error: 'Fișierul este prea mare. Dimensiunea maximă este 15MB pentru imagini.' };
+	}
 
   return { valid: true };
 }

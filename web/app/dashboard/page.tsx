@@ -153,9 +153,16 @@ export default function Dashboard() {
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gold-400">
                 Contul meu
               </p>
-              <h1 className="mt-2 text-3xl font-bold text-white">
-                Bine ai revenit, {user.email}
-              </h1>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <h1 className="text-3xl font-bold text-white">
+                  Bine ai revenit, {user.email}
+                </h1>
+                {user.idVerificationStatus === 'verified' && (
+                  <span className="inline-flex items-center rounded-full border border-emerald-400/70 bg-emerald-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200">
+                    Cont verificat
+                  </span>
+                )}
+              </div>
               <p className="mt-1 text-sm text-slate-300">
                 Vezi rapid colecția ta, mesajele, licitațiile active și creditele disponibile pentru boost-uri.
               </p>

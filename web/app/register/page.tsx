@@ -14,10 +14,20 @@ const registerSchema = z.object({
   email: z.string().email('Adresă de email invalidă'),
   password: z.string().min(6, 'Parola trebuie să aibă cel puțin 6 caractere'),
   confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Parolele nu se potrivesc",
-  path: ["confirmPassword"],
-});
+  idDocumentType: z.enum(['ci', 'passport']).optional(),
+  idDocumentNumber: z.string().optional(),
+})
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Parolele nu se potrivesc',
+    path: ['confirmPassword'],
+  })
+  .refine(
+    (data) => !data.idDocumentNumber || !!data.idDocumentType,
+    {
+      message: 'Selectează tipul documentului pentru numărul introdus',
+      path: ['idDocumentType'],
+    },
+  );
 
 function RegisterForm() {
   const searchParams = useSearchParams();
@@ -27,6 +37,8 @@ function RegisterForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [referralCode, setReferralCode] = useState(initialReferral);
+  const [idDocumentType, setIdDocumentType] = useState<'ci' | 'passport' | ''>('');
+  const [idDocumentNumber, setIdDocumentNumber] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -37,7 +49,13 @@ function RegisterForm() {
     setError('');
 
     try {
-      registerSchema.parse({ email, password, confirmPassword });
+      registerSchema.parse({
+        email,
+        password,
+        confirmPassword,
+        idDocumentType: idDocumentType || undefined,
+        idDocumentNumber: idDocumentNumber || undefined,
+      });
     } catch (validationError) {
       if (validationError instanceof z.ZodError) {
         setError(validationError.issues[0].message);
@@ -46,7 +64,19 @@ function RegisterForm() {
       return;
     }
 
-    const { user, error } = await signUpWithEmail(email, password, referralCode || undefined);
+    const idDocumentPayload = idDocumentNumber
+      ? {
+          type: (idDocumentType || 'ci') as 'ci' | 'passport',
+          number: idDocumentNumber,
+        }
+      : undefined;
+
+    const { user, error } = await signUpWithEmail(
+      email,
+      password,
+      referralCode || undefined,
+      idDocumentPayload,
+    );
     setLoading(false);
     if (error) {
       setError(error);
@@ -79,7 +109,7 @@ function RegisterForm() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleEmailRegister}>
-          <div className="rounded-xl space-y-4">
+           <div className="rounded-xl space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-200 mb-1">
                 Adresă de email
@@ -138,6 +168,42 @@ function RegisterForm() {
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value)}
               />
+            </div>
+            <div className="pt-2 border-t border-gold-500/30 mt-2 space-y-3">
+              <p className="text-xs text-slate-300">
+                Verificare identitate (opțional) – poți introduce datele CI / Pașaport pentru a primi un badge de
+                <span className="font-semibold text-gold-300"> cont verificat</span> după confirmarea de către un administrator.
+              </p>
+              <div className="flex flex-col gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">
+                    Tip document
+                  </label>
+                  <select
+                    className="block w-full px-4 py-3 border border-gold-500/40 bg-navy-900/70 text-slate-50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent"
+                    value={idDocumentType}
+                    onChange={(e) => setIdDocumentType(e.target.value as 'ci' | 'passport' | '')}
+                  >
+                    <option value="">Nu doresc să introduc acum</option>
+                    <option value="ci">Carte de identitate (CI)</option>
+                    <option value="passport">Pașaport</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="idNumber" className="block text-sm font-medium text-slate-200 mb-1">
+                    Număr document
+                  </label>
+                  <input
+                    id="idNumber"
+                    name="idNumber"
+                    type="text"
+                    className="appearance-none relative block w-full px-4 py-3 border border-gold-500/40 placeholder-slate-400 text-slate-50 rounded-xl bg-navy-900/70 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent focus:z-10 sm:text-sm"
+                    placeholder="Ex: RX123456 / 123456789"
+                    value={idDocumentNumber}
+                    onChange={(e) => setIdDocumentNumber(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

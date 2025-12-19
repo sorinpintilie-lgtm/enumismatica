@@ -71,6 +71,19 @@ describe('Auth Functions', () => {
       expect(mockAuth.createUserWithEmailAndPassword).toHaveBeenCalledWith({}, 'test@example.com', 'password123');
     });
 
+    it('should sign up successfully with identity document data', async () => {
+      const mockUser = { uid: '123', email: 'test@example.com' };
+      mockAuth.createUserWithEmailAndPassword.mockResolvedValue({ user: mockUser });
+
+      const result = await signUpWithEmail('test@example.com', 'password123', undefined, {
+        type: 'ci',
+        number: 'AB123456',
+      });
+
+      expect(result).toEqual({ user: mockUser, error: null });
+      expect(mockAuth.createUserWithEmailAndPassword).toHaveBeenCalledWith({}, 'test@example.com', 'password123');
+    });
+
     it('should return error for empty email', async () => {
       const result = await signUpWithEmail('', 'password123');
 

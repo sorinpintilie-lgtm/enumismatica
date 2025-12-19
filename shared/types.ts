@@ -12,6 +12,19 @@ export interface User {
   helpPreferences?: UserHelpPreferences;
 
   /**
+   * Identity verification fields (Romania CI / Passport).
+   *
+   * - idDocumentType / idDocumentNumber: raw document metadata provided at signup
+   * - idVerificationStatus: manual verification state controlled by admins
+   * - idVerifiedAt / idVerifiedBy: audit trail for who verified and when
+   */
+   idDocumentType?: 'ci' | 'passport';
+   idDocumentNumber?: string;
+   idVerificationStatus?: 'not_provided' | 'pending' | 'verified' | 'rejected';
+   idVerifiedAt?: Date;
+   idVerifiedBy?: string;
+
+  /**
    * Current credit balance for the user.
    */
   credits?: number;

@@ -11,7 +11,7 @@ import {
 	setUserAsAdmin,
 	removeAdminRole,
 	deleteUser,
-} from 'shared/adminService';
+	} from 'shared/adminService';
 import { User } from 'shared/types';
 
 export default function AdminUsers() {
@@ -150,6 +150,11 @@ export default function AdminUsers() {
                           {u.id === 'QEm0DSIzylNQIHpQAZlgtWQkYYE3' && (
                             <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">
                               Super Admin
+                            </span>
+                          )}
+                          {u.idVerificationStatus === 'verified' && (
+                            <span className="px-2 py-1 text-xs rounded-full bg-emerald-100 text-emerald-800">
+                              Verificat
                             </span>
                           )}
                         </div>

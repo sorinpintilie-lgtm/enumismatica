@@ -123,7 +123,10 @@ export async function getAllUsers(): Promise<User[]> {
         id: doc.id,
         email: data.email || '',
         name: data.name || '',
+        displayName: data.displayName || data.email || '',
         role: data.role || 'user',
+        idVerificationStatus: data.idVerificationStatus,
+        idDocumentType: data.idDocumentType,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date(),
       } as User;
@@ -131,6 +134,29 @@ export async function getAllUsers(): Promise<User[]> {
   } catch (error) {
     console.error('Error fetching users:', error);
     return [];
+  }
+}
+
+/**
+ * Update manual identity verification status for a user (admin/superadmin only).
+ */
+export async function updateUserVerificationStatus(
+  userId: string,
+  status: 'verified' | 'rejected' | 'pending',
+  adminUserId: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await updateDoc(doc(db, 'users', userId), {
+      idVerificationStatus: status,
+      idVerifiedAt: status === 'verified' ? Timestamp.fromDate(new Date()) : null,
+      idVerifiedBy: status === 'verified' ? adminUserId : null,
+      updatedAt: Timestamp.fromDate(new Date()),
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error updating user verification status:', error);
+    return { success: false, error: error.message };
   }
 }
 

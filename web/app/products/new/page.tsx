@@ -103,6 +103,13 @@ export default function NewProductPage() {
   const [ngcCode, setNgcCode] = useState('');
   const [ngcGrade, setNgcGrade] = useState('');
 
+  // Permission: only verified users or admins can upload product videos
+  const canUploadVideo = !!user && (
+    (user as any).idVerificationStatus === 'verified' ||
+    (user as any).isAdmin ||
+    (user as any).isSuperAdmin
+  );
+
   // Load collection item if provided, or edit existing product
   useEffect(() => {
     const collectionItemId = searchParams.get('collectionItemId');
@@ -249,6 +256,17 @@ export default function NewProductPage() {
   };
 
   const handleVideoChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!canUploadVideo) {
+      // Hard guard even if UI is bypassed
+      setVideoFile(null);
+      showToast({
+        type: 'error',
+        title: 'Permisiune necesară',
+        message: 'Doar conturile verificate pot încărca video pentru produse.',
+      });
+      return;
+    }
+
     const file = e.target.files?.[0];
     if (!file) {
       setVideoFile(null);
@@ -409,7 +427,7 @@ export default function NewProductPage() {
       }
 
       let videoUrl: string | null = null;
-      if (videoFile) {
+      if (videoFile && canUploadVideo) {
         // Upload video file
         const timestamp = Date.now();
         const filename = `${timestamp}_${videoFile.name}`;
@@ -1089,19 +1107,27 @@ export default function NewProductPage() {
             <label className="block text-sm font-medium text-slate-200 mb-1">
               Video (opțional, max 15 secunde)
             </label>
-            <input
-              type="file"
-              accept="video/*"
-              capture="environment"
-              onChange={handleVideoChange}
-              className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-red-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-red-400"
-            />
-            <p className="mt-1 text-xs text-slate-400">
-              Încarcă un video scurt (max 15 secunde) din bibliotecă sau direct de la cameră pentru a demonstra piesa.
-            </p>
-            {videoFile && (
-              <p className="mt-1 text-xs text-green-400">
-                Video selectat: {videoFile.name}
+            {canUploadVideo ? (
+              <>
+                <input
+                  type="file"
+                  accept="video/*"
+                  capture="environment"
+                  onChange={handleVideoChange}
+                  className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-red-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-red-400"
+                />
+                <p className="mt-1 text-xs text-slate-400">
+                  Încarcă un video scurt (max 15 secunde) din bibliotecă sau direct de la cameră pentru a demonstra piesa.
+                </p>
+                {videoFile && (
+                  <p className="mt-1 text-xs text-green-400">
+                    Video selectat: {videoFile.name}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="mt-1 text-xs text-slate-400">
+                Pentru a încărca un video de prezentare, contul tău trebuie să fie <span className="text-gold-300 font-semibold">verificat</span>.
               </p>
             )}
           </div>

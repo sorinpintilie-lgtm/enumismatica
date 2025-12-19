@@ -11,6 +11,9 @@ interface ExtendedUser extends FirebaseUser {
   isSuperAdmin?: boolean;
   role?: 'superadmin' | 'admin' | 'user';
   displayName: string;
+  idVerificationStatus?: 'not_provided' | 'pending' | 'verified' | 'rejected';
+  idDocumentType?: 'ci' | 'passport';
+  idDocumentNumber?: string;
 }
 
 interface AuthContextType {
@@ -41,6 +44,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           const userData = userDoc.data();
           const role = userData?.role || 'user';
+          const idVerificationStatus = userData?.idVerificationStatus;
+          const idDocumentType = userData?.idDocumentType;
+          const idDocumentNumber = userData?.idDocumentNumber;
 
           if (mounted) {
             const extendedUser = {
@@ -48,7 +54,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               role,
               isAdmin: role === 'admin' || role === 'superadmin',
               isSuperAdmin: role === 'superadmin',
-              displayName: firebaseUser.displayName || firebaseUser.email || 'User',
+              displayName: userData?.displayName || firebaseUser.displayName || firebaseUser.email || 'User',
+              idVerificationStatus,
+              idDocumentType,
+              idDocumentNumber,
             } as ExtendedUser;
 
             setUser(extendedUser);

@@ -69,6 +69,19 @@ describe('Auth Functions', () => {
       expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith({}, 'test@example.com', 'password123');
     });
 
+    it('should sign up successfully with identity document data', async () => {
+      const mockUser = { uid: '123', email: 'test@example.com' };
+      mockCreateUserWithEmailAndPassword.mockResolvedValue({ user: mockUser });
+
+      const result = await signUpWithEmail('test@example.com', 'password123', undefined, {
+        type: 'ci',
+        number: 'AB123456',
+      });
+
+      expect(result).toEqual({ user: mockUser, error: null });
+      expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith({}, 'test@example.com', 'password123');
+    });
+
     it('should return error for password too short', async () => {
       const result = await signUpWithEmail('test@example.com', '123');
 

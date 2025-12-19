@@ -107,12 +107,13 @@ function normalizeUserCreditsWithSignupExpiry(userData: any, now: Date): Normali
 }
 
 /**
- * Ensure there is a Firestore user profile document after signup and
- * optionally attach referral metadata + apply bonuses.
- */
+  * Ensure there is a Firestore user profile document after signup and
+  * optionally attach referral metadata + apply bonuses.
+  */
 export async function createUserProfileAfterSignup(
   authUser: AuthUser,
   referralCode?: string | null,
+  extraProfileData?: Record<string, any>,
 ): Promise<void> {
   // Skip credit operations in React Native for now to avoid Firebase compatibility issues
   if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.includes('React Native')) {
@@ -163,6 +164,10 @@ export async function createUserProfileAfterSignup(
       data.referralBonusApplied = false;
     }
 
+    if (extraProfileData) {
+      Object.assign(data, extraProfileData);
+    }
+
     await Promise.all([
       setDoc(userRef, data),
       addDoc(collection(db, 'users', uid, 'creditTransactions'), {
@@ -173,11 +178,19 @@ export async function createUserProfileAfterSignup(
         expiresAt: Timestamp.fromDate(signupBonusExpiry),
       }),
     ]);
-  } else if (referralCode && referralCode !== uid) {
+  } else {
     const existing = snap.data() as any;
-    if (!existing.referredBy) {
+
+    if (referralCode && referralCode !== uid && !existing.referredBy) {
       await updateDoc(userRef, {
         referredBy: referralCode,
+        updatedAt: serverTimestamp(),
+      });
+    }
+
+    if (extraProfileData) {
+      await updateDoc(userRef, {
+        ...extraProfileData,
         updatedAt: serverTimestamp(),
       });
     }
