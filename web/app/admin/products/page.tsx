@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { formatRON } from '../../utils/currency';
 import {
   isAdmin,
   getAllProducts,
@@ -168,7 +169,7 @@ export default function AdminProducts() {
                         </div>
                         <p className="text-gray-600 mt-1">{product.description}</p>
                         <div className="mt-2 text-sm text-gray-500">
-                          <p>Preț: ${product.price.toFixed(2)}</p>
+                          <p>Preț: {formatRON(product.price)}</p>
                           <p>ID Proprietar: {product.ownerId}</p>
                           <p>Creat: {product.createdAt.toLocaleDateString()}</p>
                         </div>
