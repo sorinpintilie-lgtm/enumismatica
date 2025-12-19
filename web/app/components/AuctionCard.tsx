@@ -10,6 +10,7 @@ import { formatRON } from '../utils/currency';
 import { useToast } from './ToastProvider';
 import { WatchlistButton } from './WatchlistButton';
 import { logEvent } from '../hooks/useActivityLogger';
+import OfferModal from './OfferModal';
 
 interface AuctionCardProps {
   auction: Auction;
@@ -49,6 +50,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
   const [bidAmount, setBidAmount] = useState('');
   const { user } = useAuth();
   const [bidLoading, setBidLoading] = useState(false);
+  const [showOfferModal, setShowOfferModal] = useState(false);
   const { product } = useProduct(auction.productId);
   const { showToast } = useToast();
 
@@ -293,12 +295,22 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
           </form>
         )}
 
-        <Link
-          href={`/auctions/${auction.id}`}
-          className="block w-full text-center mt-1 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-4 py-2.5 rounded-md text-sm font-semibold transition-colors duration-200 shadow-[0_0_24px_rgba(231,183,60,0.75)]"
-        >
-          Vezi Detalii
-        </Link>
+        <div className="flex gap-2 mt-1">
+          {user && user.uid !== auction.ownerId && auction.status === 'active' && (
+            <button
+              onClick={() => setShowOfferModal(true)}
+              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-md text-sm font-semibold transition-colors duration-200"
+            >
+              Fă ofertă
+            </button>
+          )}
+          <Link
+            href={`/auctions/${auction.id}`}
+            className="flex-1 text-center bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-4 py-2.5 rounded-md text-sm font-semibold transition-colors duration-200 shadow-[0_0_24px_rgba(231,183,60,0.75)]"
+          >
+            Vezi Detalii
+          </Link>
+        </div>
       </div>
       {showWatchlistButton && (
         <div className="absolute top-2 right-2 z-10">
@@ -309,6 +321,16 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
           />
         </div>
       )}
+
+      <OfferModal
+        isOpen={showOfferModal}
+        onClose={() => setShowOfferModal(false)}
+        itemType="auction"
+        itemId={auction.id}
+        itemName={product?.name || `Licitație #${auction.id.slice(-6)}`}
+        currentPrice={currentBid}
+        buyerId={user?.uid || ''}
+      />
     </div>
   );
 }

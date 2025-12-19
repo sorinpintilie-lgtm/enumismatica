@@ -1,9 +1,11 @@
 import Link from 'next/link'
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { Product } from 'shared/types'
 import LazyImage from './LazyImage'
 import { formatRON } from '../utils/currency'
 import { WatchlistButton } from './WatchlistButton'
+import { useAuth } from '../context/AuthContext'
+import OfferModal from './OfferModal'
 
 interface ProductCardProps {
   product: Product
@@ -12,6 +14,8 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product, showWatchlistButton = true, variant = 'grid' }: ProductCardProps) {
+  const { user } = useAuth();
+  const [showOfferModal, setShowOfferModal] = useState(false);
   const now = new Date();
 
   const isBoostActive =
@@ -71,14 +75,24 @@ function ProductCard({ product, showWatchlistButton = true, variant = 'grid' }: 
               {product.year && <span>📅 {product.year}</span>}
               {product.metal && <span>🥇 {product.metal}</span>}
             </div>
-            
-            <Link
-              href={`/products/${product.id}`}
-              className="inline-flex items-center gap-2 rounded-full bg-[#e7b73c] px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-[0_0_15px_rgba(231,183,60,0.6)] transition hover:-translate-y-0.5 hover:bg-[#f0c955]"
-            >
-              Vezi detalii
-              <span aria-hidden>→</span>
-            </Link>
+
+            <div className="flex gap-2">
+              {user && user.uid !== product.ownerId && !product.isSold && (
+                <button
+                  onClick={() => setShowOfferModal(true)}
+                  className="inline-flex items-center gap-1 rounded-full bg-blue-500 hover:bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
+                >
+                  Fă ofertă
+                </button>
+              )}
+              <Link
+                href={`/products/${product.id}`}
+                className="inline-flex items-center gap-2 rounded-full bg-[#e7b73c] px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-[0_0_15px_rgba(231,183,60,0.6)] transition hover:-translate-y-0.5 hover:bg-[#f0c955]"
+              >
+                Vezi detalii
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
           </div>
         </div>
         
@@ -127,18 +141,28 @@ function ProductCard({ product, showWatchlistButton = true, variant = 'grid' }: 
             {product.description}
           </p>
         </div>
-        <div className="mt-auto flex items-center justify-between gap-3">
-          <span className="text-xl font-semibold text-[#e7b73c]">
-            {formatRON(product.price)}
-          </span>
-          <Link
-            href={`/products/${product.id}`}
-            className="inline-flex items-center gap-2 rounded-full bg-[#e7b73c] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.6)] transition hover:-translate-y-0.5 hover:bg-[#f0c955]"
-          >
-            Vezi detalii
-            <span aria-hidden>→</span>
-          </Link>
-        </div>
+        <div className="mt-auto space-y-3">
+           <div className="flex items-center justify-between">
+             <span className="text-xl font-semibold text-[#e7b73c]">
+               {formatRON(product.price)}
+             </span>
+             {user && user.uid !== product.ownerId && !product.isSold && (
+               <button
+                 onClick={() => setShowOfferModal(true)}
+                 className="inline-flex items-center gap-1 rounded-full bg-blue-500 hover:bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
+               >
+                 Fă ofertă
+               </button>
+             )}
+           </div>
+           <Link
+             href={`/products/${product.id}`}
+             className="inline-flex items-center justify-center w-full gap-2 rounded-full bg-[#e7b73c] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.6)] transition hover:-translate-y-0.5 hover:bg-[#f0c955]"
+           >
+             Vezi detalii
+             <span aria-hidden>→</span>
+           </Link>
+         </div>
         {showWatchlistButton !== false && (
           <div className="absolute top-2 right-2 z-10">
             <WatchlistButton
@@ -149,6 +173,16 @@ function ProductCard({ product, showWatchlistButton = true, variant = 'grid' }: 
           </div>
         )}
       </div>
+
+      <OfferModal
+        isOpen={showOfferModal}
+        onClose={() => setShowOfferModal(false)}
+        itemType="product"
+        itemId={product.id}
+        itemName={product.name}
+        currentPrice={product.price}
+        buyerId={user?.uid || ''}
+      />
     </div>
   )
 }

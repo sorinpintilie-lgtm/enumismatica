@@ -549,3 +549,21 @@ export interface Order {
   createdAt: Date;
   updatedAt: Date;
 }
+
+/**
+ * Offer entity representing an offer made on a product or auction.
+ * Stored in 'offers' collection.
+ */
+export interface Offer {
+  id: string;
+  itemType: 'product' | 'auction';
+  itemId: string;
+  buyerId: string;
+  sellerId: string;
+  offerAmount: number;
+  message?: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'expired';
+  createdAt: Date;
+  updatedAt: Date;
+  expiresAt?: Date; // Optional expiration date
+}
