@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 
 function ProductsListContent() {
   // Fetch all fields needed for filtering and display
-  const { products, loading, error } = useProducts(
+  const { products, loading, error, hasMore, loadMore } = useProducts(
     undefined, // ownerId
     20, // pageSize
     ['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt']
@@ -271,10 +271,14 @@ function ProductsListContent() {
       )}
 
       {/* Load More Button (if needed for pagination) */}
-      {filteredProducts.length > 0 && filteredProducts.length < products.length && (
+      {hasMore && !loading && (
         <div className="mt-12 text-center">
-          <button className="bg-gold-500 hover:bg-gold-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg shadow-gold-500/30">
-            Încarcă Mai Multe Produse
+          <button
+            onClick={loadMore}
+            className="bg-gold-500 hover:bg-gold-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg shadow-gold-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
+          >
+            {loading ? 'Se încarcă...' : 'Încarcă Mai Multe Produse'}
           </button>
         </div>
       )}
