@@ -231,31 +231,38 @@ export default function PronumismaticaPage() {
              </div>
 
             {/* Desktop: Full stepper */}
-            <div className="hidden sm:flex items-center justify-between text-xs text-slate-200">
-              {['Identitate', 'Adresă', 'Act de identitate', 'Contact', 'Încarcă acte'].map((label, index) => {
-                const currentStep = (index + 1) as Step;
-                const isActive = step === currentStep;
-                const isCompleted = step > currentStep;
-                return (
-                  <div key={label} className="flex-1 flex items-center">
-                    <div
-                      className={`flex items-center justify-center h-7 w-7 rounded-full border text-[11px] font-semibold ${
-                        isCompleted
-                          ? 'bg-[#e7b73c] border-[#e7b73c] text-navy-900'
-                          : isActive
-                          ? 'bg-navy-800 border-[#e7b73c] text-[#e7b73c]'
-                          : 'bg-navy-950 border-slate-600 text-slate-400'
-                      }`}
-                    >
-                      {index + 1}
+            <div className="hidden sm:block">
+              <div className="flex items-center justify-between text-xs text-slate-200 mb-4">
+                {['Identitate', 'Adresă', 'Act identitate', 'Contact', 'Încarcă acte'].map((label, index) => {
+                  const currentStep = (index + 1) as Step;
+                  const isActive = step === currentStep;
+                  const isCompleted = step > currentStep;
+                  return (
+                    <div key={label} className="flex flex-col items-center text-center">
+                      <div
+                        className={`flex items-center justify-center h-6 w-6 rounded-full border text-[10px] font-semibold mb-1 ${
+                          isCompleted
+                            ? 'bg-[#e7b73c] border-[#e7b73c] text-navy-900'
+                            : isActive
+                            ? 'bg-navy-800 border-[#e7b73c] text-[#e7b73c]'
+                            : 'bg-navy-950 border-slate-600 text-slate-400'
+                        }`}
+                      >
+                        {index + 1}
+                      </div>
+                      <span className="text-[10px] leading-tight whitespace-nowrap">{label}</span>
                     </div>
-                    <span className="ml-2">{label}</span>
-                    {index < 4 && (
-                      <div className="flex-1 h-px bg-slate-700 ml-2" aria-hidden="true" />
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+              {/* Progress line */}
+              <div className="relative">
+                <div className="absolute top-3 left-0 right-0 h-px bg-slate-700" />
+                <div 
+                  className="absolute top-3 left-0 h-px bg-[#e7b73c] transition-all duration-300"
+                  style={{ width: `${((step - 1) / 4) * 100}%` }}
+                />
+              </div>
             </div>
           </div>
 
