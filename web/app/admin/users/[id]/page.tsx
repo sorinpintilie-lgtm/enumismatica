@@ -48,6 +48,14 @@ export default function AdminUserDetail() {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [conversationMessages, setConversationMessages] = useState<ChatMessage[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'collection' | 'messages' | 'activity' | 'controls'>('overview');
+
+  // Restrict tab access for non-superadmins
+  const handleTabChange = (tab: 'overview' | 'collection' | 'messages' | 'activity' | 'controls') => {
+    if ((tab === 'messages' || tab === 'activity') && !currentUser?.isSuperAdmin) {
+      return; // Don't allow changing to restricted tabs
+    }
+    setActiveTab(tab);
+  };
   const [activityStats, setActivityStats] = useState<any>(null);
   const [recentActivity, setRecentActivity] = useState<ActivityLog[]>([]);
   const [actionReason, setActionReason] = useState('');
@@ -78,6 +86,13 @@ export default function AdminUserDetail() {
     }
   }, [currentUser, authLoading, router, userId]);
 
+  // Redirect non-superadmins away from restricted tabs
+  useEffect(() => {
+    if (currentUser && !currentUser.isSuperAdmin && (activeTab === 'messages' || activeTab === 'activity')) {
+      setActiveTab('overview');
+    }
+  }, [currentUser, activeTab]);
+
   const loadUserData = async () => {
     try {
       // Load user document
@@ -101,17 +116,20 @@ export default function AdminUserDetail() {
       const collectionData = await getUserCollection(userId);
       setCollection(collectionData);
 
-      // Load conversations
-      const conversationsData = await getUserConversations(userId);
-      setConversations(conversationsData);
+      // Load conversations and activity only for superadmins
+      if (currentUser?.isSuperAdmin) {
+        // Load conversations
+        const conversationsData = await getUserConversations(userId);
+        setConversations(conversationsData);
 
-      // Load activity stats
-      const stats = await getUserActivityStats(userId);
-      setActivityStats(stats);
+        // Load activity stats
+        const stats = await getUserActivityStats(userId);
+        setActivityStats(stats);
 
-      // Load recent activity
-      const { logs } = await getActivityLogs({ userId, limit: 20 });
-      setRecentActivity(logs);
+        // Load recent activity
+        const { logs } = await getActivityLogs({ userId, limit: 20 });
+        setRecentActivity(logs);
+      }
     } catch (error) {
       console.error('Error loading user data:', error);
     }
@@ -420,10 +438,15 @@ export default function AdminUserDetail() {
         {/* Tabs */}
         <div className="border-b border-gold-500/20 mb-6">
           <nav className="flex gap-4 overflow-x-auto">
-            {['overview', 'collection', 'messages', 'activity', 'controls'].map((tab) => (
+            {[
+              'overview',
+              'collection',
+              ...(currentUser?.isSuperAdmin ? ['messages', 'activity'] : []),
+              'controls'
+            ].map((tab) => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab as any)}
+                onClick={() => handleTabChange(tab as any)}
                 className={`px-4 py-2 border-b-2 font-medium transition-colors whitespace-nowrap ${
                   activeTab === tab
                     ? 'border-gold-500 text-gold-400'
