@@ -111,7 +111,7 @@ export default function NewProductPage() {
     if (collectionItemId && user?.uid) {
       setLoadingCollectionItem(true);
       getCollectionItem(user.uid, collectionItemId)
-        .then((item) => {
+        .then(async (item) => {
           if (item) {
             setCollectionItem(item);
             // Pre-fill form with collection item data
@@ -128,10 +128,38 @@ export default function NewProductPage() {
             setDiameter(item.diameter ? String(item.diameter) : '');
             setWeight(item.weight ? String(item.weight) : '');
             setMintLocation(item.mintMark || '');
-            // Set price to current value if available
-            if (item.currentValue) {
-              setPrice(String(item.currentValue));
+
+            // Handle pricing for Monetaria Statului products
+            if (item.tags?.includes('monetaria-statului')) {
+              try {
+                // Fetch price from monetaria-data.json
+                const response = await fetch('/monetaria-data.json');
+                if (response.ok) {
+                  const data = await response.json();
+                  const monetariaProduct = data.products.find((p: any) => p.product_id === item.id);
+                  if (monetariaProduct && monetariaProduct.price) {
+                    // Parse price - remove currency symbols and convert to number
+                    const parsedPrice = monetariaProduct.price.replace(/[^\d.,]/g, '').replace(',', '.');
+                    const numericPrice = parseFloat(parsedPrice);
+                    if (!isNaN(numericPrice)) {
+                      setPrice(String(numericPrice));
+                    }
+                  }
+                }
+              } catch (error) {
+                console.error('Failed to fetch monetaria price:', error);
+                // Fallback to current value
+                if (item.currentValue) {
+                  setPrice(String(item.currentValue));
+                }
+              }
+            } else {
+              // Set price to current value for regular collection items
+              if (item.currentValue) {
+                setPrice(String(item.currentValue));
+              }
             }
+
             // Set listing type from URL param
             if (listingTypeParam === 'auction') {
               setListingType('auction');

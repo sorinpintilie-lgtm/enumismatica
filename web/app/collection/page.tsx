@@ -685,13 +685,13 @@ function CollectionItemCard({
               href={`/products/new?collectionItemId=${item.id}&listingType=direct`}
               className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
             >
-              Vinde
+              Pune la Vânzare
             </Link>
             <Link
               href={`/products/new?collectionItemId=${item.id}&listingType=auction`}
               className="flex-1 bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
             >
-              Licitează
+              Pune la Licitație
             </Link>
           </div>
         </div>
