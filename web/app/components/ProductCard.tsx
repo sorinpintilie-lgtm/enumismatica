@@ -35,7 +35,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
     return (
       <div className="relative group flex gap-4 p-4 rounded-xl border border-[#e7b73c]/40 bg-gradient-to-r from-navy-600 to-navy-800 shadow-[0_8px_25px_rgba(231,183,60,0.2)] hover:border-[#e7b73c] hover:shadow-[0_12px_35px_rgba(231,183,60,0.35)] transition-all duration-300 w-full">
         {/* Image */}
-        <div className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
+        <Link href={`/products/${product.id}`} className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
           {product.images && product.images.length > 0 ? (
             <LazyImage
               src={product.images[0]}
@@ -53,7 +53,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
               Promovat
             </span>
           )}
-        </div>
+        </Link>
         
         {/* Content */}
         <div className="flex-1 min-w-0">
@@ -116,7 +116,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
   // Grid variant (original layout)
   return (
     <div className="relative group h-full flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 rounded-2xl border border-[#e7b73c]/70 bg-gradient-to-br from-navy-500 to-navy-600 shadow-[0_10px_35px_rgba(231,183,60,0.3)] hover:border-[#e7b73c] hover:shadow-[0_15px_45px_rgba(231,183,60,0.45)]">
-      <div className="relative aspect-[4/3] overflow-hidden bg-white rounded-t-2xl">
+      <Link href={`/products/${product.id}`} className="relative aspect-[4/3] overflow-hidden bg-white rounded-t-2xl">
         {product.images && product.images.length > 0 ? (
           <LazyImage
             src={product.images[0]}
@@ -135,7 +135,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
           </span>
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-gold-500/10" />
-      </div>
+      </Link>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
           <h3 className="text-lg font-semibold text-white line-clamp-2" title={product.name}>

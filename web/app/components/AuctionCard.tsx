@@ -114,7 +114,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
         }`}
       >
         {/* Image */}
-        <div className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
+        <Link href={`/products/${auction.productId}`} className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
           {product && product.images && product.images.length > 0 ? (
             <img
               src={product.images[0]}
@@ -137,7 +137,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
           >
             {auction.status.toUpperCase()}
           </span>
-        </div>
+        </Link>
         
         {/* Content */}
         <div className="flex-1 min-w-0">
@@ -206,7 +206,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
         isUserHighestBidder ? 'ring-2 ring-emerald-400/80 ring-offset-2 ring-offset-navy-900' : ''
       }`}
     >
-      <div className="relative aspect-[4/3] bg-white">
+      <Link href={`/products/${auction.productId}`} className="relative aspect-[4/3] bg-white">
         {product && product.images && product.images.length > 0 ? (
           <img
             src={product.images[0]}
@@ -218,7 +218,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             <span className="text-slate-400">Se încarcă...</span>
           </div>
         )}
-      </div>
+      </Link>
       <div className="p-4 flex flex-col gap-3">
         <div className="flex justify-between items-start mb-1">
           <h3 className="text-lg font-semibold text-white truncate">

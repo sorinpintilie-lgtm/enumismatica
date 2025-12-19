@@ -357,6 +357,49 @@ export default function ProductDetailPage() {
                         ? 'Se procesează cumpărarea...'
                         : 'Cumpără acum'}
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!user) {
+                          showToast({
+                            type: 'error',
+                            title: 'Autentificare necesară',
+                            message: 'Trebuie să te autentifici pentru a face o ofertă.',
+                          });
+                          return;
+                        }
+                        if (product.ownerId === user.uid) {
+                          showToast({
+                            type: 'error',
+                            title: 'Nu poți face ofertă pe propriul produs',
+                            message: 'Ești deja proprietarul acestui produs.',
+                          });
+                          return;
+                        }
+                        if (product.isSold) {
+                          showToast({
+                            type: 'error',
+                            title: 'Produs indisponibil',
+                            message: 'Acest produs a fost deja vândut.',
+                          });
+                          return;
+                        }
+                        // TODO: Implement offer functionality
+                        showToast({
+                          type: 'info',
+                            title: 'Funcționalitate în dezvoltare',
+                          message: 'Opțiunea "Fa o ofertă" va fi disponibilă în curând.',
+                        });
+                      }}
+                      disabled={product.isSold === true || (!!user && product.ownerId === user.uid)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 disabled:text-slate-300 text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors shadow-[0_0_24px_rgba(34,197,94,0.6)]"
+                    >
+                      {product.isSold
+                        ? 'Deja vândut'
+                        : !!user && product.ownerId === user.uid
+                        ? 'Ești proprietarul acestui produs'
+                        : 'Fa o ofertă'}
+                    </button>
                   </div>
                 ) : (
                   <div className="space-y-3 mt-1">

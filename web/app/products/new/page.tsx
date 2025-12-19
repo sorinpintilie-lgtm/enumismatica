@@ -1077,8 +1077,8 @@ export default function NewProductPage() {
               </label>
             </div>
             <p className="text-xs text-slate-400 mb-4">
-              Marchează această opțiune dacă piesa este certificată de o companie profesională (NGC, PCGS, etc.).
-              Piesele certificate sunt încapsulate și au un cod unic de certificare.
+              Bifează această opțiune dacă piesa este certificată de o companie de certificare recunoscută (NGC sau PCGS). 
+              Piesele certificate sunt încapsulate și însoțite de un cod unic de autentificare.
             </p>
 
             {hasCertification && (
