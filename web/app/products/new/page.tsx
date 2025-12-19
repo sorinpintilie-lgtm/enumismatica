@@ -138,9 +138,11 @@ export default function NewProductPage() {
                   const data = await response.json();
                   const monetariaProduct = data.products.find((p: any) => p.product_id === item.id);
                   if (monetariaProduct && monetariaProduct.price) {
-                    // Parse price - remove currency symbols and convert to number
-                    const parsedPrice = monetariaProduct.price.replace(/[^\d.,]/g, '').replace(',', '.');
-                    const numericPrice = parseFloat(parsedPrice);
+                    // Parse price using Romanian number format (dot as thousand separator)
+                    const parsedPrice = monetariaProduct.price.replace(/[^\d.,]/g, '');
+                    // Handle Romanian format: remove dots (thousand separators) and replace comma with dot
+                    const cleanedPrice = parsedPrice.replace(/\./g, '').replace(',', '.');
+                    const numericPrice = parseFloat(cleanedPrice);
                     if (!isNaN(numericPrice)) {
                       setPrice(String(numericPrice));
                     }
