@@ -16,6 +16,7 @@ import BidHistoryChart from '../../components/BidHistoryChart';
 import { formatRON } from '../../utils/currency';
 import type { AutoBid } from 'shared/types';
 import { logEvent } from '../../hooks/useActivityLogger';
+import { WatchlistButton } from '../../components/WatchlistButton';
 
 const bidSchema = z.object({
   amount: z.number().positive('Bid amount must be positive'),
@@ -522,13 +523,20 @@ export default function AuctionDetailPage() {
         </div>
       )}
       <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <Link
             href="/auctions"
             className="inline-flex items-center text-sm font-medium text-gold-400 hover:text-gold-300 transition-colors"
           >
             ← Înapoi la licitații
           </Link>
+          {user && (
+            <WatchlistButton
+              itemType="auction"
+              itemId={id}
+              size="small"
+            />
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

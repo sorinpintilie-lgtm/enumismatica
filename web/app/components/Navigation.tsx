@@ -147,11 +147,11 @@ export default function Navigation() {
                     </span>
                   )}
                 </Link>
-                {/* Watchlist icon */}
+                {/* Bookmarks icon */}
                 <Link
-                  href="/watchlist"
+                  href="/bookmarks"
                   className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gold-500/60 bg-navy-900/70 text-gold-300 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
-                  title="Lista de urmărit"
+                  title="Bookmarks"
                 >
                   <svg
                     className="h-4 w-4"
@@ -163,6 +163,25 @@ export default function Navigation() {
                     strokeLinejoin="round"
                   >
                     <path d="M6 3h12a1 1 0 0 1 1 1v16l-7-4-7 4V4a1 1 0 0 1 1-1z" />
+                  </svg>
+                </Link>
+                {/* Auction Watchlist icon */}
+                <Link
+                  href="/auction-watchlist"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gold-500/60 bg-navy-900/70 text-gold-300 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
+                  title="Watchlist Licitații"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
                   </svg>
                 </Link>
               </>
@@ -276,11 +295,18 @@ export default function Navigation() {
                         )}
                       </Link>
                       <Link
-                        href="/watchlist"
+                        href="/bookmarks"
                         onClick={() => setMobileMenuOpen(false)}
                         className="inline-flex items-center justify-center rounded-full border border-gold-500/60 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
                       >
-                        Watchlist
+                        Bookmarks
+                      </Link>
+                      <Link
+                        href="/auction-watchlist"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="inline-flex items-center justify-center rounded-full border border-gold-500/60 bg-navy-800 px-3 py-2 font-semibold text-gold-200 hover:bg-gold-500/10 hover:border-gold-400 transition-colors"
+                      >
+                        Watchlist Licitații
                       </Link>
                     </div>
                     <Link
