@@ -49,6 +49,7 @@ export function useProducts(
     let q = query(
       collection(db, 'products'),
       where('status', '==', 'approved'),
+      where('listingType', '==', 'direct'),
       orderBy('createdAt', 'desc'),
       limit(pageSize)
     );
@@ -124,6 +125,7 @@ export function useProducts(
     let q = query(
       collection(db, 'products'),
       where('status', '==', 'approved'),
+      where('listingType', '==', 'direct'),
       orderBy('createdAt', 'desc'),
       limit(pageSize),
       startAfter(lastVisible)

@@ -417,6 +417,7 @@ export default function NewProductPage() {
         video: videoUrl,
         price: numericPrice,
         category: category || null,
+        listingType: listingType,
         ownerId: user.uid,
         status: listingType === 'auction' ? 'approved' : 'pending',
         country: country || null,
