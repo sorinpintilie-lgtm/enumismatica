@@ -78,25 +78,23 @@ export async function createOffer(
   }
 
   // Create the offer
-  const offerData: Omit<Offer, 'id'> = {
+  const offerData: any = {
     itemType,
     itemId,
     buyerId,
     sellerId,
     offerAmount,
-    message,
     status: 'pending',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-  };
-
-  const offerRef = await addDoc(collection(db, 'offers'), {
-    ...offerData,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-    expiresAt: Timestamp.fromDate(offerData.expiresAt),
-  });
+    expiresAt: Timestamp.fromDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)), // 7 days
+  };
+
+  if (message !== undefined) {
+    offerData.message = message;
+  }
+
+  const offerRef = await addDoc(collection(db, 'offers'), offerData);
 
   // Get buyer name for notification
   const buyerDoc = await getDoc(doc(db, 'users', buyerId));

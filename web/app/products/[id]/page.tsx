@@ -23,8 +23,10 @@ export default function ProductDetailPage() {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [buying, setBuying] = useState(false);
   const [showBuyConfirm, setShowBuyConfirm] = useState(false);
+  const [viewMode, setViewMode] = useState<'owner' | 'preview'>('preview');
 
   const images = product?.images ?? [];
+  const isOwner = user && product && user.uid === product.ownerId;
 
   const openLightboxAt = (index: number) => {
     if (!images.length) return;
@@ -215,13 +217,40 @@ export default function ProductDetailPage() {
       )}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-6">
+          <div className="mb-6 flex items-center justify-between">
             <Link
               href="/products"
               className="inline-flex items-center text-sm font-medium text-gold-400 hover:text-gold-300 transition-colors"
             >
               ← Înapoi la produse
             </Link>
+            {isOwner && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-300">Vizualizare:</span>
+                <div className="flex rounded-lg bg-navy-800/60 p-1 border border-gold-500/30">
+                  <button
+                    onClick={() => setViewMode('preview')}
+                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                      viewMode === 'preview'
+                        ? 'bg-gold-500 text-navy-900'
+                        : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    Preview
+                  </button>
+                  <button
+                    onClick={() => setViewMode('owner')}
+                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                      viewMode === 'owner'
+                        ? 'bg-gold-500 text-navy-900'
+                        : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    Proprietar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -284,38 +313,60 @@ export default function ProductDetailPage() {
                     Acest produs a fost vândut și nu mai este disponibil.
                   </p>
                 )}
-                <div className="flex flex-col sm:flex-row gap-3 mt-1">
-                  <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    disabled={product.isSold === true || (!!user && product.ownerId === user.uid)}
-                    className="flex-1 bg-navy-900/80 hover:bg-navy-800 disabled:bg-navy-900/40 disabled:text-slate-500 text-gold-200 px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors border border-gold-500/60 shadow-[0_0_18px_rgba(15,23,42,0.9)]"
-                  >
-                    {product.isSold
-                      ? 'Deja vândut'
-                      : !!user && product.ownerId === user.uid
-                      ? 'Ești proprietarul acestui produs'
-                      : 'Adaugă în coș'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleBuyClick}
-                    disabled={
-                      buying ||
-                      product.isSold === true ||
-                      (!!user && product.ownerId === user.uid)
-                    }
-                    className="flex-1 bg-[#e7b73c] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/50 disabled:text-slate-700 text-[#000940] px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors shadow-[0_0_24px_rgba(231,183,60,0.8)]"
-                  >
-                    {product.isSold
-                      ? 'Deja vândut'
-                      : !!user && product.ownerId === user.uid
-                      ? 'Ești proprietarul acestui produs'
-                      : buying
-                      ? 'Se procesează cumpărarea...'
-                      : 'Cumpără acum'}
-                  </button>
-                </div>
+                {viewMode === 'preview' ? (
+                  <div className="flex flex-col sm:flex-row gap-3 mt-1">
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      disabled={product.isSold === true || (!!user && product.ownerId === user.uid)}
+                      className="flex-1 bg-navy-900/80 hover:bg-navy-800 disabled:bg-navy-900/40 disabled:text-slate-500 text-gold-200 px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors border border-gold-500/60 shadow-[0_0_18px_rgba(15,23,42,0.9)]"
+                    >
+                      {product.isSold
+                        ? 'Deja vândut'
+                        : !!user && product.ownerId === user.uid
+                        ? 'Ești proprietarul acestui produs'
+                        : 'Adaugă în coș'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleBuyClick}
+                      disabled={
+                        buying ||
+                        product.isSold === true ||
+                        (!!user && product.ownerId === user.uid)
+                      }
+                      className="flex-1 bg-[#e7b73c] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/50 disabled:text-slate-700 text-[#000940] px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors shadow-[0_0_24px_rgba(231,183,60,0.8)]"
+                    >
+                      {product.isSold
+                        ? 'Deja vândut'
+                        : !!user && product.ownerId === user.uid
+                        ? 'Ești proprietarul acestui produs'
+                        : buying
+                        ? 'Se procesează cumpărarea...'
+                        : 'Cumpără acum'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3 mt-1">
+                    <div className="text-sm text-slate-300">
+                      <strong>Mod Proprietar:</strong> Gestionați-vă produsul și vizualizați ofertele primite.
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Link
+                        href={`/products/new?edit=${product.id}`}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors text-center"
+                      >
+                        Editează Produs
+                      </Link>
+                      <button
+                        type="button"
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors"
+                      >
+                        Gestionare Oferte
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -425,6 +476,16 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
 
+                {/* Offers Section - Only for Owner */}
+                {viewMode === 'owner' && (
+                  <div className="mt-6 pt-4 border-t border-gold-500/20">
+                    <h3 className="text-lg font-medium text-[#e7b73c] mb-3">Oferte Primite</h3>
+                    <div className="text-sm text-slate-300">
+                      Funcționalitatea de gestionare a ofertelor va fi implementată aici.
+                      Veți putea vedea toate ofertele primite, accepta sau respinge ofertele.
+                    </div>
+                  </div>
+                )}
 
                 {/* Listing Information */}
                 <div className="mt-6 pt-4 border-t border-gold-500/20">
