@@ -507,6 +507,7 @@ export default function NewProductPage() {
         const end = new Date(Date.now() + auctionDuration * 24 * 60 * 60 * 1000);
         await addDoc(collection(db, 'auctions'), {
           productId: productRef.id,
+          ownerId: user.uid,
           startTime: Timestamp.fromDate(new Date()),
           endTime: Timestamp.fromDate(end),
           reservePrice: reserve,
