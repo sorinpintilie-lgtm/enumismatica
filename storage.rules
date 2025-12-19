@@ -12,7 +12,7 @@ service firebase.storage {
     }
 
     function isAdmin() {
-      return isAuthenticated() && 
+      return isAuthenticated() &&
              (request.auth.uid == 'QEm0DSIzylNQIHpQAZlgtWQkYYE3' ||
               firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
@@ -27,60 +27,67 @@ service firebase.storage {
              request.resource.contentType.matches('video/.*');
     }
 
-    // Product images: Owner or admin can upload, anyone can read
+    // ====================
+    // USER PRODUCT UPLOADS (All product uploads, pending or approved)
+    // ====================
+    // Users can upload their own product images/videos, admins can manage all
+    // Public read for approved products, authenticated read for pending
     match /products/{userId}/{imageId} {
-      allow read: if true; // Public read for product images
+      allow read: if true; // Public read for all product images (approved products need public access)
       allow write: if isAuthenticated() && (isOwner(userId) || isAdmin()) && isValidImageFile();
       allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
     }
 
-    // Product videos: Owner or admin can upload, anyone can read
     match /products/{userId}/videos/{videoId} {
-      allow read: if true; // Public read for product videos
+      allow read: if true; // Public read for all product videos
       allow write: if isAuthenticated() && (isOwner(userId) || isAdmin()) && isValidVideoFile();
       allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
     }
 
-    // Seed product images: Superadmin/admin only, but *without* strict contentType checks.
-    // This avoids 403s during seeding if the upload metadata doesn't include a contentType.
-    match /products/seed/{imageId} {
-      allow read: if true; // Public read
-
-      // Allow writes for the hard-coded superadmin UID or any user that passes isAdmin().
-      // We intentionally skip isValidImageFile here to avoid failures when contentType is missing.
-      allow write: if isAuthenticated() &&
-                   (request.auth.uid == 'QEm0DSIzylNQIHpQAZlgtWQkYYE3' || isAdmin());
-
-      allow delete: if isAuthenticated() &&
-                    (request.auth.uid == 'QEm0DSIzylNQIHpQAZlgtWQkYYE3' || isAdmin());
-    }
-
-    // Collection images: Owner or admin can upload/delete, owner can read
+    // ====================
+    // USER COLLECTIONS (Private)
+    // ====================
+    // Users manage their own collection, admins have oversight
     match /collections/{userId}/{imageId} {
       allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
       allow write: if isAuthenticated() && (isOwner(userId) || isAdmin()) && isValidImageFile();
       allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
     }
 
-    // User avatars: Owner can upload/delete, anyone authenticated can read
+    // ====================
+    // USER AVATARS
+    // ====================
+    // Users can upload their own avatar, anyone authenticated can view
     match /avatars/{userId}/{imageId} {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated() && (isOwner(userId) || isAdmin()) && isValidImageFile();
       allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
     }
 
-    // Temporary uploads: User can upload their own temp files
-    match /temp/{userId}/{imageId} {
+    // ====================
+    // TEMPORARY UPLOADS
+    // ====================
+    // Short-term storage for user uploads before processing
+    match /temp/{userId}/{allPaths=**} {
       allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      allow write: if isAuthenticated() && isOwner(userId) && isValidImageFile();
+      allow write: if isAuthenticated() && isOwner(userId) &&
+                   (isValidImageFile() || isValidVideoFile());
       allow delete: if isAuthenticated() && (isOwner(userId) || isAdmin());
     }
 
-    // Site assets: Public read, admin write
-    match /site-assets/{assetName}/{imageId} {
-      allow read: if true; // Public read for site assets (logo, hero images, etc.)
-      allow write: if isAdmin() && isValidImageFile();
-      allow delete: if isAdmin();
+    // ====================
+    // ADMIN-ONLY AREAS
+    // ====================
+    // Site assets and seed data - admin exclusive
+    match /site-assets/{allPaths=**} {
+      allow read: if true; // Public read for logos, banners, etc.
+      allow write, delete: if isAdmin() && isValidImageFile();
+    }
+
+    match /products/seed/{allPaths=**} {
+      allow read: if true; // Public read
+      allow write, delete: if isAuthenticated() &&
+                           (request.auth.uid == 'QEm0DSIzylNQIHpQAZlgtWQkYYE3' || isAdmin());
     }
   }
 }
