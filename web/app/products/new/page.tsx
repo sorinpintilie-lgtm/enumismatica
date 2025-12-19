@@ -103,10 +103,24 @@ export default function NewProductPage() {
   const [ngcCode, setNgcCode] = useState('');
   const [ngcGrade, setNgcGrade] = useState('');
 
-  // Load collection item if provided
+  // Load collection item if provided, or edit existing product
   useEffect(() => {
     const collectionItemId = searchParams.get('collectionItemId');
     const listingTypeParam = searchParams.get('listingType');
+    const editProductId = searchParams.get('edit');
+
+    if (editProductId && user?.uid) {
+      // Load existing product for editing
+      // This would require a function to get product by ID
+      // For now, show a message that edit is not implemented
+      showToast({
+        type: 'info',
+        title: 'Funcționalitate în dezvoltare',
+        message: 'Editarea produselor existente va fi implementată în curând.',
+      });
+      router.push('/dashboard');
+      return;
+    }
 
     if (collectionItemId && user?.uid) {
       setLoadingCollectionItem(true);
@@ -404,7 +418,7 @@ export default function NewProductPage() {
         price: numericPrice,
         category: category || null,
         ownerId: user.uid,
-        status: 'pending',
+        status: listingType === 'auction' ? 'approved' : 'pending',
         country: country || null,
         year: year ? Number(year) : null,
         era: era || null,
@@ -524,7 +538,7 @@ export default function NewProductPage() {
         type: 'success',
         title: listingType === 'auction' ? 'Licitație trimisă spre aprobare' : 'Produs trimis spre aprobare',
         message: listingType === 'auction'
-          ? 'Licitația a fost trimisă spre aprobare. Un administrator o va verifica înainte să apară public.'
+          ? 'Licitația a fost trimisă spre aprobare. Produsul este acum vizibil, dar licitația va fi activată după verificare.'
           : 'Produsul a fost trimis spre aprobare. Un administrator îl va verifica înainte să apară public.',
       });
 

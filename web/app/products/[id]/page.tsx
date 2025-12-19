@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useProduct } from '../../hooks/useProducts';
@@ -24,9 +24,17 @@ export default function ProductDetailPage() {
   const [buying, setBuying] = useState(false);
   const [showBuyConfirm, setShowBuyConfirm] = useState(false);
   const [viewMode, setViewMode] = useState<'owner' | 'preview'>('preview');
+  const [showOffersModal, setShowOffersModal] = useState(false);
 
   const images = product?.images ?? [];
   const isOwner = user && product && user.uid === product.ownerId;
+
+  // Set default view mode for owners
+  useEffect(() => {
+    if (isOwner && viewMode === 'preview') {
+      setViewMode('owner');
+    }
+  }, [isOwner, viewMode]);
 
   const openLightboxAt = (index: number) => {
     if (!images.length) return;
@@ -360,6 +368,7 @@ export default function ProductDetailPage() {
                       </Link>
                       <button
                         type="button"
+                        onClick={() => setShowOffersModal(true)}
                         className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors"
                       >
                         Gestionare Oferte
@@ -577,6 +586,39 @@ export default function ProductDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
+        </div>
+      )}
+
+      {/* Offers Modal */}
+      {showOffersModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+          <div className="mx-4 max-w-2xl w-full rounded-2xl bg-navy-900/95 border border-gold-500/40 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.95)] max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-white">Oferte pentru {product?.name}</h3>
+              <button
+                onClick={() => setShowOffersModal(false)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="text-sm text-slate-300">
+              Funcționalitatea completă de gestionare a ofertelor va fi implementată în curând.
+              Veți putea vedea toate ofertele primite, accepta sau respinge ofertele, și comunica cu cumpărătorii.
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowOffersModal(false)}
+                className="px-4 py-2 bg-navy-600 hover:bg-navy-500 text-white rounded-lg font-semibold transition-colors"
+              >
+                Închide
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>
