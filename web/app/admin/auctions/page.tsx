@@ -11,7 +11,9 @@ import {
   approveAuction,
   rejectAuction,
   forceEndAuction,
+  getProductById,
 } from 'shared/adminService';
+import { Product } from 'shared/types';
 import { Auction } from 'shared/types';
 
 export default function AdminAuctions() {
@@ -20,7 +22,9 @@ export default function AdminAuctions() {
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [loading, setLoading] = useState(true);
   const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [products, setProducts] = useState<Record<string, Product>>({});
   const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'ended' | 'rejected'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -48,6 +52,24 @@ export default function AdminAuctions() {
   const loadAuctions = async () => {
     const allAuctions = await getAllAuctions();
     setAuctions(allAuctions);
+
+    // Fetch products for category filtering
+    const productPromises = allAuctions.map(async (auction) => {
+      if (auction.productId) {
+        const product = await getProductById(auction.productId);
+        return { productId: auction.productId, product };
+      }
+      return null;
+    });
+
+    const productResults = await Promise.all(productPromises);
+    const productsMap: Record<string, Product> = {};
+    productResults.forEach(result => {
+      if (result && result.product) {
+        productsMap[result.productId] = result.product;
+      }
+    });
+    setProducts(productsMap);
   };
 
   const handleDelete = async (auctionId: string) => {
@@ -90,9 +112,11 @@ export default function AdminAuctions() {
     }
   };
 
-  const filteredAuctions = auctions.filter(a => 
-    filter === 'all' ? true : a.status === filter
-  );
+  const filteredAuctions = auctions.filter(a => {
+    const statusMatch = filter === 'all' ? true : a.status === filter;
+    const categoryMatch = categoryFilter === 'all' ? true : products[a.productId]?.category === categoryFilter;
+    return statusMatch && categoryMatch;
+  });
 
   if (authLoading || loading || !isAdminUser) {
     return (
@@ -159,6 +183,20 @@ export default function AdminAuctions() {
           >
             Respinse ({auctions.filter(a => a.status === 'rejected').length})
           </button>
+        </div>
+
+        {/* Category Filter */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-white mb-2">Filtru categorie</label>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="px-4 py-2 rounded-md bg-gray-200 text-gray-700"
+          >
+            <option value="all">Toate categoriile</option>
+            <option value="Monede">Monede</option>
+            <option value="Bancnote">Bancnote</option>
+          </select>
         </div>
 
         {/* Auctions List */}

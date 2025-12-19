@@ -166,15 +166,15 @@ service cloud.firestore {
     match /auctions/{auctionId} {
       allow read: if resource.data.status in ['active', 'ended'] || isAdmin() || (isAuthenticated() && isOwner(resource.data.ownerId));
       allow create: if isAuthenticated() &&
-                           hasRequiredFields(request.resource.data, ['productId', 'ownerId', 'reservePrice', 'minAcceptPrice', 'startTime', 'endTime', 'status', 'createdAt']) &&
+                           hasRequiredFields(request.resource.data, ['productId', 'ownerId', 'reservePrice', 'minAcceptPrice', 'startTime', 'endTime', 'status', 'createdAt', 'updatedAt']) &&
                            isValidTimestamp(request.resource.data.startTime) && isValidTimestamp(request.resource.data.endTime) &&
                            request.resource.data.reservePrice > 0 &&
                            request.resource.data.endTime > request.resource.data.startTime &&
                            // Validate that the authenticated user owns this auction
                            request.resource.data.ownerId == request.auth.uid &&
                            // Validate that the product exists and the user owns it
-                           exists(/databases/$(database)/documents/products/$(productId)) &&
-                           get(/databases/$(database)/documents/products/$(productId)).data.ownerId == request.auth.uid &&
+                           exists(/databases/$(database)/documents/products/$(request.resource.data.productId)) &&
+                           get(/databases/$(database)/documents/products/$(request.resource.data.productId)).data.ownerId == request.auth.uid &&
                            (request.resource.data.status == 'pending' || (isAdmin() && request.resource.data.status in ['pending', 'active', 'ended', 'cancelled', 'rejected']));
       allow update: if isAuthenticated() &&
                     (isAdmin() ||

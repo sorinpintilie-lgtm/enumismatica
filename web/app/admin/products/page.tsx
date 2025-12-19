@@ -157,13 +157,7 @@ export default function AdminProducts() {
           >
             <option value="all">Toate categoriile</option>
             <option value="Monede">Monede</option>
-            <option value="Banknote">Banknote</option>
-            <option value="Medalii">Medalii</option>
-            <option value="Jetoane">Jetoane</option>
-            <option value="Insigne">Insigne</option>
-            <option value="Ordine">Ordine</option>
-            <option value="Decorații">Decorații</option>
-            <option value="Altele">Altele</option>
+            <option value="Bancnote">Bancnote</option>
           </select>
         </div>
 

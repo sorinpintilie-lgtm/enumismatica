@@ -47,7 +47,7 @@ const NGC_GRADES = [
 ];
 
 const CATEGORIES = [
-  'Monede', 'Banknote', 'Medalii', 'Jetoane', 'Insigne', 'Ordine', 'Decorații', 'Altele'
+  'Monede', 'Bancnote'
 ];
 
 export default function NewProductPage() {

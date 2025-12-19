@@ -120,10 +120,31 @@ export async function getAllProducts(): Promise<Product[]> {
       createdAt: doc.data().createdAt?.toDate() || new Date(),
       updatedAt: doc.data().updatedAt?.toDate() || new Date(),
     })) as Product[];
-    return products.filter(p => p.listingType !== 'auction');
+    return products.filter(p => p.listingType === 'direct');
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
+  }
+}
+
+/**
+ * Get product by ID (admin only)
+ */
+export async function getProductById(productId: string): Promise<Product | null> {
+  try {
+    const productDoc = await getDoc(doc(db, 'products', productId));
+    if (!productDoc.exists()) {
+      return null;
+    }
+    return {
+      id: productDoc.id,
+      ...productDoc.data(),
+      createdAt: productDoc.data().createdAt?.toDate() || new Date(),
+      updatedAt: productDoc.data().updatedAt?.toDate() || new Date(),
+    } as Product;
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return null;
   }
 }
 
