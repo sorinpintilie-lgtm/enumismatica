@@ -143,11 +143,6 @@ export function useBoostedProducts(limitCount: number = 3) {
     queryKey: ['boosted-products', limitCount],
     queryFn: async () => {
       const now = new Date();
-
-      console.log('[useBoostedProducts] start', {
-        now: now.toISOString(),
-        limitCount,
-      });
       
       // Query for products with active boosts
       let q = query(
@@ -161,15 +156,7 @@ export function useBoostedProducts(limitCount: number = 3) {
         limit(limitCount),
       );
 
-      let querySnapshot;
-      try {
-        querySnapshot = await getDocs(q);
-      } catch (err) {
-        console.error('[useBoostedProducts] getDocs failed (active boost query)', err);
-        throw err;
-      }
-
-      console.log('[useBoostedProducts] active boosted docs:', querySnapshot.size);
+      const querySnapshot = await getDocs(q);
       const boostedProducts: Product[] = [];
 
       querySnapshot.forEach((doc) => {
@@ -187,38 +174,6 @@ export function useBoostedProducts(limitCount: number = 3) {
         
         boostedProducts.push(productData as Product);
       });
-
-      // Dev-only diagnostics: if we got 0 results, inspect what Firestore returns
-      // when ordering by boostExpiresAt without the inequality filter.
-      if (process.env.NODE_ENV !== 'production' && boostedProducts.length === 0) {
-        try {
-          const diagQ = query(
-            collection(db, 'products'),
-            where('status', '==', 'approved'),
-            orderBy('boostExpiresAt', 'desc'),
-            limit(5),
-          );
-          const diagSnap = await getDocs(diagQ);
-          const diag = diagSnap.docs.map((d) => {
-            const v: any = d.data().boostExpiresAt;
-            return {
-              id: d.id,
-              hasBoostExpiresAt: !!v,
-              boostExpiresAtType:
-                v instanceof Date
-                  ? 'Date'
-                  : v?.toDate
-                  ? 'FirestoreTimestamp'
-                  : typeof v,
-              boostExpiresAtValue: v?.toDate ? v.toDate().toISOString() : v?.toISOString?.() || String(v),
-              status: d.data().status,
-            };
-          });
-          console.log('[useBoostedProducts] diagnostics (top 5 by boostExpiresAt):', diag);
-        } catch (err) {
-          console.warn('[useBoostedProducts] diagnostics query failed', err);
-        }
-      }
 
       return boostedProducts;
     },

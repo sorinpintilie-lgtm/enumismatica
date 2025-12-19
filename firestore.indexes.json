@@ -47,6 +47,24 @@
       ]
     },
     {
+      "collectionGroup": "products",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "boostExpiresAt",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "boostedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "auctions",
       "queryScope": "COLLECTION",
       "fields": [

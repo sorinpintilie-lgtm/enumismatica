@@ -40,11 +40,7 @@ const steps = [
 export default function HomePage() {
   const { user } = useAuth();
   const { data: products = [], isLoading: productsLoading } = useCachedProducts(undefined, 8, undefined, !!user);
-  const {
-    data: boostedProducts = [],
-    isLoading: boostedLoading,
-    error: boostedError,
-  } = useBoostedProducts(3);
+  const { data: boostedProducts = [], isLoading: boostedLoading } = useBoostedProducts(3);
 
   return (
     <div className="bg-gradient-to-b from-navy-500 via-navy-600 to-navy-900">
@@ -131,15 +127,6 @@ export default function HomePage() {
               {boostedLoading ? (
                 <div className="h-[340px] w-full rounded-2xl bg-slate-100 animate-pulse flex items-center justify-center">
                   <div className="text-slate-400">Se încarcă produsele...</div>
-                </div>
-              ) : boostedError ? (
-                <div className="h-[340px] w-full rounded-2xl bg-slate-50 border-2 border-dashed border-red-200 flex items-center justify-center">
-                  <div className="text-center text-red-500">
-                    <p className="text-sm font-medium">Nu s-au putut încărca produsele promovate</p>
-                    <p className="text-xs opacity-80">
-                      {(boostedError as any)?.message || String(boostedError)}
-                    </p>
-                  </div>
                 </div>
               ) : boostedProducts.length > 0 ? (
                 <>
