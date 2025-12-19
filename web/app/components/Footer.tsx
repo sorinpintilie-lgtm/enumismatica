@@ -156,13 +156,20 @@ export default function Footer() {
           </p>
           <div className="flex items-center justify-center gap-2">
             <span className="text-gray-400 text-xs">Powered by</span>
-            <Image
-              src="/skyrologo.png"
-              alt="Skyro"
-              width={80}
-              height={20}
-              className="object-contain"
-            />
+            <a
+              href="https://sky.ro"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-opacity hover:opacity-80"
+            >
+              <Image
+                src="/skyrologo.png"
+                alt="Skyro"
+                width={80}
+                height={20}
+                className="object-contain"
+              />
+            </a>
           </div>
         </div>
       </div>
