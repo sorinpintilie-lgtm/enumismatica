@@ -58,7 +58,7 @@ export default function AdminModeratorDashboard() {
         </div>
 
         {/* Main Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Link
             href="/admin/products"
             className="bg-navy-800/60 hover:bg-navy-700/70 border border-gold-500/30 hover:border-gold-500/50 rounded-2xl p-6 transition-colors shadow-[0_14px_40px_rgba(0,0,0,0.6)]"
@@ -85,6 +85,22 @@ export default function AdminModeratorDashboard() {
             </p>
             <span className="inline-flex items-center text-gold-400 font-semibold text-sm">
               Mergi la gestionare licitații
+              <span className="ml-1" aria-hidden>
+                →
+              </span>
+            </span>
+          </Link>
+
+          <Link
+            href="/admin/users"
+            className="bg-navy-800/60 hover:bg-navy-700/70 border border-gold-500/30 hover:border-gold-500/50 rounded-2xl p-6 transition-colors shadow-[0_14px_40px_rgba(0,0,0,0.6)]"
+          >
+            <h2 className="text-2xl font-semibold text-white mb-2">Utilizatori</h2>
+            <p className="text-slate-300 mb-3">
+              Vezi și gestionează conturile utilizatorilor (roluri de admin / utilizator, ștergere cont).
+            </p>
+            <span className="inline-flex items-center text-gold-400 font-semibold text-sm">
+              Mergi la gestionare utilizatori
               <span className="ml-1" aria-hidden>
                 →
               </span>
