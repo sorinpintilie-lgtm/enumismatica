@@ -421,31 +421,34 @@ export default function NewProductPage() {
         updatedAt: serverTimestamp(),
       });
 
-      try {
-        await addCollectionItem(user.uid, {
-          name: name.trim(),
-          description: description.trim(),
-          images: imageUrls,
-          video: videoUrl,
-          category: category || undefined,
-          country: country || undefined,
-          year: year ? Number(year) : undefined,
-          era: era || undefined,
-          metal: metal || undefined,
-          denomination: denomination || undefined,
-          rarity: rarity || undefined,
-          grade: grade || undefined,
-          // NGC fields
-          hasNgcCertification: hasNgcCertification || false,
-          ngcCode: hasNgcCertification ? ngcCode.trim() : undefined,
-          ngcGrade: hasNgcCertification ? ngcGrade : undefined,
-          acquisitionPrice: numericPrice,
-          currentValue: numericPrice,
-          notes: 'Articol creat în magazin',
-          tags: ['listare-magazin'],
-        });
-      } catch (err) {
-        console.error('Failed to add product to collection', err);
+      // Only add to collection if not from existing collection item
+      if (!collectionItem) {
+        try {
+          await addCollectionItem(user.uid, {
+            name: name.trim(),
+            description: description.trim(),
+            images: imageUrls,
+            video: videoUrl,
+            category: category || undefined,
+            country: country || undefined,
+            year: year ? Number(year) : undefined,
+            era: era || undefined,
+            metal: metal || undefined,
+            denomination: denomination || undefined,
+            rarity: rarity || undefined,
+            grade: grade || undefined,
+            // NGC fields
+            hasNgcCertification: hasNgcCertification || false,
+            ngcCode: hasNgcCertification ? ngcCode.trim() : undefined,
+            ngcGrade: hasNgcCertification ? ngcGrade : undefined,
+            acquisitionPrice: numericPrice,
+            currentValue: numericPrice,
+            notes: 'Articol creat în magazin',
+            tags: ['listare-magazin'],
+          });
+        } catch (err) {
+          console.error('Failed to add product to collection', err);
+        }
       }
   
       // Validate NGC certification fields

@@ -319,6 +319,28 @@ export async function approveProduct(productId: string): Promise<{ success: bool
             console.error('Failed to send product approved email:', error);
           });
         }
+
+        // Remove the collection item if it was created from collection
+        try {
+          const collectionRef = collection(db, 'users', productData.ownerId, 'collection');
+          const q = query(collectionRef, where('salePendingId', '==', productId));
+          const snapshot = await getDocs(q);
+
+          if (!snapshot.empty) {
+            // Remove the collection item
+            await deleteDoc(snapshot.docs[0].ref);
+          } else {
+            // Check for auction pending
+            const auctionQ = query(collectionRef, where('auctionPendingId', '==', productId));
+            const auctionSnapshot = await getDocs(auctionQ);
+            if (!auctionSnapshot.empty) {
+              await deleteDoc(auctionSnapshot.docs[0].ref);
+            }
+          }
+        } catch (error) {
+          console.error('Failed to remove collection item after product approval:', error);
+          // Don't fail the approval for this
+        }
       }
     }
 
@@ -396,6 +418,21 @@ export async function approveAuction(auctionId: string): Promise<{ success: bool
           ).catch(error => {
             console.error('Failed to send auction approved email:', error);
           });
+        }
+
+        // Remove the collection item if it was created from collection
+        try {
+          const collectionRef = collection(db, 'users', auctionData.ownerId, 'collection');
+          const q = query(collectionRef, where('auctionPendingId', '==', auctionData.productId));
+          const snapshot = await getDocs(q);
+
+          if (!snapshot.empty) {
+            // Remove the collection item
+            await deleteDoc(snapshot.docs[0].ref);
+          }
+        } catch (error) {
+          console.error('Failed to remove collection item after auction approval:', error);
+          // Don't fail the approval for this
         }
       }
     }
