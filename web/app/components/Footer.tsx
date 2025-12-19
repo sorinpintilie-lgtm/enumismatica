@@ -21,7 +21,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <h4 className="font-semibold mb-1">Adresă</h4>
-                  <p className="text-gray-300">București, România</p>
+                  <p className="text-gray-300">Strada Drumul Dealu Crisului, Nr34, Sector 4, Bucuresti</p>
                 </div>
               </div>
 
@@ -53,10 +53,10 @@ export default function Footer() {
                 <div>
                   <h4 className="font-semibold mb-1">Telefon</h4>
                   <a
-                    href="tel:+40212345678"
+                    href="tel:+40735223025"
                     className="text-gold-400 hover:text-gold-300 transition-colors"
                   >
-                    +40 (21) 234-5678
+                    0735 223 025
                   </a>
                 </div>
               </div>
