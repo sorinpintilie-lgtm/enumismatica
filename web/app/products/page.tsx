@@ -16,6 +16,10 @@ function ProductsListContent() {
     ['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt']
   );
   const searchParams = useSearchParams();
+
+  const PAGE_SIZE = 20;
+  const [page, setPage] = useState(1);
+  const [requestedPage, setRequestedPage] = useState<number | null>(null);
   
   const [filters, setFilters] = useState<FilterOptions>({
     searchTerm: '',
@@ -51,6 +55,30 @@ function ProductsListContent() {
       }));
     }
   }, [searchParams]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setPage(1);
+    setRequestedPage(null);
+  }, [
+    filters.searchTerm,
+    filters.category,
+    filters.country,
+    filters.minPrice,
+    filters.maxPrice,
+    filters.minYear,
+    filters.maxYear,
+    filters.metal,
+    filters.rarity,
+    filters.grade,
+    filters.faceValue,
+    filters.issueYear,
+    filters.diameter,
+    filters.weight,
+    filters.mint,
+    filters.era,
+    filters.sortBy,
+  ]);
 
   const filteredProducts = useMemo(() => {
     console.log('[ProductsPage] Starting filter with', products.length, 'products');
@@ -158,12 +186,78 @@ function ProductsListContent() {
     return filtered;
   }, [products, filters]);
 
+  // Ensure we have enough loaded products when user navigates to a higher page.
+  useEffect(() => {
+    if (!requestedPage) return;
+    const neededCount = requestedPage * PAGE_SIZE;
+    const loadedCount = products.length;
+
+    if (loadedCount >= neededCount) {
+      setPage(requestedPage);
+      setRequestedPage(null);
+      return;
+    }
+
+    // Need more products from Firestore
+    if (hasMore && !loading) {
+      loadMore();
+      return;
+    }
+
+    // No more products available; clamp to last available page
+    const maxPage = Math.max(1, Math.ceil(Math.max(filteredProducts.length, loadedCount) / PAGE_SIZE));
+    setPage(maxPage);
+    setRequestedPage(null);
+  }, [requestedPage, products.length, hasMore, loading, loadMore, PAGE_SIZE, filteredProducts.length]);
+
+  const loadedPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
+  const totalPagesKnown = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const effectiveMaxPage = hasMore ? Math.max(totalPagesKnown, loadedPages + 1) : totalPagesKnown;
+
+  const pageStart = (page - 1) * PAGE_SIZE;
+  const pageEnd = pageStart + PAGE_SIZE;
+  const pagedProducts = filteredProducts.slice(pageStart, pageEnd);
+
+  const goToPage = (nextPage: number) => {
+    if (nextPage < 1) return;
+
+    // If user tries to go beyond what we have loaded, request that page and trigger fetches.
+    const neededCount = nextPage * PAGE_SIZE;
+    if (products.length < neededCount && hasMore) {
+      setRequestedPage(nextPage);
+      return;
+    }
+
+    const max = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+    setPage(Math.min(nextPage, max));
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
           <p className="ml-4 text-slate-300">Se încarcă produsele...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('[ProductsPage] Failed to load products:', error);
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto rounded-2xl border border-red-500/30 bg-navy-900/80 p-8 shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
+          <h1 className="text-2xl font-bold text-white mb-3">Nu s-au putut încărca produsele</h1>
+          <p className="text-sm text-slate-300 mb-4">
+            A apărut o eroare la încărcarea produselor din baza de date.
+          </p>
+          <pre className="text-xs text-red-200 whitespace-pre-wrap break-words bg-black/30 rounded-lg p-4 border border-red-500/20">
+            {error}
+          </pre>
+          <p className="text-xs text-slate-400 mt-4">
+            Dacă eroarea conține „requires an index” sau „missing/insufficient permissions”, trebuie ajustate indexurile Firestore sau regulile.
+          </p>
         </div>
       </div>
     );
@@ -185,8 +279,9 @@ function ProductsListContent() {
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">
         <p className="text-slate-300">
-          Se afișează <span className="font-semibold text-gold-400">{filteredProducts.length}</span> din{' '}
-          <span className="font-semibold text-gold-400">{products.length}</span> produse
+          Se afișează <span className="font-semibold text-gold-400">{pagedProducts.length}</span> produse (pagina{' '}
+          <span className="font-semibold text-gold-400">{page}</span>) din{' '}
+          <span className="font-semibold text-gold-400">{filteredProducts.length}</span> rezultate încărcate
         </p>
 
         {/* View Toggle (Grid/List) */}
@@ -264,21 +359,53 @@ function ProductsListContent() {
             ? "grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
             : "space-y-4"
         }>
-          {filteredProducts.map((product) => (
+          {pagedProducts.map((product) => (
             <ProductCard key={product.id} product={product} variant={viewMode} />
           ))}
         </div>
       )}
 
-      {/* Load More Button (if needed for pagination) */}
-      {hasMore && !loading && (
-        <div className="mt-12 text-center">
+      {/* Pagination */}
+      {filteredProducts.length > 0 && (
+        <div className="mt-12 flex items-center justify-center gap-2 flex-wrap">
           <button
-            onClick={loadMore}
-            className="bg-gold-500 hover:bg-gold-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg shadow-gold-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={loading}
+            type="button"
+            onClick={() => goToPage(page - 1)}
+            disabled={page <= 1 || loading}
+            className="px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-200 hover:bg-navy-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Se încarcă...' : 'Încarcă Mai Multe Produse'}
+            ← Înapoi
+          </button>
+
+          {/* Page numbers (windowed) */}
+          {Array.from({ length: Math.min(5, effectiveMaxPage) }).map((_, idx) => {
+            const start = Math.max(1, page - 2);
+            const p = start + idx;
+            if (p > effectiveMaxPage) return null;
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => goToPage(p)}
+                disabled={loading}
+                className={
+                  p === page
+                    ? 'px-4 py-2 rounded-lg bg-gold-500 text-navy-900 font-semibold shadow-lg shadow-gold-500/30'
+                    : 'px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-200 hover:bg-navy-800'
+                }
+              >
+                {p}
+              </button>
+            );
+          })}
+
+          <button
+            type="button"
+            onClick={() => goToPage(page + 1)}
+            disabled={loading || (!hasMore && page >= totalPagesKnown) || requestedPage !== null}
+            className="px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-200 hover:bg-navy-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {requestedPage === page + 1 || loading ? 'Se încarcă…' : 'Înainte →'}
           </button>
         </div>
       )}
