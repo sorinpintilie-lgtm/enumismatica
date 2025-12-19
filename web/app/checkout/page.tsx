@@ -33,7 +33,7 @@ export default function CheckoutPage() {
 
   const [submitting, setSubmitting] = useState(false);
 
-  // Detalii livrare (doar la nivel de checkout, momentan nu sunt trimise către procesator de plăți)
+  // Detalii livrare
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [addressLine1, setAddressLine1] = useState('');
@@ -41,7 +41,33 @@ export default function CheckoutPage() {
   const [city, setCity] = useState('');
   const [county, setCounty] = useState('');
   const [postalCode, setPostalCode] = useState('');
+  
+  // Detalii facturare
+  const [billingFullName, setBillingFullName] = useState('');
+  const [billingPhone, setBillingPhone] = useState('');
+  const [billingAddressLine1, setBillingAddressLine1] = useState('');
+  const [billingAddressLine2, setBillingAddressLine2] = useState('');
+  const [billingCity, setBillingCity] = useState('');
+  const [billingCounty, setBillingCounty] = useState('');
+  const [billingPostalCode, setBillingPostalCode] = useState('');
+  
   const [notes, setNotes] = useState('');
+
+  // Funcție pentru copierea adresei de livrare la adresa de facturare
+  const copyDeliveryToBilling = () => {
+    setBillingFullName(fullName);
+    setBillingPhone(phone);
+    setBillingAddressLine1(addressLine1);
+    setBillingAddressLine2(addressLine2);
+    setBillingCity(city);
+    setBillingCounty(county);
+    setBillingPostalCode(postalCode);
+    showToast({
+      type: 'success',
+      title: 'Adresă copiată',
+      message: 'Adresa de livrare a fost copiată la adresa de facturare.',
+    });
+  };
 
   const loading = authLoading || cartLoading || productsLoading;
 
@@ -145,6 +171,23 @@ export default function CheckoutPage() {
         type: 'error',
         title: 'Date de livrare incomplete',
         message: 'Completează numele, telefonul și adresa completă pentru livrare.',
+      });
+      return;
+    }
+
+    // Validare date facturare
+    if (
+      !billingFullName.trim() ||
+      !billingPhone.trim() ||
+      !billingAddressLine1.trim() ||
+      !billingCity.trim() ||
+      !billingCounty.trim() ||
+      !billingPostalCode.trim()
+    ) {
+      showToast({
+        type: 'error',
+        title: 'Date de facturare incomplete',
+        message: 'Completează numele, telefonul și adresa completă pentru facturare.',
       });
       return;
     }
@@ -294,12 +337,11 @@ export default function CheckoutPage() {
           </div>
 
           <div className="space-y-4">
-            {/* Detalii livrare / adresă */}
+            {/* Adresă de livrare */}
             <div className="rounded-2xl border border-gold-500/40 bg-navy-900/90 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.9)]">
-              <h2 className="text-lg font-semibold text-white mb-3">Detalii livrare</h2>
+              <h2 className="text-lg font-semibold text-white mb-3">Adresă de livrare</h2>
               <p className="text-[11px] text-slate-400 mb-4">
-                Completează datele de livrare pentru această comandă. Momentan plata nu este procesată online;
-                comanda este înregistrată intern și vei fi contactat pentru confirmare și detalii finale.
+                Completează adresa unde dorești să primești produsele comandate.
               </p>
               <div className="space-y-3">
                 <div className="grid grid-cols-1 gap-3">
@@ -389,6 +431,120 @@ export default function CheckoutPage() {
                       type="text"
                       value={county}
                       onChange={(e) => setCounty(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Ex: Ilfov, România"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Adresă de facturare */}
+            <div className="rounded-2xl border border-gold-500/40 bg-navy-900/90 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.9)]">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold text-white">Adresă de facturare</h2>
+                <button
+                  type="button"
+                  onClick={copyDeliveryToBilling}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#e7b73c]/50 bg-[#e7b73c]/10 px-3 py-1.5 text-xs font-medium text-[#e7b73c] hover:bg-[#e7b73c]/20 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copiază din livrare
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400 mb-4">
+                Completează adresa pentru facturare. Poți copia datele de livrare folosind butonul de mai sus.
+              </p>
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Nume complet *
+                    </label>
+                    <input
+                      type="text"
+                      value={billingFullName}
+                      onChange={(e) => setBillingFullName(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Numele complet pentru facturare"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Telefon de contact *
+                    </label>
+                    <input
+                      type="tel"
+                      value={billingPhone}
+                      onChange={(e) => setBillingPhone(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Ex: 07xx xxx xxx"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Cod poștal *
+                    </label>
+                    <input
+                      type="text"
+                      value={billingPostalCode}
+                      onChange={(e) => setBillingPostalCode(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Ex: 010101"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Adresă (stradă, număr, bloc, etc.) *
+                    </label>
+                    <input
+                      type="text"
+                      value={billingAddressLine1}
+                      onChange={(e) => setBillingAddressLine1(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Stradă, număr, bloc, scară, apartament"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Detalii suplimentare adresă (opțional)
+                    </label>
+                    <input
+                      type="text"
+                      value={billingAddressLine2}
+                      onChange={(e) => setBillingAddressLine2(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Interfon, etaj, indicații, etc."
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Oraș / Localitate *
+                    </label>
+                    <input
+                      type="text"
+                      value={billingCity}
+                      onChange={(e) => setBillingCity(e.target.value)}
+                      className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
+                      placeholder="Ex: București"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Județ / Țară *
+                    </label>
+                    <input
+                      type="text"
+                      value={billingCounty}
+                      onChange={(e) => setBillingCounty(e.target.value)}
                       className="w-full rounded-lg border border-slate-700/60 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#e7b73c]"
                       placeholder="Ex: Ilfov, România"
                     />
