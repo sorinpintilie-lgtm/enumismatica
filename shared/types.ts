@@ -63,6 +63,7 @@ export interface Product {
   price: number; // Base price in the platform's currency
   ownerId: string; // Reference to the user who owns this product
   status: 'pending' | 'approved' | 'rejected'; // Approval status
+  listingType?: 'direct' | 'auction'; // Type of listing
 
   // Coin-specific metadata for categorization and filtering
   country?: string; // Country of origin (e.g., "Russia", "USA", "Germany")

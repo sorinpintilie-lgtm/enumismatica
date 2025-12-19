@@ -21,6 +21,7 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -79,7 +80,11 @@ export default function AdminProducts() {
     }
   };
 
-  const filteredProducts = products.filter(p => 
+  const categoryFilteredProducts = products.filter(p =>
+    categoryFilter === 'all' ? true : p.category === categoryFilter
+  );
+
+  const filteredProducts = categoryFilteredProducts.filter(p =>
     filter === 'all' ? true : p.status === filter
   );
 
@@ -114,7 +119,7 @@ export default function AdminProducts() {
               filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
             }`}
           >
-            Toate ({products.length})
+            Toate ({categoryFilteredProducts.length})
           </button>
           <button
             onClick={() => setFilter('pending')}
@@ -122,7 +127,7 @@ export default function AdminProducts() {
               filter === 'pending' ? 'bg-yellow-600 text-white' : 'bg-gray-200 text-gray-700'
             }`}
           >
-            În așteptare ({products.filter(p => p.status === 'pending').length})
+            În așteptare ({categoryFilteredProducts.filter(p => p.status === 'pending').length})
           </button>
           <button
             onClick={() => setFilter('approved')}
@@ -130,7 +135,7 @@ export default function AdminProducts() {
               filter === 'approved' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'
             }`}
           >
-            Aprobate ({products.filter(p => p.status === 'approved').length})
+            Aprobate ({categoryFilteredProducts.filter(p => p.status === 'approved').length})
           </button>
           <button
             onClick={() => setFilter('rejected')}
@@ -138,8 +143,28 @@ export default function AdminProducts() {
               filter === 'rejected' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'
             }`}
           >
-            Respinse ({products.filter(p => p.status === 'rejected').length})
+            Respinse ({categoryFilteredProducts.filter(p => p.status === 'rejected').length})
           </button>
+        </div>
+
+        {/* Category Filter */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-white mb-2">Filtru categorie</label>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="px-4 py-2 rounded-md bg-gray-200 text-gray-700"
+          >
+            <option value="all">Toate categoriile</option>
+            <option value="Monede">Monede</option>
+            <option value="Banknote">Banknote</option>
+            <option value="Medalii">Medalii</option>
+            <option value="Jetoane">Jetoane</option>
+            <option value="Insigne">Insigne</option>
+            <option value="Ordine">Ordine</option>
+            <option value="Decorații">Decorații</option>
+            <option value="Altele">Altele</option>
+          </select>
         </div>
 
         {/* Products List */}

@@ -114,12 +114,13 @@ export async function getAllUsers(): Promise<User[]> {
 export async function getAllProducts(): Promise<Product[]> {
   try {
     const productsSnapshot = await getDocs(collection(db, 'products'));
-    return productsSnapshot.docs.map(doc => ({
+    const products = productsSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate() || new Date(),
       updatedAt: doc.data().updatedAt?.toDate() || new Date(),
     })) as Product[];
+    return products.filter(p => p.listingType !== 'auction');
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
@@ -390,50 +391,84 @@ export async function rejectProduct(productId: string, reason: string = 'Produsu
  */
 export async function approveAuction(auctionId: string): Promise<{ success: boolean; error?: string }> {
   try {
+    // Get auction data first
+    const auctionDoc = await getDoc(doc(db, 'auctions', auctionId));
+    if (!auctionDoc.exists()) {
+      return { success: false, error: 'Auction not found' };
+    }
+    const auctionData = auctionDoc.data();
+
     await updateDoc(doc(db, 'auctions', auctionId), {
       status: 'active',
       updatedAt: Timestamp.fromDate(new Date()),
     });
 
-    // Send email notification to auction owner (non-blocking)
-    const auctionDoc = await getDoc(doc(db, 'auctions', auctionId));
-    if (auctionDoc.exists()) {
-      const auctionData = auctionDoc.data();
-      if (auctionData.ownerId) {
-        const ownerDoc = await getDoc(doc(db, 'users', auctionData.ownerId));
-        if (ownerDoc.exists()) {
-          const ownerData = ownerDoc.data();
-          // Get product name for better email
-          let auctionTitle = `Licitație ${auctionId}`;
-          if (auctionData.productId) {
-            const productDoc = await getDoc(doc(db, 'products', auctionData.productId));
-            if (productDoc.exists()) {
-              auctionTitle = productDoc.data().name || auctionTitle;
+    // Also approve the associated product
+    if (auctionData.productId) {
+      try {
+        await updateDoc(doc(db, 'products', auctionData.productId), {
+          status: 'approved',
+          updatedAt: Timestamp.fromDate(new Date()),
+        });
+
+        // Send email notification to product owner (non-blocking)
+        const productDoc = await getDoc(doc(db, 'products', auctionData.productId));
+        if (productDoc.exists()) {
+          const productData = productDoc.data();
+          if (productData.ownerId) {
+            const ownerDoc = await getDoc(doc(db, 'users', productData.ownerId));
+            if (ownerDoc.exists()) {
+              const ownerData = ownerDoc.data();
+              sendProductApprovedEmail(
+                ownerData.email,
+                productData.name || 'Produs',
+                auctionData.productId
+              ).catch(error => {
+                console.error('Failed to send product approved email:', error);
+              });
             }
           }
-          sendAuctionApprovedEmail(
-            ownerData.email,
-            auctionTitle,
-            auctionId
-          ).catch(error => {
-            console.error('Failed to send auction approved email:', error);
-          });
         }
+      } catch (error) {
+        console.error('Failed to approve associated product:', error);
+      }
+    }
 
-        // Remove the collection item if it was created from collection
-        try {
-          const collectionRef = collection(db, 'users', auctionData.ownerId, 'collection');
-          const q = query(collectionRef, where('auctionPendingId', '==', auctionData.productId));
-          const snapshot = await getDocs(q);
-
-          if (!snapshot.empty) {
-            // Remove the collection item
-            await deleteDoc(snapshot.docs[0].ref);
+    // Send email notification to auction owner (non-blocking)
+    if (auctionData.ownerId) {
+      const ownerDoc = await getDoc(doc(db, 'users', auctionData.ownerId));
+      if (ownerDoc.exists()) {
+        const ownerData = ownerDoc.data();
+        // Get product name for better email
+        let auctionTitle = `Licitație ${auctionId}`;
+        if (auctionData.productId) {
+          const productDoc = await getDoc(doc(db, 'products', auctionData.productId));
+          if (productDoc.exists()) {
+            auctionTitle = productDoc.data().name || auctionTitle;
           }
-        } catch (error) {
-          console.error('Failed to remove collection item after auction approval:', error);
-          // Don't fail the approval for this
         }
+        sendAuctionApprovedEmail(
+          ownerData.email,
+          auctionTitle,
+          auctionId
+        ).catch(error => {
+          console.error('Failed to send auction approved email:', error);
+        });
+      }
+
+      // Remove the collection item if it was created from collection
+      try {
+        const collectionRef = collection(db, 'users', auctionData.ownerId, 'collection');
+        const q = query(collectionRef, where('auctionPendingId', '==', auctionData.productId));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+          // Remove the collection item
+          await deleteDoc(snapshot.docs[0].ref);
+        }
+      } catch (error) {
+        console.error('Failed to remove collection item after auction approval:', error);
+        // Don't fail the approval for this
       }
     }
 
