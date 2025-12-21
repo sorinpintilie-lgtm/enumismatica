@@ -108,7 +108,7 @@ const romanianEras = [
 ];
 
 export default function FilterBar({ filters, onFilterChange, showAuctionFilters = false }: FilterBarProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [localFilters, setLocalFilters] = useState(filters);
   const [romanianOptions, setRomanianOptions] = useState({
     faceValues: ['Toate Valorile'],
@@ -266,27 +266,25 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
           </select>
         </div>
 
-        {/* Toggle Advanced Filters - only show if category is selected */}
-        {localFilters.category !== 'Toate Categoriile' && (
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="lg:w-auto px-6 py-3 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[0_0_20px_rgba(231,183,60,0.7)]"
+        {/* Toggle Advanced Filters */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="lg:w-auto px-6 py-3 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[0_0_20px_rgba(231,183,60,0.7)]"
+        >
+          <svg
+            className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            <svg
-              className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-            Filtre Avansate
-          </button>
-        )}
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+          Filtre Avansate
+        </button>
       </div>
 
-      {/* Advanced Filters - only show if category is selected */}
-      {isExpanded && localFilters.category !== 'Toate Categoriile' && (
+      {/* Advanced Filters */}
+      {isExpanded && (
         <div className="border-t border-[#e7b73c]/25 pt-6 space-y-6">
           {/* Country and Metal */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

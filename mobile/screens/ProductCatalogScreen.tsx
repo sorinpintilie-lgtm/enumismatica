@@ -72,7 +72,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
 const ProductCatalogScreen: React.FC = () => {
   const { products, loading, error } = useProducts();
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
   
   const [filters, setFilters] = useState<FilterOptions>({
     searchTerm: '',
