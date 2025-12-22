@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Modal, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Modal, ScrollView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useProducts } from '../hooks/useProducts';
@@ -32,13 +32,15 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       className="bg-white rounded-lg shadow-md p-4 mb-4 mx-4"
       onPress={() => navigation.navigate('ProductDetails', { productId: product.id })}
     >
-      <View className="aspect-w-1 aspect-h-1 bg-gray-200 mb-3 rounded">
-        {product.images.length > 0 ? (
-          <View className="w-full h-32 bg-gray-300 rounded flex items-center justify-center">
-            <Text className="text-gray-500 text-sm">Image</Text>
-          </View>
+      <View className="w-full h-32 bg-gray-200 mb-3 rounded overflow-hidden items-center justify-center">
+        {product.images && product.images.length > 0 ? (
+          <Image
+            source={{ uri: product.images[0] }}
+            className="w-full h-full"
+            resizeMode="contain"
+          />
         ) : (
-          <View className="w-full h-32 bg-gray-300 rounded flex items-center justify-center">
+          <View className="w-full h-full bg-gray-300 rounded flex items-center justify-center">
             <Text className="text-gray-500 text-sm">No Image</Text>
           </View>
         )}

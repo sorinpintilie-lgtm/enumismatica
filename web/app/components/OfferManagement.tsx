@@ -142,7 +142,7 @@ export default function OfferManagement({ productId, auctionId, productName, onC
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
         <div className="mx-4 max-w-2xl w-full rounded-2xl bg-navy-900/95 border border-gold-500/40 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.95)]">
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold-500"></div>
@@ -154,7 +154,7 @@ export default function OfferManagement({ productId, auctionId, productName, onC
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div className="mx-4 max-w-4xl w-full rounded-2xl bg-navy-900/95 border border-gold-500/40 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.95)] max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-semibold text-white">

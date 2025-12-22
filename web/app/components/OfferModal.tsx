@@ -78,7 +78,7 @@ export default function OfferModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-navy-900/95 border border-gold-500/40 rounded-2xl p-6 w-full max-w-md shadow-[0_18px_55px_rgba(0,0,0,0.85)]" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-white">Transmite o ofertă</h2>

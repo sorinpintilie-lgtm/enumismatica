@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Modal, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Modal, ScrollView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuctions } from '../hooks/useAuctions';
 import { useProducts } from '../hooks/useProducts';
-import { Auction } from '@shared/types';
+import { Auction, Product } from '@shared/types';
 import { RootStackParamList } from '../navigationTypes';
 
 interface FilterOptions {
@@ -62,7 +62,7 @@ const CountdownTimer: React.FC<{ endTime: Date }> = ({ endTime }) => {
   );
 };
 
-const AuctionCard: React.FC<{ auction: Auction }> = ({ auction }) => {
+const AuctionCard: React.FC<{ auction: Auction; product?: Product }> = ({ auction, product }) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const isEnded = new Date() > auction.endTime;
@@ -73,10 +73,18 @@ const AuctionCard: React.FC<{ auction: Auction }> = ({ auction }) => {
       className="bg-white rounded-lg shadow-md p-4 mb-4 mx-4"
       onPress={() => navigation.navigate('AuctionDetails', { auctionId: auction.id })}
     >
-      <View className="aspect-w-1 aspect-h-1 bg-gray-200 mb-3 rounded">
-        <View className="w-full h-32 bg-gray-300 rounded flex items-center justify-center">
-          <Text className="text-gray-500 text-sm">Auction Item</Text>
-        </View>
+      <View className="w-full h-32 bg-gray-200 mb-3 rounded overflow-hidden items-center justify-center">
+        {product && product.images && product.images.length > 0 ? (
+          <Image
+            source={{ uri: product.images[0] }}
+            className="w-full h-full"
+            resizeMode="contain"
+          />
+        ) : (
+          <View className="w-full h-full bg-gray-300 rounded flex items-center justify-center">
+            <Text className="text-gray-500 text-sm">Auction Item</Text>
+          </View>
+        )}
       </View>
 
       <View className="flex-row justify-between items-start mb-2">
@@ -357,7 +365,12 @@ const AuctionListScreen: React.FC = () => {
         <FlatList
           data={filteredAuctions}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <AuctionCard auction={item} />}
+          renderItem={({ item }) => (
+            <AuctionCard
+              auction={item}
+              product={productMap.get(item.productId)}
+            />
+          )}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingVertical: 16 }}
         />
