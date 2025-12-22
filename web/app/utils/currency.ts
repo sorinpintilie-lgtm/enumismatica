@@ -1,33 +1,21 @@
 /**
  * Format a number for display as EUR (label only; underlying values remain the same).
+ * Always shows whole numbers without decimals.
  * @param amount - The amount to format
- * @param decimals - Number of decimal places (default: 2)
  * @returns Formatted string with EUR currency
  */
-export function formatRON(amount: number, decimals: number = 2): string {
-  // Check if the amount has decimal places
-  const hasDecimals = Math.abs(amount % 1) > 0.001; // Small epsilon for floating point precision
-  
-  if (hasDecimals) {
-    return new Intl.NumberFormat('ro-RO', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    }).format(amount);
-  } else {
-    // No decimals, format as whole number
-    return new Intl.NumberFormat('ro-RO', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  }
+export function formatRON(amount: number): string {
+  return new Intl.NumberFormat('ro-RO', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 /**
  * Format a number as EUR with thousand separators (display only).
+ * Always shows whole numbers without decimals.
  * @param amount - The amount to format
  * @returns Formatted string with EUR currency
  */
@@ -35,8 +23,8 @@ export function formatRONWithSeparators(amount: number): string {
   return new Intl.NumberFormat('ro-RO', {
     style: 'currency',
     currency: 'EUR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(amount);
 }
 

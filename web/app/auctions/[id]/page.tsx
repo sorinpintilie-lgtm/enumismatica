@@ -10,13 +10,16 @@ import { placeBid, setAutoBid, cancelAutoBid, getUserAutoBid, buyNowAuction } fr
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/ToastProvider';
 import AuctionChat from '../../components/AuctionChat';
-import { useProduct } from '../../hooks/useProducts';
+import { useProduct, useProducts } from '../../hooks/useProducts';
 import PriceEvolutionChart from '../../components/PriceEvolutionChart';
 import BidHistoryChart from '../../components/BidHistoryChart';
 import { formatRON } from '../../utils/currency';
 import type { AutoBid } from 'shared/types';
 import { logEvent } from '../../hooks/useActivityLogger';
 import { WatchlistButton } from '../../components/WatchlistButton';
+import OfferModal from '../../components/OfferModal';
+import OfferManagement from '../../components/OfferManagement';
+import ProductCard from '../../components/ProductCard';
 
 const bidSchema = z.object({
   amount: z.number().positive('Bid amount must be positive'),
@@ -69,6 +72,8 @@ export default function AuctionDetailPage() {
     | null
   >(null);
   const [showBuyNowConfirm, setShowBuyNowConfirm] = useState(false);
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [showOfferManagement, setShowOfferManagement] = useState(false);
 
   // Track last manual and last seen user bid amounts (for auto-bid notifications)
   const lastManualBidAmountRef = useRef<number | null>(null);
@@ -78,6 +83,16 @@ export default function AuctionDetailPage() {
   // Fetch product details to check ownership
   const { product } = useProduct(auction?.productId || '');
   const isOwner = product?.ownerId === user?.uid;
+
+  // Get other products by the same seller
+  const { products: otherProducts } = useProducts(
+    product?.ownerId,
+    6,
+    ['name', 'images', 'price', 'createdAt'],
+    !!product?.ownerId,
+    'all', // include both direct and auction products
+    false
+  );
 
   // Image lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -424,11 +439,13 @@ export default function AuctionDetailPage() {
               Confirmă cumpărarea imediată
             </h3>
             <p className="text-sm text-slate-200 mb-4">
-              Ești sigur că vrei să cumperi acum această licitație pentru{' '}
+              Prin apăsarea butonului „Cumpără acum", vânzătorul va fi notificat cu privire la intenția dumneavoastră de achiziție. Vă rugăm să continuați doar dacă sunteți sigur că doriți această piesă.
+            </p>
+            <p className="text-sm text-slate-200 mb-4">
+              Preț:{' '}
               <span className="font-semibold text-[#e7b73c]">
                 {auction.buyNowPrice != null ? formatRON(auction.buyNowPrice) : '-'}
               </span>
-              ?
             </p>
             <div className="flex justify-end gap-2">
               <button
@@ -549,7 +566,7 @@ export default function AuctionDetailPage() {
                   onClick={() => openLightboxAt(0)}
                 >
                   <img
-                    src={images[0]}
+                    src={`${images[0]}?width=800`}
                     alt={product?.name || 'Articol Licitație'}
                     className="w-full h-96 object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
                   />
@@ -564,7 +581,7 @@ export default function AuctionDetailPage() {
                         className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-xl overflow-hidden border border-gold-500/10 cursor-zoom-in"
                       >
                         <img
-                          src={image}
+                          src={`${image}?width=200`}
                           alt={`${product?.name || 'Articol Licitație'} ${index + 2}`}
                           className="w-full h-20 object-contain bg-navy-950"
                         />
@@ -737,6 +754,50 @@ export default function AuctionDetailPage() {
                       </button>
                     </form>
                   </div>
+
+                  {/* Offer Button - Show only if product accepts offers and user is not owner */}
+                  {product && user && user.uid !== product.ownerId && !isEnded && product.acceptsOffers !== false && (
+                    <div className="border-t border-gold-500/20 pt-6 mt-6">
+                      <div className="text-center">
+                        <p className="text-sm text-slate-300 mb-3">
+                          Dorești să faci o ofertă directă vânzătorului?
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!user) {
+                              showToast({
+                                type: 'error',
+                                title: 'Autentificare necesară',
+                                message: 'Trebuie să te autentifici pentru a face o ofertă.',
+                              });
+                              return;
+                            }
+                            if (product.ownerId === user.uid) {
+                              showToast({
+                                type: 'error',
+                                title: 'Nu poți face ofertă pe propriul produs',
+                                message: 'Ești deja proprietarul acestui produs.',
+                              });
+                              return;
+                            }
+                            if (product.acceptsOffers === false) {
+                              showToast({
+                                type: 'info',
+                                title: 'Oferțiile nu sunt acceptate',
+                                message: 'Vânzătorul nu acceptă oferte pentru acest produs.',
+                              });
+                              return;
+                            }
+                            setShowOfferModal(true);
+                          }}
+                          className="inline-flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
+                        >
+                          Transmite o ofertă
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -933,6 +994,26 @@ export default function AuctionDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Offer Management - Only for Owner */}
+            {isOwner && (
+              <div className="border-t border-gold-500/20 pt-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold text-white">
+                    Gestionare Oferte
+                  </h2>
+                  <button
+                    onClick={() => setShowOfferManagement(true)}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors text-sm"
+                  >
+                    Vezi Oferte
+                  </button>
+                </div>
+                <p className="text-sm text-slate-300">
+                  Gestionează ofertele directe de la cumpărători interesați de acest produs.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -983,6 +1064,25 @@ export default function AuctionDetailPage() {
             title="Evoluția Prețului Monedei"
           />
         </div>
+
+        {/* Other Products by this Seller */}
+        {otherProducts.filter(p => p.id !== product?.id).length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-white mb-6">Alte Produse de la Acest Vânzător</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              {otherProducts
+                .filter(p => p.id !== product?.id)
+                .slice(0, 6)
+                .map((otherProduct) => (
+                  <ProductCard
+                    key={otherProduct.id}
+                    product={otherProduct}
+                    showOfferButton={false}
+                  />
+                ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
 
@@ -1013,7 +1113,7 @@ export default function AuctionDetailPage() {
 
         <div className="max-w-3xl max-h-[80vh] flex items-center justify-center">
           <img
-            src={images[lightboxIndex]}
+            src={`${images[lightboxIndex]}?width=1200`}
             alt={product?.name || 'Imagine licitație'}
             className="max-h-[80vh] max-w-full object-contain rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.9)]"
           />
@@ -1031,6 +1131,17 @@ export default function AuctionDetailPage() {
         </button>
       </div>
     )}
+
+    {/* Offer Modal */}
+    <OfferModal
+      isOpen={showOfferModal}
+      onClose={() => setShowOfferModal(false)}
+      itemType="auction"
+      itemId={id}
+      itemName={product?.name || `Licitația #${auction.id.slice(-6)}`}
+      currentPrice={currentBid}
+      buyerId={user?.uid || ''}
+    />
     </>
   );
 }

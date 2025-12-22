@@ -937,3 +937,19 @@ export async function deleteUserCollectionItem(
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Republish a sold product back to e-shop (admin only)
+ */
+export async function republishProduct(productId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    await updateDoc(doc(db, 'products', productId), {
+      isSold: false,
+      status: 'approved',
+      updatedAt: Timestamp.fromDate(new Date()),
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}

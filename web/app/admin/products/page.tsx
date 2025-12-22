@@ -11,6 +11,7 @@ import {
   deleteProduct,
   approveProduct,
   rejectProduct,
+  republishProduct,
 } from 'shared/adminService';
 import { Product } from 'shared/types';
 
@@ -73,6 +74,17 @@ export default function AdminProducts() {
 
   const handleReject = async (productId: string) => {
     const result = await rejectProduct(productId);
+    if (result.success) {
+      await loadProducts();
+    } else {
+      alert(`Error: ${result.error}`);
+    }
+  };
+
+  const handleRepublish = async (productId: string) => {
+    if (!confirm('Ești sigur că vrei să republici acest produs în e-shop?')) return;
+
+    const result = await republishProduct(productId);
     if (result.success) {
       await loadProducts();
     } else {
@@ -173,7 +185,12 @@ export default function AdminProducts() {
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
+                          <Link
+                            href={`/products/${product.id}`}
+                            className="text-lg font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                          >
+                            {product.name}
+                          </Link>
                           <span
                             className={`px-2 py-1 text-xs rounded-full ${
                               product.status === 'approved'
@@ -189,7 +206,15 @@ export default function AdminProducts() {
                         <p className="text-gray-600 mt-1">{product.description}</p>
                         <div className="mt-2 text-sm text-gray-500">
                           <p>Preț: {formatRON(product.price)}</p>
-                          <p>ID Proprietar: {product.ownerId}</p>
+                          <p>
+                            Proprietar:{' '}
+                            <Link
+                              href={`/admin/users/${product.ownerId}`}
+                              className="text-blue-600 hover:text-blue-800 hover:underline"
+                            >
+                              {product.ownerId}
+                            </Link>
+                          </p>
                           <p>Creat: {product.createdAt.toLocaleDateString()}</p>
                         </div>
                       </div>
@@ -216,6 +241,20 @@ export default function AdminProducts() {
                             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm"
                           >
                             Aprobă
+                          </button>
+                        )}
+                        <Link
+                          href={`/products/new?edit=${product.id}`}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm inline-block text-center"
+                        >
+                          Editează
+                        </Link>
+                        {product.isSold && (
+                          <button
+                            onClick={() => handleRepublish(product.id)}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm"
+                          >
+                            Republică
                           </button>
                         )}
                         <button

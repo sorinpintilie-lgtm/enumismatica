@@ -211,9 +211,12 @@ export default function AdminAuctions() {
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <Link
+                            href={`/auctions/${auction.id}`}
+                            className="text-lg font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                          >
                             Licitație #{auction.id.slice(-6)}
-                          </h3>
+                          </Link>
                           <span
                             className={`px-2 py-1 text-xs rounded-full ${
                               auction.status === 'active'
@@ -230,9 +233,20 @@ export default function AdminAuctions() {
                         </div>
                         <div className="mt-2 text-sm text-gray-500">
                           <p>ID Produs: {auction.productId}</p>
-                          <p>Preț de rezervă: ${auction.reservePrice.toFixed(2)}</p>
+                          <p>Preț de rezervă: ${Math.round(auction.reservePrice)}</p>
                           {auction.currentBid && (
-                            <p>Licitație curentă: ${auction.currentBid.toFixed(2)}</p>
+                            <p>Licitație curentă: ${Math.round(auction.currentBid)}</p>
+                          )}
+                          {products[auction.productId]?.ownerId && (
+                            <p>
+                              Proprietar:{' '}
+                              <Link
+                                href={`/admin/users/${products[auction.productId].ownerId}`}
+                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                              >
+                                {products[auction.productId].ownerId}
+                              </Link>
+                            </p>
                           )}
                           <p>
                             Start: {auction.startTime.toLocaleDateString()} - Sfârșit:{' '}

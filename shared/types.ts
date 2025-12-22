@@ -124,6 +124,9 @@ export interface Product {
   ngcCode?: string;
   ngcGrade?: string;
 
+  // Offer functionality
+  acceptsOffers?: boolean;
+
   /**
    * Basic paid shop listing:
    *  - listingExpiresAt: until when the product is kept in the shop

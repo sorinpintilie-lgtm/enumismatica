@@ -77,6 +77,22 @@ export async function createOffer(
     throw new Error('Cannot make offer on your own item');
   }
 
+  // Check if seller accepts offers for this item
+  if (itemType === 'product') {
+    if (itemData.acceptsOffers === false) {
+      throw new Error('Seller does not accept offers for this product');
+    }
+  } else if (itemType === 'auction') {
+    // For auctions, check the underlying product
+    const productSnap = await getDoc(doc(db, 'products', itemData.productId));
+    if (productSnap.exists()) {
+      const productData = productSnap.data();
+      if (productData.acceptsOffers === false) {
+        throw new Error('Seller does not accept offers for this auction');
+      }
+    }
+  }
+
   // Create the offer
   const offerData: any = {
     itemType,

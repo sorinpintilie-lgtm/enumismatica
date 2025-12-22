@@ -40,58 +40,34 @@ service cloud.firestore {
     // - Users can only SET identity fields once (typically at signup) and only to a pending state.
     // - Users cannot self-verify or modify verification audit fields.
     function isOwnerIdentityWriteAllowed(userId) {
-      // Only relevant for the owner.
-      if (!isOwner(userId)) return false;
-
-      // On create (doc doesn't exist yet): allow optional identity data but never allow verified state.
-      if (!exists(/databases/$(database)/documents/users/$(userId))) {
-        // If identity is provided at creation, it must be pending.
-        return (
+      return isOwner(userId) && (
+        // On create (doc doesn't exist yet): allow optional identity data but never allow verified state.
+        (!exists(/databases/$(database)/documents/users/$(userId)) &&
           (!request.resource.data.keys().hasAny(['idVerifiedAt', 'idVerifiedBy']) ||
-            (request.resource.data.idVerifiedAt == null && request.resource.data.idVerifiedBy == null))
-          &&
+            (request.resource.data.idVerifiedAt == null && request.resource.data.idVerifiedBy == null)) &&
+          (!request.resource.data.keys().hasAny(['idVerificationStatus']) ||
+            request.resource.data.idVerificationStatus in ['pending', 'not_provided']) &&
+          (!request.resource.data.keys().hasAny(['idDocumentNumber', 'idDocumentType']) ||
+            (request.resource.data.idDocumentNumber is string &&
+              request.resource.data.idDocumentNumber.size() > 0 &&
+              request.resource.data.idDocumentType in ['ci', 'passport'] &&
+              request.resource.data.idVerificationStatus == 'pending')))
+        ||
+        // On update: restrict identity-related changes.
+        (exists(/databases/$(database)/documents/users/$(userId)) &&
+          // Owner can never touch verification audit fields.
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['idVerifiedAt', 'idVerifiedBy']) &&
           (
-            !request.resource.data.keys().hasAny(['idVerificationStatus']) ||
-            request.resource.data.idVerificationStatus in ['pending', 'not_provided']
-          )
-          &&
-          (
-            !request.resource.data.keys().hasAny(['idDocumentNumber', 'idDocumentType']) ||
-            (
+            // If the owner is not changing identity fields, allow.
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['idDocumentType', 'idDocumentNumber', 'idVerificationStatus']) ||
+            // Owner is attempting to change identity fields.
+            // Allow only if identity was not previously provided (set-once) and status is set to pending.
+            ((resource.data.idDocumentNumber == null || resource.data.idDocumentNumber == '') &&
               request.resource.data.idDocumentNumber is string &&
               request.resource.data.idDocumentNumber.size() > 0 &&
               request.resource.data.idDocumentType in ['ci', 'passport'] &&
-              request.resource.data.idVerificationStatus == 'pending'
-            )
-          )
-        );
-      }
-
-      // On update: restrict identity-related changes.
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-
-      // Owner can never touch verification audit fields.
-      if (changed.hasAny(['idVerifiedAt', 'idVerifiedBy'])) {
-        return false;
-      }
-
-      // If the owner is not changing identity fields, allow.
-      if (!changed.hasAny(['idDocumentType', 'idDocumentNumber', 'idVerificationStatus'])) {
-        return true;
-      }
-
-      // Owner is attempting to change identity fields.
-      // Allow only if identity was not previously provided (set-once) and status is set to pending.
-      return (
-        (resource.data.idDocumentNumber == null || resource.data.idDocumentNumber == '')
-        &&
-        request.resource.data.idDocumentNumber is string
-        &&
-        request.resource.data.idDocumentNumber.size() > 0
-        &&
-        request.resource.data.idDocumentType in ['ci', 'passport']
-        &&
-        request.resource.data.idVerificationStatus == 'pending'
+              request.resource.data.idVerificationStatus == 'pending')
+          ))
       );
     }
 
@@ -120,9 +96,8 @@ service cloud.firestore {
       match /collection/{itemId} {
         allow read: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) &&
-                      hasRequiredFields(request.resource.data, ['userId', 'name', 'createdAt']) &&
-                      request.resource.data.userId == userId &&
-                      isValidTimestamp(request.resource.data.createdAt);
+                      hasRequiredFields(request.resource.data, ['userId', 'name']) &&
+                      request.resource.data.userId == userId;
         allow update: if isOwner(userId) || isAdmin();
         allow delete: if isOwner(userId) || isAdmin();
       }
@@ -134,10 +109,9 @@ service cloud.firestore {
         // Normal users can manage their own watchlist.
         // Admins/superadmins can also create watchlist entries for any user (needed for seeding/sample data).
         allow create: if (isOwner(userId) || isAdmin()) &&
-                      hasRequiredFields(request.resource.data, ['userId', 'itemType', 'itemId', 'addedAt']) &&
+                      hasRequiredFields(request.resource.data, ['userId', 'itemType', 'itemId']) &&
                       request.resource.data.userId == userId &&
-                      request.resource.data.itemType in ['product', 'auction'] &&
-                      isValidTimestamp(request.resource.data.addedAt);
+                      request.resource.data.itemType in ['product', 'auction'];
 
         allow update: if isOwner(userId) || isAdmin();
         allow delete: if isOwner(userId) || isAdmin();
@@ -169,10 +143,9 @@ service cloud.firestore {
     match /products/{productId} {
       allow read: if resource.data.status == 'approved' || isAdmin() || (isAuthenticated() && isOwner(resource.data.ownerId));
       allow create: if isAuthenticated() &&
-                    hasRequiredFields(request.resource.data, ['name', 'description', 'ownerId', 'price', 'status', 'createdAt']) &&
-                    isValidTimestamp(request.resource.data.createdAt) &&
+                    hasRequiredFields(request.resource.data, ['name', 'ownerId', 'price', 'status']) &&
                     request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100 &&
-                    request.resource.data.description.size() > 0 && request.resource.data.description.size() <= 1000 &&
+                    (!request.resource.data.keys().hasAny(['description']) || request.resource.data.description.size() <= 1000) &&
                     (isOwner(request.resource.data.ownerId) || isAdmin()) &&
                     (request.resource.data.status == 'pending' || (isAdmin() && request.resource.data.status in ['pending', 'approved', 'rejected']));
       allow update: if isAuthenticated() && (
@@ -207,8 +180,7 @@ service cloud.firestore {
         allow read: if true;
         allow create: if isAuthenticated() &&
                       (isOwner(get(/databases/$(database)/documents/products/$(productId)).data.ownerId) || isAdmin()) &&
-                      hasRequiredFields(request.resource.data, ['price', 'source', 'timestamp']) &&
-                      isValidTimestamp(request.resource.data.timestamp);
+                      hasRequiredFields(request.resource.data, ['price', 'source']);
         allow update, delete: if isAdmin();
       }
     }
@@ -228,7 +200,7 @@ service cloud.firestore {
     match /auctions/{auctionId} {
       allow read: if resource.data.status in ['active', 'ended'] || isAdmin() || (isAuthenticated() && isOwner(resource.data.ownerId));
       allow create: if isAuthenticated() &&
-                           hasRequiredFields(request.resource.data, ['productId', 'ownerId', 'reservePrice', 'minAcceptPrice', 'startTime', 'endTime', 'status', 'createdAt', 'updatedAt']) &&
+                           hasRequiredFields(request.resource.data, ['productId', 'ownerId', 'reservePrice', 'minAcceptPrice', 'startTime', 'endTime', 'status']) &&
                            isValidTimestamp(request.resource.data.startTime) && isValidTimestamp(request.resource.data.endTime) &&
                            request.resource.data.reservePrice > 0 &&
                            request.resource.data.endTime > request.resource.data.startTime &&
@@ -249,8 +221,7 @@ service cloud.firestore {
       match /bids/{bidId} {
         allow read: if isAuthenticated();
         allow create: if isAuthenticated() &&
-                      hasRequiredFields(request.resource.data, ['userId', 'amount', 'timestamp']) &&
-                      isValidTimestamp(request.resource.data.timestamp) &&
+                      hasRequiredFields(request.resource.data, ['userId', 'amount']) &&
                       (isAdmin() ||
                        (isOwner(request.resource.data.userId) &&
                         // Check if auction is active
@@ -278,8 +249,7 @@ service cloud.firestore {
         allow read: if isAuthenticated();
         allow create: if isAuthenticated() &&
                       isOwner(request.resource.data.senderId) &&
-                      hasRequiredFields(request.resource.data, ['senderId', 'message', 'timestamp', 'isAnonymous']) &&
-                      isValidTimestamp(request.resource.data.timestamp) &&
+                      hasRequiredFields(request.resource.data, ['senderId', 'message', 'isAnonymous']) &&
                       request.resource.data.message.size() > 0 && request.resource.data.message.size() <= 500;
         allow update: if isAuthenticated() &&
                       isOwner(resource.data.senderId) &&
@@ -292,8 +262,7 @@ service cloud.firestore {
         // Allow public read for active/ended auctions
         allow read: if true;
         allow create: if isAuthenticated() &&
-                      hasRequiredFields(request.resource.data, ['price', 'source', 'timestamp']) &&
-                      isValidTimestamp(request.resource.data.timestamp);
+                      hasRequiredFields(request.resource.data, ['price', 'source']);
         allow update, delete: if isAdmin();
       }
     }
@@ -321,8 +290,7 @@ service cloud.firestore {
         allow create: if isAuthenticated() &&
                       get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants.hasAny([request.auth.uid]) &&
                       isOwner(request.resource.data.senderId) &&
-                      hasRequiredFields(request.resource.data, ['senderId', 'message', 'timestamp']) &&
-                      isValidTimestamp(request.resource.data.timestamp) &&
+                      hasRequiredFields(request.resource.data, ['senderId', 'message']) &&
                       request.resource.data.message.size() > 0 && request.resource.data.message.size() <= 500;
         allow update: if isAuthenticated() &&
                       (isOwner(resource.data.senderId) || isAdmin()) &&
@@ -357,9 +325,8 @@ service cloud.firestore {
       // Create only via authenticated owner or admin; prevent arbitrary tampering with credits
       allow create: if isAuthenticated() &&
                     (isOwner(userId) || isAdmin()) &&
-                    hasRequiredFields(request.resource.data, ['userId', 'type', 'amount', 'createdAt']) &&
-                    request.resource.data.userId == userId &&
-                    isValidTimestamp(request.resource.data.createdAt);
+                    hasRequiredFields(request.resource.data, ['userId', 'type', 'amount']) &&
+                    request.resource.data.userId == userId;
 
       // Updates and deletes only by admin (for auditability)
       allow update, delete: if isAdmin();
@@ -411,9 +378,8 @@ service cloud.firestore {
       // For privacy, only admins should read these directly from Firestore.
       allow read: if isAdmin();
 
-      allow create: if hasRequiredFields(request.resource.data, ['email', 'eventKey', 'createdAt']) &&
-                    isValidEmail(request.resource.data.email) &&
-                    isValidTimestamp(request.resource.data.createdAt);
+      allow create: if hasRequiredFields(request.resource.data, ['email', 'eventKey']) &&
+                    isValidEmail(request.resource.data.email);
 
       allow update, delete: if isAdmin();
     }
@@ -422,8 +388,7 @@ service cloud.firestore {
     match /activityLogs/{logId} {
       allow read: if isAdmin();
       allow create: if isAuthenticated() &&
-                    hasRequiredFields(request.resource.data, ['userId', 'eventType', 'timestamp', 'metadata']) &&
-                    isValidTimestamp(request.resource.data.timestamp) &&
+                    hasRequiredFields(request.resource.data, ['userId', 'eventType', 'metadata']) &&
                     (isOwner(request.resource.data.userId) || isAdmin());
       allow update, delete: if isAdmin();
     }
@@ -432,8 +397,7 @@ service cloud.firestore {
     match /adminActions/{actionId} {
       allow read: if isAdmin();
       allow create: if isAdmin() &&
-                    hasRequiredFields(request.resource.data, ['userId', 'action', 'performedBy', 'performedByEmail', 'timestamp']) &&
-                    isValidTimestamp(request.resource.data.timestamp);
+                    hasRequiredFields(request.resource.data, ['userId', 'action', 'performedBy', 'performedByEmail']);
       allow update, delete: if isAdmin();
     }
 
@@ -441,8 +405,7 @@ service cloud.firestore {
     match /adminNotifications/{notificationId} {
       allow read: if isAdmin();
       allow create: if isAuthenticated() &&
-                    hasRequiredFields(request.resource.data, ['type', 'severity', 'title', 'message', 'read', 'actionTaken', 'createdAt']) &&
-                    isValidTimestamp(request.resource.data.createdAt);
+                    hasRequiredFields(request.resource.data, ['type', 'severity', 'title', 'message', 'read', 'actionTaken']);
       allow update: if isAdmin() &&
                     request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'actionTaken', 'actionTakenBy', 'actionTakenAt']);
       allow delete: if isAdmin();

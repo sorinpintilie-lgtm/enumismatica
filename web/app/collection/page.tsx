@@ -505,13 +505,14 @@ export default function MyCollectionPage() {
         </div>
       ) : (
         <div className="rounded-2xl border border-gold-500/20 bg-navy-900/80 overflow-hidden shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
-          <table className="min-w-full divide-y divide-navy-700">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-navy-700">
             <thead className="bg-navy-800/80">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Articol</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Țară</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">An</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Metal</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider hidden sm:table-cell">An</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider hidden sm:table-cell">Metal</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Valoare</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Acțiuni</th>
               </tr>
@@ -522,7 +523,7 @@ export default function MyCollectionPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {item.images && item.images[0] ? (
-                        <img src={item.images[0]} alt={item.name} className="w-10 h-10 rounded-full object-cover mr-3" />
+                        <img src={`${item.images[0]}?width=100`} alt={item.name} className="w-10 h-10 rounded-full object-cover mr-3" />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
                           <span className="text-xl">🪙</span>
@@ -535,8 +536,8 @@ export default function MyCollectionPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">{item.country || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">{item.year || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">{item.metal || '-'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100 hidden sm:table-cell">{item.year || '-'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100 hidden sm:table-cell">{item.metal || '-'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-emerald-400">
                     {item.currentValue != null ? `${item.currentValue} RON` : '-'}
                   </td>
@@ -562,6 +563,7 @@ export default function MyCollectionPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

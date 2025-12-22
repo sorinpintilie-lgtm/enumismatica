@@ -3,13 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useProduct } from '../../hooks/useProducts';
+import { useProduct, useProducts } from '../../hooks/useProducts';
 import PriceEvolutionChart from '../../components/PriceEvolutionChart';
 import { useToast } from '../../components/ToastProvider';
 import { useAuth } from '../../context/AuthContext';
 import { createDirectOrderForProduct } from 'shared/orderService';
 import { useCart } from '../../hooks/useCart';
 import { logEvent } from '../../hooks/useActivityLogger';
+import OfferModal from '../../components/OfferModal';
+import OfferManagement from '../../components/OfferManagement';
+import ProductCard from '../../components/ProductCard';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -19,12 +22,23 @@ export default function ProductDetailPage() {
   const { user } = useAuth();
   const { addToCart } = useCart(user?.uid);
 
+  // Get other products by the same seller
+  const { products: otherProducts } = useProducts(
+    product?.ownerId,
+    6,
+    ['name', 'images', 'price', 'createdAt'],
+    !!product?.ownerId,
+    'direct',
+    false
+  );
+
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [buying, setBuying] = useState(false);
   const [showBuyConfirm, setShowBuyConfirm] = useState(false);
   const [viewMode, setViewMode] = useState<'owner' | 'preview'>('preview');
-  const [showOffersModal, setShowOffersModal] = useState(false);
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [showOfferManagement, setShowOfferManagement] = useState(false);
 
   const images = product?.images ?? [];
   const isOwner = user && product && user.uid === product.ownerId;
@@ -195,7 +209,7 @@ export default function ProductDetailPage() {
             <p className="text-sm text-slate-200 mb-4">
               Ești sigur că vrei să cumperi acest produs pentru{' '}
               <span className="font-semibold text-[#e7b73c]">
-                {product.price.toFixed(2)} EUR
+                {Math.round(product.price)} EUR
               </span>
               ?
             </p>
@@ -270,7 +284,7 @@ export default function ProductDetailPage() {
                   onClick={() => openLightboxAt(0)}
                 >
                   <img
-                    src={images[0]}
+                    src={`${images[0]}?width=800`}
                     alt={product.name}
                     className="w-full h-96 object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
                   />
@@ -291,7 +305,7 @@ export default function ProductDetailPage() {
                       className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-xl overflow-hidden border border-gold-500/10 cursor-zoom-in"
                     >
                       <img
-                        src={image}
+                        src={`${image}?width=200`}
                         alt={`${product.name} ${index + 2}`}
                         className="w-full h-20 object-contain bg-navy-950"
                       />
@@ -308,13 +322,13 @@ export default function ProductDetailPage() {
                   {product.name}
                 </h1>
                 <p className="text-slate-300">
-                  Listat pe {product.createdAt.toLocaleDateString()}
+                  Adăugat în {product.createdAt.toLocaleDateString()}
                 </p>
               </div>
 
               <div>
                 <p className="text-4xl font-bold text-[#e7b73c] mb-1">
-                  {product.price.toFixed(2)} EUR
+                  {Math.round(product.price)} EUR
                 </p>
                 <p className="text-[11px] text-slate-300 mb-2 max-w-md">
                   Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data
@@ -384,21 +398,26 @@ export default function ProductDetailPage() {
                           });
                           return;
                         }
-                        // TODO: Implement offer functionality
-                        showToast({
-                          type: 'info',
-                            title: 'Funcționalitate în dezvoltare',
-                          message: 'Opțiunea "Fa o ofertă" va fi disponibilă în curând.',
-                        });
+                        if (product.acceptsOffers === false) {
+                          showToast({
+                            type: 'info',
+                            title: 'Oferțiile nu sunt acceptate',
+                            message: 'Vânzătorul nu acceptă oferte pentru acest produs.',
+                          });
+                          return;
+                        }
+                        setShowOfferModal(true);
                       }}
-                      disabled={product.isSold === true || (!!user && product.ownerId === user.uid)}
+                      disabled={product.isSold === true || (!!user && product.ownerId === user.uid) || product.acceptsOffers === false}
                       className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 disabled:text-slate-300 text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors shadow-[0_0_24px_rgba(34,197,94,0.6)]"
                     >
                       {product.isSold
                         ? 'Deja vândut'
                         : !!user && product.ownerId === user.uid
                         ? 'Ești proprietarul acestui produs'
-                        : 'Fa o ofertă'}
+                        : product.acceptsOffers === false
+                        ? 'Oferțiile nu sunt acceptate'
+                        : 'Transmite o ofertă'}
                     </button>
                   </div>
                 ) : (
@@ -415,7 +434,7 @@ export default function ProductDetailPage() {
                       </Link>
                       <button
                         type="button"
-                        onClick={() => setShowOffersModal(true)}
+                        onClick={() => setShowOfferManagement(true)}
                         className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors"
                       >
                         Gestionare Oferte
@@ -595,6 +614,25 @@ export default function ProductDetailPage() {
               title="Evoluția Prețului"
             />
           </div>
+
+          {/* Other Products by this Seller */}
+          {otherProducts.filter(p => p.id !== id).length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-2xl font-bold text-white mb-6">Alte Produse de la Acest Vânzător</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                {otherProducts
+                  .filter(p => p.id !== id)
+                  .slice(0, 6)
+                  .map((otherProduct) => (
+                    <ProductCard
+                      key={otherProduct.id}
+                      product={otherProduct}
+                      showOfferButton={false}
+                    />
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -625,7 +663,7 @@ export default function ProductDetailPage() {
 
           <div className="max-w-3xl max-h-[80vh] flex items-center justify-center">
             <img
-              src={images[lightboxIndex]}
+              src={`${images[lightboxIndex]}?width=1200`}
               alt={product?.name || 'Imagine produs'}
               className="max-h-[80vh] max-w-full object-contain rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.9)]"
             />
@@ -644,37 +682,24 @@ export default function ProductDetailPage() {
         </div>
       )}
 
-      {/* Offers Modal */}
-      {showOffersModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
-          <div className="mx-4 max-w-2xl w-full rounded-2xl bg-navy-900/95 border border-gold-500/40 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.95)] max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-white">Oferte pentru {product?.name}</h3>
-              <button
-                onClick={() => setShowOffersModal(false)}
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+      {/* Offer Modal */}
+      <OfferModal
+        isOpen={showOfferModal}
+        onClose={() => setShowOfferModal(false)}
+        itemType="product"
+        itemId={product.id}
+        itemName={product.name}
+        currentPrice={product.price}
+        buyerId={user?.uid || ''}
+      />
 
-            <div className="text-sm text-slate-300">
-              Funcționalitatea completă de gestionare a ofertelor va fi implementată în curând.
-              Veți putea vedea toate ofertele primite, accepta sau respinge ofertele, și comunica cu cumpărătorii.
-            </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setShowOffersModal(false)}
-                className="px-4 py-2 bg-navy-600 hover:bg-navy-500 text-white rounded-lg font-semibold transition-colors"
-              >
-                Închide
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Offer Management Modal */}
+      {showOfferManagement && (
+        <OfferManagement
+          productId={product.id}
+          productName={product.name}
+          onClose={() => setShowOfferManagement(false)}
+        />
       )}
     </>
   );

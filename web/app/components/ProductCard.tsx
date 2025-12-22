@@ -1,11 +1,10 @@
 import Link from 'next/link'
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import { Product } from 'shared/types'
 import LazyImage from './LazyImage'
 import { formatRON } from '../utils/currency'
 import { WatchlistButton } from './WatchlistButton'
 import { useAuth } from '../context/AuthContext'
-import OfferModal from './OfferModal'
 
 interface ProductCardProps {
   product: Product
@@ -16,7 +15,6 @@ interface ProductCardProps {
 
 function ProductCard({ product, showWatchlistButton = true, showOfferButton = true, variant = 'grid' }: ProductCardProps) {
   const { user } = useAuth();
-  const [showOfferModal, setShowOfferModal] = useState(false);
   const now = new Date();
 
   const isBoostActive =
@@ -38,7 +36,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
         <Link href={`/products/${product.id}`} className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
           {product.images && product.images.length > 0 ? (
             <LazyImage
-              src={product.images[0]}
+              src={`${product.images[0]}?width=200`}
               alt={product.name || 'Produs'}
               className="h-full w-full object-contain transition duration-300 group-hover:scale-105"
               placeholder="Loading..."
@@ -56,7 +54,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
         </Link>
         
         {/* Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 relative">
           <div className="flex justify-between items-start mb-2">
             <h3 className="text-lg font-semibold text-white line-clamp-1 pr-4" title={product.name}>
               {product.name}
@@ -65,6 +63,15 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
               {formatRON(product.price)}
             </span>
           </div>
+          {showWatchlistButton !== false && (
+            <div className="absolute top-2 right-2 z-10">
+              <WatchlistButton
+                itemType="product"
+                itemId={product.id}
+                size="small"
+              />
+            </div>
+          )}
           
           <p className="text-sm text-slate-300 line-clamp-2 mb-3">
             {product.description}
@@ -78,37 +85,16 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
             </div>
 
             <div className="flex gap-2">
-              {showOfferButton && user && user.uid !== product.ownerId && !product.isSold && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowOfferModal(true);
-                  }}
-                  className="inline-flex items-center gap-1 rounded-full bg-blue-500 hover:bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
-                >
-                  Fă o ofertă
-                </button>
-              )}
               <Link
                 href={`/products/${product.id}`}
                 className="inline-flex items-center gap-2 rounded-full bg-[#e7b73c] px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-[0_0_15px_rgba(231,183,60,0.6)] transition hover:-translate-y-0.5 hover:bg-[#f0c955]"
               >
-                Vezi detalii
+                Detalii
                 <span aria-hidden>→</span>
               </Link>
             </div>
           </div>
         </div>
-        
-        {showWatchlistButton !== false && (
-          <div className="absolute top-2 right-2 z-10">
-            <WatchlistButton
-              itemType="product"
-              itemId={product.id}
-              size="small"
-            />
-          </div>
-        )}
       </div>
     )
   }
@@ -119,7 +105,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
       <Link href={`/products/${product.id}`} className="relative aspect-[4/3] overflow-hidden bg-white rounded-t-2xl">
         {product.images && product.images.length > 0 ? (
           <LazyImage
-            src={product.images[0]}
+            src={`${product.images[0]}?width=400`}
             alt={product.name || 'Produs'}
             className="h-full w-full object-contain transition duration-500 group-hover:scale-105"
             placeholder="Loading..."
@@ -150,23 +136,12 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
              <span className="text-xl font-semibold text-[#e7b73c]">
                {formatRON(product.price)}
              </span>
-             {showOfferButton && user && user.uid !== product.ownerId && !product.isSold && (
-               <button
-                 onClick={(e) => {
-                   e.stopPropagation();
-                   setShowOfferModal(true);
-                 }}
-                 className="inline-flex items-center gap-1 rounded-full bg-blue-500 hover:bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
-               >
-                 Fă o ofertă
-               </button>
-             )}
            </div>
            <Link
              href={`/products/${product.id}`}
              className="inline-flex items-center justify-center w-full gap-2 rounded-full bg-[#e7b73c] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.6)] transition hover:-translate-y-0.5 hover:bg-[#f0c955]"
            >
-             Vezi detalii
+             Detalii
              <span aria-hidden>→</span>
            </Link>
          </div>
@@ -180,16 +155,6 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
           </div>
         )}
       </div>
-
-      <OfferModal
-        isOpen={showOfferModal}
-        onClose={() => setShowOfferModal(false)}
-        itemType="product"
-        itemId={product.id}
-        itemName={product.name}
-        currentPrice={product.price}
-        buyerId={user?.uid || ''}
-      />
     </div>
   )
 }

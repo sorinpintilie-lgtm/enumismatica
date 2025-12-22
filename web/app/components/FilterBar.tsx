@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 export interface FilterOptions {
   searchTerm: string;
@@ -30,6 +30,7 @@ interface FilterBarProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   showAuctionFilters?: boolean;
+  items?: any[]; // Products or auctions array to calculate counts
 }
 
 const categories = [
@@ -107,7 +108,7 @@ const romanianEras = [
   'Toate Epocile',
 ];
 
-export default function FilterBar({ filters, onFilterChange, showAuctionFilters = false }: FilterBarProps) {
+export default function FilterBar({ filters, onFilterChange, showAuctionFilters = false, items = [] }: FilterBarProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [localFilters, setLocalFilters] = useState(filters);
   const [romanianOptions, setRomanianOptions] = useState({
@@ -119,6 +120,16 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
     eras: ['Toate Epocile'],
   });
   const [romanianOptionsLoaded, setRomanianOptionsLoaded] = useState(false);
+
+  // Calculate country counts
+  const countryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    items.forEach(item => {
+      const country = item.country || 'Unknown';
+      counts[country] = (counts[country] || 0) + 1;
+    });
+    return counts;
+  }, [items]);
 
   useEffect(() => {
     const loadRomanianOptions = async () => {
@@ -295,11 +306,14 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
                 onChange={(e) => handleFilterUpdate('country', e.target.value)}
                 className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
               >
-                {countries.map((country) => (
-                  <option key={country} value={country} className="bg-navy-900 text-slate-100">
-                    {country}
-                  </option>
-                ))}
+                {countries.map((country) => {
+                  const count = country === 'Toate Țările' ? items.length : (countryCounts[country] || 0);
+                  return (
+                    <option key={country} value={country} className="bg-navy-900 text-slate-100">
+                      {country} {count > 0 ? `(${count})` : ''}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 

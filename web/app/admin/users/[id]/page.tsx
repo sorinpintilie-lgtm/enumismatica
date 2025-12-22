@@ -745,7 +745,7 @@ export default function AdminUserDetail() {
                         {item.metal && <p className="text-slate-300">Metal: {item.metal}</p>}
                         {item.grade && <p className="text-slate-300">Grad: {item.grade}</p>}
                         {item.currentValue && (
-                          <p className="text-green-400 font-medium">Valoare: ${item.currentValue.toFixed(2)}</p>
+                          <p className="text-green-400 font-medium">Valoare: ${Math.round(item.currentValue)}</p>
                         )}
                       </div>
                     </div>

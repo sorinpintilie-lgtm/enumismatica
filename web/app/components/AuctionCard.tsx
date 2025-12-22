@@ -117,7 +117,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
         <Link href={`/products/${auction.productId}`} className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
           {product && product.images && product.images.length > 0 ? (
             <img
-              src={product.images[0]}
+              src={`${product.images[0]}?width=200`}
               alt={product.name || 'Articol Licitație'}
               className="w-full h-full object-contain"
             />
@@ -140,7 +140,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
         </Link>
         
         {/* Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 relative">
           <div className="flex justify-between items-start mb-2">
             <div>
               <h3 className="text-lg font-semibold text-white line-clamp-1" title={product?.name || 'Licitație'}>
@@ -155,6 +155,15 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
               </p>
             </div>
           </div>
+          {showWatchlistButton && (
+            <div className="absolute top-2 right-2 z-10">
+              <WatchlistButton
+                itemType="auction"
+                itemId={auction.id}
+                size="small"
+              />
+            </div>
+          )}
           
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-4 text-xs text-slate-400">
@@ -168,7 +177,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
               href={`/auctions/${auction.id}`}
               className="inline-flex items-center gap-2 rounded-full bg-[#e7b73c] px-3 py-1.5 text-xs font-semibold text-[#000940] shadow-lg shadow-[0_0_15px_rgba(231,183,60,0.6)] transition hover:-translate-y-0.5 hover:bg-[#f0c955]"
             >
-              Vezi detalii
+              Detalii
               <span aria-hidden>→</span>
             </Link>
           </div>
@@ -185,16 +194,6 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             </p>
           )}
         </div>
-        
-        {showWatchlistButton && (
-          <div className="absolute top-2 right-2 z-10">
-            <WatchlistButton
-              itemType="auction"
-              itemId={auction.id}
-              size="small"
-            />
-          </div>
-        )}
       </div>
     )
   }
@@ -209,7 +208,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
       <Link href={`/products/${auction.productId}`} className="relative aspect-[4/3] bg-white">
         {product && product.images && product.images.length > 0 ? (
           <img
-            src={product.images[0]}
+            src={`${product.images[0]}?width=400`}
             alt={product.name || 'Articol Licitație'}
             className="w-full h-full object-contain"
           />
@@ -311,7 +310,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             href={`/auctions/${auction.id}`}
             className="flex-1 text-center bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-4 py-2.5 rounded-md text-sm font-semibold transition-colors duration-200 shadow-[0_0_24px_rgba(231,183,60,0.75)]"
           >
-            Vezi Detalii
+            Detalii
           </Link>
         </div>
       </div>

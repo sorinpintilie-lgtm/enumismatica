@@ -84,6 +84,11 @@ function ProductsListContent() {
     filters.sortBy,
   ]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
+
   const filteredProducts = useMemo(() => {
     console.log('[ProductsPage] Starting filter with', products.length, 'products');
     console.log('[ProductsPage] Current filters:', filters);
@@ -291,7 +296,7 @@ function ProductsListContent() {
       </div>
 
       {/* Filter Bar */}
-      <FilterBar filters={filters} onFilterChange={setFilters} />
+      <FilterBar filters={filters} onFilterChange={setFilters} items={filteredProducts} />
 
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">
