@@ -7,6 +7,13 @@ import { useCachedProducts } from './hooks/useCachedProducts';
 import { useAuth } from './context/AuthContext';
 import { useBoostedProducts } from './hooks/useCachedProducts';
 
+function buildImageUrlWithWidth(url: string | undefined, width: number): string {
+  const fallback = '/assets/placeholder-coin.jpg';
+  if (!url) return fallback;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}width=${width}`;
+}
+
 const highlights = [
   {
     title: 'Magazin curat si verificat',
@@ -128,11 +135,11 @@ export default function HomePage() {
                 <div className="h-[340px] w-full rounded-2xl bg-slate-100 animate-pulse flex items-center justify-center">
                   <div className="text-slate-400">Se încarcă produsele...</div>
                 </div>
-              ) : boostedProducts.length > 0 ? (
+               ) : boostedProducts.length > 0 ? (
                 <>
                   <div className="relative h-[340px] w-full rounded-2xl overflow-hidden">
                     <LazyImage
-                      src={boostedProducts[0].images?.[0] || '/assets/placeholder-coin.jpg'}
+                      src={buildImageUrlWithWidth(boostedProducts[0].images?.[0], 800)}
                       alt={`Moneda ${boostedProducts[0].name} din colecția noastră`}
                       sizes="100vw"
                       className="h-full w-full object-contain bg-white"
@@ -155,23 +162,23 @@ export default function HomePage() {
                   </div>
                   
                   {/* Additional boosted products preview */}
-                  {boostedProducts.length > 1 && (
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      {boostedProducts.slice(1, 3).map((product) => (
-                        <div key={product.id} className="bg-navy-50 rounded-lg p-2 border border-[#e7b73c]/20">
-                          <div className="h-16 w-full bg-white rounded mb-1 overflow-hidden">
-                            <LazyImage
-                              src={product.images?.[0] || '/assets/placeholder-coin.jpg'}
-                              alt={product.name}
-                              className="h-full w-full object-contain"
-                            />
-                          </div>
-                          <p className="text-xs font-medium text-[#000940] truncate">{product.name}</p>
-                          <p className="text-xs font-bold text-[#e7b73c]">{product.price} RON</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                   {boostedProducts.length > 1 && (
+                     <div className="mt-3 grid grid-cols-2 gap-2">
+                       {boostedProducts.slice(1, 3).map((product) => (
+                         <div key={product.id} className="bg-navy-50 rounded-lg p-2 border border-[#e7b73c]/20">
+                           <div className="h-16 w-full bg-white rounded mb-1 overflow-hidden">
+                             <LazyImage
+                               src={buildImageUrlWithWidth(product.images?.[0], 200)}
+                               alt={product.name}
+                               className="h-full w-full object-contain"
+                             />
+                           </div>
+                           <p className="text-xs font-medium text-[#000940] truncate">{product.name}</p>
+                           <p className="text-xs font-bold text-[#e7b73c]">{product.price} RON</p>
+                         </div>
+                       ))}
+                     </div>
+                   )}
                 </>
               ) : (
                 <div className="h-[340px] w-full rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center">

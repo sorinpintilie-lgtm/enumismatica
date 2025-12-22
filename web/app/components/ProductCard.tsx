@@ -6,6 +6,13 @@ import { formatRON } from '../utils/currency'
 import { WatchlistButton } from './WatchlistButton'
 import { useAuth } from '../context/AuthContext'
 
+// Ensure image URLs get a width parameter without breaking existing query strings
+function buildImageUrlWithWidth(url: string, width: number): string {
+  if (!url) return url
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}width=${width}`
+}
+
 interface ProductCardProps {
   product: Product
   showWatchlistButton?: boolean
@@ -36,7 +43,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
         <Link href={`/products/${product.id}`} className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
           {product.images && product.images.length > 0 ? (
             <LazyImage
-              src={`${product.images[0]}?width=200`}
+              src={buildImageUrlWithWidth(product.images[0], 200)}
               alt={product.name || 'Produs'}
               className="h-full w-full object-contain transition duration-300 group-hover:scale-105"
               placeholder="Loading..."
@@ -105,7 +112,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
       <Link href={`/products/${product.id}`} className="relative aspect-[4/3] overflow-hidden bg-white rounded-t-2xl">
         {product.images && product.images.length > 0 ? (
           <LazyImage
-            src={`${product.images[0]}?width=400`}
+            src={buildImageUrlWithWidth(product.images[0], 400)}
             alt={product.name || 'Produs'}
             className="h-full w-full object-contain transition duration-500 group-hover:scale-105"
             placeholder="Loading..."

@@ -14,6 +14,34 @@ import OfferModal from '../../components/OfferModal';
 import OfferManagement from '../../components/OfferManagement';
 import ProductCard from '../../components/ProductCard';
 
+// Helper to safely format numeric/string values with units (avoids duplicated units like "gg" / "mmmm")
+function formatWithUnit(value: string | number | null | undefined, unit: string): string {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+
+  if (typeof value === 'number') {
+    return `${value} ${unit}`;
+  }
+
+  const trimmed = String(value).trim();
+  const lower = trimmed.toLowerCase();
+
+  // If the value already ends with the unit (e.g. "10 g" or "10mm"), don't append it again
+  if (lower.endsWith(unit.toLowerCase())) {
+    return trimmed;
+  }
+
+  return `${trimmed} ${unit}`;
+}
+
+// Ensure product images get a width parameter without breaking existing query strings
+function buildImageUrlWithWidth(url: string | undefined, width: number): string {
+  if (!url) return '';
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}width=${width}`;
+}
+
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
@@ -284,7 +312,7 @@ export default function ProductDetailPage() {
                   onClick={() => openLightboxAt(0)}
                 >
                   <img
-                    src={`${images[0]}?width=800`}
+                    src={buildImageUrlWithWidth(images[0], 800)}
                     alt={product.name}
                     className="w-full h-96 object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
                   />
@@ -305,7 +333,7 @@ export default function ProductDetailPage() {
                       className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-xl overflow-hidden border border-gold-500/10 cursor-zoom-in"
                     >
                       <img
-                        src={`${image}?width=200`}
+                        src={buildImageUrlWithWidth(image, 200)}
                         alt={`${product.name} ${index + 2}`}
                         className="w-full h-20 object-contain bg-navy-950"
                       />
@@ -512,13 +540,13 @@ export default function ProductDetailPage() {
                       {product.weight && (
                         <div className="flex justify-between">
                           <span className="text-slate-300">Greutate:</span>
-                          <span className="text-slate-100">{product.weight}g</span>
+                          <span className="text-slate-100">{formatWithUnit(product.weight as any, 'g')}</span>
                         </div>
                       )}
                       {product.diameter && (
                         <div className="flex justify-between">
                           <span className="text-slate-300">Diametru:</span>
-                          <span className="text-slate-100">{product.diameter}mm</span>
+                          <span className="text-slate-100">{formatWithUnit(product.diameter as any, 'mm')}</span>
                         </div>
                       )}
                       {product.grade && (
@@ -663,7 +691,7 @@ export default function ProductDetailPage() {
 
           <div className="max-w-3xl max-h-[80vh] flex items-center justify-center">
             <img
-              src={`${images[lightboxIndex]}?width=1200`}
+              src={buildImageUrlWithWidth(images[lightboxIndex], 1200)}
               alt={product?.name || 'Imagine produs'}
               className="max-h-[80vh] max-w-full object-contain rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.9)]"
             />

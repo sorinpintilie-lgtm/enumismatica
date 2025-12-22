@@ -144,33 +144,48 @@ export function useBoostedProducts(limitCount: number = 3) {
     queryFn: async () => {
       const now = new Date();
       console.log('🔍 Debug: Checking for boosted products at', now.toISOString());
-      
-      // Query for products with active boosts
-      let q = query(
+
+      // Query for products with active boosts.
+      // NOTE: We keep the Firestore query simple (single inequality + orderBy
+      // on the same field) so it works without requiring a composite index.
+      // We then filter by status === 'approved' on the client side.
+      const q = query(
         collection(db, 'products'),
-        where('status', '==', 'approved'),
         where('boostExpiresAt', '>', now), // Only active boosts
-        // Firestore requires the first orderBy to match the inequality field.
-        // We'll order by expiry first, then by boostedAt for stable ordering.
         orderBy('boostExpiresAt', 'desc'),
-        orderBy('boostedAt', 'desc'),
-        limit(limitCount),
+        // Fetch a bit more than needed so we can filter out non-approved items
+        // while still returning up to `limitCount` boosted products.
+        limit(limitCount * 5),
       );
 
-      console.log('🔍 Debug: Executing Firestore query for boosted products');
+      console.log('🔍 Debug: Executing Firestore query for boosted products (client-side status filter)');
       const querySnapshot = await getDocs(q);
       console.log('🔍 Debug: Query completed, documents found:', querySnapshot.size);
       
       const boostedProducts: Product[] = [];
 
       querySnapshot.forEach((doc) => {
+        if (boostedProducts.length >= limitCount) {
+          return;
+        }
+
         const data = doc.data();
-        console.log('🔍 Debug: Found boosted product:', doc.id, {
+        const status = data.status;
+        const boostExpiresAt = data.boostExpiresAt?.toDate?.() || data.boostExpiresAt;
+        const boostedAt = data.boostedAt?.toDate?.() || data.boostedAt;
+
+        console.log('🔍 Debug: Found boosted product candidate:', doc.id, {
           name: data.name,
-          boostExpiresAt: data.boostExpiresAt?.toDate?.() || data.boostExpiresAt,
-          boostedAt: data.boostedAt?.toDate?.() || data.boostedAt
+          status,
+          boostExpiresAt,
+          boostedAt,
         });
-        
+
+        // Only show approved products in the homepage hero, even if others are boosted.
+        if (status !== 'approved') {
+          return;
+        }
+
         const productData: any = {
           id: doc.id,
           name: data.name,
@@ -178,10 +193,10 @@ export function useBoostedProducts(limitCount: number = 3) {
           price: data.price,
           createdAt: data.createdAt?.toDate() || new Date(),
           updatedAt: data.updatedAt?.toDate() || new Date(),
-          boostExpiresAt: data.boostExpiresAt?.toDate() || null,
-          boostedAt: data.boostedAt?.toDate() || null,
+          boostExpiresAt: boostExpiresAt || null,
+          boostedAt: boostedAt || null,
         };
-        
+
         boostedProducts.push(productData as Product);
       });
 

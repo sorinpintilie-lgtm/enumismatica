@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/ProductCard';
 import FilterBar, { FilterOptions } from '../components/FilterBar';
@@ -19,6 +19,8 @@ function ProductsListContent() {
     false, // live (disable realtime so pagination can prefetch safely)
   );
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const PAGE_SIZE = 20;
   const PREFETCH_PAGES_AHEAD = 3;
@@ -49,6 +51,40 @@ function ProductsListContent() {
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+  // Keep page state in sync with ?page=N in the URL so browser back/forward
+  // navigates between pages instead of leaving the listing entirely.
+  useEffect(() => {
+    const pageParam = searchParams.get('page');
+
+    if (!pageParam) {
+      if (page !== 1) {
+        setPage(1);
+      }
+      return;
+    }
+
+    const parsed = parseInt(pageParam, 10);
+    if (!Number.isNaN(parsed) && parsed >= 1 && parsed !== page) {
+      setPage(parsed);
+    }
+  }, [searchParams, page]);
+
+  const updatePageInUrl = (nextPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (nextPage > 1) {
+      params.set('page', String(nextPage));
+    } else {
+      params.delete('page');
+    }
+
+    const queryString = params.toString();
+    const target = queryString ? `${pathname}?${queryString}` : pathname;
+
+    // Use push so each page navigation creates a history entry
+    router.push(target);
+  };
+
   // Handle URL parameters on mount
   useEffect(() => {
     const countryParam = searchParams.get('country');
@@ -64,6 +100,7 @@ function ProductsListContent() {
   useEffect(() => {
     setPage(1);
     setRequestedPage(null);
+    updatePageInUrl(1);
   }, [
     filters.searchTerm,
     filters.category,
@@ -215,6 +252,7 @@ function ProductsListContent() {
     if (loadedCount >= neededCount) {
       setPage(requestedPage);
       setRequestedPage(null);
+      updatePageInUrl(requestedPage);
       return;
     }
 
@@ -228,6 +266,7 @@ function ProductsListContent() {
     const maxPage = Math.max(1, Math.ceil(Math.max(filteredProducts.length, loadedCount) / PAGE_SIZE));
     setPage(maxPage);
     setRequestedPage(null);
+    updatePageInUrl(maxPage);
   }, [requestedPage, products.length, hasMore, loading, loadMore, PAGE_SIZE, filteredProducts.length]);
 
   const loadedPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
@@ -247,11 +286,15 @@ function ProductsListContent() {
       // Switch UI immediately to the requested page, then fetch in background.
       setPage(nextPage);
       setRequestedPage(nextPage);
+      updatePageInUrl(nextPage);
       return;
     }
 
     const max = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
-    setPage(Math.min(nextPage, max));
+    const finalPage = Math.min(nextPage, max);
+    setPage(finalPage);
+    setRequestedPage(null);
+    updatePageInUrl(finalPage);
   };
 
   if (loading) {
