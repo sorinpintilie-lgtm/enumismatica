@@ -40,12 +40,12 @@ export function validateBid(auction: Auction, bidAmount: number, userId: string)
   }
 
   const currentBid = auction.currentBid || 0;
-  // Realistic bid increment: 10 RON for bids under 1000, 50 RON for higher bids
-  const bidIncrement = currentBid < 1000 ? 10 : 50;
+  // Bid increment: 5% of current bid amount
+  const bidIncrement = currentBid > 0 ? currentBid * 0.05 : 0;
   const minBid = Math.max(currentBid + bidIncrement, auction.reservePrice);
 
   if (bidAmount < minBid) {
-    return { valid: false, error: `Licitația trebuie să fie cel puțin ${minBid.toFixed(2)} RON` };
+    return { valid: false, error: `Licitația trebuie să fie cel puțin ${minBid.toFixed(2)} RON (5% increment)` };
   }
 
   return { valid: true };
