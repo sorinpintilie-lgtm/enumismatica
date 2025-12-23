@@ -187,20 +187,20 @@ export default function SalesPage() {
       {isEmpty ? (
         <div className="text-center py-16">
           <p className="text-slate-300 mb-4">
-            Nu ai vândut încă niciun produs prin magazin.
+            Nu ai vândut încă nicio piesă prin magazin.
           </p>
           <Link
             href="/products/new"
             className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-6 py-2 text-sm font-semibold text-[#000940] shadow-[0_0_24px_rgba(231,183,60,0.75)] hover:bg-[#f0c955] transition-colors"
           >
-            Listează primul tău produs
+            Listează prima ta piesă
           </Link>
         </div>
       ) : (
         <div className="space-y-4">
           {lines.map(({ order, product }) => {
             const createdAt = order.createdAt instanceof Date ? order.createdAt : new Date();
-            const productName = product?.name || `Produs ${order.productId}`;
+            const productName = product?.name || `Piesă ${order.productId}`;
             const productImage =
               product && product.images && product.images.length > 0
                 ? product.images[0]
@@ -278,7 +278,7 @@ export default function SalesPage() {
                         href={`/products/${product.id}`}
                         className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-3 py-1 text-[11px] font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
                       >
-                        Vezi produsul
+                        Vezi piesa
                       </Link>
                     )}
                   </div>

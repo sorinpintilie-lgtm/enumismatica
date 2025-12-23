@@ -185,7 +185,7 @@ export default function OrdersPage() {
       {isEmpty ? (
         <div className="text-center py-16">
           <p className="text-slate-300 mb-4">
-            Nu ai cumpărat încă niciun produs din magazin.
+            Nu ai cumpărat încă nicio piesă din magazin.
           </p>
           <Link
             href="/products"
@@ -198,7 +198,7 @@ export default function OrdersPage() {
         <div className="space-y-4">
           {lines.map(({ order, product }) => {
             const createdAt = order.createdAt instanceof Date ? order.createdAt : new Date();
-            const productName = product?.name || `Produs ${order.productId}`;
+            const productName = product?.name || `Piesă ${order.productId}`;
             const productImage =
               product && product.images && product.images.length > 0 ? product.images[0] : null;
 
@@ -267,7 +267,7 @@ export default function OrdersPage() {
                         href={`/products/${product.id}`}
                         className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-3 py-1 text-[11px] font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
                       >
-                        Vezi produsul
+                        Vezi piesa
                       </Link>
                     )}
                   </div>

@@ -72,13 +72,13 @@ export default function TestBoostPage() {
       setProducts(productsData);
     } catch (error) {
       console.error('Error loading products:', error);
-      alert('Eroare la încărcarea produselor');
+      alert('Eroare la încărcarea pieselor');
     }
   };
 
   const handleBoostProduct = async () => {
     if (!selectedProduct) {
-      alert('Selectează un produs');
+      alert('Selectează o piesă');
       return;
     }
 
@@ -93,11 +93,11 @@ export default function TestBoostPage() {
         updatedAt: serverTimestamp(),
       });
 
-      alert(`Produs boostat cu succes pentru ${boostDays} zile!`);
+      alert(`Piesă boostată cu succes pentru ${boostDays} zile!`);
       await loadProducts(); // Refresh the list
     } catch (error) {
       console.error('Error boosting product:', error);
-      alert('Eroare la boostarea produsului');
+      alert('Eroare la boostarea piesei');
     }
   };
 
