@@ -11,6 +11,157 @@ sgMail.setApiKey(sendgridKey);
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@enumismatica.ro';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://enumismatica.ro';
 
+// Generate plain text email content as fallback
+function generatePlainTextEmail(templateKey: string, vars: Record<string, unknown>): string {
+  switch (templateKey) {
+    case 'account_welcome':
+      return `Bun venit pe E-numismatica.ro!
+
+Bună, ${vars.user_name || 'Utilizator'}!
+
+Contul tău a fost creat cu succes. Poți accesa platforma la: ${vars.login_link || SITE_URL}
+
+Mulțumim că te-ai alăturat comunității noastre!
+
+Echipa E-numismatica.ro`;
+
+    case 'account_password_reset_requested':
+      return `Resetare parolă - E-numismatica.ro
+
+Bună, ${vars.user_name || 'Utilizator'}!
+
+Ai solicitat resetarea parolei. Poți reseta parola folosind următorul link: ${vars.reset_link}
+
+Dacă nu ai solicitat acest lucru, ignoră acest email.
+
+Echipa E-numismatica.ro`;
+
+    case 'bid_outbid':
+      return `Ai fost depășit în licitație - E-numismatica.ro
+
+Bună, ${vars.user_name || 'Utilizator'}!
+
+Ai fost depășit în licitația pentru ${vars.listing_title}.
+
+Prețul curent este: ${vars.current_price} ${vars.currency}.
+
+Poți licita din nou aici: ${vars.auction_link}
+
+Echipa E-numismatica.ro`;
+
+    case 'auction_won_buyer':
+      return `Felicitări! Ai câștigat licitația - E-numismatica.ro
+
+Bună, ${vars.buyer_name || 'Utilizator'}!
+
+Felicitări! Ai câștigat licitația pentru ${vars.listing_title} cu ${vars.amount} ${vars.currency}.
+
+Vânzătorul: ${vars.seller_name}
+
+Poți vedea detaliile tranzacției aici: ${vars.transaction_link}
+
+Poți contacta vânzătorul aici: ${vars.conversation_link}
+
+Echipa E-numismatica.ro`;
+
+    case 'purchase_confirmation_buyer':
+      return `Confirmare achiziție - E-numismatica.ro
+
+Bună, ${vars.buyer_name || 'Utilizator'}!
+
+Ai achiziționat cu succes ${vars.listing_title} pentru ${vars.amount} ${vars.currency}.
+
+Poți vedea detaliile tranzacției aici: ${vars.transaction_link}
+
+Poți contacta vânzătorul aici: ${vars.conversation_link}
+
+Echipa E-numismatica.ro`;
+
+    case 'product_sold_seller':
+      return `Produs vândut - E-numismatica.ro
+
+Bună, ${vars.user_name || 'Vânzător'}!
+
+Produsul tău ${vars.listing_title} a fost vândut pentru ${vars.amount} ${vars.currency}.
+
+Cumpărător: ${vars.buyer_name}
+
+Poți vedea detaliile în dashboard: ${vars.action_link}
+
+Echipa E-numismatica.ro`;
+
+    case 'auction_sold_seller':
+      return `Licitație vândută - E-numismatica.ro
+
+Bună, ${vars.user_name || 'Vânzător'}!
+
+Licitația pentru ${vars.listing_title} s-a încheiat cu succes. A fost vândută pentru ${vars.amount} ${vars.currency}.
+
+Câștigător: ${vars.buyer_name}
+
+Poți vedea detaliile aici: ${vars.action_link}
+
+Echipa E-numismatica.ro`;
+
+    case 'product_approved':
+      return `Produs aprobat - E-numismatica.ro
+
+Bună, ${vars.user_name || 'Utilizator'}!
+
+Produsul tău ${vars.listing_title} a fost aprobat și este acum live pe platformă.
+
+Poți vedea produsul aici: ${vars.listing_link}
+
+Echipa E-numismatica.ro`;
+
+    case 'product_rejected':
+      return `Produs respins - E-numismatica.ro
+
+Bună, ${vars.user_name || 'Utilizator'}!
+
+Produsul tău ${vars.listing_title} nu a putut fi aprobat.
+
+Motiv: ${vars.event_message}
+
+Poți încerca din nou sau contactează-ne pentru ajutor: ${SITE_URL}/contact
+
+Echipa E-numismatica.ro`;
+
+    case 'auction_approved':
+      return `Licitație aprobată - E-numismatica.ro
+
+Bună, ${vars.user_name || 'Utilizator'}!
+
+Licitația pentru ${vars.listing_title} a fost aprobată și este acum activă.
+
+Poți vedea licitația aici: ${vars.auction_link}
+
+Echipa E-numismatica.ro`;
+
+    case 'auction_rejected':
+      return `Licitație respinsă - E-numismatica.ro
+
+Bună, ${vars.user_name || 'Utilizator'}!
+
+Licitația pentru ${vars.listing_title} nu a putut fi aprobată.
+
+Motiv: ${vars.event_message}
+
+Poți încerca din nou sau contactează-ne pentru ajutor: ${SITE_URL}/contact
+
+Echipa E-numismatica.ro`;
+
+    default:
+      return `Notificare de la E-numismatica.ro
+
+${vars.event_message || 'Ai primit o notificare de la platforma noastră.'}
+
+Poți accesa platforma aici: ${SITE_URL}
+
+Echipa E-numismatica.ro`;
+  }
+}
+
 // Email templates mapping
 const EMAIL_TEMPLATES = {
   account_welcome: {
@@ -105,15 +256,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare email data
-    const msg = {
+    let msg: any = {
       to,
       from: FROM_EMAIL,
-      templateId: template.templateId,
+      subject: template.subject,
       dynamicTemplateData: {
         ...vars,
         site_url: SITE_URL,
       },
     };
+
+    // If template ID is set, use template, otherwise send plain text
+    if (template.templateId && template.templateId !== `d-${templateKey}-template-id`) {
+      msg.templateId = template.templateId;
+    } else {
+      // Fallback to plain text email
+      const plainTextContent = generatePlainTextEmail(templateKey, vars);
+      msg.text = plainTextContent;
+      delete msg.dynamicTemplateData;
+    }
 
     // Send email
     await sgMail.send(msg);
