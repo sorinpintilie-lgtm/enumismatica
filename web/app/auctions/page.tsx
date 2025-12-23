@@ -53,6 +53,44 @@ function AuctionsListContent() {
 
     fetchTotalCount();
   }, [statusForFetch]);
+
+  // Fetch country counts
+  const [countryCounts, setCountryCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const fetchCountryCounts = async () => {
+      const counts: Record<string, number> = {};
+      const countriesToFetch = [
+        'Rusia',
+        'SUA',
+        'Germania',
+        'Italia',
+        'Franța',
+        'Finlanda',
+        'Spania',
+        'Danemarca',
+        'Mexic',
+        'România',
+        'Austria',
+      ];
+      const promises = countriesToFetch.map(async (country) => {
+        try {
+          let q = query(collection(db, 'auctions'), where('country', '==', country));
+          if (statusForFetch) {
+            q = query(q, where('status', '==', statusForFetch));
+          }
+          const snap = await getCountFromServer(q);
+          counts[country] = snap.data().count;
+        } catch (error) {
+          console.error('Error fetching count for', country, error);
+          counts[country] = 0;
+        }
+      });
+      await Promise.all(promises);
+      setCountryCounts(counts);
+    };
+    fetchCountryCounts();
+  }, [statusForFetch]);
 	// Fetch all fields needed for filtering and display.
 	// IMPORTANT: use listingType = 'all' so we also load products listed as 'auction'.
 	const { products, loading: productsLoading } = useProducts(
@@ -522,7 +560,7 @@ function AuctionsListContent() {
       </div>
 
       {/* Filter Bar */}
-      <FilterBar filters={filters} onFilterChange={setFilters} showAuctionFilters={true} items={auctions} />
+      <FilterBar filters={filters} onFilterChange={setFilters} showAuctionFilters={true} countryCounts={countryCounts} totalCount={totalCount || 0} />
 
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">

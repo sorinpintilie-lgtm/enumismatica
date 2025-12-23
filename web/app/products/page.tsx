@@ -56,6 +56,49 @@ function ProductsListContent() {
     fetchTotalCount();
   }, [ownerId]);
 
+  // Fetch country counts
+  const [countryCounts, setCountryCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const fetchCountryCounts = async () => {
+      const counts: Record<string, number> = {};
+      const countriesToFetch = [
+        'Rusia',
+        'SUA',
+        'Germania',
+        'Italia',
+        'Franța',
+        'Finlanda',
+        'Spania',
+        'Danemarca',
+        'Mexic',
+        'România',
+        'Austria',
+      ];
+      const promises = countriesToFetch.map(async (country) => {
+        try {
+          let q = query(
+            collection(db, 'products'),
+            where('status', '==', 'approved'),
+            where('listingType', '==', 'direct'),
+            where('country', '==', country)
+          );
+          if (ownerId) {
+            q = query(q, where('ownerId', '==', ownerId));
+          }
+          const snap = await getCountFromServer(q);
+          counts[country] = snap.data().count;
+        } catch (error) {
+          console.error('Error fetching count for', country, error);
+          counts[country] = 0;
+        }
+      });
+      await Promise.all(promises);
+      setCountryCounts(counts);
+    };
+    fetchCountryCounts();
+  }, [ownerId]);
+
   // Debug: validate that we are actually loading all seller items
   useEffect(() => {
     if (process.env.NODE_ENV === 'production') return;
@@ -399,7 +442,7 @@ function ProductsListContent() {
       </div>
 
       {/* Filter Bar */}
-      <FilterBar filters={filters} onFilterChange={setFilters} items={products} />
+      <FilterBar filters={filters} onFilterChange={setFilters} countryCounts={countryCounts} totalCount={totalInCatalog || 0} />
 
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">

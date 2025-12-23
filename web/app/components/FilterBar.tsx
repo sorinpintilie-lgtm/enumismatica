@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 export interface FilterOptions {
   searchTerm: string;
@@ -30,7 +30,8 @@ interface FilterBarProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   showAuctionFilters?: boolean;
-  items?: any[]; // Products or auctions array to calculate counts
+  countryCounts?: Record<string, number>; // Pre-fetched country counts
+  totalCount?: number; // Total count for "Toate Țările"
 }
 
 const categories = [
@@ -108,7 +109,7 @@ const romanianEras = [
   'Toate Epocile',
 ];
 
-export default function FilterBar({ filters, onFilterChange, showAuctionFilters = false, items = [] }: FilterBarProps) {
+const FilterBarComponent = ({ filters, onFilterChange, showAuctionFilters = false, countryCounts = {}, totalCount = 0 }: FilterBarProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [localFilters, setLocalFilters] = useState(filters);
   const [romanianOptions, setRomanianOptions] = useState({
@@ -121,15 +122,11 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
   });
   const [romanianOptionsLoaded, setRomanianOptionsLoaded] = useState(false);
 
-  // Calculate country counts
-  const countryCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    items.forEach(item => {
-      const country = item.country || 'Unknown';
-      counts[country] = (counts[country] || 0) + 1;
-    });
-    return counts;
-  }, [items]);
+  // Sync localFilters with props when filters change
+  useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters]);
+
 
   useEffect(() => {
     const loadRomanianOptions = async () => {
@@ -307,7 +304,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
                 className="w-full px-4 py-2 rounded-xl border border-[#e7b73c]/30 bg-navy-900/70 text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent appearance-none cursor-pointer"
               >
                 {countries.map((country) => {
-                  const count = country === 'Toate Țările' ? items.length : (countryCounts[country] || 0);
+                  const count = country === 'Toate Țările' ? totalCount : (countryCounts[country] || 0);
                   return (
                     <option key={country} value={country} className="bg-navy-900 text-slate-100">
                       {country} {count > 0 ? `(${count})` : ''}
@@ -550,4 +547,6 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
       )}
     </div>
   );
-}
+};
+
+export default React.memo(FilterBarComponent);
