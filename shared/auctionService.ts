@@ -21,7 +21,7 @@ import { Auction, Bid, AutoBid, Product } from './types';
 import { addAuctionPriceHistory } from './priceHistoryService';
 import { createAuctionNotification } from './auctionNotificationService';
 import { addCollectionItem } from './collectionService';
-import { sendOutbidEmail, sendAuctionWonEmail, sendAuctionSoldEmail } from './emailService';
+import { sendOutbidEmail, sendAuctionWonEmail, sendAuctionSoldEmail } from 'shared/emailService';
 
 /**
  * Validates if a bid is valid for an auction
