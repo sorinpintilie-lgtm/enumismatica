@@ -282,10 +282,11 @@ export async function POST(request: NextRequest) {
 
     // Send email
     console.log('Sending email with msg:', msg);
-    await sgMail.send(msg);
-    console.log('Email sent successfully');
+    // Temporarily disable sending to test if API is called
+    // await sgMail.send(msg);
+    console.log('Email send disabled for testing');
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, note: 'Email sending disabled for testing' });
   } catch (error) {
     console.error('Email send error:', error);
     return NextResponse.json(
