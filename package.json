@@ -11,5 +11,8 @@
     "dev:web": "npm run dev --workspace=web",
     "build:web": "npm run build --workspace=web",
     "dev:mobile": "npm run start --workspace=mobile"
+  },
+  "dependencies": {
+    "process": "^0.11.10"
   }
 }

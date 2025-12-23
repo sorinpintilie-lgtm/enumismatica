@@ -1,8 +1,94 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  sendPronumismaticaFormEmail,
-  sendPronumismaticaFormEmailWithIdImages,
-} from 'shared/emailService';
+import { sendEmailWithAttachments } from '../../lib/sendgridEmail';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+
+type TemplatesFile = Record<string, { subject: string; html: string; text?: string }>;
+
+let templatesCache: { loadedAt: number; data: TemplatesFile } | null = null;
+
+async function loadTemplates(): Promise<TemplatesFile> {
+  const now = Date.now();
+  if (templatesCache && now - templatesCache.loadedAt < 60_000) {
+    return templatesCache.data;
+  }
+
+  const filePath = path.join(process.cwd(), 'public', 'email.json');
+  const raw = await readFile(filePath, 'utf8');
+  const data = JSON.parse(raw) as TemplatesFile;
+  templatesCache = { loadedAt: now, data };
+  return data;
+}
+
+async function sendPronumismaticaFormEmail(data: any) {
+  const templates = await loadTemplates();
+  const template = templates.pronumismatica_form || templates.fallback_default;
+
+  const vars = {
+    app_name: 'Enumismatica.ro',
+    site_url: 'https://enumismatica.ro',
+    lastName: data.lastName,
+    firstName: data.firstName,
+    cnp: data.cnp,
+    country: data.country,
+    county: data.county,
+    city: data.city,
+    address: data.address,
+    idType: data.idType,
+    idSeries: data.idSeries,
+    phone: data.phone,
+    email: data.email,
+  };
+
+  const subject = template.subject.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k as keyof typeof vars] || '');
+  const html = template.html.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k as keyof typeof vars] || '');
+
+  await sendEmailWithAttachments({
+    to: 'bogdan.epure@sky.ro',
+    subject,
+    html,
+    text: template.text?.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k as keyof typeof vars] || ''),
+    attachments: [],
+  });
+}
+
+async function sendPronumismaticaFormEmailWithIdImages(data: any, images: any) {
+  const templates = await loadTemplates();
+  const template = templates.pronumismatica_form_with_images || templates.pronumismatica_form || templates.fallback_default;
+
+  const vars = {
+    app_name: 'Enumismatica.ro',
+    site_url: 'https://enumismatica.ro',
+    lastName: data.lastName,
+    firstName: data.firstName,
+    cnp: data.cnp,
+    country: data.country,
+    county: data.county,
+    city: data.city,
+    address: data.address,
+    idType: data.idType,
+    idSeries: data.idSeries,
+    phone: data.phone,
+    email: data.email,
+  };
+
+  const subject = template.subject.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k as keyof typeof vars] || '');
+  const html = template.html.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k as keyof typeof vars] || '');
+
+  const attachments = images.map((img: any) => ({
+    filename: img.filename,
+    contentType: img.contentType,
+    contentBase64: img.data.toString('base64'),
+  }));
+
+  await sendEmailWithAttachments({
+    to: 'bogdan.epure@sky.ro',
+    subject,
+    html,
+    text: template.text?.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k as keyof typeof vars] || ''),
+    attachments,
+  });
+}
 
 export async function POST(req: NextRequest) {
   try {

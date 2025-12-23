@@ -1,0 +1,124 @@
+{
+  "fallback_default": {
+    "subject": "{{app_name}}: {{event_title}}",
+    "text": "Salut, {{user_name}}!\n\n{{event_message}}\n\nVezi detalii: {{action_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}. Poți modifica notificările din contul tău.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>{{event_message}}</p><p><a href=\"{{action_link}}\">Vezi detalii</a></p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}. Poți modifica notificările din contul tău.</p>"
+  },
+  "fallback_security": {
+    "subject": "{{app_name}} (Securitate): {{event_title}}",
+    "text": "Salut, {{user_name}}!\n\n{{event_message}}\n\nDacă nu ai fost tu, îți recomandăm să resetezi parola: {{reset_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}. Poți modifica notificările din contul tău.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>{{event_message}}</p><p>Dacă nu ai fost tu, îți recomandăm să <a href=\"{{reset_link}}\">resetezi parola</a>.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}. Poți modifica notificările din contul tău.</p>"
+  },
+  "fallback_transaction": {
+    "subject": "{{app_name}} (Tranzacție): {{event_title}}",
+    "text": "Salut, {{user_name}}!\n\n{{event_message}}\n\nDetalii tranzacție: {{transaction_link}}\nChat: {{conversation_link}}\n\nImportant: {{app_name}} nu procesează plăți și nu oferă transport. Finalizarea tranzacției se face direct între cumpărător și vânzător.\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}. Poți modifica notificările din contul tău.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>{{event_message}}</p><p><a href=\"{{transaction_link}}\">Detalii tranzacție</a> · <a href=\"{{conversation_link}}\">Deschide chat-ul</a></p><p><strong>Important:</strong> {{app_name}} nu procesează plăți și nu oferă transport. Finalizarea tranzacției se face direct între cumpărător și vânzător.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}. Poți modifica notificările din contul tău.</p>"
+  },
+
+  "account_welcome": {
+    "subject": "Bine ai venit pe {{app_name}}",
+    "text": "Salut, {{user_name}}!\n\nContul tău este activ.\nIntră în cont: {{login_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Contul tău este activ.</p><p><a href=\"{{login_link}}\">Intră în cont</a></p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "account_email_verify": {
+    "subject": "Confirmă emailul pentru {{app_name}}",
+    "text": "Salut, {{user_name}}!\n\nConfirmă adresa de email folosind linkul:\n{{verify_link}}\n\nDacă nu tu ai creat contul, poți ignora mesajul.\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Confirmă adresa de email:</p><p><a href=\"{{verify_link}}\">Confirmă emailul</a></p><p>Dacă nu tu ai creat contul, poți ignora mesajul.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "account_email_verified": {
+    "subject": "Email confirmat",
+    "text": "Salut, {{user_name}}!\n\nAdresa ta de email a fost confirmată.\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Adresa ta de email a fost confirmată.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "account_email_change_requested": {
+    "subject": "Schimbare email: confirmare necesară",
+    "text": "Salut, {{user_name}}!\n\nAi cerut schimbarea adresei de email.\nConfirmă aici: {{confirm_link}}\n\nDacă nu ai cerut tu, ignoră mesajul.\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Ai cerut schimbarea adresei de email.</p><p><a href=\"{{confirm_link}}\">Confirmă schimbarea</a></p><p>Dacă nu ai cerut tu, ignoră mesajul.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "account_email_changed": {
+    "subject": "Email schimbat",
+    "text": "Salut, {{user_name}}!\n\nAdresa de email a fost schimbată cu succes.\nDacă nu ai făcut tu asta, resetează parola: {{reset_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Adresa de email a fost schimbată cu succes.</p><p>Dacă nu ai făcut tu asta, <a href=\"{{reset_link}}\">resetează parola</a>.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "account_password_reset_requested": {
+    "subject": "Resetare parolă",
+    "text": "Salut, {{user_name}}!\n\nSetează o parolă nouă folosind linkul:\n{{reset_link}}\n\nDacă nu tu ai cerut resetarea, ignoră acest email.\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Setează o parolă nouă:</p><p><a href=\"{{reset_link}}\">Resetează parola</a></p><p>Dacă nu tu ai cerut resetarea, ignoră acest email.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "account_password_changed": {
+    "subject": "Parola a fost schimbată",
+    "text": "Salut, {{user_name}}!\n\nParola contului tău a fost schimbată.\nDacă nu ai făcut tu schimbarea, resetează parola: {{reset_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Parola contului tău a fost schimbată.</p><p>Dacă nu ai făcut tu schimbarea, <a href=\"{{reset_link}}\">resetează parola</a>.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "security_new_login": {
+    "subject": "Autentificare nouă detectată",
+    "text": "Salut, {{user_name}}!\n\nAm detectat o autentificare nouă:\n• Data: {{date}}\n• IP: {{ip}}\n• Dispozitiv: {{device}}\n\nDacă nu ai fost tu, resetează parola: {{reset_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Am detectat o autentificare nouă:</p><ul><li>Data: {{date}}</li><li>IP: {{ip}}</li><li>Dispozitiv: {{device}}</li></ul><p>Dacă nu ai fost tu, <a href=\"{{reset_link}}\">resetează parola</a>.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+
+  "listing_draft_saved": {
+    "subject": "Ciornă salvată: {{listing_title}}",
+    "text": "Salut, {{user_name}}!\n\nCiorna pentru „{{listing_title}}” a fost salvată.\nContinuă editarea: {{listing_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Ciorna pentru „<strong>{{listing_title}}</strong>” a fost salvată.</p><p><a href=\"{{listing_link}}\">Continuă editarea</a></p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "listing_created": {
+    "subject": "Articol adăugat: {{listing_title}}",
+    "text": "Salut, {{user_name}}!\n\nAi adăugat articolul „{{listing_title}}”.\nVezi: {{listing_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Ai adăugat articolul „<strong>{{listing_title}}</strong>”.</p><p><a href=\"{{listing_link}}\">Vezi articolul</a></p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "listing_updated": {
+    "subject": "Articol actualizat: {{listing_title}}",
+    "text": "Salut, {{user_name}}!\n\nAi actualizat articolul „{{listing_title}}”.\nDetalii: {{listing_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Ai actualizat articolul „<strong>{{listing_title}}</strong>”.</p><p><a href=\"{{listing_link}}\">Vezi detalii</a></p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "listing_deleted_by_owner": {
+    "subject": "Articol șters: {{listing_title}}",
+    "text": "Salut, {{user_name}}!\n\nAi șters articolul „{{listing_title}}”.\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Ai șters articolul „<strong>{{listing_title}}</strong>”.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+
+  "auction_created": {
+    "subject": "Licitație creată: {{listing_title}}",
+    "text": "Salut, {{user_name}}!\n\nAi creat licitația pentru „{{listing_title}}”.\nDetalii: {{auction_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Ai creat licitația pentru „<strong>{{listing_title}}</strong>”.</p><p><a href=\"{{auction_link}}\">Detalii licitație</a></p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "auction_started": {
+    "subject": "Licitația a început: {{listing_title}}",
+    "text": "Salut!\n\nLicitația pentru „{{listing_title}}” a început.\nIntră aici: {{auction_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut!</p><p>Licitația pentru „<strong>{{listing_title}}</strong>” a început.</p><p><a href=\"{{auction_link}}\">Intră în licitație</a></p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "bid_placed_confirmation": {
+    "subject": "Oferta ta a fost înregistrată: {{listing_title}}",
+    "text": "Salut, {{user_name}}!\n\nOferta ta a fost înregistrată.\nSuma: {{amount}} {{currency}}\nVezi: {{auction_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Oferta ta a fost înregistrată.</p><p><strong>Suma:</strong> {{amount}} {{currency}}</p><p><a href=\"{{auction_link}}\">Vezi licitația</a></p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+  "bid_outbid": {
+    "subject": "Ai fost depășit: {{listing_title}}",
+    "text": "Salut, {{user_name}}!\n\nAi fost depășit la licitația pentru „{{listing_title}}”.\nPreț curent: {{current_price}} {{currency}}\nIntră: {{auction_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Ai fost depășit la licitația pentru „<strong>{{listing_title}}</strong>”.</p><p><strong>Preț curent:</strong> {{current_price}} {{currency}}</p><p><a href=\"{{auction_link}}\">Vezi licitația</a></p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+
+  "auction_won_buyer": {
+    "subject": "Ai câștigat: {{listing_title}}",
+    "text": "Salut, {{buyer_name}}!\n\nAi câștigat licitația pentru „{{listing_title}}”.\nPreț final: {{amount}} {{currency}}\nVânzător: {{seller_name}}\n\nChat: {{conversation_link}}\nDetalii: {{transaction_link}}\n\nImportant: {{app_name}} nu procesează plăți și nu oferă transport. Finalizarea tranzacției se face direct între cumpărător și vânzător.\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{buyer_name}}</strong>!</p><p>Ai câștigat licitația pentru „<strong>{{listing_title}}</strong>”.</p><ul><li><strong>Preț final:</strong> {{amount}} {{currency}}</li><li><strong>Vânzător:</strong> {{seller_name}}</li></ul><p><a href=\"{{conversation_link}}\">Chat</a> · <a href=\"{{transaction_link}}\">Detalii</a></p><p><strong>Important:</strong> {{app_name}} nu procesează plăți și nu oferă transport. Finalizarea tranzacției se face direct între cumpărător și vânzător.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+
+  "buy_now_buyer": {
+    "subject": "Ai cumpărat direct: {{listing_title}}",
+    "text": "Salut, {{buyer_name}}!\n\nAi cumpărat direct „{{listing_title}}”.\nPreț: {{amount}} {{currency}}\nVânzător: {{seller_name}}\n\nChat: {{conversation_link}}\nDetalii: {{transaction_link}}\n\nImportant: {{app_name}} nu procesează plăți și nu oferă transport. Finalizarea tranzacției se face direct între cumpărător și vânzător.\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{buyer_name}}</strong>!</p><p>Ai cumpărat direct „<strong>{{listing_title}}</strong>”.</p><ul><li><strong>Preț:</strong> {{amount}} {{currency}}</li><li><strong>Vânzător:</strong> {{seller_name}}</li></ul><p><a href=\"{{conversation_link}}\">Chat</a> · <a href=\"{{transaction_link}}\">Detalii</a></p><p><strong>Important:</strong> {{app_name}} nu procesează plăți și nu oferă transport. Finalizarea tranzacției se face direct între cumpărător și vânzător.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+
+  "chat_message_new": {
+    "subject": "Mesaj nou pe {{app_name}}",
+    "text": "Salut, {{user_name}}!\n\nAi primit un mesaj nou de la {{from_name}}.\nDeschide: {{conversation_link}}\n\n— {{app_name}}\n{{site_url}}\n\nPrimești acest email pentru că ai un cont pe {{app_name}}.",
+    "html": "<p>Salut, <strong>{{user_name}}</strong>!</p><p>Ai primit un mesaj nou de la <strong>{{from_name}}</strong>.</p><p><a href=\"{{conversation_link}}\">Deschide conversația</a></p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p><p>Primești acest email pentru că ai un cont pe {{app_name}}.</p>"
+  },
+
+  "system_maintenance_scheduled": {
+    "subject": "Mentenanță programată",
+    "text": "Salut!\n\nVom avea o mentenanță programată:\nInterval: {{start_time}} – {{end_time}}\nÎn acest timp, unele funcții pot fi indisponibile.\n\n— {{app_name}}\n{{site_url}}",
+    "html": "<p>Salut!</p><p>Vom avea o mentenanță programată:</p><p><strong>Interval:</strong> {{start_time}} – {{end_time}}</p><p>În acest timp, unele funcții pot fi indisponibile.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p>"
+  }
+}
