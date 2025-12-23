@@ -12,7 +12,11 @@ import { db } from '../lib/firebase';
 import { Product } from 'shared/types';
 
 function AuctionsListContent() {
-	const { auctions, loading: auctionsLoading, error: auctionsError } = useAuctions('active');
+  const [statusFilter, setStatusFilter] = useState<'active' | 'ended' | 'all'>('active');
+  
+  // Use dynamic status based on filter
+  const statusForFetch = statusFilter === 'all' ? undefined : statusFilter;
+  const { auctions, loading: auctionsLoading, error: auctionsError } = useAuctions(statusForFetch);
 	// Fetch all fields needed for filtering and display.
 	// IMPORTANT: use listingType = 'all' so we also load products listed as 'auction'.
 	const { products, loading: productsLoading } = useProducts(
@@ -44,7 +48,6 @@ function AuctionsListContent() {
     sortBy: 'best-match',
   });
 
-  const [statusFilter, setStatusFilter] = useState<'active' | 'ended' | 'all'>('active');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Create a map of products for quick lookup
@@ -161,15 +164,24 @@ function AuctionsListContent() {
       filtered = filtered.filter((auction) => auction.status === statusFilter);
     }
 
-    // Filter out auctions that have ended (past their endTime)
+    // Filter out auctions that have ended (past their endTime) - only for active view
+    // This is a client-side safety check for auctions that weren't properly ended server-side
     const now = new Date();
-    filtered = filtered.filter((auction) => {
-      // If the auction status is 'active' but endTime has passed, it should be considered ended
-      if (auction.status === 'active' && new Date(auction.endTime) < now) {
-        return false;
-      }
-      return true;
-    });
+    if (statusFilter === 'active') {
+      filtered = filtered.filter((auction) => {
+        // If the auction status is 'active' but endTime has passed, it should be considered ended
+        if (new Date(auction.endTime) < now) {
+          console.log(`[AuctionsPage] Auto-ending auction ${auction.id} (endTime: ${auction.endTime})`);
+          // Update auction status to ended (fire and forget)
+          updateDoc(doc(db, 'auctions', auction.id), {
+            status: 'ended',
+            updatedAt: Timestamp.now(),
+          }).catch(err => console.error('Failed to end auction:', err));
+          return false;
+        }
+        return true;
+      });
+    }
 
     // Apply filters based on associated product data
     filtered = filtered.filter((auction) => {
