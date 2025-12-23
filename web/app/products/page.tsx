@@ -8,7 +8,7 @@ import ProductCard from '../components/ProductCard';
 import FilterBar, { FilterOptions } from '../components/FilterBar';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../lib/firebase';
-import { collection, query, where, getCountFromServer, getDocs } from 'firebase/firestore';
+import { collection, query, where, getCountFromServer } from 'firebase/firestore';
 import { Product } from 'shared/types';
 
 function ProductsListContent() {
@@ -33,50 +33,28 @@ function ProductsListContent() {
   // Fetch total count when filtering by owner
   useEffect(() => {
     const fetchTotalCount = async () => {
-      if (!ownerId) {
-        setTotalCount(null);
-        return;
-      }
-
       try {
-        const base = query(
+        let qTotal = query(
           collection(db, 'products'),
           where('status', '==', 'approved'),
-          where('ownerId', '==', ownerId),
+          where('listingType', '==', 'direct'),
         );
 
-        const qDirect = query(base, where('listingType', '==', 'direct'));
-        const qAuction = query(base, where('listingType', '==', 'auction'));
-
-        const [directSnap, auctionSnap] = await Promise.all([
-          getCountFromServer(qDirect),
-          getCountFromServer(qAuction),
-        ]);
-
-        const directCount = directSnap.data().count;
-        const auctionCount = auctionSnap.data().count;
-        const combinedKnown = directCount + auctionCount;
-
-        setTotalCount(directCount);
-
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('[ProductsPage] ownerId breakdown (approved):', {
-            ownerId,
-            directCount,
-            auctionCount,
-            combinedKnown,
-            note: 'If combinedKnown is much lower than expected, some documents may be missing listingType or have a different status.',
-          });
+        if (ownerId) {
+          qTotal = query(qTotal, where('ownerId', '==', ownerId));
         }
+
+        const totalSnap = await getCountFromServer(qTotal);
+        setTotalCount(totalSnap.data().count);
       } catch (err) {
         console.error('Error fetching total count:', err);
-        // Fallback: count loaded products
-        setTotalCount(products.length);
+        // Fallback: unknown total
+        setTotalCount(null);
       }
     };
 
     fetchTotalCount();
-  }, [ownerId, products.length]);
+  }, [ownerId]);
 
   // Debug: validate that we are actually loading all seller items
   useEffect(() => {
@@ -311,9 +289,8 @@ function ProductsListContent() {
     return filtered;
   }, [products, filters]);
 
-  // Use a single, consistent total in UI.
-  // When filtering by ownerId, prefer the Firestore count if available.
-  const totalForDisplay = ownerId ? (totalCount ?? filteredProducts.length) : filteredProducts.length;
+  // Total items in catalog (server count). This is independent of how many pages we already loaded.
+  const totalInCatalog = totalCount;
 
   // Prefetch next N pages so page navigation feels instant.
   // This keeps a buffer of (current page + PREFETCH_PAGES_AHEAD) loaded.
@@ -417,7 +394,7 @@ function ProductsListContent() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-[#e7b73c] mb-2">E-shop</h1>
         <p className="text-slate-200">
-          Explorează colecția noastră de {ownerId && totalCount == null ? '...' : totalForDisplay} piese
+          Explorează colecția noastră de {totalInCatalog ?? '...'} piese
         </p>
       </div>
 
@@ -432,8 +409,9 @@ function ProductsListContent() {
             {requestedPage === page && pagedProducts.length === 0 ? '—' : pagedProducts.length}
           </span>{' '}
           piese (pagina <span className="font-semibold text-gold-400">{page}</span>) din{' '}
-          <span className="font-semibold text-gold-400">{ownerId && totalCount == null ? '...' : totalForDisplay}</span>{' '}
-          piese
+          <span className="font-semibold text-gold-400">{filteredProducts.length}</span>{' '}
+          rezultate încărcate
+          <span className="text-slate-400"> (din {totalInCatalog ?? '...'} total)</span>
           {requestedPage === page && (
             <span className="ml-2 text-xs text-slate-400">(Se încarcă pagina…)</span>
           )}
