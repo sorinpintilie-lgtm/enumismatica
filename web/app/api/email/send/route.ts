@@ -257,35 +257,29 @@ export async function POST(request: NextRequest) {
       template = EMAIL_TEMPLATES.fallback_default;
     }
 
-    // Prepare email data
-    let msg: any = {
+    // Fallback to plain text email (templates not configured)
+    const plainTextContent = generatePlainTextEmail(templateKey, vars);
+    
+    // Prepare email data - simple format matching SendGrid example
+    const msg = {
       to,
       from: FROM_EMAIL,
       subject: template.subject,
-      dynamicTemplateData: {
-        ...vars,
-        site_url: SITE_URL,
-      },
+      text: plainTextContent,
+      html: `<pre>${plainTextContent.replace(/\n/g, '<br>')}</pre>`,
     };
 
-    // If template ID is set and not a placeholder, use template, otherwise send plain text
-    const isPlaceholder = template.templateId && /^d-.*-template-id$/.test(template.templateId);
-    if (template.templateId && !isPlaceholder) {
-      msg.templateId = template.templateId;
-    } else {
-      // Fallback to plain text email
-      const plainTextContent = generatePlainTextEmail(templateKey, vars);
-      msg.text = plainTextContent;
-      msg.subject = template.subject; // Set subject for plain text
-      delete msg.dynamicTemplateData;
-    }
-
     // Send email
-    console.log('Sending email with msg:', JSON.stringify(msg, null, 2));
-    await sgMail.send(msg);
-    console.log('Email sent successfully to:', to);
-
-    return NextResponse.json({ success: true });
+    console.log('Sending email:', { to, from: FROM_EMAIL, subject: template.subject });
+    
+    try {
+      await sgMail.send(msg);
+      console.log('Email sent successfully to:', to);
+      return NextResponse.json({ success: true });
+    } catch (sendError: any) {
+      console.error('SendGrid error:', sendError.response?.body || sendError);
+      throw new Error(`SendGrid error: ${JSON.stringify(sendError.response?.body || sendError.message)}`);
+    }
   } catch (error) {
     console.error('Email send error:', error);
     return NextResponse.json(
