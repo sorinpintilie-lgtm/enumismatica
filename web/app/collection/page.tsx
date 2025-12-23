@@ -800,10 +800,21 @@ function CollectionItemModal({
         imageUrls = [...imageUrls, ...uploadedUrls];
       }
 
-      await onSave({
+      // Hide acquisitionPrice from the UI, but still track it internally.
+      // For newly created collection items, default acquisitionPrice to currentValue
+      // (if provided) so users don't have to set it and don't see it.
+      const payload: Partial<CollectionItem> = {
         ...formData,
         images: imageUrls,
-      });
+      };
+
+      if (!item) {
+        if (payload.acquisitionPrice == null && payload.currentValue != null) {
+          payload.acquisitionPrice = payload.currentValue;
+        }
+      }
+
+      await onSave(payload);
     } catch (err) {
       console.error('Failed to save:', err);
     } finally {
