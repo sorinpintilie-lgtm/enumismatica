@@ -8,7 +8,7 @@ if (!sendgridKey) {
 }
 sgMail.setApiKey(sendgridKey);
 
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@enumismatica.ro';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'contact@enumismatica.ro';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://enumismatica.ro';
 
 // Generate plain text email content as fallback
