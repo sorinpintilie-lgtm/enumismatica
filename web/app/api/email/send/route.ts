@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import sgMail from '@sendgrid/mail';
 
 // Configure SendGrid
-if (!process.env.SENDGRID_API_KEY) {
-  throw new Error('SENDGRID_API_KEY environment variable is required');
+const sendgridKey = process.env.SENDGRID_API_KEY || process.env.SENDGRID_KEY;
+if (!sendgridKey) {
+  throw new Error('SENDGRID_API_KEY or SENDGRID_KEY environment variable is required');
 }
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sgMail.setApiKey(sendgridKey);
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@enumismatica.ro';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://enumismatica.ro';
