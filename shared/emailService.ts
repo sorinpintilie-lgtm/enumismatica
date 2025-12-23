@@ -13,7 +13,7 @@ type SendTemplateEmailInput = {
 };
 
 const DEFAULT_SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'http://localhost:3000';
+  process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'https://enumismatica.ro';
 
 function isBrowser() {
   return typeof window !== 'undefined';
