@@ -399,7 +399,7 @@ function ProductsListContent() {
       </div>
 
       {/* Filter Bar */}
-      <FilterBar filters={filters} onFilterChange={setFilters} items={filteredProducts} />
+      <FilterBar filters={filters} onFilterChange={setFilters} items={products} />
 
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">

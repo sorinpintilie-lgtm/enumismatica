@@ -522,7 +522,7 @@ function AuctionsListContent() {
       </div>
 
       {/* Filter Bar */}
-      <FilterBar filters={filters} onFilterChange={setFilters} showAuctionFilters={true} items={filteredAuctions} />
+      <FilterBar filters={filters} onFilterChange={setFilters} showAuctionFilters={true} items={auctions} />
 
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">
