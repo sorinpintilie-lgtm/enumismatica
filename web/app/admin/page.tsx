@@ -40,6 +40,10 @@ export default function AdminDashboard() {
   const [startingChat, setStartingChat] = useState(false);
   const { startConversation } = useConversations(user?.uid || null);
 
+  // Quick listing search (products / auctions)
+  const [listingSearchType, setListingSearchType] = useState<'product' | 'auction'>('product');
+  const [listingSearchText, setListingSearchText] = useState('');
+
   useEffect(() => {
     const checkAdminAndLoad = async () => {
       if (!user) {
@@ -105,6 +109,29 @@ export default function AdminDashboard() {
     } finally {
       setStartingChat(false);
     }
+  };
+
+  const normalizeListingId = (raw: string): string => {
+    const text = raw.trim();
+    if (!text) return '';
+
+    // Allow pasting full URLs like https://.../products/<id> or /auctions/<id>
+    const m = text.match(/\/(products|auctions)\/([^/?#]+)/i);
+    if (m?.[2]) return m[2];
+
+    return text;
+  };
+
+  const handleListingSearch = () => {
+    const id = normalizeListingId(listingSearchText);
+    if (!id) return;
+
+    if (listingSearchType === 'product') {
+      router.push(`/products/${id}`);
+      return;
+    }
+
+    router.push(`/auctions/${id}`);
   };
 
   const loadDashboardData = async () => {
@@ -196,6 +223,45 @@ export default function AdminDashboard() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Panou Admin</h1>
           <p className="text-slate-300">Monitorizare și control complet al platformei</p>
+        </div>
+
+        {/* Quick Search (Listing) */}
+        <div className="mb-8 rounded-2xl border border-gold-500/20 bg-navy-800/40 p-6">
+          <h2 className="text-xl font-bold text-white mb-3">Caută rapid anunț / licitație</h2>
+          <p className="text-sm text-slate-300 mb-4">
+            Introdu ID-ul (sau link-ul) și te ducem direct la pagina anunțului.
+          </p>
+          <div className="flex flex-col md:flex-row gap-3">
+            <select
+              value={listingSearchType}
+              onChange={(e) => setListingSearchType(e.target.value as any)}
+              className="px-4 py-3 rounded-lg bg-navy-900/70 text-slate-50 border border-gold-500/25 focus:outline-none focus:ring-2 focus:ring-gold-500"
+            >
+              <option value="product">E-shop (produs)</option>
+              <option value="auction">Licitație</option>
+            </select>
+            <input
+              type="text"
+              value={listingSearchText}
+              onChange={(e) => setListingSearchText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleListingSearch();
+                }
+              }}
+              placeholder="ex: 2a9c... sau https://site.ro/auctions/2a9c..."
+              className="flex-1 px-4 py-3 rounded-lg bg-navy-900/70 text-slate-50 placeholder-slate-400 border border-gold-500/25 focus:outline-none focus:ring-2 focus:ring-gold-500"
+            />
+            <button
+              type="button"
+              onClick={handleListingSearch}
+              disabled={!listingSearchText.trim()}
+              className="px-6 py-3 rounded-lg bg-[#e7b73c] text-[#000940] font-semibold shadow-[0_0_24px_rgba(231,183,60,0.55)] hover:bg-[#f0c955] disabled:bg-navy-700 disabled:text-slate-400 transition-colors"
+            >
+              Caută
+            </button>
+          </div>
         </div>
 
         {/* Quick Actions */}

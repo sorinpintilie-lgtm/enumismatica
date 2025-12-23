@@ -121,12 +121,13 @@ export default function NewProductPage() {
   // Offer settings
   const [acceptsOffers, setAcceptsOffers] = useState(true);
 
-  // Permission: only verified users or admins can upload product videos
-  const canUploadVideo = !!user && (
-    (user as any).idVerificationStatus === 'verified' ||
-    (user as any).isAdmin ||
-    (user as any).isSuperAdmin
-  );
+  // NOTE:
+  // Rely on AuthContext role flags instead of re-querying via shared/adminService.
+  // This avoids transient false negatives when dynamic imports or Firestore reads fail.
+  const isPrivilegedUser = Boolean(user?.isAdmin || user?.isSuperAdmin);
+
+  // Permission: only verified users or admins/superadmins can upload product videos
+  const canUploadVideo = !!user && ((user as any).idVerificationStatus === 'verified' || isPrivilegedUser);
 
   // Load collection item if provided, or edit existing product
   useEffect(() => {
@@ -151,8 +152,10 @@ export default function NewProductPage() {
             return;
           }
 
-          // Check if user owns the product or is admin
-          if (product.ownerId !== user.uid && !(user as any).isAdmin && !(user as any).isSuperAdmin) {
+          const canEditAny = Boolean(user?.isAdmin || user?.isSuperAdmin);
+
+          // Check if user owns the product or is privileged
+          if (product.ownerId !== user.uid && !canEditAny) {
             showToast({
               type: 'error',
               title: 'Acces interzis',

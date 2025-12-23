@@ -25,6 +25,15 @@ export default function AdminAuctions() {
   const [products, setProducts] = useState<Record<string, Product>>({});
   const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'ended' | 'rejected'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [goToText, setGoToText] = useState('');
+
+  const normalizeAuctionId = (raw: string): string => {
+    const text = raw.trim();
+    if (!text) return '';
+    const m = text.match(/\/auctions\/([^/?#]+)/i);
+    return m?.[1] ? m[1] : text;
+  };
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -118,6 +127,20 @@ export default function AdminAuctions() {
     return statusMatch && categoryMatch;
   });
 
+  const searchedAuctions = filteredAuctions.filter((a) => {
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.trim().toLowerCase();
+    const product = products[a.productId];
+    const productName = product?.name || '';
+    const ownerId = product?.ownerId || '';
+    return (
+      a.id.toLowerCase().includes(q) ||
+      a.productId.toLowerCase().includes(q) ||
+      ownerId.toLowerCase().includes(q) ||
+      productName.toLowerCase().includes(q)
+    );
+  });
+
   if (authLoading || loading || !isAdminUser) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -199,14 +222,63 @@ export default function AdminAuctions() {
           </select>
         </div>
 
+        {/* Search */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-white mb-2">
+            Caută după ID licitație / ID produs / ID proprietar / nume produs
+          </label>
+          <input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="ex: 2a9c..., productId..., ownerId..., Roman Denarius..."
+            className="w-full max-w-2xl px-4 py-2 rounded-md bg-gray-200 text-gray-700"
+          />
+          {searchTerm.trim() && (
+            <p className="mt-2 text-xs text-slate-200">
+              Rezultate: <span className="font-semibold">{searchedAuctions.length}</span>
+            </p>
+          )}
+        </div>
+
+        {/* Go to auction */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-white mb-2">Deschide direct o licitație (ID sau link)</label>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              value={goToText}
+              onChange={(e) => setGoToText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  const id = normalizeAuctionId(goToText);
+                  if (id) router.push(`/auctions/${id}`);
+                }
+              }}
+              placeholder="ex: 2a9c... sau https://site.ro/auctions/2a9c..."
+              className="w-full sm:flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700"
+            />
+            <button
+              type="button"
+              className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:bg-gray-400"
+              disabled={!goToText.trim()}
+              onClick={() => {
+                const id = normalizeAuctionId(goToText);
+                if (id) router.push(`/auctions/${id}`);
+              }}
+            >
+              Deschide
+            </button>
+          </div>
+        </div>
+
         {/* Auctions List */}
         <div className="bg-white rounded-lg shadow-md">
           <div className="p-6">
-            {filteredAuctions.length === 0 ? (
+            {searchedAuctions.length === 0 ? (
               <p className="text-gray-500">Nicio licitație găsită.</p>
             ) : (
               <div className="space-y-4">
-                {filteredAuctions.map((auction) => (
+                {searchedAuctions.map((auction) => (
                   <div key={auction.id} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">

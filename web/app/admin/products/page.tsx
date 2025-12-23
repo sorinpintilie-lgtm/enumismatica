@@ -23,6 +23,15 @@ export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [goToText, setGoToText] = useState('');
+
+  const normalizeProductId = (raw: string): string => {
+    const text = raw.trim();
+    if (!text) return '';
+    const m = text.match(/\/products\/([^/?#]+)/i);
+    return m?.[1] ? m[1] : text;
+  };
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -100,6 +109,17 @@ export default function AdminProducts() {
     filter === 'all' ? true : p.status === filter
   );
 
+  const searchedProducts = filteredProducts.filter((p) => {
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.trim().toLowerCase();
+    return (
+      p.id.toLowerCase().includes(q) ||
+      p.ownerId.toLowerCase().includes(q) ||
+      p.name.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q)
+    );
+  });
+
   if (authLoading || loading || !isAdminUser) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -173,14 +193,63 @@ export default function AdminProducts() {
           </select>
         </div>
 
+        {/* Search */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-white mb-2">
+            Caută după ID produs / ID proprietar / nume / descriere
+          </label>
+          <input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="ex: 8f3a..., QEm0..., Roman Denarius..."
+            className="w-full max-w-2xl px-4 py-2 rounded-md bg-gray-200 text-gray-700"
+          />
+          {searchTerm.trim() && (
+            <p className="mt-2 text-xs text-slate-200">
+              Rezultate: <span className="font-semibold">{searchedProducts.length}</span>
+            </p>
+          )}
+        </div>
+
+        {/* Go to product */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-white mb-2">Deschide direct un produs (ID sau link)</label>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              value={goToText}
+              onChange={(e) => setGoToText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  const id = normalizeProductId(goToText);
+                  if (id) router.push(`/products/${id}`);
+                }
+              }}
+              placeholder="ex: 8f3a... sau https://site.ro/products/8f3a..."
+              className="w-full sm:flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700"
+            />
+            <button
+              type="button"
+              className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:bg-gray-400"
+              disabled={!goToText.trim()}
+              onClick={() => {
+                const id = normalizeProductId(goToText);
+                if (id) router.push(`/products/${id}`);
+              }}
+            >
+              Deschide
+            </button>
+          </div>
+        </div>
+
         {/* Products List */}
         <div className="bg-white rounded-lg shadow-md">
           <div className="p-6">
-            {filteredProducts.length === 0 ? (
+            {searchedProducts.length === 0 ? (
               <p className="text-gray-500">Nicio piesă găsită.</p>
             ) : (
               <div className="space-y-4">
-                {filteredProducts.map((product) => (
+                {searchedProducts.map((product) => (
                   <div key={product.id} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">

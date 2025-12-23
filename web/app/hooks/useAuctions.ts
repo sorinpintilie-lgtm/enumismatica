@@ -28,7 +28,8 @@ export function useAuctions(
   status?: 'active' | 'ended' | 'cancelled',
   pageSize: number = 20,
   fields: string[] = DEFAULT_AUCTION_FIELDS,
-  enabled: boolean = true
+  enabled: boolean = true,
+  ownerId?: string,
 ) {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,11 +69,19 @@ export function useAuctions(
     
     try {
       console.log('[useAuctions] About to call collection() with db');
-      let q = query(collection(db, 'auctions'), orderBy('createdAt', 'desc'), limit(pageSize));
+
+      // Build query in a predictable order (filters first), to keep index requirements consistent.
+      let q = query(collection(db, 'auctions'));
 
       if (status) {
         q = query(q, where('status', '==', status));
       }
+
+      if (ownerId) {
+        q = query(q, where('ownerId', '==', ownerId));
+      }
+
+      q = query(q, orderBy('createdAt', 'desc'), limit(pageSize));
 
       const unsubscribe = onSnapshot(
         q,
@@ -136,7 +145,7 @@ export function useAuctions(
       setError(error instanceof Error ? error.message : 'Unknown error');
       setLoading(false);
     }
-   }, [status, pageSize, JSON.stringify(fields), enabled]);
+   }, [status, pageSize, JSON.stringify(fields), enabled, ownerId]);
 
   const loadMore = useCallback(() => {
     if (!enabled || !hasMore || !lastVisible || loading || !db) return;
@@ -144,16 +153,17 @@ export function useAuctions(
     setLoading(true);
     
     try {
-      let q = query(
-        collection(db, 'auctions'),
-        orderBy('createdAt', 'desc'),
-        limit(pageSize),
-        startAfter(lastVisible)
-      );
+      let q = query(collection(db, 'auctions'));
 
       if (status) {
         q = query(q, where('status', '==', status));
       }
+
+      if (ownerId) {
+        q = query(q, where('ownerId', '==', ownerId));
+      }
+
+      q = query(q, orderBy('createdAt', 'desc'), limit(pageSize), startAfter(lastVisible));
 
       const unsubscribe = onSnapshot(
         q,
@@ -206,7 +216,7 @@ export function useAuctions(
       setError(error instanceof Error ? error.message : 'Unknown error');
       setLoading(false);
     }
-   }, [hasMore, lastVisible, loading, status, pageSize, fields, enabled]);
+   }, [hasMore, lastVisible, loading, status, pageSize, fields, enabled, ownerId]);
 
   return { auctions, loading, error, hasMore, loadMore };
 }
