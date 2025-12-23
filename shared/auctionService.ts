@@ -40,8 +40,8 @@ export function validateBid(auction: Auction, bidAmount: number, userId: string)
   }
 
   const currentBid = auction.currentBid || 0;
-  // Bid increment: 5% of current bid amount
-  const bidIncrement = currentBid > 0 ? currentBid * 0.05 : 0;
+  // Bid increment: 5% of current bid amount, rounded up to nearest whole number
+  const bidIncrement = currentBid > 0 ? Math.ceil(currentBid * 0.05) : 0;
   const minBid = Math.max(currentBid + bidIncrement, auction.reservePrice);
 
   if (bidAmount < minBid) {
