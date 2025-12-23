@@ -114,7 +114,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
         }`}
       >
         {/* Image */}
-        <Link href={`/products/${auction.productId}`} className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
+        <Link href={`/auctions/${auction.id}`} className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
           {product && product.images && product.images.length > 0 ? (
             <img
               src={`${product.images[0]}?width=200`}
@@ -205,7 +205,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
         isUserHighestBidder ? 'ring-2 ring-emerald-400/80 ring-offset-2 ring-offset-navy-900' : ''
       }`}
     >
-      <Link href={`/products/${auction.productId}`} className="relative aspect-[4/3] bg-white">
+      <Link href={`/auctions/${auction.id}`} className="relative aspect-[4/3] bg-white">
         {product && product.images && product.images.length > 0 ? (
           <img
             src={`${product.images[0]}?width=400`}

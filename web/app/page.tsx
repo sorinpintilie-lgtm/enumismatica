@@ -137,7 +137,7 @@ export default function HomePage() {
                 </div>
                ) : boostedProducts.length > 0 ? (
                 <>
-                  <div className="relative h-[340px] w-full rounded-2xl overflow-hidden">
+                  <Link href={`/products/${boostedProducts[0].id}`} className="relative h-[340px] w-full rounded-2xl overflow-hidden block">
                     <LazyImage
                       src={buildImageUrlWithWidth(boostedProducts[0].images?.[0], 800)}
                       alt={`Moneda ${boostedProducts[0].name} din colecția noastră`}
@@ -148,7 +148,7 @@ export default function HomePage() {
                     <div className="absolute top-2 right-2 bg-[#e7b73c] text-[#000940] px-2 py-1 rounded-full text-xs font-semibold">
                       Produs Promovat
                     </div>
-                  </div>
+                  </Link>
                   <div className="mt-4 flex items-start justify-between rounded-2xl border border-[#e7b73c] bg-[#e7b73c] px-4 py-3 shadow-lg shadow-[#e7b73c]/40">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#000940]">Produs Promovat</p>
@@ -165,7 +165,7 @@ export default function HomePage() {
                    {boostedProducts.length > 1 && (
                      <div className="mt-3 grid grid-cols-2 gap-2">
                        {boostedProducts.slice(1, 3).map((product) => (
-                         <div key={product.id} className="bg-navy-50 rounded-lg p-2 border border-[#e7b73c]/20">
+                         <Link key={product.id} href={`/products/${product.id}`} className="bg-navy-50 rounded-lg p-2 border border-[#e7b73c]/20 block hover:shadow-md transition-shadow">
                            <div className="h-16 w-full bg-white rounded mb-1 overflow-hidden">
                              <LazyImage
                                src={buildImageUrlWithWidth(product.images?.[0], 200)}
@@ -175,7 +175,7 @@ export default function HomePage() {
                            </div>
                            <p className="text-xs font-medium text-[#000940] truncate">{product.name}</p>
                            <p className="text-xs font-bold text-[#e7b73c]">{product.price} RON</p>
-                         </div>
+                         </Link>
                        ))}
                      </div>
                    )}
