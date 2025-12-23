@@ -235,6 +235,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { to, templateKey, vars = {}, fallbackKey } = body;
 
+    console.log('Email API called:', { to, templateKey, fallbackKey });
+
     if (!to || !templateKey) {
       return NextResponse.json(
         { error: 'Missing required fields: to and templateKey' },
@@ -279,13 +281,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Send email
+    console.log('Sending email with msg:', msg);
     await sgMail.send(msg);
+    console.log('Email sent successfully');
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Email send error:', error);
     return NextResponse.json(
-      { error: 'Failed to send email' },
+      { error: 'Failed to send email', details: error.message },
       { status: 500 }
     );
   }
