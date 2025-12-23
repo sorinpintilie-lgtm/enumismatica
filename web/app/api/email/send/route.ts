@@ -266,13 +266,15 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    // If template ID is set, use template, otherwise send plain text
-    if (template.templateId && template.templateId !== `d-${templateKey}-template-id`) {
+    // If template ID is set and not a placeholder, use template, otherwise send plain text
+    const isPlaceholder = template.templateId && /^d-.*-template-id$/.test(template.templateId);
+    if (template.templateId && !isPlaceholder) {
       msg.templateId = template.templateId;
     } else {
       // Fallback to plain text email
       const plainTextContent = generatePlainTextEmail(templateKey, vars);
       msg.text = plainTextContent;
+      msg.subject = template.subject; // Set subject for plain text
       delete msg.dynamicTemplateData;
     }
 
