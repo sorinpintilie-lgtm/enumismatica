@@ -158,7 +158,7 @@ export default function OfferManagement({ productId, auctionId, productName, onC
       <div className="mx-4 max-w-4xl w-full rounded-2xl bg-navy-900/95 border border-gold-500/40 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.95)] max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-semibold text-white">
-            Oferte pentru {productName || 'produsul tău'}
+            Oferte pentru {productName || 'piesa ta'}
           </h3>
           <button
             onClick={onClose}
@@ -179,7 +179,7 @@ export default function OfferManagement({ productId, auctionId, productName, onC
             </div>
             <p className="text-slate-300 text-lg">Nu ai primit încă nicio ofertă</p>
             <p className="text-slate-400 text-sm mt-2">
-              Ofertele vor apărea aici când cumpărătorii vor fi interesați de produsul tău.
+              Ofertele vor apărea aici când cumpărătorii vor fi interesați de piesa ta.
             </p>
           </div>
         ) : (

@@ -141,7 +141,7 @@ export default function NewProductPage() {
       showToast({
         type: 'error',
         title: 'Autentificare necesară',
-        message: 'Trebuie să fii autentificat pentru a adăuga un produs.',
+        message: 'Trebuie să fii autentificat pentru a adăuga o piesă.',
       });
       router.push('/login');
       return;
@@ -277,7 +277,7 @@ export default function NewProductPage() {
           grade: grade || undefined,
           acquisitionPrice: numericPrice,
           currentValue: numericPrice,
-          notes: 'Articol creat în magazin',
+          notes: 'Piesă creată în magazin',
           tags: ['listare-magazin'],
         });
       } catch (err) {
@@ -307,10 +307,10 @@ export default function NewProductPage() {
 
       showToast({
         type: 'success',
-        title: listingType === 'auction' ? 'Licitație trimisă spre aprobare' : 'Produs trimis spre aprobare',
+        title: listingType === 'auction' ? 'Licitație trimisă spre aprobare' : 'Piesă trimisă spre aprobare',
         message: listingType === 'auction'
           ? 'Licitația a fost trimisă spre aprobare. Un administrator o va verifica înainte să apară public.'
-          : 'Produsul a fost trimis spre aprobare. Un administrator îl va verifica înainte să apară public.',
+          : 'Piesa a fost trimisă spre aprobare. Un administrator o va verifica înainte să apară public.',
       });
 
       router.push('/dashboard');
@@ -319,7 +319,7 @@ export default function NewProductPage() {
       showToast({
         type: 'error',
         title: 'Eroare la salvare',
-        message: err?.message || 'A apărut o eroare la salvarea produsului.',
+        message: err?.message || 'A apărut o eroare la salvarea piesei.',
       });
     } finally {
       setSubmitting(false);
@@ -339,7 +339,7 @@ export default function NewProductPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto bg-navy-900/80 border border-gold-500/40 rounded-2xl p-6 shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
-        <h1 className="text-2xl font-bold text-white mb-4">Adaugă un produs</h1>
+        <h1 className="text-2xl font-bold text-white mb-4">Adaugă o piesă</h1>
         
         {/* Toggle for Romanian Coins */}
         <div className="mb-6 p-4 bg-navy-800/50 rounded-lg border border-gold-500/20">
@@ -510,7 +510,7 @@ export default function NewProductPage() {
           {/* Name Input */}
           <div>
             <label className="block text-sm font-medium text-slate-200 mb-1">
-              Nume produs *
+              Nume piesă *
             </label>
             <input
               type="text"

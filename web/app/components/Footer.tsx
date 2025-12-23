@@ -96,7 +96,7 @@ export default function Footer() {
             <h3 className="text-xl font-bold text-gold-400 mb-4">Despre noi</h3>
             <p className="text-gray-300 text-sm">
               eNumismatica.ro este platforma lider în numismatică din România,
-              oferind colecții rare și articole de colecție de cea mai înaltă calitate.
+              oferind colecții rare și piese de colecție de cea mai înaltă calitate.
             </p>
           </div>
         </div>

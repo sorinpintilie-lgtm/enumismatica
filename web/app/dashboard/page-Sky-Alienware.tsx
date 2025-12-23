@@ -104,7 +104,7 @@ export default function Dashboard() {
       // Credits and product boost fields will refresh via Firestore listeners
     } catch (err: any) {
       console.error('Failed to boost product', err);
-      alert(err?.message || 'Nu s-a putut aplica boost-ul pentru acest produs.');
+      alert(err?.message || 'Nu s-a putut aplica boost-ul pentru această piesă.');
     }
   };
 
@@ -237,7 +237,7 @@ export default function Dashboard() {
 
           <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)] hover:-translate-y-1 hover:border-gold-400 transition-all">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-semibold text-white">Produsele Mele</h3>
+              <h3 className="text-lg font-semibold text-white">Piesele Mele</h3>
               <svg className="w-8 h-8 text-gold-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd" />
               </svg>
@@ -299,17 +299,17 @@ export default function Dashboard() {
           {/* My Products */}
           <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)] hover:-translate-y-1 hover:border-gold-400 transition-all">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-white">Produsele mele</h2>
+              <h2 className="text-xl font-semibold text-white">Piesele mele</h2>
               <Link
                 href="/products/new"
                 className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.6)] transition-colors"
               >
-                Adaugă produs
+                Adaugă piesă
               </Link>
             </div>
 
             {products.length === 0 ? (
-              <p className="text-slate-200">Niciun produs listat încă.</p>
+              <p className="text-slate-200">Nicio piesă listată încă.</p>
             ) : (
               <div className="space-y-3">
                 {products.slice(0, 5).map((product) => {
@@ -325,7 +325,7 @@ export default function Dashboard() {
                         <p className="text-sm text-gold-300 font-semibold">{formatRON(product.price)}</p>
                         {isBoostActive && (
                           <p className="mt-1 text-xs font-semibold text-emerald-300">
-                            Boost activ – produsul tău este evidențiat în listări
+                            Boost activ – piesa ta este evidențiată în listări
                           </p>
                         )}
                       </div>

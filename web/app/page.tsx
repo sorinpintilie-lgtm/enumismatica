@@ -133,7 +133,7 @@ export default function HomePage() {
             <div className="relative rounded-3xl border border-[#e7b73c] bg-white/98 backdrop-blur-sm p-4 shadow-[0_20px_60px_rgba(231,183,60,0.35)]">
               {boostedLoading ? (
                 <div className="h-[340px] w-full rounded-2xl bg-slate-100 animate-pulse flex items-center justify-center">
-                  <div className="text-slate-400">Se încarcă produsele...</div>
+                  <div className="text-slate-400">Se încarcă piesele...</div>
                 </div>
                ) : boostedProducts.length > 0 ? (
                 <>
@@ -145,13 +145,13 @@ export default function HomePage() {
                       className="h-full w-full object-contain bg-white"
                       placeholder={`Se încarcă imaginea ${boostedProducts[0].name}`}
                     />
-                    <div className="absolute top-2 right-2 bg-[#e7b73c] text-[#000940] px-2 py-1 rounded-full text-xs font-semibold">
-                      Produs Promovat
-                    </div>
+                      <div className="absolute top-2 right-2 bg-[#e7b73c] text-[#000940] px-2 py-1 rounded-full text-xs font-semibold">
+                        Piesă Promovată
+                      </div>
                   </Link>
                   <div className="mt-4 flex items-start justify-between rounded-2xl border border-[#e7b73c] bg-[#e7b73c] px-4 py-3 shadow-lg shadow-[#e7b73c]/40">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#000940]">Produs Promovat</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#000940]">Piesă Promovată</p>
                       <p className="text-base font-semibold text-white">{boostedProducts[0].name}</p>
                       <p className="text-sm text-white/90">Preț special disponibil acum</p>
                     </div>
@@ -186,8 +186,8 @@ export default function HomePage() {
                     <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    <p className="text-sm font-medium">Nu sunt produse promovate</p>
-                    <p className="text-xs">Produsele promovate vor apărea aici</p>
+                    <p className="text-sm font-medium">Nu sunt piese promovate</p>
+                    <p className="text-xs">Piesele promovate vor apărea aici</p>
                   </div>
                 </div>
               )}
@@ -233,7 +233,7 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 bg-navy-700">
         <div className="mb-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gold-400 mb-2">E-shop</p>
-          <h2 className="text-3xl font-bold text-white mb-3">Ultimele Produse</h2>
+          <h2 className="text-3xl font-bold text-white mb-3">Ultimele Piese</h2>
           <p className="text-slate-300 max-w-2xl mx-auto">
             Monede recent adăugate în E-shop, verificate și gata de livrare. Vizualizarea detaliilor și a licitațiilor este
             disponibilă doar utilizatorilor autentificați.
@@ -260,7 +260,7 @@ export default function HomePage() {
                 href="/products"
                 className="inline-flex items-center justify-center rounded-full border-2 border-[#e7b73c] bg-[#e7b73c] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#e7b73c]/40 transition hover:bg-[#f0c955] hover:border-[#f0c955]"
               >
-                Vezi toate produsele
+                Vezi toate piesele
                 <span className="ml-2" aria-hidden>→</span>
               </Link>
             </div>
@@ -269,8 +269,8 @@ export default function HomePage() {
           <div className="mx-auto max-w-xl rounded-2xl border border-[#e7b73c]/40 bg-navy-900/70 p-6 text-center shadow-[0_18px_45px_rgba(0,0,0,0.8)]">
             <h3 className="text-lg font-semibold text-white mb-2">Autentifică-te pentru a vedea E-shop-ul</h3>
             <p className="text-sm text-slate-300 mb-4">
-              Pentru a accesa produsele, licitațiile și detaliile pieselor, este necesar un cont. Fără autentificare poți vedea
-              doar pagina de start și informațiile generale.
+              Pentru a accesa piesele, licitațiile și detaliile acestora, este necesar un cont. Fără autentificare poți vedea doar
+              pagina de start și informațiile generale.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Link

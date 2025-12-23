@@ -232,7 +232,7 @@ export default function AdminAuctions() {
                           </span>
                         </div>
                         <div className="mt-2 text-sm text-gray-500">
-                          <p>ID Produs: {auction.productId}</p>
+                          <p>ID piesă: {auction.productId}</p>
                           <p>Preț de rezervă: ${Math.round(auction.reservePrice)}</p>
                           {auction.currentBid && (
                             <p>Licitație curentă: ${Math.round(auction.currentBid)}</p>

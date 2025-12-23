@@ -118,7 +118,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
           {product && product.images && product.images.length > 0 ? (
             <img
               src={`${product.images[0]}?width=200`}
-              alt={product.name || 'Articol Licitație'}
+              alt={product.name || 'Piesă Licitație'}
               className="w-full h-full object-contain"
             />
           ) : (
@@ -207,11 +207,11 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
     >
       <Link href={`/auctions/${auction.id}`} className="relative aspect-[4/3] bg-white">
         {product && product.images && product.images.length > 0 ? (
-          <img
-            src={`${product.images[0]}?width=400`}
-            alt={product.name || 'Articol Licitație'}
-            className="w-full h-full object-contain"
-          />
+            <img
+              src={`${product.images[0]}?width=400`}
+              alt={product.name || 'Piesă Licitație'}
+              className="w-full h-full object-contain"
+            />
         ) : (
           <div className="w-full h-full bg-slate-100 flex items-center justify-center">
             <span className="text-slate-400">Se încarcă...</span>

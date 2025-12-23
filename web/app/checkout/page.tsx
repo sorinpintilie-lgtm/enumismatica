@@ -198,7 +198,7 @@ export default function CheckoutPage() {
       showToast({
         type: 'error',
         title: 'Coș gol',
-        message: 'Nu există produse în coș pentru a finaliza cumpărarea.',
+        message: 'Nu există piese în coș pentru a finaliza cumpărarea.',
       });
       return;
     }
@@ -272,15 +272,15 @@ export default function CheckoutPage() {
           title: 'Cumpărare finalizată',
           message:
             successCount === 1
-              ? 'Ai cumpărat 1 produs din coș. Comanda este înregistrată. Vei fi contactat pentru confirmarea livrării la adresa introdusă.'
-              : `Ai cumpărat ${successCount} produse din coș. Comenzile sunt înregistrate. Vei fi contactat pentru confirmarea livrării la adresa introdusă.`,
+              ? 'Ai cumpărat 1 piesă din coș. Comanda este înregistrată. Vei fi contactat pentru confirmarea livrării la adresa introdusă.'
+              : `Ai cumpărat ${successCount} piese din coș. Comenzile sunt înregistrate. Vei fi contactat pentru confirmarea livrării la adresa introdusă.`,
         });
       } else {
         showToast({
           type: 'error',
           title: 'Nicio cumpărare efectuată',
           message:
-            'Niciun produs din coș nu a putut fi cumpărat (deja vândut sau nu mai este disponibil).',
+            'Nicio piesă din coș nu a putut fi cumpărată (deja vândută sau nu mai este disponibilă).',
         });
       }
     } finally {
@@ -295,8 +295,8 @@ export default function CheckoutPage() {
           <h1 className="text-3xl font-bold text-[#e7b73c] mb-1">Checkout</h1>
           <p className="text-slate-300">
             {isEmpty
-              ? 'Nu ai produse în coș pentru a finaliza comanda.'
-              : 'Verifică produsele din coș înainte de a confirma cumpărarea.'}
+              ? 'Nu ai piese în coș pentru a finaliza comanda.'
+              : 'Verifică piesele din coș înainte de a confirma cumpărarea.'}
           </p>
         </div>
         <Link
@@ -347,16 +347,16 @@ export default function CheckoutPage() {
                     <div>
                       <div className="flex justify-between items-start gap-2">
                         <div>
-                          <h2 className="text-sm sm:text-base font-semibold text-white mb-1 line-clamp-2">
-                            {product ? product.name : 'Produs indisponibil'}
-                          </h2>
+                            <h2 className="text-sm sm:text-base font-semibold text-white mb-1 line-clamp-2">
+                              {product ? product.name : 'Piesă indisponibilă'}
+                            </h2>
                           {product && typeof price === 'number' ? (
                             <p className="text-xs text-slate-400">
                               {formatRON(price)}
                             </p>
                           ) : (
                             <p className="text-xs text-red-300">
-                              Produsul nu mai este disponibil.
+                              Piesa nu mai este disponibilă.
                             </p>
                           )}
                         </div>
@@ -365,8 +365,8 @@ export default function CheckoutPage() {
                     <div className="flex items-center justify-between gap-4">
                       <div className="text-xs text-slate-400">
                         {unavailable
-                          ? 'Nu va fi cumpărat (deja vândut sau indisponibil).'
-                          : 'Va fi cumpărat ca produs unic (cantitate 1).'}
+                          ? 'Nu va fi cumpărată (deja vândută sau indisponibilă).'
+                          : 'Va fi cumpărată ca piesă unică (cantitate 1).'}
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-slate-400">Subtotal</p>
@@ -386,7 +386,7 @@ export default function CheckoutPage() {
             <div className="rounded-2xl border border-gold-500/40 bg-navy-900/90 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.9)]">
               <h2 className="text-lg font-semibold text-white mb-3">Adresă de livrare</h2>
               <p className="text-[11px] text-slate-400 mb-4">
-                Completează adresa unde dorești să primești produsele comandate.
+                Completează adresa unde dorești să primești piesele comandate.
               </p>
               <div className="space-y-3">
                 <div className="grid grid-cols-1 gap-3">
@@ -614,7 +614,7 @@ export default function CheckoutPage() {
             <div className="rounded-2xl border border-gold-500/40 bg-navy-900/90 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.9)]">
               <h2 className="text-lg font-semibold text-white mb-3">Rezumat comandă</h2>
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-slate-300">Articole</span>
+                <span className="text-slate-300">Piese</span>
                 <span className="text-slate-100">{lines.length}</span>
               </div>
               <div className="flex justify-between text-base font-semibold mt-3 pt-3 border-t border-gold-500/20">
@@ -626,7 +626,7 @@ export default function CheckoutPage() {
                 tranzacției.
               </p>
               <p className="mt-1 text-[11px] text-slate-400">
-                Fiecare produs din coș este tratat ca piesă unică, cu cantitate 1. Momentan plata nu este
+                Fiecare piesă din coș este tratată ca piesă unică, cu cantitate 1. Momentan plata nu este
                 procesată online; comenzile sunt înregistrate intern și vor fi revizuite de un administrator.
               </p>
               {fullName.trim() && city.trim() && (
@@ -644,7 +644,7 @@ export default function CheckoutPage() {
                   disabled={submitting || isEmpty}
                   className="block w-full text-center rounded-full bg-[#e7b73c] px-4 py-2.5 text-sm font-semibold text-[#000940] shadow-[0_0_22px_rgba(231,183,60,0.8)] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/50 disabled:text-slate-600 transition-colors"
                 >
-                  {submitting ? 'Se procesează cumpărarea...' : 'Confirmă cumpărarea produselor'}
+                  {submitting ? 'Se procesează cumpărarea...' : 'Confirmă cumpărarea pieselor'}
                 </button>
               </div>
             </div>

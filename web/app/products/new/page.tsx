@@ -144,8 +144,8 @@ export default function NewProductPage() {
           if (!product) {
             showToast({
               type: 'error',
-              title: 'Produs negăsit',
-              message: 'Produsul pe care încerci să-l editezi nu există.',
+              title: 'Piesă negăsită',
+              message: 'Piesa pe care încerci să o editezi nu există.',
             });
             router.push('/dashboard');
             return;
@@ -156,7 +156,7 @@ export default function NewProductPage() {
             showToast({
               type: 'error',
               title: 'Acces interzis',
-              message: 'Nu poți edita un produs care nu îți aparține.',
+              message: 'Nu poți edita o piesă care nu îți aparține.',
             });
             router.push('/dashboard');
             return;
@@ -193,8 +193,8 @@ export default function NewProductPage() {
           console.error('Failed to load product for editing:', error);
           showToast({
             type: 'error',
-            title: 'Eroare la încărcarea produsului',
-            message: 'Nu s-a putut încărca produsul pentru editare.',
+            title: 'Eroare la încărcarea piesei',
+            message: 'Nu s-a putut încărca piesa pentru editare.',
           });
           router.push('/dashboard');
           return;
@@ -273,7 +273,7 @@ export default function NewProductPage() {
           showToast({
             type: 'error',
             title: 'Eroare',
-            message: 'Nu s-a putut încărca articolul din colecție.',
+            message: 'Nu s-a putut încărca piesa din colecție.',
           });
         })
         .finally(() => {
@@ -360,7 +360,7 @@ export default function NewProductPage() {
       showToast({
         type: 'error',
         title: 'Permisiune necesară',
-        message: 'Doar conturile verificate pot încărca video pentru produse.',
+        message: 'Doar conturile verificate pot încărca video pentru piese.',
       });
       return;
     }
@@ -417,7 +417,7 @@ export default function NewProductPage() {
       showToast({
         type: 'error',
         title: 'Autentificare necesară',
-        message: 'Trebuie să fii autentificat pentru a adăuga un produs.',
+        message: 'Trebuie să fii autentificat pentru a adăuga o piesă.',
       });
       router.push('/login');
       return;
@@ -427,7 +427,7 @@ export default function NewProductPage() {
       showToast({
         type: 'error',
         title: 'Câmp obligatoriu',
-        message: 'Numele produsului este obligatoriu.',
+        message: 'Numele piesei este obligatoriu.',
       });
       return;
     }
@@ -619,7 +619,7 @@ export default function NewProductPage() {
             certificationGrade: hasCertification ? certificationGrade : undefined,
             acquisitionPrice: productPrice,
             currentValue: productPrice,
-            notes: 'Articol creat în magazin',
+            notes: 'Piesă creată în magazin',
             tags: ['listare-magazin'],
           });
         } catch (err) {
@@ -710,15 +710,15 @@ export default function NewProductPage() {
       showToast({
         type: 'success',
         title: editingProduct
-          ? 'Produs actualizat cu succes'
+          ? 'Piesă actualizată cu succes'
           : listingType === 'auction'
           ? 'Licitație trimisă spre aprobare'
-          : 'Produs trimis spre aprobare',
+          : 'Piesă trimisă spre aprobare',
         message: editingProduct
           ? 'Modificările au fost salvate.'
           : listingType === 'auction'
-          ? 'Licitația a fost trimisă spre aprobare. Produsul este acum vizibil, dar licitația va fi activată după verificare.'
-          : 'Produsul a fost trimis spre aprobare. Un administrator îl va verifica înainte să apară public.',
+          ? 'Licitația a fost trimisă spre aprobare. Piesa este acum vizibilă, dar licitația va fi activată după verificare.'
+          : 'Piesa a fost trimisă spre aprobare. Un administrator o va verifica înainte să apară public.',
       });
 
       router.push('/dashboard');
@@ -727,7 +727,7 @@ export default function NewProductPage() {
       showToast({
         type: 'error',
         title: 'Eroare la salvare',
-        message: err?.message || 'A apărut o eroare la salvarea produsului.',
+        message: err?.message || 'A apărut o eroare la salvarea piesei.',
       });
     } finally {
       setSubmitting(false);
@@ -740,7 +740,7 @@ export default function NewProductPage() {
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500" />
           <p className="ml-4 text-slate-300">
-            {loadingCollectionItem ? 'Se încarcă articolul din colecție...' : 'Se verifică sesiunea de utilizator...'}
+            {loadingCollectionItem ? 'Se încarcă piesa din colecție...' : 'Se verifică sesiunea de utilizator...'}
           </p>
         </div>
       </div>
@@ -751,7 +751,7 @@ export default function NewProductPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto bg-navy-900/80 border border-gold-500/40 rounded-2xl p-6 shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
         <h1 className="text-2xl font-bold text-white mb-4">
-          {editingProduct ? 'Editează produs' : 'Adaugă un produs'}
+          {editingProduct ? 'Editează piesă' : 'Adaugă o piesă'}
         </h1>
         
         {/* Toggle for Romanian Coins */}
@@ -939,7 +939,7 @@ export default function NewProductPage() {
           {/* Name Input */}
           <div>
             <label className="block text-sm font-medium text-slate-200 mb-1">
-              Nume produs *
+              Nume piesă *
             </label>
             <input
               type="text"
@@ -1263,7 +1263,7 @@ export default function NewProductPage() {
               </label>
             </div>
             <p className="text-xs text-slate-400">
-              Bifează această opțiune dacă dorești să primești oferte de la cumpărători interesați de produsul tău. 
+              Bifează această opțiune dacă dorești să primești oferte de la cumpărători interesați de piesa ta. 
               Ofertele vor fi trimise prin notificări și vei putea să le accepti sau să le respingi.
             </p>
           </div>
@@ -1283,7 +1283,7 @@ export default function NewProductPage() {
                 className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-gold-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-navy-900 hover:file:bg-gold-400"
               />
               <p className="mt-1 text-xs text-slate-400">
-                Poți selecta imagini din galerie sau să faci fotografii direct
+                Selectează imagini din galerie sau folosește camera pentru fotografii noi
               </p>
               {files.length > 0 && (
                 <>

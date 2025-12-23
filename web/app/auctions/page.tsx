@@ -456,7 +456,7 @@ function AuctionsListContent() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-white mb-2">Licitații Active</h1>
         <p className="text-slate-300">
-          Licitează pentru {auctions.length} articole numismatice
+          Licitează pentru {auctions.length} piese numismatice
         </p>
       </div>
 

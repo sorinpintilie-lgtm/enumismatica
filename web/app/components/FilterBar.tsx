@@ -109,7 +109,7 @@ const romanianEras = [
 ];
 
 export default function FilterBar({ filters, onFilterChange, showAuctionFilters = false, items = [] }: FilterBarProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [localFilters, setLocalFilters] = useState(filters);
   const [romanianOptions, setRomanianOptions] = useState({
     faceValues: ['Toate Valorile'],
@@ -186,7 +186,7 @@ export default function FilterBar({ filters, onFilterChange, showAuctionFilters 
     const defaultFilters: FilterOptions = {
       searchTerm: '',
       category: 'Toate Categoriile',
-      country: 'România',
+      country: 'Toate Țările',
       // 0 / 0 = fără filtru de preț; utilizatorul setează limite doar dacă dorește.
       minPrice: 0,
       maxPrice: 0,

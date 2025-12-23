@@ -210,7 +210,7 @@ export default function AuctionDetailPage() {
       showToast({
         type: 'success',
         title: 'Cumpărare instant',
-        message: 'Ai cumpărat imediat acest articol prin "Cumpără acum".',
+        message: 'Ai cumpărat imediat această piesă prin "Cumpără acum".',
       });
     } catch (error) {
       console.error('Failed to use buy now:', error);
@@ -512,7 +512,7 @@ export default function AuctionDetailPage() {
                     <span className="font-semibold">{formatRON(auction.buyNowPrice)}</span>.
                   </p>
                   <p className="text-[11px] text-amber-100/90 mt-1">
-                    Poți cumpăra imediat acest articol folosind opțiunea "Cumpără acum"
+                    Poți cumpăra imediat această piesă folosind opțiunea "Cumpără acum"
                     la același sau la un preț mai mic, fără riscul de a licita peste. Sigur vrei să
                     continui cu această licitație?
                   </p>
@@ -567,7 +567,7 @@ export default function AuctionDetailPage() {
                 >
                   <img
                     src={`${images[0]}?width=800`}
-                    alt={product?.name || 'Articol Licitație'}
+                    alt={product?.name || 'Piesă Licitație'}
                     className="w-full h-96 object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
                   />
                 </div>
@@ -580,11 +580,11 @@ export default function AuctionDetailPage() {
                         onClick={() => openLightboxAt(index + 1)}
                         className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-xl overflow-hidden border border-gold-500/10 cursor-zoom-in"
                       >
-                        <img
-                          src={`${image}?width=200`}
-                          alt={`${product?.name || 'Articol Licitație'} ${index + 2}`}
-                          className="w-full h-20 object-contain bg-navy-950"
-                        />
+                          <img
+                            src={`${image}?width=200`}
+                            alt={`${product?.name || 'Piesă Licitație'} ${index + 2}`}
+                            className="w-full h-20 object-contain bg-navy-950"
+                          />
                       </button>
                     ))}
                   </div>
@@ -776,8 +776,8 @@ export default function AuctionDetailPage() {
                             if (product.ownerId === user.uid) {
                               showToast({
                                 type: 'error',
-                                title: 'Nu poți face ofertă pe propriul produs',
-                                message: 'Ești deja proprietarul acestui produs.',
+                                title: 'Nu poți face ofertă pe propria piesă',
+                                message: 'Ești deja proprietarul acestei piese.',
                               });
                               return;
                             }
@@ -785,7 +785,7 @@ export default function AuctionDetailPage() {
                               showToast({
                                 type: 'info',
                                 title: 'Oferțiile nu sunt acceptate',
-                                message: 'Vânzătorul nu acceptă oferte pentru acest produs.',
+                                message: 'Vânzătorul nu acceptă oferte pentru această piesă.',
                               });
                               return;
                             }
@@ -1010,7 +1010,7 @@ export default function AuctionDetailPage() {
                   </button>
                 </div>
                 <p className="text-sm text-slate-300">
-                  Gestionează ofertele directe de la cumpărători interesați de acest produs.
+                  Gestionează ofertele directe de la cumpărători interesați de această piesă.
                 </p>
               </div>
             )}
@@ -1068,7 +1068,7 @@ export default function AuctionDetailPage() {
         {/* Other Products by this Seller */}
         {otherProducts.filter(p => p.id !== product?.id).length > 0 && (
           <div className="mt-12">
-            <h2 className="text-2xl font-bold text-white mb-6">Alte Produse de la Acest Vânzător</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Alte Piese de la Acest Vânzător</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
               {otherProducts
                 .filter(p => p.id !== product?.id)

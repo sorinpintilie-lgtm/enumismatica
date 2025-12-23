@@ -227,7 +227,7 @@ export default function Dashboard() {
       // Credits and product boost fields will refresh via Firestore listeners
     } catch (err: any) {
       console.error('Failed to boost product', err);
-      alert(err?.message || 'Nu s-a putut aplica boost-ul pentru acest produs.');
+      alert(err?.message || 'Nu s-a putut aplica boost-ul pentru această piesă.');
     }
   };
 
@@ -617,12 +617,12 @@ export default function Dashboard() {
                 href="/products/new"
                 className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.6)] transition-colors"
               >
-                Adaugă produs
+                Adaugă piesă
               </Link>
             </div>
 
             {products.length === 0 ? (
-              <p className="text-slate-200">Niciun produs listat încă.</p>
+              <p className="text-slate-200">Nicio piesă listată încă.</p>
             ) : (
               <div className="space-y-3">
                 {products.slice(0, 5).map((product) => {
@@ -638,7 +638,7 @@ export default function Dashboard() {
                         <p className="text-sm text-gold-300 font-semibold">{formatRON(product.price)}</p>
                         {isBoostActive && (
                           <p className="mt-1 text-xs font-semibold text-emerald-300">
-                            Boost activ – produsul tău este evidențiat în listări
+                            Boost activ – piesa ta este evidențiată în listări
                           </p>
                         )}
                       </div>

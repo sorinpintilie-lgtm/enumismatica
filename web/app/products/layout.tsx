@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Produse - eNumismatica',
-  description: 'Catalog de monede și produse numismatice',
+  title: 'Piese - eNumismatica',
+  description: 'Catalog de monede și piese numismatice',
 }
 
 export default function ProductsLayout({

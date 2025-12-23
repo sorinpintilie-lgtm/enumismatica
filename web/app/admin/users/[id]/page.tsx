@@ -198,7 +198,7 @@ export default function AdminUserDetail() {
   };
 
   const handleDeleteCollectionItem = async (itemId: string) => {
-    if (!confirm('Șterge acest articol din colecția utilizatorului?')) return;
+    if (!confirm('Șterge această piesă din colecția utilizatorului?')) return;
     
     const result = await deleteUserCollectionItem(userId, itemId);
     if (result.success) {
@@ -465,7 +465,7 @@ export default function AdminUserDetail() {
         {analytics && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
             <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
-              <p className="text-sm text-slate-400">Produse</p>
+              <p className="text-sm text-slate-400">Piese</p>
               <p className="text-2xl font-bold text-white">{analytics.totalProducts}</p>
             </div>
             <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-4">
@@ -523,7 +523,7 @@ export default function AdminUserDetail() {
         {activeTab === 'overview' && analytics && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Statistici Produse</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Statistici Piese</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-slate-300">Aprobate:</span>
@@ -722,10 +722,10 @@ export default function AdminUserDetail() {
           <div className="bg-navy-800/50 rounded-lg border border-gold-500/20">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-white mb-4">
-                Colecția Personală ({collection.length} articole)
+                Colecția Personală ({collection.length} piese)
               </h3>
               {collection.length === 0 ? (
-                <p className="text-slate-400">Utilizatorul nu are articole în colecție.</p>
+                <p className="text-slate-400">Utilizatorul nu are piese în colecție.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {collection.map((item) => (

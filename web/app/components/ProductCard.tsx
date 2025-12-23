@@ -42,12 +42,12 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
         {/* Image */}
         <Link href={`/products/${product.id}`} className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
           {product.images && product.images.length > 0 ? (
-            <LazyImage
-              src={buildImageUrlWithWidth(product.images[0], 200)}
-              alt={product.name || 'Produs'}
-              className="h-full w-full object-contain transition duration-300 group-hover:scale-105"
-              placeholder="Loading..."
-            />
+              <LazyImage
+                src={buildImageUrlWithWidth(product.images[0], 200)}
+                alt={product.name || 'Piesă'}
+                className="h-full w-full object-contain transition duration-300 group-hover:scale-105"
+                placeholder="Loading..."
+              />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
               Fără imagine
@@ -113,7 +113,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
         {product.images && product.images.length > 0 ? (
           <LazyImage
             src={buildImageUrlWithWidth(product.images[0], 400)}
-            alt={product.name || 'Produs'}
+            alt={product.name || 'Piesă'}
             className="h-full w-full object-contain transition duration-500 group-hover:scale-105"
             placeholder="Loading..."
           />
