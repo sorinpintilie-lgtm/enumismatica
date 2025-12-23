@@ -962,7 +962,7 @@ export default function NewProductPage() {
              {listingType === 'direct' && (
                <div>
                  <label className="block text-sm font-medium text-slate-200 mb-1">
-                   Preț fix (RON) *
+                    Preț fix (EUR) *
                  </label>
                  <input
                    type="number"
@@ -1375,7 +1375,7 @@ export default function NewProductPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-200 mb-1">
-                    Preț de start licitație (RON)
+                    Preț de start licitație (EUR)
                   </label>
                   <input
                     type="number"
@@ -1389,7 +1389,7 @@ export default function NewProductPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-200 mb-1">
-                    Preț minim acceptat (doar pentru tine) (RON)
+                    Preț minim acceptat (doar pentru tine) (EUR)
                   </label>
                   <input
                     type="number"
@@ -1405,7 +1405,7 @@ export default function NewProductPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-200 mb-1">
-                    Preț "Cumpără acum" (RON, opțional)
+                    Preț "Cumpără acum" (EUR, opțional)
                   </label>
                   <input
                     type="number"
