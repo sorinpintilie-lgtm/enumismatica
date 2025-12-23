@@ -311,6 +311,10 @@ function ProductsListContent() {
     return filtered;
   }, [products, filters]);
 
+  // Use a single, consistent total in UI.
+  // When filtering by ownerId, prefer the Firestore count if available.
+  const totalForDisplay = ownerId ? (totalCount ?? filteredProducts.length) : filteredProducts.length;
+
   // Prefetch next N pages so page navigation feels instant.
   // This keeps a buffer of (current page + PREFETCH_PAGES_AHEAD) loaded.
   useEffect(() => {
@@ -413,7 +417,7 @@ function ProductsListContent() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-[#e7b73c] mb-2">E-shop</h1>
         <p className="text-slate-200">
-          Explorează colecția noastră de {products.length} piese
+          Explorează colecția noastră de {ownerId && totalCount == null ? '...' : totalForDisplay} piese
         </p>
       </div>
 
@@ -428,8 +432,8 @@ function ProductsListContent() {
             {requestedPage === page && pagedProducts.length === 0 ? '—' : pagedProducts.length}
           </span>{' '}
           piese (pagina <span className="font-semibold text-gold-400">{page}</span>) din{' '}
-          <span className="font-semibold text-gold-400">{ownerId ? totalCount ?? '...' : 'total'}</span>{' '}
-          {ownerId ? 'piese' : 'piese disponibile'}
+          <span className="font-semibold text-gold-400">{ownerId && totalCount == null ? '...' : totalForDisplay}</span>{' '}
+          piese
           {requestedPage === page && (
             <span className="ml-2 text-xs text-slate-400">(Se încarcă pagina…)</span>
           )}
