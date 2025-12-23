@@ -29,7 +29,7 @@ export default function CartPage() {
           // For mint products, create a pseudo-product object
           product = {
             id: item.productId,
-            name: item.mintProductData.title || 'Produs Monetaria Statului',
+            name: item.mintProductData.title || 'Piesă Monetaria Statului',
             price: parseRON(item.mintProductData.price),
             images: [`/Monetaria_statului/romanian_mint_products/${item.mintProductData.category_slug}/${item.mintProductData.image_files}`],
           } as any;
@@ -119,7 +119,7 @@ export default function CartPage() {
             <p className="text-slate-300">Coșul tău este gol.</p>
           ) : (
             <p className="text-slate-300">
-              Ai {lines.length} {lines.length === 1 ? 'produs' : 'produse'} în coș.
+              Ai {lines.length} {lines.length === 1 ? 'piesă' : 'piese'} în coș.
             </p>
           )}
         </div>
@@ -153,7 +153,7 @@ export default function CartPage() {
 
           <div className="space-y-4">
             {lines.map(({ item, product }) => {
-              const label = product?.name || `Produs ${item.productId}`;
+              const label = product?.name || `Piesă ${item.productId}`;
               const price =
                 product && typeof product.price === 'number'
                   ? formatRON(product.price)
@@ -170,7 +170,7 @@ export default function CartPage() {
                         {label}
                       </h2>
                       <p className="text-xs text-slate-400">
-                        ID produs: {item.productId}
+                        ID piesă: {item.productId}
                       </p>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -182,7 +182,7 @@ export default function CartPage() {
                           href={item.isMintProduct ? `/monetaria-statului/${item.productId}` : `/products/${item.productId}`}
                           className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-3 py-1 text-xs font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
                         >
-                          Vezi produsul
+                          Vezi piesa
                         </Link>
                         <button
                           disabled={placingOrderFor === item.productId}

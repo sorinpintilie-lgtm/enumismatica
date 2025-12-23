@@ -213,7 +213,7 @@ export default function AdminDashboard() {
             href="/admin/products"
             className="bg-navy-800/50 hover:bg-navy-700/50 border border-gold-500/20 hover:border-gold-500/40 rounded-lg p-6 transition-colors"
           >
-            <h3 className="text-lg font-semibold text-white mb-2">Produse</h3>
+            <h3 className="text-lg font-semibold text-white mb-2">Piese</h3>
             <p className="text-3xl font-bold text-gold-400">{stats?.totalProducts || 0}</p>
             <p className="text-sm text-slate-400 mt-1">Total catalog</p>
           </Link>

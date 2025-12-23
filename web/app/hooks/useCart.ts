@@ -83,13 +83,13 @@ export function useCart(userId?: string) {
   const addToCart = useCallback(
     async (productId: string, quantity: number = 1, isMintProduct?: boolean, mintProductData?: any) => {
       if (!userId) {
-        throw new Error('Trebuie să fii autentificat pentru a adăuga produse în coș.');
+        throw new Error('Trebuie să fii autentificat pentru a adăuga piese în coș.');
       }
       if (!db) {
         throw new Error('Baza de date nu este inițializată.');
       }
       if (!productId) {
-        throw new Error('Produs invalid.');
+        throw new Error('Piesă invalidă.');
       }
       if (!quantity || quantity <= 0) {
         quantity = 1;

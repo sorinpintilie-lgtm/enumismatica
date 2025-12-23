@@ -106,7 +106,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Autenticitate</h3>
               <p className="text-slate-200">
-                Fiecare articol din colecția noastră este verificat și autentificat cu atenție de echipa noastră de experți.
+                Fiecare piesă din colecția noastră este verificată și autentificată cu atenție de echipa noastră de experți.
                 Garantăm autenticitatea tuturor monedelor și valutelor pe care le oferim.
               </p>
             </div>
@@ -197,7 +197,7 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-lg font-bold text-white mb-2">Resurse educaționale</h3>
                 <p className="text-slate-200">
-                  Accesează biblioteca noastră de articole, ghiduri și informații istorice pentru a-ți aprofunda
+                  Accesează biblioteca noastră de piese, ghiduri și informații istorice pentru a-ți aprofunda
                   înțelegerea numismaticii.
                 </p>
               </div>

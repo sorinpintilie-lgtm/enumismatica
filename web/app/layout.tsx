@@ -9,7 +9,7 @@ import Footer from './components/Footer'
  
 export const metadata: Metadata = {
   title: 'eNumismatica - Magazin de Monede & Licitatii',
-  description: 'Cumpara si vinde articole numismatice prin magazinul si platforma noastra de licitatii',
+  description: 'Cumpara si vinde piese numismatice prin magazinul si platforma noastra de licitatii',
   icons: {
     icon: '/eNumismatica.ro_logo.ico',
     shortcut: '/eNumismatica.ro_logo.ico',

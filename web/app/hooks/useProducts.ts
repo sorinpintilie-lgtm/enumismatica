@@ -85,6 +85,17 @@ export function useProducts(
       q = query(q, where('ownerId', '==', ownerId));
     }
 
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[useProducts] init', {
+        ownerId: ownerId || null,
+        pageSize,
+        enabled,
+        listingType,
+        live,
+        fieldsCount: fields.length,
+      });
+    }
+
     // Live mode: keep the existing listener behavior.
     // Non-live mode: use getDocs so pagination doesn't get overwritten by realtime updates.
     if (live) {
@@ -156,6 +167,14 @@ export function useProducts(
       try {
         const snap = await getDocs(q);
         if (cancelled) return;
+
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('[useProducts] getDocs returned', snap.size, 'products', {
+            ownerId: ownerId || null,
+            pageSize,
+            listingType,
+          });
+        }
 
         const productsData: Product[] = [];
         snap.forEach((doc) => {

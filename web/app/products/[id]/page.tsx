@@ -103,7 +103,7 @@ export default function ProductDetailPage() {
       showToast({
         type: 'error',
         title: 'Autentificare necesară',
-        message: 'Trebuie să te autentifici pentru a cumpăra acest produs.',
+        message: 'Trebuie să te autentifici pentru a cumpăra această piesă.',
       });
       return;
     }
@@ -111,8 +111,8 @@ export default function ProductDetailPage() {
     if (product.ownerId === user.uid) {
       showToast({
         type: 'error',
-        title: 'Nu poți cumpăra propriul produs',
-        message: 'Ești deja proprietarul acestui produs.',
+        title: 'Nu poți cumpăra propria piesă',
+        message: 'Ești deja proprietarul acestei piese.',
       });
       return;
     }
@@ -120,8 +120,8 @@ export default function ProductDetailPage() {
     if ((product as any).isSold) {
       showToast({
         type: 'error',
-        title: 'Produs indisponibil',
-        message: 'Acest produs a fost deja vândut.',
+        title: 'Piesă indisponibilă',
+        message: 'Această piesă a fost deja vândută.',
       });
       return;
     }
@@ -148,12 +148,12 @@ export default function ProductDetailPage() {
       showToast({
         type: 'success',
         title: 'Cumpărare reușită',
-        message: `Ai cumpărat acest produs. Comanda ta a fost înregistrată (ID: ${orderId}).`,
+        message: `Ai cumpărat această piesă. Comanda ta a fost înregistrată (ID: ${orderId}).`,
       });
     } catch (error) {
       console.error('Failed to buy product:', error);
       const message =
-        error instanceof Error ? error.message : 'A apărut o eroare la cumpărarea produsului.';
+        error instanceof Error ? error.message : 'A apărut o eroare la cumpărarea piesei.';
       showToast({
         type: 'error',
         title: 'Eroare la cumpărare',
@@ -171,7 +171,7 @@ export default function ProductDetailPage() {
       showToast({
         type: 'error',
         title: 'Autentificare necesară',
-        message: 'Trebuie să te autentifici pentru a adăuga produse în coș.',
+        message: 'Trebuie să te autentifici pentru a adăuga piese în coș.',
       });
       return;
     }
@@ -186,7 +186,7 @@ export default function ProductDetailPage() {
     } catch (error) {
       console.error('Failed to add to cart:', error);
       const message =
-        error instanceof Error ? error.message : 'A apărut o eroare la adăugarea produsului în coș.';
+        error instanceof Error ? error.message : 'A apărut o eroare la adăugarea piesei în coș.';
       showToast({
         type: 'error',
         title: 'Eroare la coș',
@@ -210,16 +210,16 @@ export default function ProductDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-xl mx-auto panel-dark p-6 text-center">
           <h1 className="text-2xl font-bold text-white mb-4">
-            {error ? 'Eroare la încărcarea produsului' : 'Produs negăsit'}
+            {error ? 'Eroare la încărcarea piesei' : 'Piesă negăsită'}
           </h1>
           <p className="text-slate-300 mb-4">
-            {error || 'Produsul pe care îl cauți nu există.'}
+            {error || 'Piesa pe care o cauți nu există.'}
           </p>
           <Link
             href="/products"
             className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-6 py-2 text-sm font-semibold text-[#000940] shadow-[0_0_24px_rgba(231,183,60,0.75)] hover:bg-[#f0c955] transition-colors"
           >
-            Înapoi la produse
+            Înapoi la piese
           </Link>
         </div>
       </div>
@@ -232,10 +232,10 @@ export default function ProductDetailPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
           <div className="mx-4 max-w-md w-full rounded-2xl bg-navy-900/95 border border-gold-500/40 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.95)]">
             <h3 className="text-lg font-semibold text-white mb-2">
-              Confirmă cumpărarea produsului
+              Confirmă cumpărarea piesei
             </h3>
             <p className="text-sm text-slate-200 mb-4">
-              Ești sigur că vrei să cumperi acest produs pentru{' '}
+              Ești sigur că vrei să cumperi această piesă pentru{' '}
               <span className="font-semibold text-[#e7b73c]">
                 {Math.round(product.price)} EUR
               </span>
@@ -268,12 +268,15 @@ export default function ProductDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6 flex items-center justify-between">
-            <Link
-              href="/products"
-              className="inline-flex items-center text-sm font-medium text-gold-400 hover:text-gold-300 transition-colors"
+            <button
+              onClick={() => {
+                console.log('[ProductDetail] Back button clicked, using window.history.back()');
+                window.history.back();
+              }}
+              className="inline-flex items-center text-sm font-medium text-gold-400 hover:text-gold-300 transition-colors bg-transparent border-none cursor-pointer"
             >
-              ← Înapoi la produse
-            </Link>
+              ← Înapoi la piese
+            </button>
             {isOwner && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-slate-300">Vizualizare:</span>
@@ -364,7 +367,7 @@ export default function ProductDetailPage() {
                 </p>
                 {product.isSold && (
                   <p className="text-sm font-semibold text-red-300 mb-2">
-                    Acest produs a fost vândut și nu mai este disponibil.
+                    Această piesă a fost vândută și nu mai este disponibilă.
                   </p>
                 )}
                 {viewMode === 'preview' ? (
@@ -378,7 +381,7 @@ export default function ProductDetailPage() {
                       {product.isSold
                         ? 'Deja vândut'
                         : !!user && product.ownerId === user.uid
-                        ? 'Ești proprietarul acestui produs'
+                        ? 'Ești proprietarul acestei piese'
                         : 'Adaugă în coș'}
                     </button>
                     <button
@@ -394,7 +397,7 @@ export default function ProductDetailPage() {
                       {product.isSold
                         ? 'Deja vândut'
                         : !!user && product.ownerId === user.uid
-                        ? 'Ești proprietarul acestui produs'
+                        ? 'Ești proprietarul acestei piese'
                         : buying
                         ? 'Se procesează cumpărarea...'
                         : 'Cumpără acum'}
@@ -413,16 +416,16 @@ export default function ProductDetailPage() {
                         if (product.ownerId === user.uid) {
                           showToast({
                             type: 'error',
-                            title: 'Nu poți face ofertă pe propriul produs',
-                            message: 'Ești deja proprietarul acestui produs.',
+                            title: 'Nu poți face ofertă pe propria piesă',
+                            message: 'Ești deja proprietarul acestei piese.',
                           });
                           return;
                         }
                         if (product.isSold) {
                           showToast({
                             type: 'error',
-                            title: 'Produs indisponibil',
-                            message: 'Acest produs a fost deja vândut.',
+                            title: 'Piesă indisponibilă',
+                            message: 'Această piesă a fost deja vândută.',
                           });
                           return;
                         }
@@ -430,7 +433,7 @@ export default function ProductDetailPage() {
                           showToast({
                             type: 'info',
                             title: 'Oferțiile nu sunt acceptate',
-                            message: 'Vânzătorul nu acceptă oferte pentru acest produs.',
+                            message: 'Vânzătorul nu acceptă oferte pentru această piesă.',
                           });
                           return;
                         }
@@ -442,7 +445,7 @@ export default function ProductDetailPage() {
                       {product.isSold
                         ? 'Deja vândut'
                         : !!user && product.ownerId === user.uid
-                        ? 'Ești proprietarul acestui produs'
+                        ? 'Ești proprietarul acestei piese'
                         : product.acceptsOffers === false
                         ? 'Oferțiile nu sunt acceptate'
                         : 'Transmite o ofertă'}
@@ -451,14 +454,14 @@ export default function ProductDetailPage() {
                 ) : (
                   <div className="space-y-3 mt-1">
                     <div className="text-sm text-slate-300">
-                      <strong>Mod Proprietar:</strong> Gestionați-vă produsul și vizualizați ofertele primite.
+                      <strong>Mod Proprietar:</strong> Gestionați-vă piesa și vizualizați ofertele primite.
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Link
                         href={`/products/new?edit=${product.id}`}
                         className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-colors text-center"
                       >
-                        Editează Produs
+                        Editează Piesă
                       </Link>
                       <button
                         type="button"
@@ -491,7 +494,7 @@ export default function ProductDetailPage() {
                     <h3 className="text-lg font-medium text-[#e7b73c] mb-3">Informații generale</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-slate-300">ID Produs:</span>
+                        <span className="text-slate-300">ID piesă:</span>
                         <span className="font-mono text-slate-100">{product.id}</span>
                       </div>
                       {product.country && (
@@ -646,7 +649,7 @@ export default function ProductDetailPage() {
           {/* Other Products by this Seller */}
           {otherProducts.filter(p => p.id !== id).length > 0 && (
             <div className="mt-12">
-              <h2 className="text-2xl font-bold text-white mb-6">Alte Produse de la Acest Vânzător</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">Alte Piese de la Acest Vânzător</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 {otherProducts
                   .filter(p => p.id !== id)
@@ -659,6 +662,19 @@ export default function ProductDetailPage() {
                     />
                   ))}
               </div>
+              {otherProducts.filter(p => p.id !== id).length > 6 && (
+                <div className="mt-6 text-center">
+                  <Link
+                    href={`/products?ownerId=${product.ownerId}`}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-navy-700 hover:bg-navy-600 text-gold-400 rounded-xl font-semibold transition-colors"
+                  >
+                    Vezi toate piesele de la acest vânzător ({otherProducts.filter(p => p.id !== id).length})
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -692,7 +708,7 @@ export default function ProductDetailPage() {
           <div className="max-w-3xl max-h-[80vh] flex items-center justify-center">
             <img
               src={buildImageUrlWithWidth(images[lightboxIndex], 1200)}
-              alt={product?.name || 'Imagine produs'}
+              alt={product?.name || 'Imagine piesă'}
               className="max-h-[80vh] max-w-full object-contain rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.9)]"
             />
           </div>

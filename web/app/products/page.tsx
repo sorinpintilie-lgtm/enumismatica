@@ -7,20 +7,97 @@ import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/ProductCard';
 import FilterBar, { FilterOptions } from '../components/FilterBar';
 import { useAuth } from '../context/AuthContext';
+import { db } from '../lib/firebase';
+import { collection, query, where, getCountFromServer, getDocs } from 'firebase/firestore';
+import { Product } from 'shared/types';
 
 function ProductsListContent() {
   // Fetch all fields needed for filtering and display
+  // Check URL for ownerId filter (when clicking "alte piese de la acest vanzator")
+  const searchParams = useSearchParams();
+  const sellerIdParam = searchParams.get('ownerId');
+  const ownerId = sellerIdParam || undefined;
+  
   const { products, loading, error, hasMore, loadMore } = useProducts(
-    undefined, // ownerId
+    ownerId,
     20, // pageSize
     ['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt'],
     true, // enabled
     'direct', // listingType
     false, // live (disable realtime so pagination can prefetch safely)
   );
-  const searchParams = useSearchParams();
+
+  // State for total count (when filtering by owner)
+  const [totalCount, setTotalCount] = useState<number | null>(null);
+
+  // Fetch total count when filtering by owner
+  useEffect(() => {
+    const fetchTotalCount = async () => {
+      if (!ownerId) {
+        setTotalCount(null);
+        return;
+      }
+
+      try {
+        const base = query(
+          collection(db, 'products'),
+          where('status', '==', 'approved'),
+          where('ownerId', '==', ownerId),
+        );
+
+        const qDirect = query(base, where('listingType', '==', 'direct'));
+        const qAuction = query(base, where('listingType', '==', 'auction'));
+
+        const [directSnap, auctionSnap] = await Promise.all([
+          getCountFromServer(qDirect),
+          getCountFromServer(qAuction),
+        ]);
+
+        const directCount = directSnap.data().count;
+        const auctionCount = auctionSnap.data().count;
+        const combinedKnown = directCount + auctionCount;
+
+        setTotalCount(directCount);
+
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('[ProductsPage] ownerId breakdown (approved):', {
+            ownerId,
+            directCount,
+            auctionCount,
+            combinedKnown,
+            note: 'If combinedKnown is much lower than expected, some documents may be missing listingType or have a different status.',
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching total count:', err);
+        // Fallback: count loaded products
+        setTotalCount(products.length);
+      }
+    };
+
+    fetchTotalCount();
+  }, [ownerId, products.length]);
+
+  // Debug: validate that we are actually loading all seller items
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return;
+    if (!ownerId) return;
+    console.log('[ProductsPage] owner filter state:', {
+      ownerId,
+      loadedProducts: products.length,
+      hasMore,
+      error,
+    });
+  }, [ownerId, products.length, hasMore, error]);
   const router = useRouter();
   const pathname = usePathname();
+
+  // Log page navigation for debugging
+  useEffect(() => {
+    const pageParam = searchParams.get('page');
+    console.log('[ProductsPage] Current page:', pageParam || '1');
+    console.log('[ProductsPage] Full URL:', window.location.href);
+  }, [searchParams]);
 
   const PAGE_SIZE = 20;
   const PREFETCH_PAGES_AHEAD = 3;
@@ -30,7 +107,7 @@ function ProductsListContent() {
   const [filters, setFilters] = useState<FilterOptions>({
     searchTerm: '',
     category: 'Toate Categoriile',
-    country: 'România',
+    country: 'Toate Țările',
     // 0 / 0 = fără filtru de preț în mod implicit. Utilizatorul setează limitele doar dacă dorește.
     minPrice: 0,
     maxPrice: 0,
@@ -166,8 +243,8 @@ function ProductsListContent() {
     }
 
     // Apply year range filter
-    // Notă: dacă un produs nu are anul setat, îl păstrăm în listă,
-    // altfel filtrul ar ascunde produsele fără an chiar și când gama este default.
+    // Notă: dacă o piesă nu are anul setat, o păstrăm în listă,
+    // altfel filtrul ar ascunde piesele fără an chiar și când gama este default.
     if (filters.minYear || filters.maxYear) {
       filtered = filtered.filter((product) => {
         if (!product.year) return true;
@@ -216,7 +293,7 @@ function ProductsListContent() {
     filtered.sort((a, b) => {
       switch (filters.sortBy) {
         case 'best-match':
-          // Relevanță: implicit cele mai noi produse primele
+          // Relevanță: implicit cele mai noi piese primele
           return b.createdAt.getTime() - a.createdAt.getTime();
         case 'price-asc':
           return a.price - b.price;
@@ -304,7 +381,7 @@ function ProductsListContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
-          <p className="ml-4 text-slate-300">Se încarcă produsele...</p>
+          <p className="ml-4 text-slate-300">Se încarcă piesele...</p>
         </div>
       </div>
     );
@@ -315,9 +392,9 @@ function ProductsListContent() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto rounded-2xl border border-red-500/30 bg-navy-900/80 p-8 shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
-          <h1 className="text-2xl font-bold text-white mb-3">Nu s-au putut încărca produsele</h1>
+          <h1 className="text-2xl font-bold text-white mb-3">Nu s-au putut încărca piesele</h1>
           <p className="text-sm text-slate-300 mb-4">
-            A apărut o eroare la încărcarea produselor din baza de date.
+            A apărut o eroare la încărcarea pieselor din baza de date.
           </p>
           <pre className="text-xs text-red-200 whitespace-pre-wrap break-words bg-black/30 rounded-lg p-4 border border-red-500/20">
             {error}
@@ -336,7 +413,7 @@ function ProductsListContent() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-[#e7b73c] mb-2">E-shop</h1>
         <p className="text-slate-200">
-          Explorează colecția noastră de {products.length} articole
+          Explorează colecția noastră de {products.length} piese
         </p>
       </div>
 
@@ -350,8 +427,9 @@ function ProductsListContent() {
           <span className="font-semibold text-gold-400">
             {requestedPage === page && pagedProducts.length === 0 ? '—' : pagedProducts.length}
           </span>{' '}
-          produse (pagina <span className="font-semibold text-gold-400">{page}</span>) din{' '}
-          <span className="font-semibold text-gold-400">{filteredProducts.length}</span> rezultate încărcate
+          piese (pagina <span className="font-semibold text-gold-400">{page}</span>) din{' '}
+          <span className="font-semibold text-gold-400">{ownerId ? totalCount ?? '...' : 'total'}</span>{' '}
+          {ownerId ? 'piese' : 'piese disponibile'}
           {requestedPage === page && (
             <span className="ml-2 text-xs text-slate-400">(Se încarcă pagina…)</span>
           )}
@@ -402,11 +480,11 @@ function ProductsListContent() {
               d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <h3 className="text-xl font-semibold text-white mb-2">Nu s-au găsit articole</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">Nu s-au găsit piese</h3>
           <p className="text-slate-300 mb-6">
             {filters.searchTerm
               ? 'Încearcă să ajustezi căutarea sau filtrele'
-              : 'Nu există articole disponibile momentan'}
+              : 'Nu există piese disponibile momentan'}
           </p>
           {filters.searchTerm && (
             <button
@@ -508,7 +586,7 @@ function ProductsPageContent() {
             Catalogul este disponibil doar pentru utilizatori autentificați
           </h1>
           <p className="text-sm text-slate-300 mb-5">
-            Pentru a vedea produsele, licitațiile și detaliile pieselor, trebuie să te autentifici în contul tău. Fără
+            Pentru a vedea piesele, licitațiile și detaliile acestora, trebuie să te autentifici în contul tău. Fără
             autentificare poți accesa doar pagina principală și informațiile generale.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
@@ -540,7 +618,7 @@ export default function ProductsPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
-            <p className="ml-4 text-slate-300">Se încarcă produsele...</p>
+            <p className="ml-4 text-slate-300">Se încarcă piesele...</p>
           </div>
         </div>
       }

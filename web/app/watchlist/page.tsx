@@ -33,7 +33,7 @@ export default function BookmarksPage() {
   }, [productWatchlist, products]);
 
   const handleRemove = async (itemId: string) => {
-    if (confirm('Ești sigur că vrei să elimini acest articol din lista de urmărire?')) {
+    if (confirm('Ești sigur că vrei să elimini această piesă din lista de urmărire?')) {
       await removeFromWatchlist(itemId);
     }
   };
@@ -93,7 +93,7 @@ export default function BookmarksPage() {
             <p className="text-slate-300">Lista ta de bookmark-uri este goală.</p>
           ) : (
             <p className="text-slate-300">
-              Ai {watchlistWithItems.length} {watchlistWithItems.length === 1 ? 'produs' : 'produse'} salvate.
+              Ai {watchlistWithItems.length} {watchlistWithItems.length === 1 ? 'piesă' : 'piese'} salvate.
             </p>
           )}
         </div>
@@ -128,7 +128,7 @@ export default function BookmarksPage() {
                     className="relative group h-full flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 rounded-2xl border border-[#e7b73c]/70 bg-gradient-to-br from-navy-500 to-navy-600 shadow-[0_10px_35px_rgba(231,183,60,0.3)] p-4"
                   >
                     <div className="text-center text-slate-400">
-                      <p className="text-sm">Articol indisponibil</p>
+                      <p className="text-sm">Piesă indisponibilă</p>
                       <p className="text-xs mt-1">ID: {item.itemId}</p>
                     </div>
                     <div className="mt-auto flex justify-center">
@@ -189,7 +189,7 @@ export default function BookmarksPage() {
             href="/products"
             className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-6 py-2 text-sm font-semibold text-[#000940] shadow-[0_0_24px_rgba(231,183,60,0.75)] hover:bg-[#f0c955] transition-colors"
           >
-            Catalog produse
+            Catalog piese
           </Link>
           <Link
             href="/auctions"

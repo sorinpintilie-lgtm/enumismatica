@@ -76,7 +76,7 @@ export default function MintProductDetailPage() {
       showToast({
         type: 'error',
         title: 'Autentificare necesară',
-        message: 'Trebuie să te autentifici pentru a cumpăra acest produs.',
+        message: 'Trebuie să te autentifici pentru a cumpăra această piesă.',
       });
       return;
     }
@@ -103,12 +103,12 @@ export default function MintProductDetailPage() {
       showToast({
         type: 'success',
         title: 'Cumpărare reușită',
-        message: `Ai cumpărat acest produs. Comanda ta a fost înregistrată (ID: ${orderId}).`,
+        message: `Ai cumpărat această piesă. Comanda ta a fost înregistrată (ID: ${orderId}).`,
       });
     } catch (error) {
       console.error('Failed to buy product:', error);
       const message =
-        error instanceof Error ? error.message : 'A apărut o eroare la cumpărarea produsului.';
+        error instanceof Error ? error.message : 'A apărut o eroare la cumpărarea piesei.';
       showToast({
         type: 'error',
         title: 'Eroare la cumpărare',
@@ -126,7 +126,7 @@ export default function MintProductDetailPage() {
       showToast({
         type: 'error',
         title: 'Autentificare necesară',
-        message: 'Trebuie să te autentifici pentru a adăuga produse în coș.',
+        message: 'Trebuie să te autentifici pentru a adăuga piese în coș.',
       });
       return;
     }
@@ -141,7 +141,7 @@ export default function MintProductDetailPage() {
     } catch (error) {
       console.error('Failed to add to cart:', error);
       const message =
-        error instanceof Error ? error.message : 'A apărut o eroare la adăugarea produsului în coș.';
+        error instanceof Error ? error.message : 'A apărut o eroare la adăugarea piesei în coș.';
       showToast({
         type: 'error',
         title: 'Eroare la coș',
@@ -156,10 +156,10 @@ export default function MintProductDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-xl mx-auto panel-dark p-6 text-center">
           <h1 className="text-2xl font-bold text-white mb-4">
-            {error ? 'Eroare la încărcarea produsului' : 'Produs negăsit'}
+            {error ? 'Eroare la încărcarea piesei' : 'Piesă negăsită'}
           </h1>
           <p className="text-slate-300 mb-4">
-            {error || 'Produsul pe care îl cauți nu există.'}
+            {error || 'Piesa pe care o cauți nu există.'}
           </p>
           <Link
             href="/monetaria-statului"
@@ -208,7 +208,7 @@ export default function MintProductDetailPage() {
               <div className="space-y-6">
                 <div>
                   <h1 className="text-3xl font-bold text-white mb-2">
-                    {product.title || 'Produs fără titlu'}
+                    {product.title || 'Piesă fără titlu'}
                   </h1>
                   <p className="text-slate-300 mb-4">
                     Categorie: {product.category}
@@ -270,7 +270,7 @@ export default function MintProductDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-slate-300">ID Produs:</span>
+                      <span className="text-slate-300">ID piesă:</span>
                       <span className="font-mono text-slate-100">{product.product_id}</span>
                     </div>
                     <div className="flex justify-between">
@@ -294,9 +294,9 @@ export default function MintProductDetailPage() {
           {/* Similar Products Carousel */}
           {similarProducts.length > 0 && (
             <div className="mt-12">
-              <h2 className="text-2xl font-bold text-white mb-6">
-                Produse similare din aceeași categorie
-              </h2>
+                <h2 className="text-2xl font-bold text-white mb-6">
+                Piese similare din aceeași categorie
+                </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {similarProducts.map((similarProduct) => {
                   const transformedProduct = {
@@ -314,13 +314,13 @@ export default function MintProductDetailPage() {
                       product={transformedProduct}
                       onCartClick={async (productId, productData) => {
                         if (!user) {
-                          showToast({
-                            type: 'error',
-                            title: 'Autentificare necesară',
-                            message: 'Trebuie să te autentifici pentru a adăuga produse în coș.',
-                          });
-                          return;
-                        }
+                            showToast({
+                              type: 'error',
+                              title: 'Autentificare necesară',
+                              message: 'Trebuie să te autentifici pentru a adăuga piese în coș.',
+                            });
+                            return;
+                          }
                         try {
                           await addToCart(productId, 1, true, productData);
                           showToast({
@@ -330,8 +330,8 @@ export default function MintProductDetailPage() {
                           });
                         } catch (error) {
                           console.error('Failed to add to cart:', error);
-                          const message =
-                            error instanceof Error ? error.message : 'A apărut o eroare la adăugarea produsului în coș.';
+                            const message =
+                            error instanceof Error ? error.message : 'A apărut o eroare la adăugarea piesei în coș.';
                           showToast({
                             type: 'error',
                             title: 'Eroare la coș',
@@ -363,11 +363,11 @@ export default function MintProductDetailPage() {
           </button>
 
           <div className="max-w-3xl max-h-[80vh] flex items-center justify-center">
-            <img
-              src={imageUrl}
-              alt={product.title || 'Imagine produs'}
-              className="max-h-[80vh] max-w-full object-contain rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.9)]"
-            />
+              <img
+                src={imageUrl}
+              alt={product.title || 'Imagine piesă'}
+                className="max-h-[80vh] max-w-full object-contain rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.9)]"
+              />
           </div>
         </div>
       )}

@@ -187,7 +187,7 @@ export default function MyCollectionPage() {
             Colecția este disponibilă doar pentru utilizatori autentificați
           </h1>
           <p className="text-sm text-slate-300 mb-5">
-            Pentru a vedea și gestiona articolele din colecția ta, trebuie să te autentifici în
+            Pentru a vedea și gestiona piesele din colecția ta, trebuie să te autentifici în
             contul tău.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
@@ -229,7 +229,7 @@ export default function MyCollectionPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3">Abonament Colecția Mea</h1>
           <p className="text-sm text-slate-300 mb-4">
             Pentru a folosi funcționalitățile „Colecția Mea” (vizualizare, adăugare și gestionare
-            articole), este nevoie de un abonament activ plătit cu credite.
+            piese), este nevoie de un abonament activ plătit cu credite.
           </p>
           <ul className="text-sm text-slate-300 mb-4 list-disc list-inside space-y-1">
             <li>
@@ -295,7 +295,7 @@ export default function MyCollectionPage() {
           <div className="rounded-2xl border border-gold-500/20 bg-navy-800/80 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-300 mb-1">Total articole</p>
+                <p className="text-sm text-slate-300 mb-1">Total piese</p>
                 <p className="text-3xl font-bold text-white">{stats.totalItems}</p>
               </div>
               <div className="w-12 h-12 bg-gold-500/20 rounded-full flex items-center justify-center">
@@ -403,7 +403,7 @@ export default function MyCollectionPage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Adaugă Articol
+            Adaugă Piesă
           </button>
         </div>
       </div>
@@ -425,19 +425,19 @@ export default function MyCollectionPage() {
           <h3 className="text-xl font-semibold text-white mb-2">
             {searchTerm ? 'Niciun rezultat găsit' : 'Colecția ta este goală'}
           </h3>
-          <p className="text-slate-300 mb-6">
-            {searchTerm
-              ? 'Încearcă să ajustezi termenul de căutare'
-              : 'Începe să-ți construiești colecția adăugând primul articol'}
-          </p>
-          {!searchTerm && (
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-6 py-3 rounded-full font-medium transition-colors shadow-lg shadow-[#e7b73c]/40"
-            >
-              Adaugă Primul Articol
-            </button>
-          )}
+            <p className="text-slate-300 mb-6">
+              {searchTerm
+                ? 'Încearcă să ajustezi termenul de căutare'
+                : 'Începe să-ți construiești colecția adăugând prima piesă'}
+            </p>
+            {!searchTerm && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-6 py-3 rounded-full font-medium transition-colors shadow-lg shadow-[#e7b73c]/40"
+              >
+                Adaugă Prima Piesă
+              </button>
+            )}
         </div>
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -447,7 +447,7 @@ export default function MyCollectionPage() {
               item={item}
               onEdit={() => setEditingItem(item)}
               onDelete={() => {
-                if (confirm('Sigur vrei să ștergi acest articol din colecție?')) {
+                if (confirm('Sigur vrei să ștergi această piesă din colecție?')) {
                   deleteItem(item.id);
                 }
               }}
@@ -509,7 +509,7 @@ export default function MyCollectionPage() {
             <table className="min-w-full divide-y divide-navy-700">
             <thead className="bg-navy-800/80">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Articol</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Piesă</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Țară</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider hidden sm:table-cell">An</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider hidden sm:table-cell">Metal</th>
@@ -550,7 +550,7 @@ export default function MyCollectionPage() {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm('Sigur vrei să ștergi acest articol?')) {
+                        if (confirm('Sigur vrei să ștergi această piesă?')) {
                           deleteItem(item.id);
                         }
                       }}
@@ -847,7 +847,7 @@ function CollectionItemModal({
       <div className="max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-gold-500/40 bg-navy-900/95 shadow-[0_22px_70px_rgba(0,0,0,0.9)]">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gold-500/30 bg-navy-900/95 px-6 py-4">
           <h2 className="text-2xl font-bold text-white">
-            {item ? 'Editează Articol' : 'Adaugă Articol Nou'}
+            {item ? 'Editează Piesă' : 'Adaugă Piesă Nouă'}
           </h2>
           <button
             onClick={onClose}
@@ -863,7 +863,7 @@ function CollectionItemModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-200 mb-1">
-                Nume Articol *
+                Nume piesă *
               </label>
               <input
                 type="text"
@@ -983,7 +983,7 @@ function CollectionItemModal({
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
                 className="w-full px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c]"
-                placeholder="Notițe despre acest articol..."
+                placeholder="Notițe despre această piesă..."
               />
             </div>
 
@@ -993,7 +993,6 @@ function CollectionItemModal({
                 type="file"
                 multiple
                 accept="image/*"
-                capture="environment"
                 onChange={handleImageChange}
                 className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-full file:border-0 file:bg-gold-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-navy-900 hover:file:bg-gold-400"
               />

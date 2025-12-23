@@ -86,7 +86,7 @@ export default function MonetariaStatuluiPage() {
           return {
             ...p,
             id: p.product_id,
-            title: p.title || 'Produs fără titlu',
+            title: p.title || 'Piesă fără titlu',
             description: p.full_description,
             price: p.price,
             category: p.category,
@@ -195,7 +195,7 @@ export default function MonetariaStatuluiPage() {
         {/* Monetaria Statului Filters */}
         {products.length > 0 && (
           <div className="bg-navy-800/50 rounded-2xl p-6 mb-8">
-            <h3 className="text-lg font-semibold text-white mb-4 text-center">Filtre Produse Monetaria Statului</h3>
+            <h3 className="text-lg font-semibold text-white mb-4 text-center">Filtre Piese Monetaria Statului</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-200 mb-2">Material</label>

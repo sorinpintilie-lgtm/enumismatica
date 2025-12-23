@@ -53,7 +53,7 @@ export default function AdminProducts() {
   };
 
   const handleDelete = async (productId: string) => {
-    if (!confirm('Ești sigur că vrei să ștergi acest produs?')) return;
+    if (!confirm('Ești sigur că vrei să ștergi această piesă?')) return;
     
     const result = await deleteProduct(productId);
     if (result.success) {
@@ -82,7 +82,7 @@ export default function AdminProducts() {
   };
 
   const handleRepublish = async (productId: string) => {
-    if (!confirm('Ești sigur că vrei să republici acest produs în e-shop?')) return;
+    if (!confirm('Ești sigur că vrei să republici această piesă în e-shop?')) return;
 
     const result = await republishProduct(productId);
     if (result.success) {
@@ -114,7 +114,7 @@ export default function AdminProducts() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-white">Gestionează produse</h1>
+          <h1 className="text-3xl font-bold text-white">Gestionează piese</h1>
           <Link
             href="/admin"
             className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-medium"
@@ -177,7 +177,7 @@ export default function AdminProducts() {
         <div className="bg-white rounded-lg shadow-md">
           <div className="p-6">
             {filteredProducts.length === 0 ? (
-              <p className="text-gray-500">Niciun produs găsit.</p>
+              <p className="text-gray-500">Nicio piesă găsită.</p>
             ) : (
               <div className="space-y-4">
                 {filteredProducts.map((product) => (

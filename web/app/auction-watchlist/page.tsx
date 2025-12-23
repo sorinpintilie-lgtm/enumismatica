@@ -185,7 +185,7 @@ export default function AuctionWatchlistPage() {
             href="/products"
             className="inline-flex items-center justify-center rounded-full border border-[#e7b73c] px-6 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
           >
-            Catalog produse
+            Catalog piese
           </Link>
         </div>
       </div>
