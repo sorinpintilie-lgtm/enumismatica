@@ -17,8 +17,8 @@ export async function uploadImage(file: File, path: string): Promise<string> {
 		originalType: file.type,
 	});
 
-	// Convert to WebP format for better compression (where supported)
-	const webpFile = await convertToWebP(file);
+	// Convert to WebP format with size optimization (max 700KB)
+	const webpFile = await convertToWebP(file, 700);
 
 	// Update path to use .webp extension
 	const webpPath = path.replace(/\.[^/.]+$/, '.webp');
