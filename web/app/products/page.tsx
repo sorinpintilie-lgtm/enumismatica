@@ -55,14 +55,16 @@ function ProductsListContent() {
   // navigates between pages instead of leaving the listing entirely.
   useEffect(() => {
     const pageParam = searchParams.get('page');
-
+ 
     if (!pageParam) {
+      // Only reset to page 1 if we're not already on page 1
+      // This prevents unnecessary state updates that can interfere with browser history
       if (page !== 1) {
         setPage(1);
       }
       return;
     }
-
+ 
     const parsed = parseInt(pageParam, 10);
     if (!Number.isNaN(parsed) && parsed >= 1 && parsed !== page) {
       setPage(parsed);

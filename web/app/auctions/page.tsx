@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo, Suspense, useEffect } from 'react';
+import { useState, useMemo, Suspense, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAuctions } from '../hooks/useAuctions';
 import { useProducts } from '../hooks/useProducts';
 import AuctionCard from '../components/AuctionCard';
@@ -13,15 +14,23 @@ import { Product } from 'shared/types';
 
 function AuctionsListContent() {
   const [statusFilter, setStatusFilter] = useState<'active' | 'ended' | 'all'>('active');
+  const [page, setPage] = useState(1);
+  const [requestedPage, setRequestedPage] = useState<number | null>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  const PAGE_SIZE = 20;
+  const PREFETCH_PAGES_AHEAD = 3;
   
   // Use dynamic status based on filter
   const statusForFetch = statusFilter === 'all' ? undefined : statusFilter;
-  const { auctions, loading: auctionsLoading, error: auctionsError } = useAuctions(statusForFetch);
+  const { auctions, loading: auctionsLoading, error: auctionsError, hasMore, loadMore } = useAuctions(statusForFetch, PAGE_SIZE);
 	// Fetch all fields needed for filtering and display.
 	// IMPORTANT: use listingType = 'all' so we also load products listed as 'auction'.
 	const { products, loading: productsLoading } = useProducts(
 		undefined, // ownerId
-		20, // pageSize
+		PAGE_SIZE,
 		['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt'],
 		true,
 		'all',
@@ -304,8 +313,107 @@ function AuctionsListContent() {
     return filtered;
   }, [auctions, fullProductMap, filters, statusFilter]);
 
-  const loading = auctionsLoading || productsLoading;
-  const error = auctionsError;
+ // Keep page state in sync with ?page=N in the URL so browser back/forward
+ // navigates between pages instead of leaving the listing entirely.
+ useEffect(() => {
+   const pageParam = searchParams.get('page');
+
+   if (!pageParam) {
+     if (page !== 1) {
+       setPage(1);
+     }
+     return;
+   }
+
+   const parsed = parseInt(pageParam, 10);
+   if (!Number.isNaN(parsed) && parsed >= 1 && parsed !== page) {
+     setPage(parsed);
+   }
+ }, [searchParams, page]);
+
+ const updatePageInUrl = (nextPage: number) => {
+   const params = new URLSearchParams(searchParams.toString());
+
+   if (nextPage > 1) {
+     params.set('page', String(nextPage));
+   } else {
+     params.delete('page');
+   }
+
+   const queryString = params.toString();
+   const target = queryString ? `${pathname}?${queryString}` : pathname;
+
+   // Use push so each page navigation creates a history entry
+   router.push(target);
+ };
+
+ // Prefetch next N pages so page navigation feels instant.
+ // This keeps a buffer of (current page + PREFETCH_PAGES_AHEAD) loaded.
+ useEffect(() => {
+   if (auctionsLoading || !hasMore) return;
+
+   const targetCount = (page + PREFETCH_PAGES_AHEAD) * PAGE_SIZE;
+   if (auctions.length < targetCount) {
+     loadMore();
+   }
+ }, [page, auctions.length, auctionsLoading, hasMore, loadMore, PAGE_SIZE, PREFETCH_PAGES_AHEAD]);
+
+ // Ensure we have enough loaded auctions when user navigates to a higher page.
+ useEffect(() => {
+   if (!requestedPage) return;
+   const neededCount = requestedPage * PAGE_SIZE;
+   const loadedCount = auctions.length;
+
+   if (loadedCount >= neededCount) {
+     setPage(requestedPage);
+     setRequestedPage(null);
+     updatePageInUrl(requestedPage);
+     return;
+   }
+
+   // Need more auctions from Firestore
+   if (hasMore && !auctionsLoading) {
+     loadMore();
+     return;
+   }
+
+   // No more auctions available; clamp to last available page
+   const maxPage = Math.max(1, Math.ceil(Math.max(filteredAuctions.length, loadedCount) / PAGE_SIZE));
+   setPage(maxPage);
+   setRequestedPage(null);
+   updatePageInUrl(maxPage);
+ }, [requestedPage, auctions.length, hasMore, auctionsLoading, loadMore, PAGE_SIZE, filteredAuctions.length]);
+
+ const loadedPages = Math.max(1, Math.ceil(auctions.length / PAGE_SIZE));
+ const totalPagesKnown = Math.max(1, Math.ceil(filteredAuctions.length / PAGE_SIZE));
+ const effectiveMaxPage = hasMore ? Math.max(totalPagesKnown, loadedPages + 1) : totalPagesKnown;
+
+ const pageStart = (page - 1) * PAGE_SIZE;
+ const pageEnd = pageStart + PAGE_SIZE;
+ const pagedAuctions = filteredAuctions.slice(pageStart, pageEnd);
+
+ const goToPage = (nextPage: number) => {
+   if (nextPage < 1) return;
+
+   // If user tries to go beyond what we have loaded, request that page and trigger fetches.
+   const neededCount = nextPage * PAGE_SIZE;
+   if (auctions.length < neededCount && hasMore) {
+     // Switch UI immediately to the requested page, then fetch in background.
+     setPage(nextPage);
+     setRequestedPage(nextPage);
+     updatePageInUrl(nextPage);
+     return;
+   }
+
+   const max = Math.max(1, Math.ceil(filteredAuctions.length / PAGE_SIZE));
+   const finalPage = Math.min(nextPage, max);
+   setPage(finalPage);
+   setRequestedPage(null);
+   updatePageInUrl(finalPage);
+ };
+
+ const loading = auctionsLoading || productsLoading;
+ const error = auctionsError;
 
   if (loading) {
     return (
@@ -392,8 +500,15 @@ function AuctionsListContent() {
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">
         <p className="text-slate-300">
-          Se afișează <span className="font-semibold text-gold-400">{filteredAuctions.length}</span> din{' '}
-          <span className="font-semibold text-gold-400">{auctions.length}</span> licitații
+          Se afișează{' '}
+          <span className="font-semibold text-gold-400">
+            {requestedPage === page && pagedAuctions.length === 0 ? '—' : pagedAuctions.length}
+          </span>{' '}
+          licitații (pagina <span className="font-semibold text-gold-400">{page}</span>) din{' '}
+          <span className="font-semibold text-gold-400">{filteredAuctions.length}</span> rezultate
+          {requestedPage === page && (
+            <span className="ml-2 text-xs text-slate-400">(Se încarcă pagina…)</span>
+          )}
         </p>
         
         {/* View Toggle */}
@@ -478,7 +593,7 @@ function AuctionsListContent() {
             ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
             : "space-y-4"
         }>
-          {filteredAuctions.map((auction) => (
+          {pagedAuctions.map((auction) => (
             <div key={auction.id} className={
               viewMode === 'list'
                 ? "flex bg-navy-800/50 rounded-xl border border-[#e7b73c]/20 p-4 hover:border-[#e7b73c]/40 transition-colors"
@@ -487,6 +602,51 @@ function AuctionsListContent() {
               <AuctionCard auction={auction} />
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {filteredAuctions.length > 0 && (
+        <div className="mt-12 flex items-center justify-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => goToPage(page - 1)}
+            disabled={page <= 1 || loading}
+            className="px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-200 hover:bg-navy-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ← Înapoi
+          </button>
+
+          {/* Page numbers (windowed) */}
+          {Array.from({ length: Math.min(5, effectiveMaxPage) }).map((_, idx) => {
+            const start = Math.max(1, page - 2);
+            const p = start + idx;
+            if (p > effectiveMaxPage) return null;
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => goToPage(p)}
+                disabled={loading}
+                className={
+                  p === page
+                    ? 'px-4 py-2 rounded-lg bg-gold-500 text-navy-900 font-semibold shadow-lg shadow-gold-500/30'
+                    : 'px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-200 hover:bg-navy-800'
+                }
+              >
+                {p}
+              </button>
+            );
+          })}
+
+          <button
+            type="button"
+            onClick={() => goToPage(page + 1)}
+            disabled={loading || (!hasMore && page >= totalPagesKnown) || requestedPage !== null}
+            className="px-4 py-2 rounded-lg border border-gold-500/30 bg-navy-800/60 text-slate-200 hover:bg-navy-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {requestedPage === page || loading ? 'Se încarcă…' : 'Înainte →'}
+          </button>
         </div>
       )}
     </div>
