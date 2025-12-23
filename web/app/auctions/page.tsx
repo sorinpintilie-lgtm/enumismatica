@@ -62,9 +62,20 @@ function AuctionsListContent() {
   useEffect(() => {
     const fetchAndFixMissingProducts = async () => {
       const missingIds: string[] = [];
+      const now = new Date();
       
-      // Find auction productIds that aren't in productMap
+      // Find auction productIds that aren't in productMap and check for ended auctions
       auctions.forEach((auction) => {
+        // Check if auction has ended based on endTime
+        if (auction.status === 'active' && new Date(auction.endTime) < now) {
+          console.log(`[AuctionsPage] Auto-ending auction ${auction.id} (endTime: ${auction.endTime})`);
+          // Update auction status to ended
+          updateDoc(doc(db, 'auctions', auction.id), {
+            status: 'ended',
+            updatedAt: Timestamp.now(),
+          }).catch(err => console.error('Failed to end auction:', err));
+        }
+        
         if (!productMap.has(auction.productId)) {
           missingIds.push(auction.productId);
         }
@@ -149,6 +160,16 @@ function AuctionsListContent() {
     if (statusFilter !== 'all') {
       filtered = filtered.filter((auction) => auction.status === statusFilter);
     }
+
+    // Filter out auctions that have ended (past their endTime)
+    const now = new Date();
+    filtered = filtered.filter((auction) => {
+      // If the auction status is 'active' but endTime has passed, it should be considered ended
+      if (auction.status === 'active' && new Date(auction.endTime) < now) {
+        return false;
+      }
+      return true;
+    });
 
     // Apply filters based on associated product data
     filtered = filtered.filter((auction) => {
