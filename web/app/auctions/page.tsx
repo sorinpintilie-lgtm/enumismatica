@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useMemo, Suspense } from 'react';
+import { useState, useMemo, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuctions } from '../hooks/useAuctions';
 import { useProducts } from '../hooks/useProducts';
 import AuctionCard from '../components/AuctionCard';
 import FilterBar, { FilterOptions } from '../components/FilterBar';
 import { useAuth } from '../context/AuthContext';
+import { doc, getDoc, updateDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { Product } from 'shared/types';
 
 function AuctionsListContent() {
 	const { auctions, loading: auctionsLoading, error: auctionsError } = useAuctions('active');
@@ -53,6 +56,88 @@ function AuctionsListContent() {
     return map;
   }, [products]);
 
+  // Fetch missing products that aren't in the initial 20 and auto-approve pending ones
+  const [missingProducts, setMissingProducts] = useState<Map<string, Product>>(new Map());
+
+  useEffect(() => {
+    const fetchAndFixMissingProducts = async () => {
+      const missingIds: string[] = [];
+      
+      // Find auction productIds that aren't in productMap
+      auctions.forEach((auction) => {
+        if (!productMap.has(auction.productId)) {
+          missingIds.push(auction.productId);
+        }
+      });
+
+      if (missingIds.length === 0) {
+        setMissingProducts(new Map());
+        return;
+      }
+
+      // Fetch each missing product individually and auto-approve if pending
+      const newMissingProducts = new Map<string, Product>();
+      await Promise.all(
+        missingIds.map(async (productId) => {
+          try {
+            const productDoc = await getDoc(doc(db, 'products', productId));
+            if (productDoc.exists()) {
+              const data = productDoc.data() as any;
+              
+              // Auto-approve product if it's pending and has an active auction
+              if (data.status === 'pending') {
+                console.log(`[AuctionsPage] Auto-approving product ${productId} for active auction`);
+                await updateDoc(doc(db, 'products', productId), {
+                  status: 'approved',
+                  updatedAt: Timestamp.now(),
+                });
+                // Update the local data to reflect the approved status
+                data.status = 'approved';
+              }
+              
+              const product: Product = {
+                id: productDoc.id,
+                name: data.name || 'Unknown Product',
+                description: data.description || '',
+                images: data.images || [],
+                price: data.price || 0,
+                ownerId: data.ownerId || '',
+                status: 'approved',
+                listingType: data.listingType,
+                country: data.country,
+                year: data.year,
+                era: data.era,
+                denomination: data.denomination,
+                metal: data.metal,
+                rarity: data.rarity,
+                grade: data.grade,
+                category: data.category,
+                createdAt: data.createdAt?.toDate() || new Date(),
+                updatedAt: data.updatedAt?.toDate() || new Date(),
+              };
+              newMissingProducts.set(productId, product);
+            }
+          } catch (error) {
+            console.error('Failed to fetch/fix product:', productId, error);
+          }
+        })
+      );
+
+      setMissingProducts(newMissingProducts);
+    };
+
+    fetchAndFixMissingProducts();
+  }, [auctions, productMap]);
+
+  // Combined product map including fetched missing products
+  const fullProductMap = useMemo(() => {
+    const map = new Map(productMap);
+    missingProducts.forEach((product, id) => {
+      map.set(id, product);
+    });
+    return map;
+  }, [productMap, missingProducts]);
+
   const filteredAuctions = useMemo(() => {
     console.log('[AuctionsPage] Starting filter with', auctions.length, 'auctions');
     console.log('[AuctionsPage] ProductMap size:', productMap.size);
@@ -67,7 +152,7 @@ function AuctionsListContent() {
 
     // Apply filters based on associated product data
     filtered = filtered.filter((auction) => {
-      const product = productMap.get(auction.productId);
+      const product = fullProductMap.get(auction.productId);
       if (!product) {
         console.log('[AuctionsPage] No product found for auction:', auction.id, 'productId:', auction.productId);
         return false;
@@ -161,8 +246,8 @@ function AuctionsListContent() {
 
     // Apply sorting
     filtered.sort((a, b) => {
-      const productA = productMap.get(a.productId);
-      const productB = productMap.get(b.productId);
+      const productA = fullProductMap.get(a.productId);
+      const productB = fullProductMap.get(b.productId);
 
       switch (filters.sortBy) {
         case 'best-match':
@@ -182,8 +267,9 @@ function AuctionsListContent() {
     });
 
     console.log('[AuctionsPage] Filtered auctions:', filtered.length);
+    console.log('[AuctionsPage] Full product map size:', fullProductMap.size);
     return filtered;
-  }, [auctions, productMap, filters, statusFilter]);
+  }, [auctions, fullProductMap, filters, statusFilter]);
 
   const loading = auctionsLoading || productsLoading;
   const error = auctionsError;
