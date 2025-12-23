@@ -37,6 +37,13 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+
+    // Next.js generates route typing files under .next/types.
+    // This repo also contains legacy *-Sky-Alienware route-like files, which can
+    // lead to duplicate route type declarations in generated .next/types outputs.
+    // Exclude those generated duplicates from TypeScript checks.
+    ".next/types/**/*Sky-Alienware.ts",
+    ".next/dev/types/**/*Sky-Alienware.ts"
   ]
 }
