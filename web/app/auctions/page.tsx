@@ -8,7 +8,7 @@ import { useProducts } from '../hooks/useProducts';
 import AuctionCard from '../components/AuctionCard';
 import FilterBar, { FilterOptions } from '../components/FilterBar';
 import { useAuth } from '../context/AuthContext';
-import { doc, getDoc, updateDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc, Timestamp, collection, query, where, getCountFromServer } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Product } from 'shared/types';
 
@@ -26,6 +26,33 @@ function AuctionsListContent() {
   // Use dynamic status based on filter
   const statusForFetch = statusFilter === 'all' ? undefined : statusFilter;
   const { auctions, loading: auctionsLoading, error: auctionsError, hasMore, loadMore } = useAuctions(statusForFetch, PAGE_SIZE);
+
+  const [totalCount, setTotalCount] = useState<number | null>(null);
+
+  // Fetch total count for the current status tab (so the summary can be "X din Y")
+  useEffect(() => {
+    const fetchTotalCount = async () => {
+      try {
+        if (!db) {
+          setTotalCount(null);
+          return;
+        }
+
+        let qTotal = query(collection(db, 'auctions'));
+        if (statusForFetch) {
+          qTotal = query(qTotal, where('status', '==', statusForFetch));
+        }
+
+        const snap = await getCountFromServer(qTotal);
+        setTotalCount(snap.data().count);
+      } catch (err) {
+        console.error('[AuctionsPage] Error fetching total count:', err);
+        setTotalCount(null);
+      }
+    };
+
+    fetchTotalCount();
+  }, [statusForFetch]);
 	// Fetch all fields needed for filtering and display.
 	// IMPORTANT: use listingType = 'all' so we also load products listed as 'auction'.
 	const { products, loading: productsLoading } = useProducts(
@@ -456,7 +483,7 @@ function AuctionsListContent() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-white mb-2">Licitații Active</h1>
         <p className="text-slate-300">
-          Licitează pentru {filteredAuctions.length} piese numismatice
+          Licitează pentru {totalCount ?? filteredAuctions.length} piese numismatice
         </p>
       </div>
 
@@ -504,10 +531,9 @@ function AuctionsListContent() {
           <span className="font-semibold text-gold-400">
             {requestedPage === page && pagedAuctions.length === 0 ? '—' : pagedAuctions.length}
           </span>{' '}
-          licitații (pagina <span className="font-semibold text-gold-400">{page}</span>) din{' '}
-          <span className="font-semibold text-gold-400">{filteredAuctions.length}</span> rezultate
+          licitații din <span className="font-semibold text-gold-400">{totalCount ?? '...'}</span>
           {requestedPage === page && (
-            <span className="ml-2 text-xs text-slate-400">(Se încarcă pagina…)</span>
+            <span className="ml-2 text-xs text-slate-400">(Se încarcă…)</span>
           )}
         </p>
         

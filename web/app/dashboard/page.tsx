@@ -30,6 +30,8 @@ export default function Dashboard() {
   const [autoBids, setAutoBids] = useState<{ autoBid: AutoBid; auction: Auction | null }[]>([]);
   const [autoBidsLoading, setAutoBidsLoading] = useState(false);
 
+  const [showAllMyProducts, setShowAllMyProducts] = useState(false);
+
   const [personalDetailsLoading, setPersonalDetailsLoading] = useState(false);
   const [personalDetailsSaving, setPersonalDetailsSaving] = useState(false);
   const [personalDetailsError, setPersonalDetailsError] = useState<string | null>(null);
@@ -625,7 +627,7 @@ export default function Dashboard() {
               <p className="text-slate-200">Nicio piesă listată încă.</p>
             ) : (
               <div className="space-y-3">
-                {products.slice(0, 5).map((product) => {
+                {(showAllMyProducts ? products : products.slice(0, 5)).map((product) => {
                   const isBoostActive =
                     product.boostExpiresAt instanceof Date
                       ? product.boostExpiresAt.getTime() > Date.now()
@@ -660,10 +662,23 @@ export default function Dashboard() {
                     </div>
                   );
                 })}
-                {products.length > 5 && (
-                  <p className="text-sm text-slate-200 text-center">
+                {!showAllMyProducts && products.length > 5 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllMyProducts(true)}
+                    className="w-full text-sm text-slate-200 text-center underline decoration-gold-500/50 underline-offset-4 hover:text-gold-200"
+                  >
                     Și încă {products.length - 5}...
-                  </p>
+                  </button>
+                )}
+                {showAllMyProducts && products.length > 5 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllMyProducts(false)}
+                    className="w-full text-xs text-slate-300 text-center hover:text-slate-100"
+                  >
+                    Afișează mai puțin
+                  </button>
                 )}
               </div>
             )}

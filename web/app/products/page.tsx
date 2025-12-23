@@ -408,12 +408,11 @@ function ProductsListContent() {
           <span className="font-semibold text-gold-400">
             {requestedPage === page && pagedProducts.length === 0 ? '—' : pagedProducts.length}
           </span>{' '}
-          piese (pagina <span className="font-semibold text-gold-400">{page}</span>) din{' '}
-          <span className="font-semibold text-gold-400">{filteredProducts.length}</span>{' '}
-          rezultate încărcate
-          <span className="text-slate-400"> (din {totalInCatalog ?? '...'} total)</span>
+          piese
+          {ownerId ? ' ale acestui vânzător' : ''} din{' '}
+          <span className="font-semibold text-gold-400">{totalInCatalog ?? '...'}</span>
           {requestedPage === page && (
-            <span className="ml-2 text-xs text-slate-400">(Se încarcă pagina…)</span>
+            <span className="ml-2 text-xs text-slate-400">(Se încarcă…)</span>
           )}
         </p>
 
