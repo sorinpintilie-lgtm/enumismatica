@@ -12,7 +12,7 @@ import { Bid } from '@shared/types';
 import { RootStackParamList } from '../navigationTypes';
 
 // Currency formatting function
-const formatRON = (amount: number): string => `${amount.toFixed(2)} RON`;
+const formatRON = (amount: number): string => `${amount.toFixed(2)} EUR`;
 
 const bidSchema = z.object({
   amount: z.number().positive('Bid amount must be positive'),

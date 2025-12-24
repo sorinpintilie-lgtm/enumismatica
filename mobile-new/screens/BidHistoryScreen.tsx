@@ -10,7 +10,7 @@ import { getBidHistoryForAuction, getUserBidHistory } from '@shared/bidHistorySe
 import { BidHistory, BidHistoryStats } from '@shared/types';
 
 // Currency formatting function
-const formatRON = (amount: number): string => `${amount.toFixed(2)} RON`;
+const formatRON = (amount: number): string => `${amount.toFixed(2)} EUR`;
 
 export default function BidHistoryScreen() {
   type BidHistoryScreenRouteProp = RouteProp<RootStackParamList, 'BidHistory'>;

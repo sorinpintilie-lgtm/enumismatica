@@ -663,7 +663,7 @@ export default function CheckoutPage() {
                 <span className="text-[#e7b73c]">{formatRON(total)}</span>
               </div>
               <p className="mt-2 text-[11px] text-slate-300">
-                Toate prețurile din comandă sunt exprimate în RON.
+                Toate prețurile din comandă sunt exprimate în EUR.
               </p>
               <p className="mt-1 text-[11px] text-slate-400">
                 Fiecare piesă din coș este tratată ca piesă unică, cu cantitate 1. Momentan plata nu este

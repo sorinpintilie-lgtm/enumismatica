@@ -112,7 +112,7 @@ const DashboardScreen: React.FC = () => {
                 <View key={product.id} className="flex-row justify-between items-center p-3 bg-navy-700/50 rounded-xl border border-gold-500/20">
                   <View>
                     <Text className="font-medium text-white">{product.name}</Text>
-                    <Text className="text-sm text-gold-400">{product.price} RON</Text>
+                    <Text className="text-sm text-gold-400">{product.price} EUR</Text>
                   </View>
                   <TouchableOpacity
                     className="border border-gold-500 py-1 px-3 rounded-lg"
@@ -154,7 +154,7 @@ const DashboardScreen: React.FC = () => {
                   <View>
                     <Text className="font-medium text-white">Licitație #{auction.id.slice(-6)}</Text>
                     <Text className="text-sm text-gold-400">
-                      Ofertă curentă: {auction.currentBid?.toFixed(2) || auction.reservePrice.toFixed(2)} RON
+                      Ofertă curentă: {auction.currentBid?.toFixed(2) || auction.reservePrice.toFixed(2)} EUR
                     </Text>
                   </View>
                   <TouchableOpacity

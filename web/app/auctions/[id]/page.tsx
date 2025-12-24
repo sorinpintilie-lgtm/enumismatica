@@ -651,7 +651,7 @@ export default function AuctionDetailPage() {
                   {formatRON(currentBid)}
                 </p>
                 <p className="mt-1 text-[11px] text-slate-300 max-w-md mx-auto">
-                  Prețul licitației este afișat în RON.
+                  Prețul licitației este afișat în EUR.
                 </p>
                 {user && (
                   <p

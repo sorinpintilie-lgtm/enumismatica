@@ -151,7 +151,9 @@ export function useProducts(
 
           console.log('[useProducts] Setting products:', productsData.length);
           setProducts(productsData);
-          setHasMore(productsData.length === pageSize);
+          // Use raw snapshot size for pagination; filtered length may be < pageSize
+          // when we skip sold items in memory, but we still want to keep loading.
+          setHasMore(querySnapshot.size === pageSize);
           if (productsData.length > 0) {
             setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
           }
@@ -224,9 +226,10 @@ export function useProducts(
 
           productsData.push(productData as Product);
         });
-
+        
         setProducts(productsData);
-        setHasMore(productsData.length === pageSize);
+        // Again, base hasMore on how many docs Firestore actually returned
+        setHasMore(snap.size === pageSize);
         if (productsData.length > 0) {
           setLastVisible(snap.docs[snap.docs.length - 1]);
         }

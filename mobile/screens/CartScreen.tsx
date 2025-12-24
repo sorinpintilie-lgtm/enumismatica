@@ -143,7 +143,7 @@ const CartScreen: React.FC = () => {
               <Text className="text-sm font-semibold text-gray-900">
                 Total estimat:{' '}
                 <Text className="text-green-600">
-                  {totalValue.toFixed(2)} RON
+                  {totalValue.toFixed(2)} EUR
                 </Text>
               </Text>
             </View>
@@ -161,7 +161,7 @@ const CartScreen: React.FC = () => {
               const label = product?.name || `Produs ${item.productId}`;
               const price =
                 product && typeof product.price === 'number'
-                  ? `${product.price.toFixed(2)} RON`
+                  ? `${product.price.toFixed(2)} EUR`
                   : 'Preț indisponibil';
 
               return (

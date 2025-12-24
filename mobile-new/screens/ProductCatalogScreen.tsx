@@ -58,7 +58,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       </Text>
       <View className="flex-row justify-between items-center">
         <Text className="text-xl font-bold text-gold-400">
-          {product.price.toFixed(2)} RON
+          {product.price.toFixed(2)} EUR
         </Text>
         {product.rarity && (
           <View className="bg-gold-500/10 px-2 py-1 rounded-full border border-gold-500/40">

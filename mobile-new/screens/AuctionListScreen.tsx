@@ -115,7 +115,7 @@ const AuctionCard: React.FC<{ auction: Auction; product?: Product | null }> = ({
       <View className="mb-3 flex-row justify-between items-center">
         <View>
           <Text className="text-xs text-slate-300">Ofertă curentă</Text>
-          <Text className="text-xl font-bold text-gold-400">{currentBid.toFixed(2)} RON</Text>
+          <Text className="text-xl font-bold text-gold-400">{currentBid.toFixed(2)} EUR</Text>
         </View>
         <View className="items-end">
           <Text className="text-xs text-slate-300 mb-1">Timp rămas</Text>

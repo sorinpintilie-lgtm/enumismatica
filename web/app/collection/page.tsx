@@ -508,7 +508,7 @@ export default function MyCollectionPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100 hidden sm:table-cell">{item.year || '-'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100 hidden sm:table-cell">{item.metal || '-'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-emerald-400">
-                    {item.currentValue != null ? `${item.currentValue} RON` : '-'}
+                    {item.currentValue != null ? `${item.currentValue} EUR` : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
@@ -673,7 +673,7 @@ export default function MyCollectionPage() {
           {item.currentValue && (
             <div className="flex justify-between border-t pt-2">
               <span className="text-slate-300">Valoare:</span>
-              <span className="font-bold text-emerald-400">{item.currentValue} RON</span>
+              <span className="font-bold text-emerald-400">{item.currentValue} EUR</span>
             </div>
           )}
         </div>

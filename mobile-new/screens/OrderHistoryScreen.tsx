@@ -168,7 +168,7 @@ const OrderHistoryScreen: React.FC = () => {
                       </Text>
                     </View>
                     <Text className="text-sm font-semibold text-green-600">
-                      {order.price.toFixed(2)} RON
+                      {order.price.toFixed(2)} EUR
                     </Text>
                   </View>
                   <Text className="text-xs text-gray-500 mb-2">

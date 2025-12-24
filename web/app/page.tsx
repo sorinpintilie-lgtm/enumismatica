@@ -156,7 +156,7 @@ export default function HomePage() {
                       <p className="text-sm text-white/90">Preț special disponibil acum</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-white">{boostedProducts[0].price} RON</div>
+                      <div className="text-lg font-bold text-white">{boostedProducts[0].price} EUR</div>
                       <div className="text-xs text-white/80">La ofertă limitată</div>
                     </div>
                   </div>
@@ -174,7 +174,7 @@ export default function HomePage() {
                              />
                            </div>
                            <p className="text-xs font-medium text-[#000940] truncate">{product.name}</p>
-                           <p className="text-xs font-bold text-[#e7b73c]">{product.price} RON</p>
+                           <p className="text-xs font-bold text-[#e7b73c]">{product.price} EUR</p>
                          </Link>
                        ))}
                      </div>

@@ -381,7 +381,7 @@ export default function ProductDetailPage() {
                   {formatRON(product.price)}
                 </p>
                 <p className="text-[11px] text-slate-300 mb-2 max-w-md">
-                  Prețul este afișat în RON.
+                  Prețul este afișat în EUR.
                 </p>
                 {product.isSold && (
                   <p className="text-sm font-semibold text-red-300 mb-2">
