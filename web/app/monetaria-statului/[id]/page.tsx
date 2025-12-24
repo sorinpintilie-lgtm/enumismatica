@@ -97,7 +97,7 @@ export default function MintProductDetailPage() {
       await logEvent(user, 'mint_product_buy', {
         productId: id,
         productName: product.title,
-        price: parseFloat(product.price.replace(' Lei', '').replace(',', '')),
+        price: parseFloat(product.price.replace(/[^\d.]/g, '')),
         orderId,
         source: 'mint_product_detail',
       });
