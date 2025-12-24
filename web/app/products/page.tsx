@@ -23,7 +23,7 @@ function ProductsListContent() {
     20, // pageSize
     ['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt'],
     true, // enabled
-    'all', // listingType - show all products (direct and auction)
+    'direct', // listingType - only direct sale products (not auction products)
     false, // live (disable realtime so pagination can prefetch safely)
   );
 
@@ -37,6 +37,7 @@ function ProductsListContent() {
         let qTotal = query(
           collection(db, 'products'),
           where('status', '==', 'approved'),
+          where('listingType', '==', 'direct'), // Only count direct sale products
         );
 
         if (ownerId) {
@@ -79,6 +80,7 @@ function ProductsListContent() {
           let q = query(
             collection(db, 'products'),
             where('status', '==', 'approved'),
+            where('listingType', '==', 'direct'), // Only count direct sale products
             where('country', '==', country)
           );
           if (ownerId) {
@@ -119,7 +121,7 @@ function ProductsListContent() {
   }, [searchParams]);
 
   const PAGE_SIZE = 20;
-  const PREFETCH_PAGES_AHEAD = 3;
+  const PREFETCH_PAGES_AHEAD = 10; // Preload more pages ahead for better UX
   const [page, setPage] = useState(1);
   const [requestedPage, setRequestedPage] = useState<number | null>(null);
   

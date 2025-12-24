@@ -21,7 +21,7 @@ function AuctionsListContent() {
   const pathname = usePathname();
   
   const PAGE_SIZE = 20;
-  const PREFETCH_PAGES_AHEAD = 3;
+  const PREFETCH_PAGES_AHEAD = 10; // Preload more pages ahead for better UX
   
   // Use dynamic status based on filter
   const statusForFetch = statusFilter === 'all' ? undefined : statusFilter;
