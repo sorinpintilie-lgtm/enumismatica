@@ -374,7 +374,10 @@ function ProductsListContent() {
     const neededCount = requestedPage * PAGE_SIZE;
     const loadedCount = products.length;
 
+    console.log('[ProductsPage] Handling requestedPage:', { requestedPage, neededCount, loadedCount, hasMore, loading });
+
     if (loadedCount >= neededCount) {
+      console.log('[ProductsPage] Enough products loaded. Navigating to page', requestedPage);
       setPage(requestedPage);
       setRequestedPage(null);
       updatePageInUrl(requestedPage);
@@ -383,12 +386,14 @@ function ProductsListContent() {
 
     // Need more products from Firestore
     if (hasMore && !loading) {
+      console.log('[ProductsPage] Loading more products...');
       loadMore();
       return;
     }
 
     // No more products available; clamp to last available page
-    const maxPage = Math.max(1, Math.ceil(Math.max(filteredProducts.length, loadedCount) / PAGE_SIZE));
+    const maxPage = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+    console.log('[ProductsPage] No more products. Clamping to page', maxPage);
     setPage(maxPage);
     setRequestedPage(null);
     updatePageInUrl(maxPage);
@@ -401,11 +406,13 @@ function ProductsListContent() {
   const goToPage = (nextPage: number) => {
     if (nextPage < 1) return;
 
+    console.log('[ProductsPage] goToPage called:', { nextPage, productsLength: products.length, hasMore });
+
     // If user tries to go beyond what we have loaded, request that page and trigger fetches.
     const neededCount = nextPage * PAGE_SIZE;
     if (products.length < neededCount && hasMore) {
-      // Switch UI immediately to the requested page, then fetch in background.
-      setPage(nextPage);
+      // Do not update the page immediately; wait for products to load.
+      console.log('[ProductsPage] Requesting page', nextPage, 'but not enough products loaded yet. Waiting...');
       setRequestedPage(nextPage);
       updatePageInUrl(nextPage);
       return;
@@ -413,6 +420,7 @@ function ProductsListContent() {
 
     const max = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
     const finalPage = Math.min(nextPage, max);
+    console.log('[ProductsPage] Navigating to page', finalPage, 'from', page);
     setPage(finalPage);
     setRequestedPage(null);
     updatePageInUrl(finalPage);
