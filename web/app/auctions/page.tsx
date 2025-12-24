@@ -698,11 +698,9 @@ function AuctionsListContent() {
             ← Înapoi
           </button>
 
-          {/* Page numbers (windowed) */}
-          {Array.from({ length: Math.min(5, effectiveMaxPage) }).map((_, idx) => {
-            const start = Math.max(1, page - 2);
-            const p = start + idx;
-            if (p > effectiveMaxPage) return null;
+          {/* Page numbers (all pages) */}
+          {Array.from({ length: effectiveMaxPage }).map((_, idx) => {
+            const p = idx + 1;
             return (
               <button
                 key={p}
