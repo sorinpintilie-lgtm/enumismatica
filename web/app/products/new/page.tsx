@@ -257,7 +257,10 @@ function NewProductPageContent() {
                     const cleanedPrice = parsedPrice.replace(/\./g, '').replace(',', '.');
                     const numericPrice = parseFloat(cleanedPrice);
                     if (!isNaN(numericPrice)) {
-                      setPrice(String(numericPrice));
+                      // Convert RON to EUR
+                      const RON_TO_EUR_RATE = 4.97;
+                      const eurPrice = numericPrice / RON_TO_EUR_RATE;
+                      setPrice(String(Math.round(eurPrice)));
                     }
                   }
                 }
@@ -265,7 +268,13 @@ function NewProductPageContent() {
                 console.error('Failed to fetch monetaria price:', error);
                 // Fallback to current value
                 if (item.currentValue) {
-                  setPrice(String(item.currentValue));
+                  if (item.tags?.includes('monetaria-statului')) {
+                    // Convert RON to EUR
+                    const eurPrice = item.currentValue / 4.97;
+                    setPrice(String(Math.round(eurPrice)));
+                  } else {
+                    setPrice(String(item.currentValue));
+                  }
                 }
               }
             } else {
