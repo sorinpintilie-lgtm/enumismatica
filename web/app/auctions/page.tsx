@@ -467,7 +467,7 @@ function AuctionsListContent() {
  }, [requestedPage, auctions.length, hasMore, auctionsLoading, loadMore, PAGE_SIZE, filteredAuctions.length]);
 
  const loadedPages = Math.max(1, Math.ceil(auctions.length / PAGE_SIZE));
- const totalPagesKnown = Math.max(1, Math.ceil(filteredAuctions.length / PAGE_SIZE));
+ const totalPagesKnown = totalCount ? Math.max(1, Math.ceil(totalCount / PAGE_SIZE)) : Math.max(1, Math.ceil(filteredAuctions.length / PAGE_SIZE));
  const effectiveMaxPage = hasMore ? Math.max(totalPagesKnown, loadedPages + 1) : totalPagesKnown;
 
  const pageStart = (page - 1) * PAGE_SIZE;

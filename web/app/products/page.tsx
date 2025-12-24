@@ -371,7 +371,7 @@ function ProductsListContent() {
   }, [requestedPage, products.length, hasMore, loading, loadMore, PAGE_SIZE, filteredProducts.length]);
 
   const loadedPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
-  const totalPagesKnown = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const totalPagesKnown = totalInCatalog ? Math.max(1, Math.ceil(totalInCatalog / PAGE_SIZE)) : Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
   const effectiveMaxPage = hasMore ? Math.max(totalPagesKnown, loadedPages + 1) : totalPagesKnown;
 
   const pageStart = (page - 1) * PAGE_SIZE;
