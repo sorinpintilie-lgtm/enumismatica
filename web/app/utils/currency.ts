@@ -4,7 +4,7 @@
  *
  * NOTE: All prices on the platform are stored and displayed in EUR.
  */
-export function formatRON(amount: number): string {
+export function formatEUR(amount: number): string {
   return new Intl.NumberFormat('ro-RO', {
     style: 'currency',
     currency: 'EUR',
@@ -15,9 +15,9 @@ export function formatRON(amount: number): string {
 
 /**
  * Format a number as EUR with thousand separators (display only).
- * Semantics are identical to formatRON but kept for backwards compatibility.
+ * Semantics are identical to formatEUR but kept for backwards compatibility.
  */
-export function formatRONWithSeparators(amount: number): string {
+export function formatEURWithSeparators(amount: number): string {
   return new Intl.NumberFormat('ro-RO', {
     style: 'currency',
     currency: 'EUR',
@@ -31,6 +31,20 @@ export function formatRONWithSeparators(amount: number): string {
  * @param ronString - String like "100 RON" or "100.50 RON"
  * @returns Parsed number
  */
+/**
+ * Format a number as Romanian Leu (RON) for display.
+ * Always shows whole numbers without decimals.
+ * Uses Romanian locale for proper formatting.
+ */
+export function formatRON(amount: number): string {
+  return new Intl.NumberFormat('ro-RO', {
+    style: 'currency',
+    currency: 'RON',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 /**
  * Parse Romanian RON string to number
  * Handles Romanian number format: "1.234,56 Lei" -> 1234.56
