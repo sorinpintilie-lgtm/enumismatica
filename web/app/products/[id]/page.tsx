@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useProduct, useProducts } from '../../hooks/useProducts';
 import PriceEvolutionChart from '../../components/PriceEvolutionChart';
 import { useToast } from '../../components/ToastProvider';
 import { useAuth } from '../../context/AuthContext';
 import { createDirectOrderForProduct } from 'shared/orderService';
+import { createOrGetConversation } from 'shared/chatService';
 import { useCart } from '../../hooks/useCart';
 import { logEvent } from '../../hooks/useActivityLogger';
 import OfferModal from '../../components/OfferModal';
@@ -46,6 +47,7 @@ function buildImageUrlWithWidth(url: string | undefined, width: number): string 
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
+  const router = useRouter();
   const { product, loading, error } = useProduct(id);
   const { showToast } = useToast();
   const { user } = useAuth();
@@ -145,6 +147,22 @@ export default function ProductDetailPage() {
         orderId,
         source: 'product_detail',
       });
+
+      // Ensure a private conversation exists between buyer and seller and redirect to it
+      if (product.ownerId && product.ownerId !== user.uid) {
+        try {
+          const conversationId = await createOrGetConversation(
+            user.uid,
+            product.ownerId,
+            undefined,
+            product.id,
+            false,
+          );
+          router.push(`/messages?conversation=${conversationId}`);
+        } catch (convError) {
+          console.error('Failed to open conversation after direct product purchase:', convError);
+        }
+      }
 
       showToast({
         type: 'success',

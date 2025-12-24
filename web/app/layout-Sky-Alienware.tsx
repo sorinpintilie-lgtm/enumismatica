@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import ClientProvider from './components/ClientProvider'
 import NavigationWrapper from './components/NavigationWrapper'
@@ -14,16 +14,17 @@ export const metadata: Metadata = {
     icon: '/eNumismatica.ro_logo.ico',
     shortcut: '/eNumismatica.ro_logo.ico',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
   other: {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'black-translucent',
   },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 }
  
 export default function RootLayout({

@@ -10,11 +10,14 @@ import { formatRON } from '../utils/currency';
 import { useToast } from '../components/ToastProvider';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { createOrGetConversation } from 'shared/chatService';
+import { useRouter } from 'next/navigation';
 
 export default function CheckoutPage() {
   const { user, loading: authLoading } = useAuth();
   const userId = user?.uid || null;
   const { showToast } = useToast();
+  const router = useRouter();
 
   const {
     items,
@@ -249,6 +252,9 @@ export default function CheckoutPage() {
       let successCount = 0;
       let skippedCount = 0;
 
+      // Track the first successful conversation created so we can auto-open it
+      let firstConversationId: string | null = null;
+
       for (const line of lines) {
         const product = line.product;
         if (!product) {
@@ -265,6 +271,26 @@ export default function CheckoutPage() {
         try {
           await createDirectOrderForProduct(product.id, userId);
           successCount++;
+
+          // Ensure a conversation exists between buyer and seller and, for the
+          // first successful order, remember its ID for redirect.
+          try {
+            const sellerId: string | undefined = (product as any).ownerId;
+            if (sellerId && sellerId !== userId) {
+              const conversationId = await createOrGetConversation(
+                userId,
+                sellerId,
+                undefined,
+                product.id,
+                false,
+              );
+              if (!firstConversationId) {
+                firstConversationId = conversationId;
+              }
+            }
+          } catch (convError) {
+            console.error('Failed to open conversation after checkout purchase:', convError);
+          }
         } catch (err) {
           console.error('Failed to create order for product in checkout:', err);
           skippedCount++;
@@ -279,8 +305,17 @@ export default function CheckoutPage() {
           message:
             successCount === 1
               ? 'Ai cumpărat 1 piesă din coș. Comanda este înregistrată. Vei fi contactat pentru confirmarea livrării la adresa introdusă.'
-              : `Ai cumpărat ${successCount} piese din coș. Comenzile sunt înregistrate. Vei fi contactat pentru confirmarea livrării la adresa introdusă.`,
+               : `Ai cumpărat ${successCount} piese din coș. Comenzile sunt înregistrate. Vei fi contactat pentru confirmarea livrării la adresa introdusă.`,
         });
+
+        // If we managed to create or fetch at least one buyer/seller conversation
+        // during checkout, redirect the user to that specific chat. Otherwise,
+        // fall back to the generic messages page.
+        if (firstConversationId) {
+          router.push(`/messages?conversation=${firstConversationId}`);
+        } else {
+          router.push('/messages');
+        }
       } else {
         showToast({
           type: 'error',

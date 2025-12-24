@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import MintProductCard from '../../components/MintProductCard';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../hooks/useCart';
 import { createDirectOrderForProduct } from 'shared/orderService';
+import { createOrGetConversation } from 'shared/chatService';
 import { useToast } from '../../components/ToastProvider';
 import { logEvent } from '../../hooks/useActivityLogger';
 
@@ -32,6 +33,7 @@ interface RawProduct {
 export default function MintProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
+  const router = useRouter();
   const [product, setProduct] = useState<RawProduct | null>(null);
   const [similarProducts, setSimilarProducts] = useState<RawProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,6 +101,21 @@ export default function MintProductDetailPage() {
         orderId,
         source: 'mint_product_detail',
       });
+
+      // Open a conversation between buyer and the Monetaria Statului pseudo-seller
+      // so the buyer is immediately taken to a chat context after purchase.
+      try {
+        const conversationId = await createOrGetConversation(
+          user.uid,
+          'monetaria-statului',
+          undefined,
+          id,
+          false,
+        );
+        router.push(`/messages?conversation=${conversationId}`);
+      } catch (convError) {
+        console.error('Failed to open conversation after mint product purchase:', convError);
+      }
 
       showToast({
         type: 'success',

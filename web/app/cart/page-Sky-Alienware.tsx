@@ -4,12 +4,15 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../hooks/useCart';
 import { useProducts } from '../hooks/useProducts';
 import { createDirectOrderForProduct } from 'shared/orderService';
+import { createOrGetConversation } from 'shared/chatService';
+import { useRouter } from 'next/navigation';
 import { formatRON, parseRON } from '../utils/currency';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
 
 export default function CartPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const { items, loading, error, removeItem, clearCart } = useCart(user?.uid);
   const {
     products,
@@ -57,6 +60,37 @@ export default function CartPage() {
     try {
       setPlacingOrderFor(productId);
       await createDirectOrderForProduct(productId, user.uid, isMintProduct, mintProductData);
+
+      // After successful purchase, ensure a conversation exists and redirect to it
+      try {
+        if (isMintProduct) {
+          const conversationId = await createOrGetConversation(
+            user.uid,
+            'monetaria-statului',
+            undefined,
+            productId,
+            false,
+          );
+          router.push(`/messages?conversation=${conversationId}`);
+        } else {
+          const product = products.find((p) => p.id === productId) as any;
+          const sellerId: string | undefined = product?.ownerId;
+
+          if (sellerId && sellerId !== user.uid) {
+            const conversationId = await createOrGetConversation(
+              user.uid,
+              sellerId,
+              undefined,
+              productId,
+              false,
+            );
+            router.push(`/messages?conversation=${conversationId}`);
+          }
+        }
+      } catch (convError: any) {
+        console.error('Failed to open conversation after cart purchase (Sky-Alienware):', convError);
+      }
+
       await removeItem(cartItemId);
 
       alert('Comanda a fost înregistrată. O poți vedea în istoricul comenzilor.');

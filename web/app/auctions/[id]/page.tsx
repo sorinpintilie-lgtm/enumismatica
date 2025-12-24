@@ -20,6 +20,8 @@ import { WatchlistButton } from '../../components/WatchlistButton';
 import OfferModal from '../../components/OfferModal';
 import OfferManagement from '../../components/OfferManagement';
 import ProductCard from '../../components/ProductCard';
+import { createOrGetConversation } from 'shared/chatService';
+import { useRouter } from 'next/navigation';
 
 const bidSchema = z.object({
   amount: z.number().positive('Bid amount must be positive'),
@@ -56,6 +58,7 @@ function CountdownTimer({ endTime }: { endTime: Date }) {
 export default function AuctionDetailPage() {
   const params = useParams();
   const id = params.id as string;
+  const router = useRouter();
   const { auction, loading, error } = useAuction(id);
   const { bids } = useBids(id);
   const { user } = useAuth();
@@ -207,6 +210,25 @@ export default function AuctionDetailPage() {
         method: 'buy_now',
         finalPrice: auction?.buyNowPrice ?? null,
       });
+
+      // Ensure a private conversation exists between buyer and seller and
+      // redirect to it so they can immediately coordinate the transaction.
+      try {
+        const sellerId: string | undefined = (auction as any).ownerId;
+        const productId: string | undefined = auction.productId;
+        if (sellerId && sellerId !== user.uid) {
+          const conversationId = await createOrGetConversation(
+            user.uid,
+            sellerId,
+            id,
+            productId,
+            false,
+          );
+          router.push(`/messages?conversation=${conversationId}`);
+        }
+      } catch (convError) {
+        console.error('Failed to open conversation after auction buy-now:', convError);
+      }
       showToast({
         type: 'success',
         title: 'Cumpărare instant',
