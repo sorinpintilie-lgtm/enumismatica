@@ -32,7 +32,7 @@ export function useCachedProducts(
   return useQuery({
     queryKey: ['products', ownerId, pageSize, selectedFields],
     queryFn: async () => {
-      // Match catalog behavior: show only approved products
+      // Match catalog behavior: show only approved products that are direct listings (not auctions)
       let q = query(
         collection(db, 'products'),
         where('status', '==', 'approved'),
@@ -49,6 +49,7 @@ export function useCachedProducts(
 
       querySnapshot.forEach((doc) => {
         const data = doc.data();
+        if (data.listingType === 'auction') return;
         const productData: any = { id: doc.id };
 
         // Only include requested fields for performance
@@ -170,6 +171,7 @@ export function useBoostedProducts(limitCount: number = 3) {
         }
 
         const data = doc.data();
+        if (data.listingType === 'auction') return;
         const status = data.status;
         const boostExpiresAt = data.boostExpiresAt?.toDate?.() || data.boostExpiresAt;
         const boostedAt = data.boostedAt?.toDate?.() || data.boostedAt;
