@@ -1,28 +1,26 @@
 /**
- * Format a number for display as EUR (label only; underlying values remain the same).
+ * Format a number as Romanian Lei (RON) for display.
  * Always shows whole numbers without decimals.
- * @param amount - The amount to format
- * @returns Formatted string with EUR currency
+ *
+ * NOTE: All prices on the platform are stored and displayed in RON.
  */
 export function formatRON(amount: number): string {
   return new Intl.NumberFormat('ro-RO', {
     style: 'currency',
-    currency: 'EUR',
+    currency: 'RON',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
 }
 
 /**
- * Format a number as EUR with thousand separators (display only).
- * Always shows whole numbers without decimals.
- * @param amount - The amount to format
- * @returns Formatted string with EUR currency
+ * Format a number as RON with thousand separators (display only).
+ * Semantics are identical to formatRON but kept for backwards compatibility.
  */
 export function formatRONWithSeparators(amount: number): string {
   return new Intl.NumberFormat('ro-RO', {
     style: 'currency',
-    currency: 'EUR',
+    currency: 'RON',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);

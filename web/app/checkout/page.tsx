@@ -35,6 +35,12 @@ export default function CheckoutPage() {
 
   const [submitting, setSubmitting] = useState(false);
 
+  const buildImageUrlWithWidth = (url: string, width: number): string => {
+    if (!url) return url;
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}width=${width}`;
+  };
+
   // Detalii livrare
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -335,7 +341,7 @@ export default function CheckoutPage() {
                   <div className="w-24 h-24 rounded-xl bg-navy-950 flex items-center justify-center overflow-hidden border border-gold-500/20">
                     {product && product.images && product.images.length > 0 ? (
                       <img
-                        src={product.images[0]}
+                        src={buildImageUrlWithWidth(product.images[0], 200)}
                         alt={product.name}
                         className="w-full h-full object-contain"
                       />
@@ -622,8 +628,7 @@ export default function CheckoutPage() {
                 <span className="text-[#e7b73c]">{formatRON(total)}</span>
               </div>
               <p className="mt-2 text-[11px] text-slate-300">
-                Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data
-                tranzacției.
+                Toate prețurile din comandă sunt exprimate în RON.
               </p>
               <p className="mt-1 text-[11px] text-slate-400">
                 Fiecare piesă din coș este tratată ca piesă unică, cu cantitate 1. Momentan plata nu este

@@ -16,6 +16,12 @@ export default function OrdersPage() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [ordersError, setOrdersError] = useState<string | null>(null);
 
+  const buildImageUrlWithWidth = (url: string, width: number): string => {
+    if (!url) return url;
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}width=${width}`;
+  };
+
   const {
     products,
     loading: productsLoading,
@@ -200,7 +206,9 @@ export default function OrdersPage() {
             const createdAt = order.createdAt instanceof Date ? order.createdAt : new Date();
             const productName = product?.name || `Piesă ${order.productId}`;
             const productImage =
-              product && product.images && product.images.length > 0 ? product.images[0] : null;
+              product && product.images && product.images.length > 0
+                ? buildImageUrlWithWidth(product.images[0], 200)
+                : null;
 
             return (
               <div

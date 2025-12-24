@@ -174,6 +174,32 @@ export async function sendAuctionChatMessage(
 
   const docRef = await addDoc(chatRef, messageData);
 
+  // Notify auction owner about new chat message
+  try {
+    const auctionDoc = await getDoc(doc(db, 'auctions', auctionId));
+    if (auctionDoc.exists()) {
+      const auctionData = auctionDoc.data();
+      const ownerId = auctionData.ownerId;
+      
+      // Only notify if sender is not the owner
+      if (ownerId && ownerId !== userId) {
+        const displayName = isAnonymous ? 'Un utilizator' : (senderName || 'Un utilizator');
+        await createChatNotification(
+          ownerId,
+          'new_message',
+          userId,
+          displayName,
+          `Mesaj nou în licitația ta: ${trimmed.substring(0, 50)}${trimmed.length > 50 ? '...' : ''}`,
+          undefined,
+          auctionId
+        );
+      }
+    }
+  } catch (error) {
+    console.error('Failed to notify auction owner about chat message:', error);
+    // Don't throw - message was sent successfully
+  }
+
   return docRef.id;
 }
 

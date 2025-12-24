@@ -16,6 +16,9 @@ const registerSchema = z.object({
   confirmPassword: z.string(),
   idDocumentType: z.enum(['ci', 'passport']).optional(),
   idDocumentNumber: z.string().optional(),
+  acceptTerms: z.boolean().refine((val) => val === true, {
+    message: 'Trebuie să accepți Termenii și Condițiile',
+  }),
 })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Parolele nu se potrivesc',
@@ -39,6 +42,7 @@ function RegisterForm() {
   const [referralCode, setReferralCode] = useState(initialReferral);
   const [idDocumentType, setIdDocumentType] = useState<'ci' | 'passport' | ''>('');
   const [idDocumentNumber, setIdDocumentNumber] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -55,6 +59,7 @@ function RegisterForm() {
         confirmPassword,
         idDocumentType: idDocumentType || undefined,
         idDocumentNumber: idDocumentNumber || undefined,
+        acceptTerms,
       });
     } catch (validationError) {
       if (validationError instanceof z.ZodError) {
@@ -171,8 +176,7 @@ function RegisterForm() {
             </div>
             <div className="pt-2 border-t border-gold-500/30 mt-2 space-y-3">
               <p className="text-xs text-slate-300">
-                Verificare identitate (opțional) – poți introduce datele CI / Pașaport pentru a primi un badge de
-                <span className="font-semibold text-gold-300"> cont verificat</span> după confirmarea de către un administrator.
+                Verificare identitate (opțional) – pe platforma enumismatica.ro poți furniza datele din CI sau pașaport pentru obținerea unui cont verificat, crescând încrederea în anunțurile și ofertele tale.
               </p>
               <div className="flex flex-col gap-3">
                 <div>
@@ -204,6 +208,33 @@ function RegisterForm() {
                   />
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="flex items-start">
+            <div className="flex items-center h-5">
+              <input
+                id="acceptTerms"
+                name="acceptTerms"
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="w-4 h-4 border border-gold-500/40 rounded bg-navy-900/70 text-gold-500 focus:ring-2 focus:ring-gold-500 focus:ring-offset-0"
+                required
+              />
+            </div>
+            <div className="ml-3 text-sm">
+              <label htmlFor="acceptTerms" className="text-slate-300">
+                Sunt de acord ca datele mele să fie procesate în conformitate cu{' '}
+                <Link href="/terms" className="text-gold-400 hover:text-gold-300 underline">
+                  Termenii și Condițiile
+                </Link>
+                {' '}și{' '}
+                <Link href="/privacy" className="text-gold-400 hover:text-gold-300 underline">
+                  Politica de Confidențialitate
+                </Link>
+                {' '}ale enumismatica.ro. *
+              </label>
             </div>
           </div>
 

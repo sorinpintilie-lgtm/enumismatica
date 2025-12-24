@@ -1,11 +1,13 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from './ToastProvider';
-import { getOffersForSeller, acceptOffer, rejectOffer } from 'shared/offerService';
-import { formatRON } from '../utils/currency';
-import type { Offer } from 'shared/types';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "./ToastProvider";
+import { getOffersForSeller, acceptOffer, rejectOffer } from "shared/offerService";
+import { createOrGetConversation } from "shared/chatService";
+import { formatRON } from "../utils/currency";
+import type { Offer } from "shared/types";
 
 interface OfferManagementProps {
   productId?: string;
@@ -14,9 +16,15 @@ interface OfferManagementProps {
   onClose: () => void;
 }
 
-export default function OfferManagement({ productId, auctionId, productName, onClose }: OfferManagementProps) {
+export default function OfferManagement({
+  productId,
+  auctionId,
+  productName,
+  onClose,
+}: OfferManagementProps) {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const router = useRouter();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingOffer, setProcessingOffer] = useState<string | null>(null);
@@ -107,6 +115,35 @@ export default function OfferManagement({ productId, auctionId, productName, onC
       });
     } finally {
       setProcessingOffer(null);
+    }
+  };
+
+  const handleOpenConversation = async (offer: Offer) => {
+    if (!user?.uid) return;
+
+    try {
+      const sellerId = user.uid;
+      const buyerId = offer.buyerId;
+
+      const conversationId = await createOrGetConversation(
+        buyerId,
+        sellerId,
+        offer.itemType === "auction" ? offer.itemId : undefined,
+        offer.itemType === "product" ? offer.itemId : undefined,
+        false,
+      );
+
+      onClose();
+      router.push(`/messages?conversation=${conversationId}`);
+    } catch (error: any) {
+      console.error("Failed to open conversation from offer:", error);
+      showToast({
+        type: "error",
+        title: "Eroare",
+        message:
+          error?.message ||
+          "Nu s-a putut deschide conversația cu cumpărătorul. Încearcă din nou mai târziu.",
+      });
     }
   };
 
@@ -208,30 +245,50 @@ export default function OfferManagement({ productId, auctionId, productName, onC
                   </div>
                 )}
 
-                <div className="flex justify-between items-center">
-                  <div className="text-xs text-slate-400">
+                <div className="flex justify-between items-center gap-3 flex-wrap">
+                  <div className="text-xs text-slate-400 flex flex-col gap-1">
                     {offer.expiresAt && (
                       <span>
                         Expiră: {offer.expiresAt.toLocaleDateString()}
                       </span>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenConversation(offer)}
+                      className="inline-flex items-center gap-1 text-xs text-gold-300 hover:text-gold-200"
+                    >
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
+                      </svg>
+                      Deschide conversația cu cumpărătorul
+                    </button>
                   </div>
 
-                  {offer.status === 'pending' && (
+                  {offer.status === "pending" && (
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleRejectOffer(offer.id)}
                         disabled={processingOffer === offer.id}
                         className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-600/50 text-white rounded-lg text-sm font-semibold transition-colors"
                       >
-                        {processingOffer === offer.id ? 'Se procesează...' : 'Respinge'}
+                        {processingOffer === offer.id ? "Se procesează..." : "Respinge"}
                       </button>
                       <button
                         onClick={() => handleAcceptOffer(offer.id)}
                         disabled={processingOffer === offer.id}
                         className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white rounded-lg text-sm font-semibold transition-colors"
                       >
-                        {processingOffer === offer.id ? 'Se procesează...' : 'Acceptă'}
+                        {processingOffer === offer.id ? "Se procesează..." : "Acceptă"}
                       </button>
                     </div>
                   )}

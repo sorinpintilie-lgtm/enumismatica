@@ -12,7 +12,8 @@ import { useCart } from '../../hooks/useCart';
 import { logEvent } from '../../hooks/useActivityLogger';
 import OfferModal from '../../components/OfferModal';
 import OfferManagement from '../../components/OfferManagement';
-import ProductCard from '../../components/ProductCard';
+ import ProductCard from '../../components/ProductCard';
+ import { formatRON } from '../../utils/currency';
 
 // Helper to safely format numeric/string values with units (avoids duplicated units like "gg" / "mmmm")
 function formatWithUnit(value: string | number | null | undefined, unit: string): string {
@@ -237,7 +238,7 @@ export default function ProductDetailPage() {
             <p className="text-sm text-slate-200 mb-4">
               Ești sigur că vrei să cumperi această piesă pentru{' '}
               <span className="font-semibold text-[#e7b73c]">
-                {Math.round(product.price)} EUR
+                {formatRON(product.price)}
               </span>
               ?
             </p>
@@ -359,11 +360,10 @@ export default function ProductDetailPage() {
 
               <div>
                 <p className="text-4xl font-bold text-[#e7b73c] mb-1">
-                  {Math.round(product.price)} EUR
+                  {formatRON(product.price)}
                 </p>
                 <p className="text-[11px] text-slate-300 mb-2 max-w-md">
-                  Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data
-                  tranzacției.
+                  Prețul este afișat în RON.
                 </p>
                 {product.isSold && (
                   <p className="text-sm font-semibold text-red-300 mb-2">

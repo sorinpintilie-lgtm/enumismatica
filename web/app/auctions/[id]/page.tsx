@@ -629,8 +629,7 @@ export default function AuctionDetailPage() {
                   {formatRON(currentBid)}
                 </p>
                 <p className="mt-1 text-[11px] text-slate-300 max-w-md mx-auto">
-                  Prețul este afișat în EUR și poate fi achitat fie în EUR, fie în RON, la cursul BNR din data
-                  tranzacției.
+                  Prețul licitației este afișat în RON.
                 </p>
                 {user && (
                   <p

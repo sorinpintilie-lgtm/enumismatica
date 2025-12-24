@@ -22,9 +22,15 @@ export default function SellerPage() {
 
   const { user, loading: authLoading } = useAuth();
 
+  // Firestore security rules only allow reading full user documents for the owner or admins.
+  // To avoid exposing "Missing or insufficient permissions" errors to normal users
+  // when viewing another seller's profile, we only subscribe to the profile document
+  // when the authenticated user is viewing their own seller page.
+  const canReadOwnProfile = !!user && !authLoading && user.uid === sellerId;
+
   const { profile, loading: profileLoading, error: profileError } = useUserProfile(
     sellerId,
-    !!user && !authLoading,
+    canReadOwnProfile,
   );
 
   const {

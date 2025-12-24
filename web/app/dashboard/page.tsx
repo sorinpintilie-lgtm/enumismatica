@@ -266,8 +266,14 @@ export default function Dashboard() {
     );
   }
 
-  // Filter auctions where user is the owner (assuming we add ownerId to auctions later)
-  const userAuctions = auctions.filter(auction => auction.currentBidderId === user.uid);
+  // Filter auctions where user is participating (either as bidder or owner)
+  const userAuctions = auctions.filter(auction =>
+    auction.currentBidderId === user.uid || auction.ownerId === user.uid
+  );
+  
+  // Separate owned auctions from bid auctions
+  const ownedAuctions = auctions.filter(auction => auction.ownerId === user.uid);
+  const biddingAuctions = auctions.filter(auction => auction.currentBidderId === user.uid && auction.ownerId !== user.uid);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -696,32 +702,68 @@ export default function Dashboard() {
               </Link>
             </div>
 
-            {userAuctions.length === 0 ? (
-              <p className="text-slate-200">Nicio licitație activă.</p>
-            ) : (
-              <div className="space-y-3 mb-4">
-                {userAuctions.slice(0, 5).map((auction) => (
-                  <div
-                    key={auction.id}
-                    className="flex justify-between items-center p-3 bg-navy-900/40 rounded-xl border border-gold-500/20"
-                  >
-                    <div>
-                      <p className="font-medium text-white">Licitație #{auction.id.slice(-6)}</p>
-                      <p className="text-sm text-gold-300 font-semibold">
-                        Licitație curentă:{' '}
-                        {formatRON(auction.currentBid ?? auction.reservePrice)}
-                      </p>
-                    </div>
-                    <Link
-                      href={`/auctions/${auction.id}`}
-                      className="text-gold-300 hover:text-gold-200 text-sm font-semibold"
+            {/* Owned Auctions */}
+            {ownedAuctions.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-gold-400 mb-2">Licitațiile mele</h3>
+                <div className="space-y-2">
+                  {ownedAuctions.slice(0, 3).map((auction) => (
+                    <div
+                      key={auction.id}
+                      className="flex justify-between items-center p-3 bg-navy-900/40 rounded-xl border border-gold-500/20"
                     >
-                      Vezi
-                    </Link>
-                  </div>
-                ))}
+                      <div>
+                        <p className="font-medium text-white">Licitație #{auction.id.slice(-6)}</p>
+                        <p className="text-sm text-gold-300 font-semibold">
+                          Licitație curentă:{' '}
+                          {formatRON(auction.currentBid ?? auction.reservePrice)}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          Status: {auction.status === 'active' ? 'Activă' : auction.status === 'ended' ? 'Încheiată' : auction.status}
+                        </p>
+                      </div>
+                      <Link
+                        href={`/auctions/${auction.id}`}
+                        className="text-gold-300 hover:text-gold-200 text-sm font-semibold"
+                      >
+                        Vezi
+                      </Link>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
+
+            {/* Bidding Auctions */}
+            {biddingAuctions.length === 0 && ownedAuctions.length === 0 ? (
+              <p className="text-slate-200">Nicio licitație activă.</p>
+            ) : biddingAuctions.length > 0 ? (
+              <div>
+                <h3 className="text-sm font-semibold text-gold-400 mb-2">Licitații la care participi</h3>
+                <div className="space-y-2">
+                  {biddingAuctions.slice(0, 3).map((auction) => (
+                    <div
+                      key={auction.id}
+                      className="flex justify-between items-center p-3 bg-navy-900/40 rounded-xl border border-gold-500/20"
+                    >
+                      <div>
+                        <p className="font-medium text-white">Licitație #{auction.id.slice(-6)}</p>
+                        <p className="text-sm text-gold-300 font-semibold">
+                          Licitație curentă:{' '}
+                          {formatRON(auction.currentBid ?? auction.reservePrice)}
+                        </p>
+                      </div>
+                      <Link
+                        href={`/auctions/${auction.id}`}
+                        className="text-gold-300 hover:text-gold-200 text-sm font-semibold"
+                      >
+                        Vezi
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             <div className="mt-4 border-t border-gold-500/30 pt-4">
               <h3 className="text-lg font-semibold text-white mb-3">

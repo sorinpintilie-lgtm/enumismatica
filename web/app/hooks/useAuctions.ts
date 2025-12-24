@@ -70,11 +70,16 @@ export function useAuctions(
     try {
       console.log('[useAuctions] About to call collection() with db');
 
-      // Build query in a predictable order (filters first), to keep index requirements consistent.
+      // Build query in a predictable order (filters first), to keep index and rules consistent.
       let q = query(collection(db, 'auctions'));
 
+      // IMPORTANT: Firestore rules only allow read for status in ['active', 'ended']
+      // for non-admins, so when no specific status is requested we explicitly limit
+      // to these two to avoid "missing or insufficient permissions" errors.
       if (status) {
         q = query(q, where('status', '==', status));
+      } else {
+        q = query(q, where('status', 'in', ['active', 'ended']));
       }
 
       if (ownerId) {
@@ -157,6 +162,8 @@ export function useAuctions(
 
       if (status) {
         q = query(q, where('status', '==', status));
+      } else {
+        q = query(q, where('status', 'in', ['active', 'ended']));
       }
 
       if (ownerId) {

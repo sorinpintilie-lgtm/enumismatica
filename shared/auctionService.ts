@@ -18,6 +18,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 import { Auction, Bid, AutoBid, Product } from './types';
+import { createOrGetConversation } from './chatService';
 import { addAuctionPriceHistory } from './priceHistoryService';
 import { createAuctionNotification } from './auctionNotificationService';
 import { addCollectionItem } from './collectionService';
@@ -394,6 +395,7 @@ export async function endAuction(auctionId: string): Promise<void> {
   let auctionTitle: string | undefined;
   let winningBidAmount: number | undefined = undefined;
   let winnerProductId: string | null = null;
+  let winnerSellerId: string | null = null;
 
   await runTransaction(db, async (transaction) => {
     const auctionDoc = await transaction.get(auctionRef);
@@ -419,10 +421,12 @@ export async function endAuction(auctionId: string): Promise<void> {
       winnerId = auction.currentBidderId;
       winningBidAmount = currentBidAmount;
       winnerProductId = auction.productId;
+      winnerSellerId = (raw as any).ownerId || null;
     } else {
       winnerId = null;
       winningBidAmount = undefined;
       winnerProductId = null;
+      winnerSellerId = null;
     }
 
     auctionTitle = `Auction ${auctionId}`;
@@ -462,7 +466,7 @@ export async function endAuction(auctionId: string): Promise<void> {
         });
       }
 
-      // Get auction owner and send sold notification
+      // Get auction owner and send sold notification + open chat
       const auctionDoc = await getDoc(doc(db, 'auctions', auctionId));
       if (auctionDoc.exists() && winningBidAmount != undefined) {
         const auctionData = auctionDoc.data();
@@ -480,6 +484,19 @@ export async function endAuction(auctionId: string): Promise<void> {
             ).catch(error => {
               console.error('Failed to send auction sold email:', error);
             });
+
+            // Ensure a private conversation exists between winner and seller
+            try {
+              await createOrGetConversation(
+                winnerId as string,
+                auctionData.ownerId,
+                auctionId,
+                auctionData.productId,
+                false,
+              );
+            } catch (err) {
+              console.error('Failed to create conversation after auction win:', err);
+            }
           }
         }
       }
@@ -531,6 +548,7 @@ export async function buyNowAuction(auctionId: string, buyerId: string): Promise
   let finalPrice: number | null = null;
   let auctionTitle: string | undefined;
   let boughtProductId: string | null = null;
+  let sellerId: string | null = null;
 
   await runTransaction(db, async (tx) => {
     const auctionDoc = await tx.get(auctionRef);
@@ -563,6 +581,7 @@ export async function buyNowAuction(auctionId: string, buyerId: string): Promise
     finalPrice = auction.buyNowPrice;
     auctionTitle = `Auction ${auctionId}`;
     boughtProductId = auction.productId;
+    sellerId = (raw as any).ownerId || null;
 
     tx.update(auctionRef, {
       status: 'ended',
@@ -604,25 +623,38 @@ export async function buyNowAuction(auctionId: string, buyerId: string): Promise
 
     // Send email notification to seller (non-blocking)
     const auctionDoc = await getDoc(doc(db, 'auctions', auctionId));
-    if (auctionDoc.exists()) {
-      const auctionData = auctionDoc.data();
-      if (auctionData.ownerId) {
-        const ownerDoc = await getDoc(doc(db, 'users', auctionData.ownerId));
-        if (ownerDoc.exists()) {
+      if (auctionDoc.exists()) {
+        const auctionData = auctionDoc.data();
+        if (auctionData.ownerId) {
+          const ownerDoc = await getDoc(doc(db, 'users', auctionData.ownerId));
+          if (ownerDoc.exists()) {
           const ownerData = ownerDoc.data();
           const buyerName = buyerDoc.exists() ? (buyerDoc.data().displayName || 'Cumpărător') : 'Cumpărător';
-          sendAuctionSoldEmail(
-            ownerData.email,
-            auctionTitle || `Licitație ${auctionId}`,
-            finalPrice,
-            buyerName,
-            auctionId
-          ).catch(error => {
-            console.error('Failed to send buy-now sold email:', error);
-          });
+            sendAuctionSoldEmail(
+              ownerData.email,
+              auctionTitle || `Licitație ${auctionId}`,
+              finalPrice,
+              buyerName,
+              auctionId
+            ).catch(error => {
+              console.error('Failed to send buy-now sold email:', error);
+            });
+
+            // Ensure a private conversation exists between buyer and seller
+            try {
+              await createOrGetConversation(
+                buyerId,
+                auctionData.ownerId,
+                auctionId,
+                auctionData.productId,
+                false,
+              );
+            } catch (err) {
+              console.error('Failed to create conversation after buy-now:', err);
+            }
+          }
         }
       }
-    }
   } catch (error) {
     console.error('Failed to send buy-now auction won notification:', error);
   }

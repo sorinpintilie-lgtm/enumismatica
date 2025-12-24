@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { createOffer } from 'shared/offerService';
 import { useToast } from './ToastProvider';
+import { formatRON } from '../utils/currency';
 
 interface OfferModalProps {
   isOpen: boolean;
@@ -96,9 +97,10 @@ export default function OfferModal({
           <p className="text-sm text-slate-300">
             <span className="font-medium text-white">{itemName}</span>
           </p>
-          {currentPrice && (
+          {typeof currentPrice === 'number' && currentPrice > 0 && (
             <p className="text-sm text-slate-400 mt-1">
-              Preț actual: <span className="text-gold-400 font-semibold">{currentPrice} RON</span>
+              Preț actual:{' '}
+              <span className="text-gold-400 font-semibold">{formatRON(currentPrice)}</span>
             </p>
           )}
         </div>

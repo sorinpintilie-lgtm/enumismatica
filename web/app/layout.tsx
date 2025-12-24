@@ -4,7 +4,6 @@ import ClientProvider from './components/ClientProvider'
 import NavigationWrapper from './components/NavigationWrapper'
 import ScrollToTop from './components/ScrollToTop'
 import LoadingSpinner from './components/LoadingSpinner'
-import PasswordProtection from './components/PasswordProtection'
 import Footer from './components/Footer'
  
 export const metadata: Metadata = {
@@ -42,15 +41,13 @@ export default function RootLayout({
       </head>
       <body className="antialiased text-white selection:bg-gold-500 selection:text-navy-900 bg-gradient-to-b from-navy-500 via-navy-600 to-navy-900">
         <ScrollToTop />
-        <PasswordProtection>
-          <ClientProvider>
-            <NavigationWrapper />
-            <main className="min-h-screen">
-              {children}
-            </main>
-            <Footer />
-          </ClientProvider>
-        </PasswordProtection>
+        <ClientProvider>
+          <NavigationWrapper />
+          <main className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
+        </ClientProvider>
       </body>
     </html>
   )

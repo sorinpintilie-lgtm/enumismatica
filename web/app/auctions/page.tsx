@@ -38,9 +38,16 @@ function AuctionsListContent() {
           return;
         }
 
-        let qTotal = query(collection(db, 'auctions'));
+        let qTotal;
         if (statusForFetch) {
-          qTotal = query(qTotal, where('status', '==', statusForFetch));
+          // Single-status tab (active / ended)
+          qTotal = query(collection(db, 'auctions'), where('status', '==', statusForFetch));
+        } else {
+          // "Toate licitațiile" – limit to statuses allowed by security rules
+          qTotal = query(
+            collection(db, 'auctions'),
+            where('status', 'in', ['active', 'ended'])
+          );
         }
 
         const snap = await getCountFromServer(qTotal);
@@ -75,9 +82,19 @@ function AuctionsListContent() {
       ];
       const promises = countriesToFetch.map(async (country) => {
         try {
-          let q = query(collection(db, 'auctions'), where('country', '==', country));
+          let q;
           if (statusForFetch) {
-            q = query(q, where('status', '==', statusForFetch));
+            q = query(
+              collection(db, 'auctions'),
+              where('country', '==', country),
+              where('status', '==', statusForFetch),
+            );
+          } else {
+            q = query(
+              collection(db, 'auctions'),
+              where('country', '==', country),
+              where('status', 'in', ['active', 'ended']),
+            );
           }
           const snap = await getCountFromServer(q);
           counts[country] = snap.data().count;

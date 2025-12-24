@@ -60,11 +60,16 @@ export function useProducts(
 		setLoading(true);
 		setError(null);
 		
-		// Base query: only approved products
+		// Base query: only approved products that are not sold
 		let q = query(
 			collection(db, 'products'),
 			where('status', '==', 'approved'),
 		);
+
+		// Apply ownerId filter BEFORE orderBy (Firestore requirement)
+		if (ownerId) {
+			q = query(q, where('ownerId', '==', ownerId));
+		}
 
 		// Apply listing type filter unless we explicitly want all listing types
 		if (listingType !== 'all') {
@@ -74,16 +79,16 @@ export function useProducts(
 			);
 		}
 
-		// Order and limit
+		// Filter out sold items (isSold == false or null/undefined)
+		// Note: We can't use where('isSold', '==', false) because it won't match null/undefined
+		// So we'll filter in memory after fetching
+		
+		// Order and limit (must come after all where clauses)
 		q = query(
 			q,
 			orderBy('createdAt', 'desc'),
 			limit(pageSize),
 		);
-
-    if (ownerId) {
-      q = query(q, where('ownerId', '==', ownerId));
-    }
 
     if (process.env.NODE_ENV !== 'production') {
       console.log('[useProducts] init', {
@@ -107,6 +112,13 @@ export function useProducts(
           querySnapshot.forEach((doc) => {
             console.log('[useProducts] Product:', doc.id, 'status:', doc.data().status);
             const data = doc.data();
+            
+            // Skip sold items
+            if (data.isSold === true) {
+              console.log('[useProducts] Skipping sold product:', doc.id);
+              return;
+            }
+            
             const productData: any = { id: doc.id };
 
             // Only include requested fields for performance
@@ -179,6 +191,12 @@ export function useProducts(
         const productsData: Product[] = [];
         snap.forEach((doc) => {
           const data = doc.data();
+          
+          // Skip sold items
+          if (data.isSold === true) {
+            return;
+          }
+          
           const productData: any = { id: doc.id };
 
           fields.forEach((field) => {
@@ -240,6 +258,11 @@ export function useProducts(
 			where('status', '==', 'approved'),
 		);
 
+		// Apply ownerId filter BEFORE orderBy (Firestore requirement)
+		if (ownerId) {
+			q = query(q, where('ownerId', '==', ownerId));
+		}
+
 		if (listingType !== 'all') {
 			q = query(
 				q,
@@ -247,6 +270,7 @@ export function useProducts(
 			);
 		}
 
+		// Order and limit (must come after all where clauses)
 		q = query(
 			q,
 			orderBy('createdAt', 'desc'),
@@ -254,15 +278,17 @@ export function useProducts(
 			startAfter(lastVisible),
 		);
 
-    if (ownerId) {
-      q = query(q, where('ownerId', '==', ownerId));
-    }
-
     try {
       const snap = await getDocs(q);
       const productsData: Product[] = [];
       snap.forEach((doc) => {
         const data = doc.data();
+        
+        // Skip sold items
+        if (data.isSold === true) {
+          return;
+        }
+        
         const productData: any = { id: doc.id };
 
         fields.forEach((field) => {

@@ -16,6 +16,12 @@ export default function SalesPage() {
   const [loadingSales, setLoadingSales] = useState(false);
   const [salesError, setSalesError] = useState<string | null>(null);
 
+  const buildImageUrlWithWidth = (url: string, width: number): string => {
+    if (!url) return url;
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}width=${width}`;
+  };
+
   const {
     products,
     loading: productsLoading,
@@ -203,7 +209,7 @@ export default function SalesPage() {
             const productName = product?.name || `Piesă ${order.productId}`;
             const productImage =
               product && product.images && product.images.length > 0
-                ? product.images[0]
+                ? buildImageUrlWithWidth(product.images[0], 200)
                 : null;
 
             return (

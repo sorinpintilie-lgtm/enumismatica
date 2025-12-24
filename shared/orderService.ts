@@ -13,6 +13,7 @@ import { db } from './firebaseConfig';
 import type { Product, Order } from './types';
 import { addCollectionItem } from './collectionService';
 import { sendPurchaseConfirmationEmail, sendProductSoldEmail } from './emailService';
+import { createOrGetConversation } from './chatService';
 
 /**
  * Parse Romanian RON string to number
@@ -91,19 +92,19 @@ export async function createDirectOrderForProduct(
   const ordersCol = collection(db, 'orders');
 
   let createdOrderId = '';
+  let sellerId: string | null = null;
 
   await runTransaction(db, async (tx) => {
     let price: number;
-    let sellerId: string;
     let productData: any;
 
     // Create order document reference first
     const orderDocRef = doc(ordersCol);
 
-    if (isMintProduct && mintProductData) {
+      if (isMintProduct && mintProductData) {
       // For mint products, use provided data
-      price = parseRON(mintProductData.price);
-      sellerId = 'monetaria-statului'; // Special seller for mint products
+       price = parseRON(mintProductData.price);
+       sellerId = 'monetaria-statului'; // Special seller for mint products
       productData = mintProductData;
     } else {
       // For regular products, fetch from Firebase
@@ -133,8 +134,8 @@ export async function createDirectOrderForProduct(
         throw new Error('Nu poți cumpăra propriul produs.');
       }
 
-      price = product.price;
-      sellerId = product.ownerId;
+       price = product.price;
+       sellerId = product.ownerId;
       productData = data;
 
       // Mark product as sold and link the order.
@@ -151,7 +152,7 @@ export async function createDirectOrderForProduct(
       throw new Error('Produsul nu are un preț valid.');
     }
 
-    const orderData = {
+       const orderData = {
       productId,
       buyerId,
       sellerId,
@@ -171,7 +172,7 @@ export async function createDirectOrderForProduct(
     createdOrderId = orderDocRef.id;
   });
 
-  // Add the bought product into buyer's personal collection and send emails
+   // Add the bought product into buyer's personal collection, send emails, and ensure chat exists
   try {
     let productName: string;
     let productPrice: number;
@@ -244,7 +245,7 @@ export async function createDirectOrderForProduct(
     }
 
     // For regular products, send email to seller
-    if (!isMintProduct && sellerEmail === null) {
+     if (!isMintProduct && sellerEmail === null) {
       const productSnap = await getDoc(doc(db, 'products', productId));
       if (productSnap.exists()) {
         const data = productSnap.data() as any;
@@ -252,15 +253,28 @@ export async function createDirectOrderForProduct(
           const sellerDoc = await getDoc(doc(db, 'users', data.ownerId));
           if (sellerDoc.exists()) {
             const sellerData = sellerDoc.data();
-            const buyerName = buyerDoc.exists() ? (buyerDoc.data().displayName || 'Cumpărător') : 'Cumpărător';
-            sendProductSoldEmail(
-              sellerData.email,
-              productName,
-              productPrice,
-              buyerName
-            ).catch(error => {
-              console.error('Failed to send product sold email:', error);
-            });
+             const buyerName = buyerDoc.exists() ? (buyerDoc.data().displayName || 'Cumpărător') : 'Cumpărător';
+             sendProductSoldEmail(
+               sellerData.email,
+               productName,
+               productPrice,
+               buyerName
+             ).catch(error => {
+               console.error('Failed to send product sold email:', error);
+             });
+
+             // Ensure a private conversation exists between buyer and seller for this product
+             try {
+               await createOrGetConversation(
+                 buyerId,
+                 data.ownerId,
+                 undefined,
+                 productId,
+                 false,
+               );
+             } catch (err) {
+               console.error('Failed to create conversation after direct product purchase:', err);
+             }
           }
         }
       }
