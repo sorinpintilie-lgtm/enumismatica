@@ -110,8 +110,13 @@ export function useProducts(
           console.log('[useProducts] Query returned', querySnapshot.size, 'products');
           const productsData: Product[] = [];
           querySnapshot.forEach((doc) => {
-            console.log('[useProducts] Product:', doc.id, 'status:', doc.data().status);
             const data = doc.data();
+            console.log('[useProducts] Product:', doc.id, {
+              status: data.status,
+              listingType: data.listingType,
+              isSold: data.isSold,
+              name: data.name
+            });
             
             // Skip sold items
             if (data.isSold === true) {

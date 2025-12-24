@@ -335,6 +335,21 @@ function ProductsListContent() {
   // Total items in catalog (server count). This is independent of how many pages we already loaded.
   const totalInCatalog = totalCount;
 
+  // Debug pagination calculation
+  useEffect(() => {
+    console.log('[ProductsPage] Pagination Debug:', {
+      totalInCatalog,
+      totalCount,
+      loadedProducts: products.length,
+      filteredProducts: filteredProducts.length,
+      hasMore,
+      currentPage: page,
+      PAGE_SIZE,
+      calculatedPages: totalInCatalog ? Math.ceil(totalInCatalog / PAGE_SIZE) : 'unknown',
+      effectiveMaxPage,
+    });
+  }, [totalInCatalog, totalCount, products.length, filteredProducts.length, hasMore, page, effectiveMaxPage]);
+
   // Prefetch next N pages so page navigation feels instant.
   // This keeps a buffer of (current page + PREFETCH_PAGES_AHEAD) loaded.
   useEffect(() => {
