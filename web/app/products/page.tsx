@@ -25,6 +25,7 @@ function ProductsListContent() {
     true, // enabled
     'direct', // listingType - only direct sale products (not auction products)
     false, // live (disable realtime so pagination can prefetch safely)
+    true, // loadAllAtOnce - load all products at once instead of pagination
   );
 
   // State for total count (when filtering by owner)
