@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import LazyImage from './components/LazyImage';
 import ProductCard from './components/ProductCard';
-import { useCachedProducts } from './hooks/useCachedProducts';
+import { useProducts } from './hooks/useProducts';
 import { useAuth } from './context/AuthContext';
 import { useBoostedProducts } from './hooks/useCachedProducts';
 
@@ -46,7 +46,7 @@ const steps = [
 
 export default function HomePage() {
   const { user } = useAuth();
-  const { data: products = [], isLoading: productsLoading } = useCachedProducts(undefined, 8, undefined, !!user);
+  const { products, loading: productsLoading } = useProducts(undefined, 8, undefined, !!user, 'direct', false);
   const { data: boostedProducts = [], isLoading: boostedLoading } = useBoostedProducts(3);
 
   return (
