@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { FormEvent, useState, ChangeEvent, useEffect } from 'react';
+import { FormEvent, useState, ChangeEvent, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -64,7 +64,7 @@ const CATEGORIES = [
   'Monede', 'Bancnote'
 ];
 
-export default function NewProductPage() {
+function NewProductPageContent() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
@@ -1464,5 +1464,22 @@ export default function NewProductPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function NewProductPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500" />
+            <p className="ml-4 text-slate-300">Se încarcă formularul de adăugare piesă...</p>
+          </div>
+        </div>
+      }
+    >
+      <NewProductPageContent />
+    </Suspense>
   );
 }
