@@ -374,7 +374,7 @@ function ProductsListContent() {
     const neededCount = requestedPage * PAGE_SIZE;
     const loadedCount = products.length;
 
-    console.log('[ProductsPage] Handling requestedPage:', { requestedPage, neededCount, loadedCount, hasMore, loading });
+    console.log('[ProductsPage] Handling requestedPage:', { requestedPage, neededCount, loadedCount, hasMore, loading, totalInCatalog });
 
     if (loadedCount >= neededCount) {
       console.log('[ProductsPage] Enough products loaded. Navigating to page', requestedPage);
@@ -385,7 +385,8 @@ function ProductsListContent() {
     }
 
     // Need more products from Firestore
-    if (hasMore && !loading) {
+    // Even if hasMore is false, we should still attempt to load more products if the total count suggests there are more.
+    if ((hasMore || (totalInCatalog && neededCount <= totalInCatalog)) && !loading) {
       console.log('[ProductsPage] Loading more products...');
       loadMore();
       return;
@@ -397,7 +398,7 @@ function ProductsListContent() {
     setPage(maxPage);
     setRequestedPage(null);
     updatePageInUrl(maxPage);
-  }, [requestedPage, products.length, hasMore, loading, loadMore, PAGE_SIZE, filteredProducts.length]);
+  }, [requestedPage, products.length, hasMore, loading, loadMore, PAGE_SIZE, filteredProducts.length, totalInCatalog]);
 
   const pageStart = (page - 1) * PAGE_SIZE;
   const pageEnd = pageStart + PAGE_SIZE;
@@ -410,12 +411,14 @@ function ProductsListContent() {
 
     // If user tries to go beyond what we have loaded, request that page and trigger fetches.
     const neededCount = nextPage * PAGE_SIZE;
-    if (products.length < neededCount && hasMore) {
-      // Do not update the page immediately; wait for products to load.
-      console.log('[ProductsPage] Requesting page', nextPage, 'but not enough products loaded yet. Waiting...');
-      setRequestedPage(nextPage);
-      updatePageInUrl(nextPage);
-      return;
+    if (products.length < neededCount) {
+      // Even if hasMore is false, we should still attempt to load more products if the total count suggests there are more.
+      if (totalInCatalog && neededCount <= totalInCatalog) {
+        console.log('[ProductsPage] Requesting page', nextPage, 'but not enough products loaded yet. Waiting...');
+        setRequestedPage(nextPage);
+        updatePageInUrl(nextPage);
+        return;
+      }
     }
 
     const max = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
