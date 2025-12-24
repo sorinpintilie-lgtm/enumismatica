@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "./ToastProvider";
 import { getOffersForSeller, acceptOffer, rejectOffer } from "shared/offerService";
 import { createOrGetConversation } from "shared/chatService";
-import { formatRON } from "../utils/currency";
+import { formatEUR } from "../utils/currency";
 import type { Offer } from "shared/types";
 
 interface OfferManagementProps {
@@ -226,7 +226,7 @@ export default function OfferManagement({
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <p className="text-lg font-semibold text-white">
-                      {formatRON(offer.offerAmount)}
+                      {formatEUR(offer.offerAmount)}
                     </p>
                     <p className="text-sm text-slate-400">
                       Ofertă din {offer.createdAt.toLocaleDateString()}

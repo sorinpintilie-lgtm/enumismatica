@@ -6,7 +6,7 @@ import { Auction, Product } from 'shared/types';
 import { placeBid } from 'shared/auctionService';
 import { useAuth } from '../context/AuthContext';
 import { useProduct } from '../hooks/useProducts';
-import { formatRON } from '../utils/currency';
+import { formatEUR } from '../utils/currency';
 import { useToast } from './ToastProvider';
 import { WatchlistButton } from './WatchlistButton';
 import { logEvent } from '../hooks/useActivityLogger';
@@ -151,7 +151,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             <div className="text-right">
               <p className="text-sm text-slate-300">Preț curent</p>
               <p className="text-xl font-bold text-[#e7b73c]">
-                {formatRON(currentBid)}
+                {formatEUR(currentBid)}
               </p>
             </div>
           </div>
@@ -169,7 +169,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             <div className="flex items-center gap-4 text-xs text-slate-400">
               <span>⏰ <CountdownTimer endTime={auction.endTime} /></span>
               {canBuyNow && (
-                <span className="text-emerald-300">💰 {formatRON(auction.buyNowPrice as number)}</span>
+                <span className="text-emerald-300">💰 {formatEUR(auction.buyNowPrice as number)}</span>
               )}
             </div>
             
@@ -239,7 +239,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
         <div className="mb-1">
           <p className="text-xs uppercase tracking-wide text-slate-300">Licitație Curentă</p>
           <p className="text-2xl font-extrabold text-[#e7b73c] drop-shadow-[0_0_18px_rgba(231,183,60,0.6)]">
-            {formatRON(currentBid)}
+            {formatEUR(currentBid)}
           </p>
           {user && (
             <p
@@ -265,7 +265,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
           <div className="mb-2">
             <p className="text-[11px] uppercase tracking-wide text-emerald-300">Cumpără acum</p>
             <p className="text-sm font-semibold text-emerald-300">
-              {formatRON(auction.buyNowPrice as number)}
+              {formatEUR(auction.buyNowPrice as number)}
             </p>
           </div>
         )}
@@ -279,7 +279,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
                 min={Math.max(currentBid + 0.01, auction.reservePrice)}
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
-                placeholder={`Minim: ${formatRON(Math.max(currentBid + 0.01, auction.reservePrice))}`}
+                placeholder={`Minim: ${formatEUR(Math.max(currentBid + 0.01, auction.reservePrice))}`}
                 className="flex-1 px-3 py-2 rounded-md border border-[#e7b73c]/35 bg-navy-900/70 text-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent text-sm"
                 required
               />

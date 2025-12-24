@@ -39,7 +39,7 @@ export function formatEURWithSeparators(amount: number): string {
 export function formatRON(amount: number): string {
   return new Intl.NumberFormat('ro-RO', {
     style: 'currency',
-    currency: 'RON',
+    currency: 'EUR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);

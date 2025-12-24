@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { memo } from 'react'
 import { Product } from 'shared/types'
 import LazyImage from './LazyImage'
-import { formatRON } from '../utils/currency'
+import { formatEUR } from '../utils/currency'
 import { WatchlistButton } from './WatchlistButton'
 import { useAuth } from '../context/AuthContext'
 
@@ -67,7 +67,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
               {product.name}
             </h3>
             <span className="text-xl font-bold text-[#e7b73c] flex-shrink-0">
-              {formatRON(product.price)}
+              {formatEUR(product.price)}
             </span>
           </div>
           {showWatchlistButton !== false && (
@@ -141,7 +141,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
         <div className="mt-auto space-y-3">
            <div className="flex items-center justify-between">
              <span className="text-xl font-semibold text-[#e7b73c]">
-               {formatRON(product.price)}
+               {formatEUR(product.price)}
              </span>
            </div>
            <Link

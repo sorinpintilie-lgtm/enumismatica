@@ -122,7 +122,7 @@ export async function createOffer(
     'new_offer',
     buyerId,
     buyerName,
-    `Ai primit o ofertă de ${offerAmount} RON pentru ${itemType === 'product' ? 'produsul' : 'licitația'} tău.`,
+    `Ai primit o ofertă de ${offerAmount} EUR pentru ${itemType === 'product' ? 'produsul' : 'licitația'} tău.`,
     offerRef.id,
     itemType,
     itemId
