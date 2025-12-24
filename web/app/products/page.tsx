@@ -335,6 +335,11 @@ function ProductsListContent() {
   // Total items in catalog (server count). This is independent of how many pages we already loaded.
   const totalInCatalog = totalCount;
 
+  // Calculate pagination values first
+  const loadedPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
+  const totalPagesKnown = totalInCatalog ? Math.max(1, Math.ceil(totalInCatalog / PAGE_SIZE)) : Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const effectiveMaxPage = hasMore ? Math.max(totalPagesKnown, loadedPages + 1) : totalPagesKnown;
+
   // Debug pagination calculation
   useEffect(() => {
     console.log('[ProductsPage] Pagination Debug:', {
@@ -346,9 +351,11 @@ function ProductsListContent() {
       currentPage: page,
       PAGE_SIZE,
       calculatedPages: totalInCatalog ? Math.ceil(totalInCatalog / PAGE_SIZE) : 'unknown',
+      loadedPages,
+      totalPagesKnown,
       effectiveMaxPage,
     });
-  }, [totalInCatalog, totalCount, products.length, filteredProducts.length, hasMore, page, effectiveMaxPage]);
+  }, [totalInCatalog, totalCount, products.length, filteredProducts.length, hasMore, page, loadedPages, totalPagesKnown, effectiveMaxPage]);
 
   // Prefetch next N pages so page navigation feels instant.
   // This keeps a buffer of (current page + PREFETCH_PAGES_AHEAD) loaded.
@@ -386,10 +393,6 @@ function ProductsListContent() {
     setRequestedPage(null);
     updatePageInUrl(maxPage);
   }, [requestedPage, products.length, hasMore, loading, loadMore, PAGE_SIZE, filteredProducts.length]);
-
-  const loadedPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
-  const totalPagesKnown = totalInCatalog ? Math.max(1, Math.ceil(totalInCatalog / PAGE_SIZE)) : Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
-  const effectiveMaxPage = hasMore ? Math.max(totalPagesKnown, loadedPages + 1) : totalPagesKnown;
 
   const pageStart = (page - 1) * PAGE_SIZE;
   const pageEnd = pageStart + PAGE_SIZE;
