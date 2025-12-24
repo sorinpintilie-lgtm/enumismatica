@@ -20,7 +20,7 @@ function ProductsListContent() {
   
   const { products, loading, error, hasMore, loadMore } = useProducts(
     ownerId,
-    100, // pageSize - increased to show more products per page
+    20, // pageSize
     ['name', 'images', 'price', 'description', 'category', 'country', 'year', 'metal', 'rarity', 'grade', 'denomination', 'createdAt', 'updatedAt'],
     true, // enabled
     'all', // listingType - show all products (direct and auction)
@@ -118,8 +118,8 @@ function ProductsListContent() {
     console.log('[ProductsPage] Full URL:', window.location.href);
   }, [searchParams]);
 
-  const PAGE_SIZE = 100;
-  const PREFETCH_PAGES_AHEAD = 5;
+  const PAGE_SIZE = 20;
+  const PREFETCH_PAGES_AHEAD = 3;
   const [page, setPage] = useState(1);
   const [requestedPage, setRequestedPage] = useState<number | null>(null);
   

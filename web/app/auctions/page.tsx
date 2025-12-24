@@ -20,8 +20,8 @@ function AuctionsListContent() {
   const router = useRouter();
   const pathname = usePathname();
   
-  const PAGE_SIZE = 100;
-  const PREFETCH_PAGES_AHEAD = 5;
+  const PAGE_SIZE = 20;
+  const PREFETCH_PAGES_AHEAD = 3;
   
   // Use dynamic status based on filter
   const statusForFetch = statusFilter === 'all' ? undefined : statusFilter;
