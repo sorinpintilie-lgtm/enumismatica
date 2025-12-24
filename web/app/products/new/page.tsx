@@ -156,6 +156,16 @@ function NewProductPageContent() {
 
           const canEditAny = Boolean(user?.isAdmin || user?.isSuperAdmin);
 
+          console.log('Permission check:', {
+            userId: user.uid,
+            productOwnerId: product.ownerId,
+            userRole: user.role,
+            isAdmin: user.isAdmin,
+            isSuperAdmin: user.isSuperAdmin,
+            canEditAny,
+            ownsProduct: product.ownerId === user.uid
+          });
+
           // Check if user owns the product or is privileged
           if (product.ownerId !== user.uid && !canEditAny) {
             showToast({
