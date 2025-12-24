@@ -33,7 +33,7 @@ export default function CartPage() {
           product = {
             id: item.productId,
             name: item.mintProductData.title || 'Piesă Monetaria Statului',
-            price: parseFloat(item.mintProductData.price.replace(/[^\d.]/g, '')),
+            price: parseRON(item.mintProductData.price) / 4.97,
             images: [`/Monetaria_statului/romanian_mint_products/${item.mintProductData.category_slug}/${item.mintProductData.image_files}`],
           } as any;
         }

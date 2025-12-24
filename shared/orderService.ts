@@ -103,7 +103,7 @@ export async function createDirectOrderForProduct(
 
       if (isMintProduct && mintProductData) {
       // For mint products, use provided data
-       price = parseFloat(mintProductData.price.replace(/[^\d.]/g, ''));
+       price = parseRON(mintProductData.price);
        sellerId = 'monetaria-statului'; // Special seller for mint products
       productData = mintProductData;
     } else {
@@ -157,7 +157,7 @@ export async function createDirectOrderForProduct(
       buyerId,
       sellerId,
       price,
-      currency: isMintProduct ? 'EUR' : 'RON',
+      currency: 'RON',
       status: 'paid',
       paymentProvider: 'manual',
       paymentReference: null,
@@ -182,7 +182,7 @@ export async function createDirectOrderForProduct(
     if (isMintProduct && mintProductData) {
       // For mint products
       productName = mintProductData.title || 'Produs Monetaria Statului';
-      productPrice = parseFloat(mintProductData.price.replace(/[^\d.]/g, ''));
+      productPrice = parseRON(mintProductData.price);
       productImages = [`/Monetaria_statului/romanian_mint_products/${mintProductData.category_slug}/${mintProductData.image_files}`];
 
       // Add to collection
