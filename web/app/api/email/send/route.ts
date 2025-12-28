@@ -4,11 +4,10 @@ import fs from 'fs';
 import path from 'path';
 
 // Configure SendGrid
-const sendgridKey = process.env.SENDGRID_API_KEY || process.env.SENDGRID_KEY;
-if (!sendgridKey) {
-  throw new Error('SENDGRID_API_KEY or SENDGRID_KEY environment variable is required');
-}
-sgMail.setApiKey(sendgridKey);
+// IMPORTANT:
+// Do NOT throw at module import time.
+// Next.js may evaluate route modules during build (page data collection).
+// We validate env vars inside the handler instead.
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'contact@enumismatica.ro';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://enumismatica.ro';
@@ -26,6 +25,15 @@ try {
 
 export async function POST(request: NextRequest) {
   try {
+    const sendgridKey = process.env.SENDGRID_API_KEY || process.env.SENDGRID_KEY;
+    if (!sendgridKey) {
+      return NextResponse.json(
+        { error: 'Email service is not configured (missing SendGrid API key)' },
+        { status: 500 },
+      );
+    }
+    sgMail.setApiKey(sendgridKey);
+
     const body = await request.json();
     const { to, templateKey, vars = {}, fallbackKey } = body;
 

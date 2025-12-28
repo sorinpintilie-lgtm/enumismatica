@@ -7,11 +7,17 @@ import { Auction } from 'shared/types';
 // Include buyNow fields so list cards can show "Cumpără acum" info.
 const DEFAULT_AUCTION_FIELDS = [
   'productId',
+  'ownerId',
   'startTime',
   'endTime',
   'reservePrice',
   'currentBid',
   'currentBidderId',
+  'winnerId',
+  'didMeetMinimum',
+  'winnerConversationId',
+  'winnerName',
+  'sellerName',
   'status',
   'buyNowPrice',
   'buyNowUsed',

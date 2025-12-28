@@ -4,6 +4,7 @@ import {
   runTransaction,
   collection,
   serverTimestamp,
+  updateDoc,
   getDocs,
   query,
   where,
@@ -65,6 +66,9 @@ function mapOrderSnapshot(orderDoc: any): Order {
     productId: data.productId,
     buyerId: data.buyerId,
     sellerId: data.sellerId,
+    buyerName: typeof data.buyerName === 'string' ? data.buyerName : undefined,
+    sellerName: typeof data.sellerName === 'string' ? data.sellerName : undefined,
+    conversationId: typeof data.conversationId === 'string' ? data.conversationId : undefined,
     price: data.price,
     currency: data.currency,
     status: data.status,
@@ -172,18 +176,32 @@ export async function createDirectOrderForProduct(
     createdOrderId = orderDocRef.id;
   });
 
-   // Add the bought product into buyer's personal collection, send emails, and ensure chat exists
+  // Add the bought product into buyer's personal collection, send emails, and ensure chat exists
   try {
     let productName: string;
     let productPrice: number;
     let productImages: string[];
+
+    const orderRef = doc(db, 'orders', createdOrderId);
+
+    // Fetch buyer data (email + name) once
+    const buyerDoc = await getDoc(doc(db, 'users', buyerId));
+    const buyerEmail = buyerDoc.exists() ? buyerDoc.data().email : null;
+    const buyerName = buyerDoc.exists()
+      ? (buyerDoc.data().displayName || buyerDoc.data().name || buyerDoc.data().email || 'Cumpărător')
+      : 'Cumpărător';
+
     let sellerEmail: string | null = null;
+    let sellerName: string | undefined = undefined;
+    let conversationId: string | undefined = undefined;
 
     if (isMintProduct && mintProductData) {
       // For mint products
       productName = mintProductData.title || 'Produs Monetaria Statului';
       productPrice = parseRON(mintProductData.price);
       productImages = [`/Monetaria_statului/romanian_mint_products/${mintProductData.category_slug}/${mintProductData.image_files}`];
+
+      sellerName = 'Monetaria Statului';
 
       // Add to collection
       await addCollectionItem(buyerId, {
@@ -226,58 +244,74 @@ export async function createDirectOrderForProduct(
         productName = data.name || 'Produs';
         productPrice = data.price || 0;
         productImages = data.images || [];
-        sellerEmail = data.ownerId ? null : null; // Will fetch below
+
+        // Resolve seller
+        if (data.ownerId) {
+          const sellerDoc = await getDoc(doc(db, 'users', data.ownerId));
+          if (sellerDoc.exists()) {
+            sellerEmail = sellerDoc.data().email;
+            sellerName = sellerDoc.data().displayName || sellerDoc.data().name || sellerDoc.data().email || 'Vânzător';
+          }
+
+          // Ensure a private conversation exists between buyer and seller for this product
+          try {
+            conversationId = await createOrGetConversation(
+              buyerId,
+              data.ownerId,
+              undefined,
+              productId,
+              false,
+            );
+          } catch (err) {
+            console.error('Failed to create conversation after direct product purchase:', err);
+          }
+        }
       }
     }
 
+    // Persist conversation + names on the order for dashboard clarity
+    try {
+      const patch: any = {
+        buyerName,
+        sellerName: sellerName || (isMintProduct ? 'Monetaria Statului' : undefined),
+        updatedAt: serverTimestamp(),
+      };
+      if (conversationId) patch.conversationId = conversationId;
+      await updateDoc(orderRef, patch);
+    } catch (err) {
+      console.error('Failed to update order with conversationId/names:', err);
+    }
+
     // Send email to buyer (non-blocking)
-    const buyerDoc = await getDoc(doc(db, 'users', buyerId));
-    if (buyerDoc.exists()) {
-      const buyerData = buyerDoc.data();
+    if (buyerEmail) {
       sendPurchaseConfirmationEmail(
-        buyerData.email,
+        buyerEmail,
         productName,
         productPrice,
-        createdOrderId
-      ).catch(error => {
+        createdOrderId,
+        {
+          sellerName: sellerName || (isMintProduct ? 'Monetaria Statului' : 'Vânzător'),
+          conversationId,
+        },
+      ).catch((error) => {
         console.error('Failed to send purchase confirmation email:', error);
       });
     }
 
-    // For regular products, send email to seller
-     if (!isMintProduct && sellerEmail === null) {
-      const productSnap = await getDoc(doc(db, 'products', productId));
-      if (productSnap.exists()) {
-        const data = productSnap.data() as any;
-        if (data.ownerId) {
-          const sellerDoc = await getDoc(doc(db, 'users', data.ownerId));
-          if (sellerDoc.exists()) {
-            const sellerData = sellerDoc.data();
-             const buyerName = buyerDoc.exists() ? (buyerDoc.data().displayName || 'Cumpărător') : 'Cumpărător';
-             sendProductSoldEmail(
-               sellerData.email,
-               productName,
-               productPrice,
-               buyerName
-             ).catch(error => {
-               console.error('Failed to send product sold email:', error);
-             });
-
-             // Ensure a private conversation exists between buyer and seller for this product
-             try {
-               await createOrGetConversation(
-                 buyerId,
-                 data.ownerId,
-                 undefined,
-                 productId,
-                 false,
-               );
-             } catch (err) {
-               console.error('Failed to create conversation after direct product purchase:', err);
-             }
-          }
-        }
-      }
+    // Send email to seller (non-blocking)
+    if (!isMintProduct && sellerEmail) {
+      sendProductSoldEmail(
+        sellerEmail,
+        productName,
+        productPrice,
+        buyerName,
+        {
+          conversationId,
+          orderId: createdOrderId,
+        },
+      ).catch((error) => {
+        console.error('Failed to send product sold email:', error);
+      });
     }
   } catch (err) {
     // Non-critical: log and continue.

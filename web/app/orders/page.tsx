@@ -3,18 +3,25 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
-import { useProducts } from '../hooks/useProducts';
 import { formatRON } from '../utils/currency';
 import { getOrdersForBuyer } from 'shared/orderService';
+import { createOrGetConversation } from 'shared/chatService';
 import type { Order } from 'shared/types';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { useRouter } from 'next/navigation';
 
 export default function OrdersPage() {
   const { user, loading: authLoading } = useAuth();
   const userId = user?.uid || null;
+  const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [ordersError, setOrdersError] = useState<string | null>(null);
+
+  const [productById, setProductById] = useState<Record<string, any>>({});
+  const [openingConversationFor, setOpeningConversationFor] = useState<string | null>(null);
 
   const buildImageUrlWithWidth = (url: string, width: number): string => {
     if (!url) return url;
@@ -22,15 +29,42 @@ export default function OrdersPage() {
     return `${url}${separator}width=${width}`;
   };
 
-  const {
-    products,
-    loading: productsLoading,
-  } = useProducts(
-    undefined,
-    200,
-    ['name', 'images', 'price', 'ownerId', 'isSold', 'createdAt', 'updatedAt'],
-    !!userId,
-  );
+  useEffect(() => {
+    let cancelled = false;
+    const loadProducts = async () => {
+      if (!db || orders.length === 0) {
+        if (!cancelled) setProductById({});
+        return;
+      }
+
+      const ids = Array.from(new Set(orders.map((o) => o.productId).filter(Boolean)));
+      const entries = await Promise.all(
+        ids.map(async (id) => {
+          try {
+            const snap = await getDoc(doc(db, 'products', id));
+            if (!snap.exists()) return [id, null] as const;
+            const data = snap.data() as any;
+            return [id, { id, name: data.name, images: data.images || [] }] as const;
+          } catch {
+            return [id, null] as const;
+          }
+        }),
+      );
+
+      if (cancelled) return;
+
+      const next: Record<string, any> = {};
+      for (const [id, value] of entries) {
+        if (value) next[id] = value;
+      }
+      setProductById(next);
+    };
+
+    loadProducts();
+    return () => {
+      cancelled = true;
+    };
+  }, [orders]);
 
   useEffect(() => {
     let isMounted = true;
@@ -70,16 +104,37 @@ export default function OrdersPage() {
     };
   }, [userId]);
 
-  const loading = authLoading || loadingOrders || productsLoading;
+  const loading = authLoading || loadingOrders;
 
   const lines = useMemo(
     () =>
       orders.map((order) => {
-        const product = products.find((p) => p.id === order.productId) || null;
+        const product = productById[order.productId] || null;
         return { order, product };
       }),
-    [orders, products],
+    [orders, productById],
   );
+
+  const handleOpenChat = async (order: Order) => {
+    if (!userId) return;
+    if (order.sellerId === 'monetaria-statului') {
+      router.push('/contact');
+      return;
+    }
+
+    try {
+      setOpeningConversationFor(order.id);
+      const conversationId =
+        order.conversationId ||
+        (await createOrGetConversation(userId, order.sellerId, undefined, order.productId, false));
+      router.push(`/messages?conversation=${conversationId}`);
+    } catch (err: any) {
+      console.error('Failed to open conversation for order', err);
+      alert(err?.message || 'Nu s-a putut deschide conversația.');
+    } finally {
+      setOpeningConversationFor(null);
+    }
+  };
 
   const statusLabel = (status: Order['status']) => {
     switch (status) {
@@ -210,6 +265,11 @@ export default function OrdersPage() {
                 ? buildImageUrlWithWidth(product.images[0], 200)
                 : null;
 
+            const sellerLabel =
+              order.sellerId === 'monetaria-statului'
+                ? 'Monetaria Statului'
+                : order.sellerName || `Vânzător #${order.sellerId.slice(-6)}`;
+
             return (
               <div
                 key={order.id}
@@ -235,6 +295,19 @@ export default function OrdersPage() {
                       <h2 className="text-sm sm:text-base font-semibold text-white mb-1 line-clamp-2">
                         {productName}
                       </h2>
+                      <p className="text-xs text-slate-300">
+                        Ai cumpărat de la{' '}
+                        {order.sellerId === 'monetaria-statului' ? (
+                          <span className="font-semibold text-slate-100">Monetaria Statului</span>
+                        ) : (
+                          <Link
+                            href={`/seller/${order.sellerId}`}
+                            className="font-semibold text-gold-300 hover:text-gold-200"
+                          >
+                            {sellerLabel}
+                          </Link>
+                        )}
+                      </p>
                       <p className="text-xs text-slate-400">
                         Comandă ID:{' '}
                         <span className="font-mono text-slate-200 text-[11px]">
@@ -267,17 +340,32 @@ export default function OrdersPage() {
 
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 border-t border-gold-500/20">
                     <p className="text-[11px] text-slate-400">
-                      Momentan plata este înregistrată intern. Vânzătorul te va contacta pentru
-                      detalii despre livrare și plată.
+                      Folosește chatul intern pentru a coordona livrarea și detaliile tranzacției.
                     </p>
-                    {product && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenChat(order)}
+                        disabled={openingConversationFor === order.id}
+                        className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-[11px] font-semibold text-[#000940] shadow hover:bg-[#f0c955] disabled:opacity-60"
+                      >
+                        {openingConversationFor === order.id ? 'Se deschide...' : 'Deschide chat'}
+                      </button>
                       <Link
-                        href={`/products/${product.id}`}
+                        href={`/orders/${order.id}`}
                         className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-3 py-1 text-[11px] font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
                       >
-                        Vezi piesa
+                        Detalii
                       </Link>
-                    )}
+                      {product && (
+                        <Link
+                          href={`/products/${product.id}`}
+                          className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/40 px-3 py-1 text-[11px] font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
+                        >
+                          Vezi piesa
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

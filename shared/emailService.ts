@@ -99,7 +99,15 @@ export async function sendPurchaseConfirmationEmail(
   productName: string,
   price: number,
   orderId: string,
+  options?: {
+    sellerName?: string;
+    conversationId?: string;
+  },
 ): Promise<void> {
+  const conversationLink = options?.conversationId
+    ? `${DEFAULT_SITE_URL}/messages?conversation=${options.conversationId}`
+    : `${DEFAULT_SITE_URL}/messages`;
+
   return sendTemplateEmail({
     to: email,
     templateKey: 'purchase_confirmation_buyer',
@@ -107,10 +115,10 @@ export async function sendPurchaseConfirmationEmail(
       buyer_name: 'Utilizator',
       listing_title: productName,
       amount: price.toFixed(2),
-      currency: 'EUR',
+      currency: 'RON',
       transaction_link: `${DEFAULT_SITE_URL}/orders/${orderId}`,
-      conversation_link: `${DEFAULT_SITE_URL}/messages`,
-      seller_name: 'Vânzător',
+      conversation_link: conversationLink,
+      seller_name: options?.sellerName || 'Vânzător',
     },
     fallbackKey: 'fallback_transaction',
   });
@@ -141,7 +149,15 @@ export async function sendAuctionWonEmail(
   auctionTitle: string,
   finalBid: number,
   auctionId: string,
+  options?: {
+    sellerName?: string;
+    conversationId?: string;
+  },
 ): Promise<void> {
+  const conversationLink = options?.conversationId
+    ? `${DEFAULT_SITE_URL}/messages?conversation=${options.conversationId}`
+    : `${DEFAULT_SITE_URL}/messages`;
+
   return sendTemplateEmail({
     to: email,
     templateKey: 'auction_won_buyer',
@@ -149,10 +165,10 @@ export async function sendAuctionWonEmail(
       buyer_name: 'Utilizator',
       listing_title: auctionTitle,
       amount: finalBid.toFixed(2),
-      currency: 'EUR',
-      seller_name: 'Vânzător',
+      currency: 'RON',
+      seller_name: options?.sellerName || 'Vânzător',
       transaction_link: `${DEFAULT_SITE_URL}/auctions/${auctionId}`,
-      conversation_link: `${DEFAULT_SITE_URL}/messages`,
+      conversation_link: conversationLink,
     },
     fallbackKey: 'fallback_transaction',
   });
@@ -163,7 +179,15 @@ export async function sendProductSoldEmail(
   productName: string,
   price: number,
   buyerName: string,
+  options?: {
+    conversationId?: string;
+    orderId?: string;
+  },
 ): Promise<void> {
+  const conversationLink = options?.conversationId
+    ? `${DEFAULT_SITE_URL}/messages?conversation=${options.conversationId}`
+    : `${DEFAULT_SITE_URL}/messages`;
+
   return sendTemplateEmail({
     to: email,
     templateKey: 'product_sold_seller',
@@ -171,9 +195,12 @@ export async function sendProductSoldEmail(
       user_name: 'Vânzător',
       listing_title: productName,
       amount: price.toFixed(2),
-      currency: 'EUR',
+      currency: 'RON',
       buyer_name: buyerName,
-      action_link: `${DEFAULT_SITE_URL}/dashboard`,
+      action_link: options?.orderId
+        ? `${DEFAULT_SITE_URL}/orders/${options.orderId}`
+        : `${DEFAULT_SITE_URL}/dashboard`,
+      conversation_link: conversationLink,
     },
     fallbackKey: 'fallback_transaction',
   });
@@ -185,7 +212,14 @@ export async function sendAuctionSoldEmail(
   finalBid: number,
   winnerName: string,
   auctionId: string,
+  options?: {
+    conversationId?: string;
+  },
 ): Promise<void> {
+  const conversationLink = options?.conversationId
+    ? `${DEFAULT_SITE_URL}/messages?conversation=${options.conversationId}`
+    : `${DEFAULT_SITE_URL}/messages`;
+
   return sendTemplateEmail({
     to: email,
     templateKey: 'auction_sold_seller',
@@ -193,9 +227,10 @@ export async function sendAuctionSoldEmail(
       user_name: 'Vânzător',
       listing_title: auctionTitle,
       amount: finalBid.toFixed(2),
-      currency: 'EUR',
+      currency: 'RON',
       buyer_name: winnerName,
       action_link: `${DEFAULT_SITE_URL}/auctions/${auctionId}`,
+      conversation_link: conversationLink,
     },
     fallbackKey: 'fallback_transaction',
   });

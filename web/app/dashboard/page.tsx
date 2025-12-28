@@ -9,6 +9,8 @@ import { useAuctions } from '../hooks/useAuctions';
 import Link from 'next/link';
 import { getUserCredits, boostProductWithCredits } from 'shared/creditService';
 import { getUserAutoBidsForUser, cancelAutoBid } from 'shared/auctionService';
+import { getOrdersForBuyer, getSalesForSeller } from 'shared/orderService';
+import { createOrGetConversation } from 'shared/chatService';
 import { formatRON } from '../utils/currency';
 import type { AutoBid, Auction } from 'shared/types';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
@@ -29,6 +31,13 @@ export default function Dashboard() {
   const [creditsError, setCreditsError] = useState<string | null>(null);
   const [autoBids, setAutoBids] = useState<{ autoBid: AutoBid; auction: Auction | null }[]>([]);
   const [autoBidsLoading, setAutoBidsLoading] = useState(false);
+
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [recentSales, setRecentSales] = useState<any[]>([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [transactionsError, setTransactionsError] = useState<string | null>(null);
+  const [productById, setProductById] = useState<Record<string, any>>({});
+  const [openingChatKey, setOpeningChatKey] = useState<string | null>(null);
 
   const [showAllMyProducts, setShowAllMyProducts] = useState(false);
 
@@ -97,6 +106,89 @@ export default function Dashboard() {
       isMounted = false;
     };
   }, [user?.uid]);
+
+  // Load recent direct shop orders/sales and cache product titles for clarity.
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      if (!user?.uid || !db) return;
+      setTransactionsLoading(true);
+      setTransactionsError(null);
+      try {
+        const [orders, sales] = await Promise.all([
+          getOrdersForBuyer(user.uid),
+          getSalesForSeller(user.uid),
+        ]);
+
+        if (cancelled) return;
+        setRecentOrders(orders.slice(0, 5));
+        setRecentSales(sales.slice(0, 5));
+
+        // Build product cache (includes orders + sales + ended auctions we already have in memory)
+        const ids = new Set<string>();
+        orders.forEach((o) => o.productId && ids.add(o.productId));
+        sales.forEach((o) => o.productId && ids.add(o.productId));
+        auctions.forEach((a) => a.productId && ids.add(a.productId));
+
+        const entries = await Promise.all(
+          Array.from(ids).map(async (id) => {
+            try {
+              const snap = await getDoc(doc(db, 'products', id));
+              if (!snap.exists()) return [id, null] as const;
+              const data = snap.data() as any;
+              return [id, { id, name: data.name, images: data.images || [] }] as const;
+            } catch {
+              return [id, null] as const;
+            }
+          }),
+        );
+
+        if (cancelled) return;
+        const next: Record<string, any> = {};
+        for (const [id, value] of entries) {
+          if (value) next[id] = value;
+        }
+        setProductById(next);
+      } catch (err: any) {
+        console.error('Failed to load dashboard transactions', err);
+        if (!cancelled) setTransactionsError(err?.message || 'Nu s-au putut încărca tranzacțiile.');
+      } finally {
+        if (!cancelled) setTransactionsLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid, auctions]);
+
+  const openTransactionChat = async (opts: {
+    key: string;
+    buyerId: string;
+    sellerId: string;
+    productId?: string;
+    conversationId?: string;
+    auctionId?: string;
+  }) => {
+    if (!user?.uid) return;
+    if (opts.sellerId === 'monetaria-statului') {
+      router.push('/contact');
+      return;
+    }
+    try {
+      setOpeningChatKey(opts.key);
+      const conversationId =
+        opts.conversationId ||
+        (await createOrGetConversation(opts.buyerId, opts.sellerId, opts.auctionId, opts.productId, false));
+      router.push(`/messages?conversation=${conversationId}`);
+    } catch (err: any) {
+      console.error('Failed to open transaction chat', err);
+      alert(err?.message || 'Nu s-a putut deschide conversația.');
+    } finally {
+      setOpeningChatKey(null);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -430,6 +522,283 @@ export default function Dashboard() {
             >
               Licitații
             </Link>
+          </div>
+        </div>
+
+        {/* Transactions overview */}
+        <div className="mb-8 rounded-2xl border border-gold-500/25 bg-navy-900/70 p-6 shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-white">Tranzacțiile mele</h2>
+              <p className="text-sm text-slate-300">
+                Cumpărări și vânzări (magazin + licitații) cu link direct către chat.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/orders"
+                className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-4 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
+              >
+                Cumpărări
+              </Link>
+              <Link
+                href="/sales"
+                className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-4 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
+              >
+                Vânzări
+              </Link>
+            </div>
+          </div>
+
+          {transactionsError && (
+            <p className="text-sm text-red-200 border border-red-500/30 bg-red-500/10 rounded-lg px-3 py-2 mb-4">
+              {transactionsError}
+            </p>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Purchases */}
+            <div className="rounded-2xl border border-gold-500/20 bg-navy-950/30 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-semibold text-white">Cumpărări recente</h3>
+                <span className="text-xs text-slate-300">{transactionsLoading ? '—' : recentOrders.length}</span>
+              </div>
+
+              {transactionsLoading ? (
+                <p className="text-sm text-slate-300">Se încarcă...</p>
+              ) : recentOrders.length === 0 ? (
+                <p className="text-sm text-slate-300">Nu ai încă cumpărări înregistrate.</p>
+              ) : (
+                <div className="space-y-2">
+                  {recentOrders.slice(0, 3).map((o: any) => {
+                    const p = productById[o.productId];
+                    const title = p?.name || `Piesă ${o.productId}`;
+                    const sellerLabel =
+                      o.sellerId === 'monetaria-statului'
+                        ? 'Monetaria Statului'
+                        : o.sellerName || `Vânzător #${o.sellerId.slice(-6)}`;
+                    return (
+                      <div
+                        key={o.id}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl border border-gold-500/15 bg-navy-900/40 p-3"
+                      >
+                        <div>
+                          <p className="text-sm font-semibold text-white line-clamp-1">{title}</p>
+                          <p className="text-xs text-slate-300">
+                            Ai cumpărat de la{' '}
+                            {o.sellerId === 'monetaria-statului' ? (
+                              <span className="font-semibold">Monetaria Statului</span>
+                            ) : (
+                              <Link href={`/seller/${o.sellerId}`} className="font-semibold text-gold-300 hover:text-gold-200">
+                                {sellerLabel}
+                              </Link>
+                            )}
+                            {' • '}
+                            <span className="font-semibold text-gold-300">{formatRON(o.price)}</span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              openTransactionChat({
+                                key: `order-${o.id}`,
+                                buyerId: o.buyerId,
+                                sellerId: o.sellerId,
+                                productId: o.productId,
+                                conversationId: o.conversationId,
+                              })
+                            }
+                            disabled={openingChatKey === `order-${o.id}`}
+                            className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-[11px] font-semibold text-[#000940] hover:bg-[#f0c955] disabled:opacity-60"
+                          >
+                            {openingChatKey === `order-${o.id}` ? '...' : 'Chat'}
+                          </button>
+                          <Link
+                            href={`/orders/${o.id}`}
+                            className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/50 px-3 py-1 text-[11px] font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10"
+                          >
+                            Detalii
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Auction wins */}
+              {(() => {
+                const wins = auctions
+                  .filter((a) => a.status === 'ended' && a.winnerId === user.uid && a.didMeetMinimum)
+                  .slice(0, 2);
+                if (wins.length === 0) return null;
+                return (
+                  <div className="mt-4 pt-4 border-t border-gold-500/15">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gold-400 mb-2">Licitații câștigate</p>
+                    <div className="space-y-2">
+                      {wins.map((a) => {
+                        const p = productById[a.productId];
+                        const title = p?.name || `Licitație #${a.id.slice(-6)}`;
+                        const sellerLabel = a.sellerName || (a.ownerId ? `Vânzător #${a.ownerId.slice(-6)}` : 'Vânzător');
+                        return (
+                          <div key={a.id} className="flex items-center justify-between gap-2 rounded-xl border border-gold-500/15 bg-navy-900/40 p-3">
+                            <div>
+                              <p className="text-sm font-semibold text-white line-clamp-1">{title}</p>
+                              <p className="text-xs text-slate-300">
+                                Câștigată de la <span className="font-semibold">{sellerLabel}</span>
+                                {' • '}
+                                <span className="font-semibold text-gold-300">{formatRON(a.currentBid ?? 0)}</span>
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  openTransactionChat({
+                                    key: `awin-${a.id}`,
+                                    buyerId: user.uid,
+                                    sellerId: a.ownerId || '',
+                                    productId: a.productId,
+                                    auctionId: a.id,
+                                    conversationId: a.winnerConversationId,
+                                  })
+                                }
+                                disabled={openingChatKey === `awin-${a.id}` || !a.ownerId}
+                                className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-[11px] font-semibold text-[#000940] hover:bg-[#f0c955] disabled:opacity-60"
+                              >
+                                {openingChatKey === `awin-${a.id}` ? '...' : 'Chat'}
+                              </button>
+                              <Link href={`/auctions/${a.id}`} className="text-[11px] font-semibold text-gold-300 hover:text-gold-200">
+                                Vezi
+                              </Link>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Sales */}
+            <div className="rounded-2xl border border-gold-500/20 bg-navy-950/30 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-semibold text-white">Vânzări recente</h3>
+                <span className="text-xs text-slate-300">{transactionsLoading ? '—' : recentSales.length}</span>
+              </div>
+
+              {transactionsLoading ? (
+                <p className="text-sm text-slate-300">Se încarcă...</p>
+              ) : recentSales.length === 0 ? (
+                <p className="text-sm text-slate-300">Nu ai încă vânzări înregistrate.</p>
+              ) : (
+                <div className="space-y-2">
+                  {recentSales.slice(0, 3).map((o: any) => {
+                    const p = productById[o.productId];
+                    const title = p?.name || `Piesă ${o.productId}`;
+                    const buyerLabel = o.buyerName || `Cumpărător #${o.buyerId.slice(-6)}`;
+                    return (
+                      <div
+                        key={o.id}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl border border-gold-500/15 bg-navy-900/40 p-3"
+                      >
+                        <div>
+                          <p className="text-sm font-semibold text-white line-clamp-1">{title}</p>
+                          <p className="text-xs text-slate-300">
+                            Ai vândut către{' '}
+                            <Link href={`/seller/${o.buyerId}`} className="font-semibold text-gold-300 hover:text-gold-200">
+                              {buyerLabel}
+                            </Link>
+                            {' • '}
+                            <span className="font-semibold text-gold-300">{formatRON(o.price)}</span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              openTransactionChat({
+                                key: `sale-${o.id}`,
+                                buyerId: o.buyerId,
+                                sellerId: o.sellerId,
+                                productId: o.productId,
+                                conversationId: o.conversationId,
+                              })
+                            }
+                            disabled={openingChatKey === `sale-${o.id}`}
+                            className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-[11px] font-semibold text-[#000940] hover:bg-[#f0c955] disabled:opacity-60"
+                          >
+                            {openingChatKey === `sale-${o.id}` ? '...' : 'Chat'}
+                          </button>
+                          <Link
+                            href={`/orders/${o.id}`}
+                            className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/50 px-3 py-1 text-[11px] font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10"
+                          >
+                            Detalii
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Auction sales */}
+              {(() => {
+                const sold = auctions
+                  .filter((a) => a.status === 'ended' && a.ownerId === user.uid && !!a.winnerId && a.didMeetMinimum)
+                  .slice(0, 2);
+                if (sold.length === 0) return null;
+                return (
+                  <div className="mt-4 pt-4 border-t border-gold-500/15">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gold-400 mb-2">Licitații vândute</p>
+                    <div className="space-y-2">
+                      {sold.map((a) => {
+                        const p = productById[a.productId];
+                        const title = p?.name || `Licitație #${a.id.slice(-6)}`;
+                        const buyerLabel = a.winnerName || (a.winnerId ? `Cumpărător #${a.winnerId.slice(-6)}` : 'Cumpărător');
+                        return (
+                          <div key={a.id} className="flex items-center justify-between gap-2 rounded-xl border border-gold-500/15 bg-navy-900/40 p-3">
+                            <div>
+                              <p className="text-sm font-semibold text-white line-clamp-1">{title}</p>
+                              <p className="text-xs text-slate-300">
+                                Vândut către <span className="font-semibold">{buyerLabel}</span>
+                                {' • '}
+                                <span className="font-semibold text-gold-300">{formatRON(a.currentBid ?? 0)}</span>
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  openTransactionChat({
+                                    key: `asold-${a.id}`,
+                                    buyerId: a.winnerId as string,
+                                    sellerId: user.uid,
+                                    productId: a.productId,
+                                    auctionId: a.id,
+                                    conversationId: a.winnerConversationId,
+                                  })
+                                }
+                                disabled={openingChatKey === `asold-${a.id}` || !a.winnerId}
+                                className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-[11px] font-semibold text-[#000940] hover:bg-[#f0c955] disabled:opacity-60"
+                              >
+                                {openingChatKey === `asold-${a.id}` ? '...' : 'Chat'}
+                              </button>
+                              <Link href={`/auctions/${a.id}`} className="text-[11px] font-semibold text-gold-300 hover:text-gold-200">
+                                Vezi
+                              </Link>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         </div>
 

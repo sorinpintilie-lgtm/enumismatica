@@ -202,6 +202,16 @@ export interface Auction {
   currentBidderId?: string; // User ID of the current highest bidder
 
   /**
+   * Winner metadata set when an auction ends.
+   * Used to build dashboards, email links, and reliable transaction history.
+   */
+  winnerId?: string | null;
+  didMeetMinimum?: boolean;
+  winnerConversationId?: string;
+  winnerName?: string;
+  sellerName?: string;
+
+  /**
    * Optional "Cumpără acum" (Buy Now) configuration.
    * If set, users can instantly buy the item for this price while the auction is active.
    */
@@ -590,6 +600,19 @@ export interface Order {
   productId: string;
   buyerId: string;
   sellerId: string;
+
+  /**
+   * Denormalized metadata to make transaction history clear even when user/profile reads are restricted.
+   */
+  buyerName?: string;
+  sellerName?: string;
+
+  /**
+   * Conversation created between buyer and seller for this order.
+   * Used for deep-linking from emails and dashboard.
+   */
+  conversationId?: string;
+
   price: number;
   currency: 'RON';
   status: 'pending' | 'paid' | 'cancelled' | 'failed' | 'refunded';
