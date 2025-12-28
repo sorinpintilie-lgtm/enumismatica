@@ -10,6 +10,7 @@ import type { Order } from 'shared/types';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useRouter } from 'next/navigation';
+import { ContactDetailsModal } from '../components/ContactDetailsModal';
 
 export default function SalesPage() {
   const { user, loading: authLoading } = useAuth();
@@ -22,6 +23,15 @@ export default function SalesPage() {
 
   const [productById, setProductById] = useState<Record<string, any>>({});
   const [openingConversationFor, setOpeningConversationFor] = useState<string | null>(null);
+
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [contactContext, setContactContext] = useState<{
+    conversationId?: string;
+    buyerId: string;
+    sellerId: string;
+    buyerName?: string;
+    sellerName?: string;
+  } | null>(null);
 
   const buildImageUrlWithWidth = (url: string, width: number): string => {
     if (!url) return url;
@@ -136,6 +146,30 @@ export default function SalesPage() {
     }
   };
 
+  const handleShowContact = async (order: Order) => {
+    if (!userId) return;
+
+    try {
+      setOpeningConversationFor(order.id);
+      const conversationId =
+        order.conversationId ||
+        (await createOrGetConversation(order.buyerId, userId, undefined, order.productId, false));
+      setContactContext({
+        conversationId,
+        buyerId: order.buyerId,
+        sellerId: order.sellerId,
+        buyerName: order.buyerName,
+        sellerName: order.sellerName,
+      });
+      setContactModalOpen(true);
+    } catch (err: any) {
+      console.error('Failed to load contact details', err);
+      alert(err?.message || 'Nu s-au putut încărca detaliile de contact.');
+    } finally {
+      setOpeningConversationFor(null);
+    }
+  };
+
   const statusLabel = (status: Order['status']) => {
     switch (status) {
       case 'paid':
@@ -226,6 +260,16 @@ export default function SalesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <ContactDetailsModal
+        open={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+        conversationId={contactContext?.conversationId}
+        currentUserId={userId || ''}
+        buyerId={contactContext?.buyerId}
+        sellerId={contactContext?.sellerId}
+        buyerName={contactContext?.buyerName}
+        sellerName={contactContext?.sellerName}
+      />
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#e7b73c] mb-1">Vânzările mele</h1>
@@ -302,6 +346,14 @@ export default function SalesPage() {
                         >
                           {buyerLabel}
                         </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleShowContact(order)}
+                          className="ml-2 inline-flex items-center justify-center rounded-full border border-gold-500/30 bg-navy-950/30 px-2 py-0.5 text-[10px] font-semibold text-gold-200 hover:bg-navy-950/60"
+                          title="Detalii contact"
+                        >
+                          Contact
+                        </button>
                       </p>
                       <p className="text-xs text-slate-400">
                         Comandă ID:{' '}

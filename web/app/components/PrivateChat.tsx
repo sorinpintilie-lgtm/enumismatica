@@ -31,7 +31,7 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
   } = useConversation(conversationId, user?.uid || null);
   const [messageText, setMessageText] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Check if this is an admin support conversation
   const isAdminChat = messages.length > 0 && messages.some(msg =>
@@ -40,7 +40,10 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    // Scroll only the chat container, not the whole page.
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -216,7 +219,7 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 bg-navy-950/70">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 bg-navy-950/70">
         {loading && messages.length === 0 ? (
           <div className="flex justify-center items-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#e7b73c]"></div>
@@ -246,7 +249,6 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
                 <span>Scrie...</span>
               </div>
             )}
-            <div ref={messagesEndRef} />
           </>
         )}
       </div>

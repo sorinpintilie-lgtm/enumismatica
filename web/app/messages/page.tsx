@@ -44,7 +44,7 @@ function MessagesPageContent() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-120px)] flex flex-col">
       <div className="mb-6 rounded-3xl border border-gold-500/40 bg-gradient-to-r from-navy-700 via-navy-800 to-navy-900 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.6)]">
         <h1 className="text-3xl font-bold text-white mb-2">Mesajele Mele</h1>
         <p className="text-sm text-slate-300">
@@ -52,9 +52,9 @@ function MessagesPageContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
         {/* Conversations List - Left Sidebar */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 min-h-0">
           <ConversationList
             onSelectConversation={setSelectedConversationId}
             selectedConversationId={selectedConversationId}
@@ -62,7 +62,7 @@ function MessagesPageContent() {
         </div>
 
         {/* Chat Area - Main Content */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-h-0">
           <PrivateChat
             conversationId={selectedConversationId}
             onClose={() => setSelectedConversationId(null)}

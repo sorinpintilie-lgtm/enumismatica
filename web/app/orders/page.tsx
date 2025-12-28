@@ -10,6 +10,7 @@ import type { Order } from 'shared/types';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useRouter } from 'next/navigation';
+import { ContactDetailsModal } from '../components/ContactDetailsModal';
 
 export default function OrdersPage() {
   const { user, loading: authLoading } = useAuth();
@@ -22,6 +23,15 @@ export default function OrdersPage() {
 
   const [productById, setProductById] = useState<Record<string, any>>({});
   const [openingConversationFor, setOpeningConversationFor] = useState<string | null>(null);
+
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [contactContext, setContactContext] = useState<{
+    conversationId?: string;
+    buyerId: string;
+    sellerId: string;
+    buyerName?: string;
+    sellerName?: string;
+  } | null>(null);
 
   const buildImageUrlWithWidth = (url: string, width: number): string => {
     if (!url) return url;
@@ -136,6 +146,34 @@ export default function OrdersPage() {
     }
   };
 
+  const handleShowContact = async (order: Order) => {
+    if (!userId) return;
+    if (order.sellerId === 'monetaria-statului') {
+      router.push('/contact');
+      return;
+    }
+
+    try {
+      setOpeningConversationFor(order.id);
+      const conversationId =
+        order.conversationId ||
+        (await createOrGetConversation(userId, order.sellerId, undefined, order.productId, false));
+      setContactContext({
+        conversationId,
+        buyerId: order.buyerId,
+        sellerId: order.sellerId,
+        buyerName: order.buyerName,
+        sellerName: order.sellerName,
+      });
+      setContactModalOpen(true);
+    } catch (err: any) {
+      console.error('Failed to load contact details', err);
+      alert(err?.message || 'Nu s-au putut încărca detaliile de contact.');
+    } finally {
+      setOpeningConversationFor(null);
+    }
+  };
+
   const statusLabel = (status: Order['status']) => {
     switch (status) {
       case 'paid':
@@ -226,6 +264,16 @@ export default function OrdersPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <ContactDetailsModal
+        open={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+        conversationId={contactContext?.conversationId}
+        currentUserId={userId || ''}
+        buyerId={contactContext?.buyerId}
+        sellerId={contactContext?.sellerId}
+        buyerName={contactContext?.buyerName}
+        sellerName={contactContext?.sellerName}
+      />
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#e7b73c] mb-1">Comenzile mele</h1>
@@ -295,19 +343,29 @@ export default function OrdersPage() {
                       <h2 className="text-sm sm:text-base font-semibold text-white mb-1 line-clamp-2">
                         {productName}
                       </h2>
-                      <p className="text-xs text-slate-300">
-                        Ai cumpărat de la{' '}
-                        {order.sellerId === 'monetaria-statului' ? (
-                          <span className="font-semibold text-slate-100">Monetaria Statului</span>
-                        ) : (
-                          <Link
-                            href={`/seller/${order.sellerId}`}
-                            className="font-semibold text-gold-300 hover:text-gold-200"
-                          >
-                            {sellerLabel}
-                          </Link>
-                        )}
-                      </p>
+                          <p className="text-xs text-slate-300">
+                            Ai cumpărat de la{' '}
+                            {order.sellerId === 'monetaria-statului' ? (
+                              <span className="font-semibold text-slate-100">Monetaria Statului</span>
+                            ) : (
+                              <Link
+                                href={`/seller/${order.sellerId}`}
+                                className="font-semibold text-gold-300 hover:text-gold-200"
+                              >
+                                {sellerLabel}
+                              </Link>
+                            )}
+                            {order.sellerId !== 'monetaria-statului' && (
+                              <button
+                                type="button"
+                                onClick={() => handleShowContact(order)}
+                                className="ml-2 inline-flex items-center justify-center rounded-full border border-gold-500/30 bg-navy-950/30 px-2 py-0.5 text-[10px] font-semibold text-gold-200 hover:bg-navy-950/60"
+                                title="Detalii contact"
+                              >
+                                Contact
+                              </button>
+                            )}
+                          </p>
                       <p className="text-xs text-slate-400">
                         Comandă ID:{' '}
                         <span className="font-mono text-slate-200 text-[11px]">

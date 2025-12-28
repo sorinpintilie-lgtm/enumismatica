@@ -323,6 +323,10 @@ export async function createOrGetConversation(
   // (Also helps when reading user docs is restricted outside of participants.)
   let buyerName: string | undefined = undefined;
   let sellerName: string | undefined = undefined;
+  let buyerEmail: string | undefined = undefined;
+  let sellerEmail: string | undefined = undefined;
+  let buyerPhone: string | undefined = undefined;
+  let sellerPhone: string | undefined = undefined;
   try {
     const [buyerDoc, sellerDoc] = await Promise.all([
       getDoc(doc(db, 'users', buyerId)),
@@ -331,10 +335,14 @@ export async function createOrGetConversation(
     if (buyerDoc.exists()) {
       const d = buyerDoc.data() as any;
       buyerName = d.displayName || d.name || d.email || undefined;
+      buyerEmail = d.email || undefined;
+      buyerPhone = d.personalDetails?.phone || undefined;
     }
     if (sellerDoc.exists()) {
       const d = sellerDoc.data() as any;
       sellerName = d.displayName || d.name || d.email || undefined;
+      sellerEmail = d.email || undefined;
+      sellerPhone = d.personalDetails?.phone || undefined;
     }
   } catch (err) {
     console.error('Failed to resolve buyer/seller names for conversation:', err);
@@ -347,6 +355,10 @@ export async function createOrGetConversation(
     participants: [buyerId, sellerId],
     buyerName,
     sellerName,
+    buyerEmail,
+    sellerEmail,
+    buyerPhone,
+    sellerPhone,
     unreadCount: {
       [buyerId]: 0,
       [sellerId]: 0,

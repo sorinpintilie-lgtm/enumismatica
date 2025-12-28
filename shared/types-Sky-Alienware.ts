@@ -442,6 +442,10 @@ export interface Conversation {
   sellerId?: string;
   buyerName?: string;
   sellerName?: string;
+  buyerEmail?: string;
+  sellerEmail?: string;
+  buyerPhone?: string;
+  sellerPhone?: string;
   status?: string;
 }
 
