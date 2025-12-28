@@ -488,6 +488,8 @@ export interface Conversation {
   productId?: string;
   buyerId?: string;
   sellerId?: string;
+  buyerName?: string;
+  sellerName?: string;
   status?: string;
 }
 

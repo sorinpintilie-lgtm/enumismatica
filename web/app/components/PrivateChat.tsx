@@ -296,12 +296,26 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
   const getOtherUserName = (conversation: Conversation) => {
-    // This would need to be enhanced to fetch actual user names
-    const otherUserId = conversation.participants.find(id => id !== user?.uid);
+    const currentUserId = user?.uid;
+    const otherUserId = conversation.participants.find((id) => id !== currentUserId);
+
     if (conversation.isAdminSupport) {
-      return otherUserId === user?.uid ? 'Suport Admin' : `Utilizator ${otherUserId?.slice(-4)}`;
+      // For normal users this is always admin support.
+      if (!isAdmin) return 'Suport Admin';
+      // For admins, show the other user.
     }
-    return `Utilizator ${otherUserId?.slice(-4)}`;
+
+    const short = otherUserId ? otherUserId.slice(-4) : '????';
+
+    // Prefer names stored on the conversation (set at creation time).
+    if (currentUserId && conversation.buyerId && conversation.sellerId) {
+      const otherIsBuyer = otherUserId === conversation.buyerId;
+      const name = otherIsBuyer ? conversation.buyerName : conversation.sellerName;
+      if (name) return `${name} (${short})`;
+    }
+
+    // Fallback: show short id.
+    return `Utilizator (${short})`;
   };
 
   const handleStartAdminChat = async () => {

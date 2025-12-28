@@ -319,11 +319,34 @@ export async function createOrGetConversation(
     return existingConversation.id;
   }
 
+  // Resolve participant display names once, so chat UI can show usernames without needing extra reads.
+  // (Also helps when reading user docs is restricted outside of participants.)
+  let buyerName: string | undefined = undefined;
+  let sellerName: string | undefined = undefined;
+  try {
+    const [buyerDoc, sellerDoc] = await Promise.all([
+      getDoc(doc(db, 'users', buyerId)),
+      getDoc(doc(db, 'users', sellerId)),
+    ]);
+    if (buyerDoc.exists()) {
+      const d = buyerDoc.data() as any;
+      buyerName = d.displayName || d.name || d.email || undefined;
+    }
+    if (sellerDoc.exists()) {
+      const d = sellerDoc.data() as any;
+      sellerName = d.displayName || d.name || d.email || undefined;
+    }
+  } catch (err) {
+    console.error('Failed to resolve buyer/seller names for conversation:', err);
+  }
+
   // Create new conversation
   const conversationData: any = {
     buyerId,
     sellerId,
     participants: [buyerId, sellerId],
+    buyerName,
+    sellerName,
     unreadCount: {
       [buyerId]: 0,
       [sellerId]: 0,
@@ -348,14 +371,13 @@ export async function createOrGetConversation(
   });
 
   // Notify seller about new conversation
-  const buyerDoc = await getDoc(doc(db, 'users', buyerId));
-  const buyerName = buyerDoc.exists() ? buyerDoc.data().displayName : 'A user';
+  const senderNameForNotification = buyerName || 'A user';
 
   await createChatNotification(
     sellerId,
     'conversation_started',
     buyerId,
-    buyerName,
+    senderNameForNotification,
     isAdminSupport ? 'A new support conversation has been started' : 'A new conversation has been started',
     docRef.id,
     auctionId // This will be undefined for admin support, which is fine now
