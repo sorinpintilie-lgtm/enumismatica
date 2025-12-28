@@ -7,6 +7,9 @@ import { ChatMessage, Conversation } from 'shared/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import Link from 'next/link';
+import { ContactDetailsModal } from './ContactDetailsModal';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 interface PrivateChatProps {
   conversationId: string | null;
@@ -32,6 +35,49 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
   const [messageText, setMessageText] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [conversationMeta, setConversationMeta] = useState<{
+    buyerId?: string;
+    sellerId?: string;
+    buyerName?: string;
+    sellerName?: string;
+  } | null>(null);
+
+  // Load basic conversation metadata so we can show contact details directly from chat.
+  useEffect(() => {
+    let cancelled = false;
+    const loadMeta = async () => {
+      if (!conversationId || !db) {
+        setConversationMeta(null);
+        return;
+      }
+      try {
+        const snap = await getDoc(doc(db, 'conversations', conversationId));
+        if (!snap.exists()) {
+          if (!cancelled) setConversationMeta(null);
+          return;
+        }
+        const data = snap.data() as any;
+        if (!cancelled) {
+          setConversationMeta({
+            buyerId: data.buyerId,
+            sellerId: data.sellerId,
+            buyerName: data.buyerName,
+            sellerName: data.sellerName,
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load conversation meta', err);
+        if (!cancelled) setConversationMeta(null);
+      }
+    };
+
+    loadMeta();
+    return () => {
+      cancelled = true;
+    };
+  }, [conversationId]);
 
   // Check if this is an admin support conversation
   const isAdminChat = messages.length > 0 && messages.some(msg =>
@@ -148,6 +194,16 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
 
   return (
     <div className="rounded-2xl bg-navy-900/80 border border-gold-500/30 shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col h-full">
+      <ContactDetailsModal
+        open={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+        conversationId={conversationId}
+        currentUserId={user?.uid || ''}
+        buyerId={conversationMeta?.buyerId}
+        sellerId={conversationMeta?.sellerId}
+        buyerName={conversationMeta?.buyerName}
+        sellerName={conversationMeta?.sellerName}
+      />
       {/* Header */}
       <div className={`px-4 py-3 border-b border-gold-500/30 ${
         isAdminChat ? 'bg-gradient-to-r from-amber-900/80 via-orange-900/80 to-red-900/80' : 'bg-gradient-to-r from-navy-900 via-navy-800 to-navy-900'
@@ -167,6 +223,16 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
             )}
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setContactModalOpen(true)}
+              className="text-gold-200 hover:text-white transition-colors p-1"
+              title="Detalii contact"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
             <button
               onClick={() => setShowSearch(!showSearch)}
               className="text-gold-200 hover:text-white transition-colors p-1"
