@@ -65,6 +65,7 @@ export default function ProductDetailPage() {
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [heroIndex, setHeroIndex] = useState(0);
   const [buying, setBuying] = useState(false);
   const [showBuyConfirm, setShowBuyConfirm] = useState(false);
   const [viewMode, setViewMode] = useState<'owner' | 'preview'>('preview');
@@ -86,6 +87,11 @@ export default function ProductDetailPage() {
     setLightboxIndex(index);
     setLightboxOpen(true);
   };
+
+  useEffect(() => {
+    // Reset hero image when navigating to a different product.
+    setHeroIndex(0);
+  }, [id]);
 
   const closeLightbox = () => setLightboxOpen(false);
 
@@ -330,17 +336,17 @@ export default function ProductDetailPage() {
             <div className="space-y-4">
               {images.length > 0 ? (
                 <div
-                  className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-2xl overflow-hidden border border-gold-500/20 cursor-zoom-in"
-                  onClick={() => openLightboxAt(0)}
+                  className="w-full h-96 bg-navy-900/60 rounded-2xl overflow-hidden border border-gold-500/20 cursor-zoom-in flex items-center justify-center"
+                  onClick={() => openLightboxAt(heroIndex)}
                 >
                   <img
-                    src={buildImageUrlWithWidth(images[0], 800)}
+                    src={buildImageUrlWithWidth(images[heroIndex] || images[0], 800)}
                     alt={product.name}
-                    className="w-full h-96 object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
+                    className="w-full h-full object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
                   />
                 </div>
               ) : (
-                <div className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-2xl flex items-center justify-center border border-gold-500/20">
+                <div className="w-full h-96 bg-navy-900/60 rounded-2xl flex items-center justify-center border border-gold-500/20">
                   <span className="text-slate-400 text-lg">Imagine indisponibilă</span>
                 </div>
               )}
@@ -351,13 +357,17 @@ export default function ProductDetailPage() {
                     <button
                       key={index}
                       type="button"
-                      onClick={() => openLightboxAt(index + 1)}
-                      className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-xl overflow-hidden border border-gold-500/10 cursor-zoom-in"
+                      onClick={() => setHeroIndex(index + 1)}
+                      className={`w-full h-20 bg-navy-900/60 rounded-xl overflow-hidden border transition-colors cursor-pointer ${
+                        heroIndex === index + 1
+                          ? 'border-gold-400/80'
+                          : 'border-gold-500/10 hover:border-gold-500/30'
+                      }`}
                     >
                       <img
                         src={buildImageUrlWithWidth(image, 200)}
                         alt={`${product.name} ${index + 2}`}
-                        className="w-full h-20 object-contain bg-navy-950"
+                        className="w-full h-full object-contain bg-navy-950"
                       />
                     </button>
                   ))}

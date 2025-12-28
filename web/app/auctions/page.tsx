@@ -669,18 +669,20 @@ function AuctionsListContent() {
          )}
         </div>
       ) : (
-        <div className={
-          viewMode === 'grid'
-            ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            : "space-y-4"
-        }>
+        <div
+          className={
+            viewMode === 'grid'
+              ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4'
+              : 'space-y-4'
+          }
+        >
           {pagedAuctions.map((auction) => (
             <div key={auction.id} className={
               viewMode === 'list'
                 ? "flex bg-navy-800/50 rounded-xl border border-[#e7b73c]/20 p-4 hover:border-[#e7b73c]/40 transition-colors"
                 : ""
             }>
-              <AuctionCard auction={auction} />
+              <AuctionCard auction={auction} variant={viewMode} />
             </div>
           ))}
         </div>

@@ -11,6 +11,8 @@ import { useToast } from './ToastProvider';
 import { WatchlistButton } from './WatchlistButton';
 import { logEvent } from '../hooks/useActivityLogger';
 import OfferModal from './OfferModal';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 interface AuctionCardProps {
   auction: Auction;
@@ -53,6 +55,33 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
   const [showOfferModal, setShowOfferModal] = useState(false);
   const { product } = useProduct(auction.productId);
   const { showToast } = useToast();
+
+  const [sellerName, setSellerName] = useState<string | null>(null);
+  const [sellerVerified, setSellerVerified] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadSeller = async () => {
+      if (!db || !auction.ownerId) return;
+      try {
+        const snap = await getDoc(doc(db, 'users', auction.ownerId));
+        if (!snap.exists()) return;
+        const data = snap.data() as any;
+        if (cancelled) return;
+        setSellerName(data.displayName || data.name || data.email || `Vânzător #${auction.ownerId.slice(-6)}`);
+        setSellerVerified(data.idVerificationStatus === 'verified');
+      } catch (err) {
+        console.error('Failed to load auction seller', err);
+      }
+    };
+
+    setSellerName(null);
+    setSellerVerified(false);
+    loadSeller();
+    return () => {
+      cancelled = true;
+    };
+  }, [auction.ownerId]);
 
   const isUserHighestBidder = !!user && auction.currentBidderId === user.uid;
   const isEnded = new Date() > auction.endTime;
@@ -126,6 +155,11 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
               <span className="text-slate-400 text-xs">Se încarcă...</span>
             </div>
           )}
+          {product && product.images && product.images.length > 1 && (
+            <span className="absolute bottom-1 left-1 z-10 rounded-full bg-navy-950/80 px-2 py-0.5 text-[10px] font-semibold text-slate-100 border border-gold-500/30">
+              Alte poze
+            </span>
+          )}
           <span
             className={`absolute top-1 left-1 z-10 px-1.5 py-0.5 rounded-full text-[9px] font-semibold tracking-wide ${
               auction.status === 'active'
@@ -146,7 +180,27 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
               <h3 className="text-lg font-semibold text-white line-clamp-1" title={product?.name || 'Licitație'}>
                 {product?.name || `Licitație #${auction.id.slice(-6)}`}
               </h3>
-              <p className="text-xs text-slate-400">Licitație #{auction.id.slice(-6)}</p>
+              <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                <p className="text-xs text-slate-400">Licitație #{auction.id.slice(-6)}</p>
+                {auction.ownerId && (
+                  <p className="text-xs text-slate-300">
+                    Vânzător:{' '}
+                    <Link
+                      href={`/seller/${auction.ownerId}`}
+                      className="font-semibold text-gold-300 hover:text-gold-200"
+                      title={auction.ownerId}
+                    >
+                      {sellerName || `#${auction.ownerId.slice(-6)}`}
+                    </Link>
+                    <span className="ml-2 font-mono text-[10px] text-slate-400">ID: {auction.ownerId.slice(-6)}</span>
+                  </p>
+                )}
+                {sellerVerified && (
+                  <span className="inline-flex items-center rounded-full border border-emerald-400/60 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-200">
+                    VERIFICAT
+                  </span>
+                )}
+              </div>
             </div>
             <div className="text-right">
               <p className="text-sm text-slate-300">Preț curent</p>
@@ -217,6 +271,11 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             <span className="text-slate-400">Se încarcă...</span>
           </div>
         )}
+        {product && product.images && product.images.length > 1 && (
+          <span className="absolute bottom-2 left-2 z-10 rounded-full bg-navy-950/80 px-2.5 py-1 text-[10px] font-semibold text-slate-100 border border-gold-500/30">
+            Alte poze
+          </span>
+        )}
       </Link>
       <div className="p-4 flex flex-col gap-3">
         <div className="flex justify-between items-start mb-1">
@@ -235,6 +294,27 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             {auction.status.toUpperCase()}
           </span>
         </div>
+
+        {auction.ownerId && (
+          <div className="-mt-1 flex flex-wrap items-center gap-2">
+            <p className="text-xs text-slate-300">
+              Vânzător:{' '}
+              <Link
+                href={`/seller/${auction.ownerId}`}
+                className="font-semibold text-gold-300 hover:text-gold-200"
+                title={auction.ownerId}
+              >
+                {sellerName || `#${auction.ownerId.slice(-6)}`}
+              </Link>
+              <span className="ml-2 font-mono text-[10px] text-slate-400">ID: {auction.ownerId.slice(-6)}</span>
+            </p>
+            {sellerVerified && (
+              <span className="inline-flex items-center rounded-full border border-emerald-400/60 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-200">
+                VERIFICAT
+              </span>
+            )}
+          </div>
+        )}
 
         <div className="mb-1">
           <p className="text-xs uppercase tracking-wide text-slate-300">Licitație Curentă</p>
@@ -272,7 +352,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
 
         {!isEnded && (
           <form onSubmit={handleBid} className="mb-2">
-            <div className="flex space-x-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <input
                 type="number"
                 step="0.01"
@@ -286,7 +366,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
               <button
                 type="submit"
                 disabled={bidLoading || !user}
-                className="bg-[#e7b73c] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/50 text-[#000940] px-4 py-2 rounded-md text-sm font-semibold transition-colors duration-200 shadow-[0_0_20px_rgba(231,183,60,0.7)]"
+                className="w-full sm:w-auto bg-[#e7b73c] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/50 text-[#000940] px-4 py-2 rounded-md text-sm font-semibold transition-colors duration-200 shadow-[0_0_20px_rgba(231,183,60,0.7)]"
               >
                 {bidLoading ? '...' : user ? 'Licitează' : 'Autentificare'}
               </button>

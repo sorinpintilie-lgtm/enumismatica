@@ -17,7 +17,9 @@ let emailTemplatesData: Record<string, { subject: string; html: string; text: st
 try {
   const templatesPath = path.join(process.cwd(), 'public', 'email-templates.json');
   const templatesContent = fs.readFileSync(templatesPath, 'utf-8');
-  emailTemplatesData = JSON.parse(templatesContent);
+  // Some editors may save JSON with a UTF-8 BOM which breaks JSON.parse.
+  // Strip it defensively so builds/runtime don't fail to load templates.
+  emailTemplatesData = JSON.parse(templatesContent.replace(/^\uFEFF/, ''));
 } catch (error) {
   console.error('Failed to load email templates:', error);
 }

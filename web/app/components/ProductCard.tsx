@@ -1,10 +1,14 @@
+ 'use client'
+
 import Link from 'next/link'
-import { memo } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { Product } from 'shared/types'
 import LazyImage from './LazyImage'
 import { formatEUR } from '../utils/currency'
 import { WatchlistButton } from './WatchlistButton'
 import { useAuth } from '../context/AuthContext'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '../lib/firebase'
 
 // Ensure image URLs get a width parameter without breaking existing query strings
 function buildImageUrlWithWidth(url: string, width: number): string {
@@ -23,6 +27,33 @@ interface ProductCardProps {
 function ProductCard({ product, showWatchlistButton = true, showOfferButton = true, variant = 'grid' }: ProductCardProps) {
   const { user } = useAuth();
   const now = new Date();
+
+  const [sellerName, setSellerName] = useState<string | null>(null);
+  const [sellerVerified, setSellerVerified] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadSeller = async () => {
+      if (!db || !product.ownerId) return;
+      try {
+        const snap = await getDoc(doc(db, 'users', product.ownerId));
+        if (!snap.exists()) return;
+        const data = snap.data() as any;
+        if (cancelled) return;
+        setSellerName(data.displayName || data.name || data.email || `Vânzător #${product.ownerId.slice(-6)}`);
+        setSellerVerified(data.idVerificationStatus === 'verified');
+      } catch (err) {
+        console.error('Failed to load product seller', err);
+      }
+    };
+
+    setSellerName(null);
+    setSellerVerified(false);
+    loadSeller();
+    return () => {
+      cancelled = true;
+    };
+  }, [product.ownerId]);
 
   const isBoostActive =
     product.boostExpiresAt instanceof Date
@@ -53,6 +84,11 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
               Fără imagine
             </div>
           )}
+          {product.images && product.images.length > 1 && (
+            <span className="absolute bottom-1 left-1 z-10 rounded-full bg-navy-950/80 px-2 py-0.5 text-[10px] font-semibold text-slate-100 border border-gold-500/30">
+              Alte poze
+            </span>
+          )}
           {estePromovat && (
             <span className="absolute top-1 left-1 z-10 rounded-full bg-emerald-500 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-navy-900 shadow-md">
               Promovat
@@ -63,9 +99,31 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
         {/* Content */}
         <div className="flex-1 min-w-0 relative">
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-lg font-semibold text-white line-clamp-1 pr-4" title={product.name}>
-              {product.name}
-            </h3>
+            <div className="min-w-0 pr-4">
+              <h3 className="text-lg font-semibold text-white line-clamp-1" title={product.name}>
+                {product.name}
+              </h3>
+              {product.ownerId && (
+                <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                  <p className="text-xs text-slate-300">
+                    Vânzător:{' '}
+                    <Link
+                      href={`/seller/${product.ownerId}`}
+                      className="font-semibold text-gold-300 hover:text-gold-200"
+                      title={product.ownerId}
+                    >
+                      {sellerName || `#${product.ownerId.slice(-6)}`}
+                    </Link>
+                    <span className="ml-2 font-mono text-[10px] text-slate-400">ID: {product.ownerId.slice(-6)}</span>
+                  </p>
+                  {sellerVerified && (
+                    <span className="inline-flex items-center rounded-full border border-emerald-400/60 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-200">
+                      VERIFICAT
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
             <span className="text-xl font-bold text-[#e7b73c] flex-shrink-0">
               {formatEUR(product.price)}
             </span>
@@ -122,6 +180,11 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
             Fara imagine
           </div>
         )}
+        {product.images && product.images.length > 1 && (
+          <span className="absolute bottom-2 left-2 z-10 rounded-full bg-navy-950/80 px-2.5 py-1 text-[10px] font-semibold text-slate-100 border border-gold-500/30">
+            Alte poze
+          </span>
+        )}
         {estePromovat && (
           <span className="absolute top-2 left-2 z-10 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-navy-900 shadow-md">
             Promovat
@@ -134,6 +197,26 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
           <h3 className="text-lg font-semibold text-white line-clamp-2" title={product.name}>
             {product.name}
           </h3>
+          {product.ownerId && (
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <p className="text-xs text-slate-300">
+                Vânzător:{' '}
+                <Link
+                  href={`/seller/${product.ownerId}`}
+                  className="font-semibold text-gold-300 hover:text-gold-200"
+                  title={product.ownerId}
+                >
+                  {sellerName || `#${product.ownerId.slice(-6)}`}
+                </Link>
+                <span className="ml-2 font-mono text-[10px] text-slate-400">ID: {product.ownerId.slice(-6)}</span>
+              </p>
+              {sellerVerified && (
+                <span className="inline-flex items-center rounded-full border border-emerald-400/60 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-200">
+                  VERIFICAT
+                </span>
+              )}
+            </div>
+          )}
           <p className="mt-2 text-sm text-slate-300 line-clamp-2">
             {product.description}
           </p>

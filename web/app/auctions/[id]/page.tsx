@@ -100,6 +100,7 @@ export default function AuctionDetailPage() {
   // Image lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [heroIndex, setHeroIndex] = useState(0);
   const images = product?.images ?? [];
 
   const openLightboxAt = (index: number) => {
@@ -107,6 +108,11 @@ export default function AuctionDetailPage() {
     setLightboxIndex(index);
     setLightboxOpen(true);
   };
+
+  useEffect(() => {
+    // Reset hero image when navigating to a different auction.
+    setHeroIndex(0);
+  }, [id]);
 
   const closeLightbox = () => setLightboxOpen(false);
 
@@ -584,13 +590,13 @@ export default function AuctionDetailPage() {
             {images.length > 0 ? (
               <>
                 <div
-                  className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-2xl overflow-hidden border border-gold-500/20 cursor-zoom-in"
-                  onClick={() => openLightboxAt(0)}
+                  className="w-full h-96 bg-navy-900/60 rounded-2xl overflow-hidden border border-gold-500/20 cursor-zoom-in flex items-center justify-center"
+                  onClick={() => openLightboxAt(heroIndex)}
                 >
                   <img
-                    src={`${images[0]}?width=800`}
+                    src={`${(images[heroIndex] || images[0])}?width=800`}
                     alt={product?.name || 'Piesă Licitație'}
-                    className="w-full h-96 object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
+                    className="w-full h-full object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
                   />
                 </div>
                 {images.length > 1 && (
@@ -599,13 +605,17 @@ export default function AuctionDetailPage() {
                       <button
                         key={index}
                         type="button"
-                        onClick={() => openLightboxAt(index + 1)}
-                        className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-xl overflow-hidden border border-gold-500/10 cursor-zoom-in"
+                        onClick={() => setHeroIndex(index + 1)}
+                        className={`w-full h-20 bg-navy-900/60 rounded-xl overflow-hidden border transition-colors cursor-pointer ${
+                          heroIndex === index + 1
+                            ? 'border-gold-400/80'
+                            : 'border-gold-500/10 hover:border-gold-500/30'
+                        }`}
                       >
                           <img
                             src={`${image}?width=200`}
                             alt={`${product?.name || 'Piesă Licitație'} ${index + 2}`}
-                            className="w-full h-20 object-contain bg-navy-950"
+                            className="w-full h-full object-contain bg-navy-950"
                           />
                       </button>
                     ))}
@@ -613,7 +623,7 @@ export default function AuctionDetailPage() {
                 )}
               </>
             ) : (
-              <div className="aspect-w-1 aspect-h-1 bg-navy-900/60 rounded-2xl flex items-center justify-center h-96 border border-gold-500/20">
+              <div className="w-full h-96 bg-navy-900/60 rounded-2xl flex items-center justify-center border border-gold-500/20">
                 <div className="text-center">
                   <svg className="w-16 h-16 text-slate-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
