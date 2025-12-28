@@ -316,6 +316,47 @@ export async function createOrGetConversation(
   });
 
   if (existingConversation) {
+    // Backfill participant metadata for older conversations that were created
+    // before we started storing names/emails/phones on the conversation.
+    try {
+      const data = existingConversation.data() as any;
+      const needsBackfill =
+        !data.buyerName ||
+        !data.sellerName ||
+        !data.buyerEmail ||
+        !data.sellerEmail ||
+        !data.buyerPhone ||
+        !data.sellerPhone;
+
+      if (needsBackfill) {
+        const [buyerDoc, sellerDoc] = await Promise.all([
+          getDoc(doc(db, 'users', buyerId)),
+          getDoc(doc(db, 'users', sellerId)),
+        ]);
+
+        const patch: any = {
+          updatedAt: serverTimestamp(),
+        };
+
+        if (buyerDoc.exists()) {
+          const d = buyerDoc.data() as any;
+          patch.buyerName = d.displayName || d.name || d.email || data.buyerName;
+          patch.buyerEmail = d.email || data.buyerEmail;
+          patch.buyerPhone = d.personalDetails?.phone || data.buyerPhone;
+        }
+        if (sellerDoc.exists()) {
+          const d = sellerDoc.data() as any;
+          patch.sellerName = d.displayName || d.name || d.email || data.sellerName;
+          patch.sellerEmail = d.email || data.sellerEmail;
+          patch.sellerPhone = d.personalDetails?.phone || data.sellerPhone;
+        }
+
+        await updateDoc(doc(db, 'conversations', existingConversation.id), patch);
+      }
+    } catch (err) {
+      console.error('Failed to backfill conversation participant metadata:', err);
+    }
+
     return existingConversation.id;
   }
 

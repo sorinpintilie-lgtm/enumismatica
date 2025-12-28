@@ -8,10 +8,44 @@ import { useAuth } from '../../context/AuthContext';
 import { formatRON } from '../../utils/currency';
 import type { Order, Auction } from 'shared/types';
 import { createOrGetConversation } from 'shared/chatService';
+import { isAdmin as checkIsAdmin } from 'shared/adminService';
+import { useRouter } from 'next/navigation';
 
 export default function AdminTransactionsPage() {
   const { user, loading: authLoading } = useAuth();
-  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
+  const router = useRouter();
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const check = async () => {
+      if (!user) {
+        if (!cancelled) {
+          setIsAdminUser(false);
+          setCheckingAdmin(false);
+        }
+        return;
+      }
+      try {
+        const ok = await checkIsAdmin(user.uid);
+        if (!cancelled) {
+          setIsAdminUser(ok);
+          setCheckingAdmin(false);
+        }
+      } catch (err) {
+        console.error('Failed to check admin status', err);
+        if (!cancelled) {
+          setIsAdminUser(false);
+          setCheckingAdmin(false);
+        }
+      }
+    };
+    if (!authLoading) check();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authLoading]);
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [auctions, setAuctions] = useState<Auction[]>([]);
@@ -24,7 +58,7 @@ export default function AdminTransactionsPage() {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      if (!db || !isAdmin) return;
+      if (!db || !isAdminUser) return;
       setLoading(true);
       setError(null);
       try {
@@ -109,7 +143,7 @@ export default function AdminTransactionsPage() {
     return () => {
       cancelled = true;
     };
-  }, [isAdmin]);
+  }, [isAdminUser]);
 
   const filterLower = filter.trim().toLowerCase();
 
@@ -168,7 +202,7 @@ export default function AdminTransactionsPage() {
     }
   };
 
-  if (authLoading) {
+  if (authLoading || checkingAdmin) {
     return (
       <div className="container mx-auto px-4 py-8">
         <p className="text-slate-200">Se încarcă...</p>
@@ -176,12 +210,21 @@ export default function AdminTransactionsPage() {
     );
   }
 
-  if (!user || !isAdmin) {
+  if (!user || !isAdminUser) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto rounded-2xl border border-gold-500/30 bg-navy-900/80 p-8 text-center">
           <h1 className="text-2xl font-bold text-white mb-2">Acces restricționat</h1>
           <p className="text-slate-300">Doar administratorii pot vedea această pagină.</p>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard')}
+              className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-5 py-2 text-sm font-semibold text-[#000940] hover:bg-[#f0c955]"
+            >
+              Înapoi
+            </button>
+          </div>
         </div>
       </div>
     );

@@ -78,12 +78,29 @@ export function ContactDetailsModal(props: {
               ? data.buyerPhone
               : undefined;
 
+        // Fallback for older conversations: try to read the other user's doc
+        // (may fail depending on Firestore rules; that's OK).
+        let fallbackEmail = email;
+        let fallbackPhone = phone;
+        if ((!fallbackEmail || !fallbackPhone) && otherId) {
+          try {
+            const userSnap = await getDoc(doc(db, 'users', otherId));
+            if (userSnap.exists()) {
+              const u = userSnap.data() as any;
+              fallbackEmail = fallbackEmail || u.email;
+              fallbackPhone = fallbackPhone || u.personalDetails?.phone;
+            }
+          } catch {
+            // ignore
+          }
+        }
+
         if (cancelled) return;
         setDetails({
           userId: otherId || '',
           displayName: name ? `${name} (${short})` : otherId ? `Utilizator (${short})` : 'Utilizator',
-          email,
-          phone,
+          email: fallbackEmail,
+          phone: fallbackPhone,
         });
       } catch (err: any) {
         if (!cancelled) setError(err?.message || 'Nu s-au putut încărca detaliile de contact.');
