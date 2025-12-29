@@ -10,7 +10,6 @@ import Link from 'next/link';
 import { getUserCredits, boostProductWithCredits } from 'shared/creditService';
 import { getUserAutoBidsForUser, cancelAutoBid } from 'shared/auctionService';
 import { getOrdersForBuyer, getSalesForSeller } from 'shared/orderService';
-import { createOrGetConversation } from 'shared/chatService';
 import { formatRON } from '../utils/currency';
 import type { AutoBid, Auction } from 'shared/types';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
@@ -37,7 +36,6 @@ export default function Dashboard() {
   const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [transactionsError, setTransactionsError] = useState<string | null>(null);
   const [productById, setProductById] = useState<Record<string, any>>({});
-  const [openingChatKey, setOpeningChatKey] = useState<string | null>(null);
 
   const [showAllMyProducts, setShowAllMyProducts] = useState(false);
 
@@ -162,33 +160,6 @@ export default function Dashboard() {
       cancelled = true;
     };
   }, [user?.uid, auctions]);
-
-  const openTransactionChat = async (opts: {
-    key: string;
-    buyerId: string;
-    sellerId: string;
-    productId?: string;
-    conversationId?: string;
-    auctionId?: string;
-  }) => {
-    if (!user?.uid) return;
-    if (opts.sellerId === 'monetaria-statului') {
-      router.push('/contact');
-      return;
-    }
-    try {
-      setOpeningChatKey(opts.key);
-      const conversationId =
-        opts.conversationId ||
-        (await createOrGetConversation(opts.buyerId, opts.sellerId, opts.auctionId, opts.productId, false));
-      router.push(`/messages?conversation=${conversationId}`);
-    } catch (err: any) {
-      console.error('Failed to open transaction chat', err);
-      alert(err?.message || 'Nu s-a putut deschide conversația.');
-    } finally {
-      setOpeningChatKey(null);
-    }
-  };
 
   useEffect(() => {
     let mounted = true;
@@ -531,7 +502,7 @@ export default function Dashboard() {
             <div>
               <h2 className="text-xl font-semibold text-white">Tranzacțiile mele</h2>
               <p className="text-sm text-slate-300">
-                Cumpărări și vânzări (magazin + licitații) cu link direct către chat.
+                Cumpărări și vânzări (magazin + licitații) cu acces rapid la detaliile tranzacției.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -598,22 +569,6 @@ export default function Dashboard() {
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              openTransactionChat({
-                                key: `order-${o.id}`,
-                                buyerId: o.buyerId,
-                                sellerId: o.sellerId,
-                                productId: o.productId,
-                                conversationId: o.conversationId,
-                              })
-                            }
-                            disabled={openingChatKey === `order-${o.id}`}
-                            className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-[11px] font-semibold text-[#000940] hover:bg-[#f0c955] disabled:opacity-60"
-                          >
-                            {openingChatKey === `order-${o.id}` ? '...' : 'Chat'}
-                          </button>
                           <Link
                             href={`/orders/${o.id}`}
                             className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/50 px-3 py-1 text-[11px] font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10"
@@ -652,23 +607,6 @@ export default function Dashboard() {
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  openTransactionChat({
-                                    key: `awin-${a.id}`,
-                                    buyerId: user.uid,
-                                    sellerId: a.ownerId || '',
-                                    productId: a.productId,
-                                    auctionId: a.id,
-                                    conversationId: a.winnerConversationId,
-                                  })
-                                }
-                                disabled={openingChatKey === `awin-${a.id}` || !a.ownerId}
-                                className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-[11px] font-semibold text-[#000940] hover:bg-[#f0c955] disabled:opacity-60"
-                              >
-                                {openingChatKey === `awin-${a.id}` ? '...' : 'Chat'}
-                              </button>
                               <Link href={`/auctions/${a.id}`} className="text-[11px] font-semibold text-gold-300 hover:text-gold-200">
                                 Vezi
                               </Link>
@@ -716,22 +654,6 @@ export default function Dashboard() {
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              openTransactionChat({
-                                key: `sale-${o.id}`,
-                                buyerId: o.buyerId,
-                                sellerId: o.sellerId,
-                                productId: o.productId,
-                                conversationId: o.conversationId,
-                              })
-                            }
-                            disabled={openingChatKey === `sale-${o.id}`}
-                            className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-[11px] font-semibold text-[#000940] hover:bg-[#f0c955] disabled:opacity-60"
-                          >
-                            {openingChatKey === `sale-${o.id}` ? '...' : 'Chat'}
-                          </button>
                           <Link
                             href={`/orders/${o.id}`}
                             className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/50 px-3 py-1 text-[11px] font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10"
@@ -770,23 +692,6 @@ export default function Dashboard() {
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  openTransactionChat({
-                                    key: `asold-${a.id}`,
-                                    buyerId: a.winnerId as string,
-                                    sellerId: user.uid,
-                                    productId: a.productId,
-                                    auctionId: a.id,
-                                    conversationId: a.winnerConversationId,
-                                  })
-                                }
-                                disabled={openingChatKey === `asold-${a.id}` || !a.winnerId}
-                                className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-[11px] font-semibold text-[#000940] hover:bg-[#f0c955] disabled:opacity-60"
-                              >
-                                {openingChatKey === `asold-${a.id}` ? '...' : 'Chat'}
-                              </button>
                               <Link href={`/auctions/${a.id}`} className="text-[11px] font-semibold text-gold-300 hover:text-gold-200">
                                 Vezi
                               </Link>

@@ -129,7 +129,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
             </span>
           </div>
           {showWatchlistButton !== false && (
-            <div className="absolute top-2 right-2 z-10">
+            <div className="absolute top-2 left-2 z-10">
               <WatchlistButton
                 itemType="product"
                 itemId={product.id}

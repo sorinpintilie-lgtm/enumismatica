@@ -13,8 +13,10 @@ import { useCart } from '../../hooks/useCart';
 import { logEvent } from '../../hooks/useActivityLogger';
 import OfferModal from '../../components/OfferModal';
 import OfferManagement from '../../components/OfferManagement';
- import ProductCard from '../../components/ProductCard';
- import { formatRON } from '../../utils/currency';
+import ProductCard from '../../components/ProductCard';
+import { formatRON } from '../../utils/currency';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 // Helper to safely format numeric/string values with units (avoids duplicated units like "gg" / "mmmm")
 function formatWithUnit(value: string | number | null | undefined, unit: string): string {
@@ -74,6 +76,11 @@ export default function ProductDetailPage() {
 
   const images = product?.images ?? [];
   const isOwner = user && product && user.uid === product.ownerId;
+  
+  // Seller information state
+  const [sellerName, setSellerName] = useState<string | null>(null);
+  const [sellerVerified, setSellerVerified] = useState(false);
+  const [sellerUsername, setSellerUsername] = useState<string | null>(null);
 
   // Set default view mode for owners
   useEffect(() => {
@@ -81,6 +88,33 @@ export default function ProductDetailPage() {
       setViewMode('owner');
     }
   }, [isOwner, viewMode]);
+
+  // Fetch seller information
+  useEffect(() => {
+    let cancelled = false;
+    const loadSeller = async () => {
+      if (!db || !product?.ownerId) return;
+      try {
+        const snap = await getDoc(doc(db, 'users', product.ownerId));
+        if (!snap.exists()) return;
+        const data = snap.data() as any;
+        if (cancelled) return;
+        setSellerName(data.displayName || data.name || data.email || `Vânzător #${product.ownerId.slice(-6)}`);
+        setSellerUsername(data.username || data.displayName || data.name || `utilizator${product.ownerId.slice(-4)}`);
+        setSellerVerified(data.idVerificationStatus === 'verified');
+      } catch (err) {
+        console.error('Failed to load seller', err);
+      }
+    };
+
+    setSellerName(null);
+    setSellerUsername(null);
+    setSellerVerified(false);
+    loadSeller();
+    return () => {
+      cancelled = true;
+    };
+  }, [product?.ownerId]);
 
   const openLightboxAt = (index: number) => {
     if (!images.length) return;
@@ -295,8 +329,18 @@ export default function ProductDetailPage() {
           <div className="mb-6 flex items-center justify-between">
             <button
               onClick={() => {
-                console.log('[ProductDetail] Back button clicked, using window.history.back()');
-                window.history.back();
+                console.log('[ProductDetail] Back button clicked, attempting to use window.history.back()');
+                try {
+                  if (window.history.length > 1) {
+                    window.history.back();
+                  } else {
+                    console.log('[ProductDetail] No history available, redirecting to /products');
+                    window.location.href = '/products';
+                  }
+                } catch (error) {
+                  console.error('[ProductDetail] Error with history navigation:', error);
+                  window.location.href = '/products';
+                }
               }}
               className="inline-flex items-center text-sm font-medium text-gold-400 hover:text-gold-300 transition-colors bg-transparent border-none cursor-pointer"
             >
@@ -384,6 +428,22 @@ export default function ProductDetailPage() {
                 <p className="text-slate-300">
                   Adăugat în {product.createdAt.toLocaleDateString()}
                 </p>
+                {product.ownerId && (
+                  <div className="mt-4 flex items-center gap-3">
+                    <Link
+                      href={`/seller/${product.ownerId}`}
+                      className="flex items-center gap-2 text-sm text-slate-200 hover:text-white transition-colors"
+                    >
+                      <span className="font-medium">Vânzător:</span>
+                      <span className="text-gold-300">@{sellerUsername}</span>
+                      {sellerVerified && (
+                        <span className="inline-flex items-center rounded-full border border-emerald-400/60 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-200">
+                          VERIFICAT
+                        </span>
+                      )}
+                    </Link>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -609,6 +669,98 @@ export default function ProductDetailPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Certification Section */}
+                {(product.hasCertification || product.hasNgcCertification || product.certificationCompany || product.ngcCode) && (
+                  <div className="mt-6 pt-4 border-t border-gold-500/20">
+                    <h3 className="text-lg font-medium text-[#e7b73c] mb-3">Certificare</h3>
+                    <div className="space-y-3 text-sm">
+                      {product.certificationCompany && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Companie certificare:</span>
+                          <span className="text-slate-100 font-medium">
+                            {product.certificationCompany === 'NGC' ? 'Numismatic Guaranty Corporation' : 'Professional Coin Grading Service'}
+                          </span>
+                        </div>
+                      )}
+                      {product.certificationCode && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Cod certificare:</span>
+                          <span className="text-slate-100 font-mono">
+                            {product.certificationCode}
+                          </span>
+                        </div>
+                      )}
+                      {product.ngcCode && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Cod NGC:</span>
+                          <span className="text-slate-100 font-mono">
+                            {product.ngcCode}
+                          </span>
+                        </div>
+                      )}
+                      {product.certificationGrade && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Grad certificare:</span>
+                          <span className="text-slate-100">
+                            {product.certificationGrade}
+                          </span>
+                        </div>
+                      )}
+                      {product.ngcGrade && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Grad NGC:</span>
+                          <span className="text-slate-100">
+                            {product.ngcGrade}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Certification Verification Links */}
+                      <div className="mt-4 flex gap-2">
+                        {product.certificationCompany === 'NGC' && product.certificationCode && (
+                          <Link
+                            href={`https://www.ngccoin.com/certlookup/${product.certificationCode}/`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-600/20 border border-blue-500/40 text-blue-300 hover:bg-blue-600/30 transition-colors text-xs"
+                          >
+                            <span className="font-semibold">NGC</span> Verificare
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </Link>
+                        )}
+                        {product.certificationCompany === 'PCGS' && product.certificationCode && (
+                          <Link
+                            href={`https://www.pcgs.com/cert/${product.certificationCode}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-600/20 border border-green-500/40 text-green-300 hover:bg-green-600/30 transition-colors text-xs"
+                          >
+                            <span className="font-semibold">PCGS</span> Verificare
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </Link>
+                        )}
+                        {product.ngcCode && (
+                          <Link
+                            href={`https://www.ngccoin.com/certlookup/${product.ngcCode}/`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-600/20 border border-blue-500/40 text-blue-300 hover:bg-blue-600/30 transition-colors text-xs"
+                          >
+                            <span className="font-semibold">NGC</span> Verificare
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Offers Section - Only for Owner */}
                 {viewMode === 'owner' && (

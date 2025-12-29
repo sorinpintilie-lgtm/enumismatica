@@ -42,6 +42,8 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
     sellerId?: string;
     buyerName?: string;
     sellerName?: string;
+    productId?: string;
+    auctionId?: string;
   } | null>(null);
 
   // Load basic conversation metadata so we can show contact details directly from chat.
@@ -65,6 +67,8 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
             sellerId: data.sellerId,
             buyerName: data.buyerName,
             sellerName: data.sellerName,
+            productId: data.productId,
+            auctionId: data.auctionId,
           });
         }
       } catch (err) {
@@ -223,6 +227,18 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
             )}
           </div>
           <div className="flex items-center gap-2">
+            {conversationMeta?.productId && (
+              <Link
+                href={conversationMeta.auctionId ? `/auctions/${conversationMeta.auctionId}` : `/products/${conversationMeta.productId}`}
+                className="inline-flex items-center gap-1 rounded-full border border-gold-500/40 px-3 py-1 text-xs font-semibold text-gold-200 hover:bg-gold-500/10 transition-colors"
+                title={conversationMeta.auctionId ? "Vezi licitația asociată" : "Vezi produsul asociat"}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{conversationMeta.auctionId ? "Licitație" : "Produs"}</span>
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => setContactModalOpen(true)}

@@ -1,46 +1,30 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
 import type { Order } from 'shared/types';
 import { formatRON } from '../../utils/currency';
-import { createOrGetConversation } from 'shared/chatService';
-import { ContactDetailsModal } from '../../components/ContactDetailsModal';
+import { TransactionDetailsModal } from '../../components/TransactionDetailsModal';
 
 export default function OrderDetailsPage() {
   const params = useParams();
   const orderId = params.id as string;
-  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [product, setProduct] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [openingChat, setOpeningChat] = useState(false);
-  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [transactionModalOpen, setTransactionModalOpen] = useState(false);
 
   const userId = user?.uid || null;
-
   const isSeller = !!userId && order?.sellerId === userId;
   const isBuyer = !!userId && order?.buyerId === userId;
   const canView = !!userId && (isSeller || isBuyer);
-
-  const counterpartyId = useMemo(() => {
-    if (!order || !userId) return null;
-    return order.buyerId === userId ? order.sellerId : order.buyerId;
-  }, [order, userId]);
-
-  const counterpartyLabel = useMemo(() => {
-    if (!order || !userId || !counterpartyId) return null;
-    if (counterpartyId === 'monetaria-statului') return 'Monetaria Statului';
-    if (order.buyerId === userId) return order.sellerName || `Vânzător #${counterpartyId.slice(-6)}`;
-    return order.buyerName || `Cumpărător #${counterpartyId.slice(-6)}`;
-  }, [order, userId, counterpartyId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,27 +93,6 @@ export default function OrderDetailsPage() {
       cancelled = true;
     };
   }, [orderId]);
-
-  const handleOpenChat = async () => {
-    if (!userId || !order || !counterpartyId) return;
-    if (counterpartyId === 'monetaria-statului') {
-      router.push('/contact');
-      return;
-    }
-
-    try {
-      setOpeningChat(true);
-      const conversationId =
-        order.conversationId ||
-        (await createOrGetConversation(order.buyerId, order.sellerId, undefined, order.productId, false));
-      router.push(`/messages?conversation=${conversationId}`);
-    } catch (err: any) {
-      console.error('Failed to open conversation from order details', err);
-      alert(err?.message || 'Nu s-a putut deschide conversația.');
-    } finally {
-      setOpeningChat(false);
-    }
-  };
 
   if (authLoading || loading) {
     return (
@@ -207,15 +170,13 @@ export default function OrderDetailsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <ContactDetailsModal
-        open={contactModalOpen}
-        onClose={() => setContactModalOpen(false)}
-        conversationId={order.conversationId}
+      <TransactionDetailsModal
+        open={transactionModalOpen}
+        onClose={() => setTransactionModalOpen(false)}
+        orderId={order.id}
         currentUserId={userId || ''}
-        buyerId={order.buyerId}
-        sellerId={order.sellerId}
-        buyerName={order.buyerName}
-        sellerName={order.sellerName}
+        isBuyer={isBuyer}
+        isSeller={isSeller}
       />
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 flex items-center justify-between gap-3">
@@ -247,12 +208,12 @@ export default function OrderDetailsPage() {
             <div className="flex-1">
               <h2 className="text-xl font-semibold text-white mb-1">{productName}</h2>
               <p className="text-sm text-slate-300">
-                {isBuyer ? 'Ai cumpărat de la' : 'Ai vândut către'}{' '}
-                {counterpartyId === 'monetaria-statului' ? (
+                {isBuyer ? 'Ai cumpărat de la' : 'Ai vândut către'} 
+                {order.sellerId === 'monetaria-statului' || order.buyerId === 'monetaria-statului' ? (
                   <span className="font-semibold text-slate-100">Monetaria Statului</span>
                 ) : (
-                  <Link href={`/seller/${counterpartyId}`} className="font-semibold text-gold-300 hover:text-gold-200">
-                    {counterpartyLabel}
+                  <Link href={`/seller/${isBuyer ? order.sellerId : order.buyerId}`} className="font-semibold text-gold-300 hover:text-gold-200">
+                    {isBuyer ? (order.sellerName || `Vânzător #${order.sellerId.slice(-6)}`) : (order.buyerName || `Cumpărător #${order.buyerId.slice(-6)}`)}
                   </Link>
                 )}
               </p>
@@ -273,11 +234,10 @@ export default function OrderDetailsPage() {
               <div className="mt-5 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={handleOpenChat}
-                  disabled={openingChat}
-                  className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-5 py-2 text-sm font-semibold text-[#000940] shadow hover:bg-[#f0c955] disabled:opacity-60"
+                  onClick={() => setTransactionModalOpen(true)}
+                  className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-5 py-2 text-sm font-semibold text-[#000940] shadow hover:bg-[#f0c955]"
                 >
-                  {openingChat ? 'Se deschide...' : 'Deschide chat'}
+                  Detalii tranzacție
                 </button>
 
                 {product?.id && (
@@ -289,14 +249,6 @@ export default function OrderDetailsPage() {
                   </Link>
                 )}
 
-                <button
-                  type="button"
-                  onClick={() => setContactModalOpen(true)}
-                  className="inline-flex items-center justify-center rounded-full border border-gold-500/40 px-5 py-2 text-sm font-semibold text-gold-200 hover:bg-navy-950/40 transition-colors"
-                >
-                  Detalii contact
-                </button>
-
                 <Link
                   href="/messages"
                   className="inline-flex items-center justify-center rounded-full border border-slate-500/50 px-5 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-500/10 transition-colors"
@@ -306,7 +258,7 @@ export default function OrderDetailsPage() {
               </div>
 
               <p className="mt-5 text-xs text-slate-400">
-                Recomandare: păstrați toate detaliile tranzacției în chat (livrare, plată, confirmări) pentru a evita pierderea informațiilor.
+                Apasă "Detalii tranzacție" pentru a vedea toate opțiunile: chat, detalii bancare, adresă expediere, confirmare plată și informații de livrare.
               </p>
             </div>
           </div>
@@ -315,4 +267,3 @@ export default function OrderDetailsPage() {
     </div>
   );
 }
-

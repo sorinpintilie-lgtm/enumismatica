@@ -173,7 +173,7 @@ export default function AuctionDetailPage() {
       // Open confirmation modal before actually setting auto-bid
       setConfirmAction({ type: 'auto', amount });
     } catch (error) {
-      let message = 'Eroare la validarea licitației automate';
+      let message = 'Eroare la validarea ofertei maxime';
       if (error instanceof z.ZodError) {
         message = error.issues[0].message;
       } else if (error instanceof Error) {
@@ -182,7 +182,7 @@ export default function AuctionDetailPage() {
       setBidError(message);
       showToast({
         type: 'error',
-        title: 'Eroare la licitarea automată',
+        title: 'Eroare la oferta maximă',
         message,
       });
     }
@@ -294,10 +294,10 @@ export default function AuctionDetailPage() {
         }
         showToast({
           type: 'success',
-          title: 'Licitare automată activată',
-          message: `Vom licita automat pentru tine până la ${formatRON(amount)}.`,
+          title: 'Licitație automată activată',
+          message: `Licitația automată a fost activată până la suma maximă de ${formatRON(amount)}.`,
         });
-        await logEvent(user, 'auction_auto_bid_set', {
+        await logEvent(user, 'auction_max_bid_set', {
           auctionId: id,
           maxAmount: amount,
         });
@@ -306,10 +306,10 @@ export default function AuctionDetailPage() {
         setUserAutoBid(null);
         showToast({
           type: 'success',
-          title: 'Licitare automată anulată',
-          message: 'Licitarea automată a fost dezactivată pentru această licitație.',
+          title: 'Licitație automată dezactivată',
+          message: 'Licitația automată a fost dezactivată pentru această licitație.',
         });
-        await logEvent(user, 'auction_auto_bid_cancel', {
+        await logEvent(user, 'auction_max_bid_cancel', {
           auctionId: id,
         });
       }
@@ -318,8 +318,8 @@ export default function AuctionDetailPage() {
         confirmAction.type === 'manual'
           ? 'Eroare la plasarea licitației'
           : confirmAction.type === 'auto'
-          ? 'Eroare la setarea licitației automate'
-          : 'Eroare la anularea licitației automate';
+          ? 'Eroare la setarea ofertei maxime'
+          : 'Eroare la anularea ofertei maxime';
       if (error instanceof z.ZodError) {
         message = error.issues[0].message;
       } else if (error instanceof Error) {
@@ -332,7 +332,7 @@ export default function AuctionDetailPage() {
           confirmAction.type === 'manual'
             ? 'Eroare la licitare'
             : confirmAction.type === 'auto'
-            ? 'Eroare la licitarea automată'
+            ? 'Eroare la oferta maximă'
             : 'Eroare la anulare',
         message,
       });
@@ -385,12 +385,12 @@ export default function AuctionDetailPage() {
         Math.abs(latestUserBid.amount - lastManualBidAmountRef.current) < 0.000001;
 
       // If the latest user bid wasn't just placed manually from this client,
-      // treat it as an auto-bid event.
+      // treat it as an auto-bid event (but don't reveal it's automatic).
       if (!isSameAsLastManual) {
         showToast({
           type: 'info',
-          title: 'Licitare automată',
-          message: `Licitarea automată a plasat o ofertă de ${formatRON(latestUserBid.amount)} în numele tău.`,
+          title: 'Ofertă actualizată',
+          message: `Oferta ta a fost actualizată la ${formatRON(latestUserBid.amount)}.`,
         });
       }
 
@@ -504,7 +504,9 @@ export default function AuctionDetailPage() {
             <h3 className="text-lg font-semibold text-white mb-2">
               {confirmAction.type === 'manual'
                 ? 'Confirmă licitația'
-                : 'Confirmă licitarea automată'}
+                : confirmAction.type === 'auto'
+                ? 'Confirmă oferta maximă'
+                : 'Confirmă anularea'}
             </h3>
             <p className="text-sm text-slate-200 mb-3">
               {confirmAction.type === 'manual' ? (
@@ -517,15 +519,15 @@ export default function AuctionDetailPage() {
                 </>
               ) : confirmAction.type === 'auto' ? (
                 <>
-                  Ești sigur că vrei să setezi licitarea automată până la{' '}
+                  Ești sigur că vrei să activezi licitația automată până la{' '}
                   <span className="font-semibold text-[#e7b73c]">
                     {formatRON(confirmAction.amount)}
                   </span>
-                  ? Sistemul va licita automat în numele tău până la această sumă.
+                  ? Sistemul va licita automat în numele tău până la această sumă maximă.
                 </>
               ) : (
                 <>
-                  Ești sigur că vrei să anulezi licitarea automată pentru această licitație?
+                  Ești sigur că vrei să anulezi oferta maximă pentru această licitație?
                 </>
               )}
             </p>
@@ -576,11 +578,13 @@ export default function AuctionDetailPage() {
             ← Înapoi la licitații
           </Link>
           {user && (
-            <WatchlistButton
-              itemType="auction"
-              itemId={id}
-              size="small"
-            />
+            <div className="ml-4">
+              <WatchlistButton
+                itemType="auction"
+                itemId={id}
+                size="small"
+              />
+            </div>
           )}
         </div>
 
@@ -720,7 +724,7 @@ export default function AuctionDetailPage() {
                         min={minBid}
                         value={bidAmount}
                         onChange={(e) => setBidAmount(e.target.value)}
-                        placeholder={`Introdu suma licitației`}
+                        placeholder={`Suma licitată`}
                         className="w-full px-4 py-3 border border-gold-500/40 rounded-lg bg-navy-900/70 text-slate-50 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent text-lg"
                         required
                         disabled={bidLoading}
@@ -731,19 +735,19 @@ export default function AuctionDetailPage() {
                       disabled={bidLoading}
                       className="w-full bg-[#e7b73c] hover:bg-[#f0c955] disabled:bg-[#e7b73c]/60 text-[#000940] px-6 py-3 rounded-xl font-semibold text-lg transition-colors duration-200 shadow-[0_0_24px_rgba(231,183,60,0.8)]"
                     >
-                      {bidLoading ? 'Se plasează licitația...' : 'Plasează licitație'}
+                      {bidLoading ? 'Se plasează licitația...' : 'Licitează'}
                     </button>
                   </form>
 
                   <div className="border-t border-gold-500/20 pt-6 mt-4">
-                    <h3 className="text-lg font-semibold text-white mb-4">Licitare automată</h3>
+                    <h3 className="text-lg font-semibold text-white mb-4">Licitație automată</h3>
                     <p className="text-sm text-slate-300 mb-4">
-                      Setează o sumă maximă de licitare. Sistemul va licita automat în numele tău, până la această sumă, când ești depășit.
+                      Setează suma maximă până la care sistemul poate licita automat în numele tău.
                     </p>
                     {userAutoBid && (
                       <div className="mb-4 rounded-xl border border-gold-500/40 bg-navy-900/60 px-4 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                         <p className="text-sm text-slate-100">
-                          Licitare automată activă până la{' '}
+                          Ofertă maximă activă până la{' '}
                           <span className="font-semibold text-[#e7b73c]">
                             {formatRON(userAutoBid.maxAmount)}
                           </span>
@@ -754,14 +758,14 @@ export default function AuctionDetailPage() {
                           className="inline-flex items-center justify-center rounded-full border border-red-500/70 px-4 py-2 text-xs font-semibold text-red-200 hover:bg-red-500/10 transition-colors"
                           disabled={bidLoading}
                         >
-                          Anulează licitarea automată
+                          Dezactivează licitația automată
                         </button>
                       </div>
                     )}
                     <form onSubmit={handleAutoBid} className="space-y-4">
                       <div>
                         <label htmlFor="autoBidAmount" className="block text-sm font-medium text-slate-200 mb-2">
-                          Suma maximă licitare automată
+                          Sumă maximă licitație automată
                         </label>
                         <input
                           id="autoBidAmount"
@@ -781,7 +785,7 @@ export default function AuctionDetailPage() {
                         disabled={bidLoading}
                         className="w-full bg-navy-900/80 hover:bg-navy-800 disabled:bg-navy-900/50 text-gold-200 px-6 py-3 rounded-xl font-semibold text-lg transition-colors duration-200 border border-gold-500/50 shadow-[0_0_22px_rgba(15,23,42,0.9)]"
                       >
-                        {bidLoading ? 'Se setează licitarea automată...' : 'Setează licitare automată'}
+                        {bidLoading ? 'Se activează licitația automată...' : 'Activează licitația automată'}
                       </button>
                     </form>
                   </div>
@@ -950,6 +954,98 @@ export default function AuctionDetailPage() {
                   <div className="mt-6">
                     <h3 className="text-lg font-medium text-[#e7b73c] mb-3">Descriere</h3>
                     <p className="text-slate-200 leading-relaxed">{product.description}</p>
+                  </div>
+                )}
+
+                {/* Certification Section */}
+                {(product.hasCertification || product.hasNgcCertification || product.certificationCompany || product.ngcCode) && (
+                  <div className="mt-6 pt-4 border-t border-gold-500/20">
+                    <h3 className="text-lg font-medium text-[#e7b73c] mb-3">Certificare</h3>
+                    <div className="space-y-3 text-sm">
+                      {product.certificationCompany && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Companie certificare:</span>
+                          <span className="text-slate-100 font-medium">
+                            {product.certificationCompany === 'NGC' ? 'Numismatic Guaranty Corporation' : 'Professional Coin Grading Service'}
+                          </span>
+                        </div>
+                      )}
+                      {product.certificationCode && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Cod certificare:</span>
+                          <span className="text-slate-100 font-mono">
+                            {product.certificationCode}
+                          </span>
+                        </div>
+                      )}
+                      {product.ngcCode && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Cod NGC:</span>
+                          <span className="text-slate-100 font-mono">
+                            {product.ngcCode}
+                          </span>
+                        </div>
+                      )}
+                      {product.certificationGrade && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Grad certificare:</span>
+                          <span className="text-slate-100">
+                            {product.certificationGrade}
+                          </span>
+                        </div>
+                      )}
+                      {product.ngcGrade && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-300">Grad NGC:</span>
+                          <span className="text-slate-100">
+                            {product.ngcGrade}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Certification Verification Links */}
+                      <div className="mt-4 flex gap-2">
+                        {product.certificationCompany === 'NGC' && product.certificationCode && (
+                          <Link
+                            href={`https://www.ngccoin.com/certlookup/${product.certificationCode}/`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-600/20 border border-blue-500/40 text-blue-300 hover:bg-blue-600/30 transition-colors text-xs"
+                          >
+                            <span className="font-semibold">NGC</span> Verificare
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </Link>
+                        )}
+                        {product.certificationCompany === 'PCGS' && product.certificationCode && (
+                          <Link
+                            href={`https://www.pcgs.com/cert/${product.certificationCode}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-600/20 border border-green-500/40 text-green-300 hover:bg-green-600/30 transition-colors text-xs"
+                          >
+                            <span className="font-semibold">PCGS</span> Verificare
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </Link>
+                        )}
+                        {product.ngcCode && (
+                          <Link
+                            href={`https://www.ngccoin.com/certlookup/${product.ngcCode}/`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-600/20 border border-blue-500/40 text-blue-300 hover:bg-blue-600/30 transition-colors text-xs"
+                          >
+                            <span className="font-semibold">NGC</span> Verificare
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </Link>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

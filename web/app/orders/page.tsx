@@ -401,14 +401,6 @@ export default function OrdersPage() {
                       Folosește chatul intern pentru a coordona livrarea și detaliile tranzacției.
                     </p>
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenChat(order)}
-                        disabled={openingConversationFor === order.id}
-                        className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-[11px] font-semibold text-[#000940] shadow hover:bg-[#f0c955] disabled:opacity-60"
-                      >
-                        {openingConversationFor === order.id ? 'Se deschide...' : 'Deschide chat'}
-                      </button>
                       <Link
                         href={`/orders/${order.id}`}
                         className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-3 py-1 text-[11px] font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"

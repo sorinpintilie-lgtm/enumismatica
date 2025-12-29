@@ -210,7 +210,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             </div>
           </div>
           {showWatchlistButton && (
-            <div className="absolute top-2 right-2 z-10">
+            <div className="absolute top-2 left-2 z-10">
               <WatchlistButton
                 itemType="auction"
                 itemId={auction.id}
@@ -395,7 +395,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
         </div>
       </div>
       {showWatchlistButton && (
-        <div className="absolute top-2 right-2 z-10">
+        <div className="absolute top-2 left-2 z-10">
           <WatchlistButton
             itemType="auction"
             itemId={auction.id}
