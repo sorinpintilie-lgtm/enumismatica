@@ -5,8 +5,8 @@ const FROM_EMAIL = process.env.FROM_EMAIL || 'contact@enumismatica.ro';
 const TEST_EMAIL = 'sorin.pintilie@sky.ro'; // Test email address
 const PRODUCTION_EMAIL = 'marketing@monetariastatului.ro';
 
-// For now, use test email. Change to PRODUCTION_EMAIL when ready for production
-const TARGET_EMAIL = TEST_EMAIL;
+// Use production email
+const TARGET_EMAIL = PRODUCTION_EMAIL;
 
 export async function POST(request: NextRequest) {
   try {

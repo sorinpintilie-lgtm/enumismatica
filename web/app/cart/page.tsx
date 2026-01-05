@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { formatRON, parseRON } from '../utils/currency';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
+import MonetariaStatuluiCheckoutForm from '../components/MonetariaStatuluiCheckoutForm';
 
 export default function CartPage() {
   const { user } = useAuth();
@@ -23,6 +24,13 @@ export default function CartPage() {
   );
 
   const [placingOrderFor, setPlacingOrderFor] = useState<string | null>(null);
+  const [showMintCheckoutForm, setShowMintCheckoutForm] = useState<{
+    productId: string;
+    cartItemId: string;
+    productTitle: string;
+    productPrice: string;
+  } | null>(null);
+  const [orderSuccess, setOrderSuccess] = useState(false);
 
   const lines = useMemo(
     () =>
@@ -54,6 +62,17 @@ export default function CartPage() {
   const handleCheckoutItem = async (productId: string, cartItemId: string, isMintProduct?: boolean, mintProductData?: any) => {
     if (!user) {
       alert('Trebuie să fii autentificat pentru a cumpăra.');
+      return;
+    }
+
+    // Handle Monetaria Statului products differently
+    if (isMintProduct && mintProductData) {
+      setShowMintCheckoutForm({
+        productId,
+        cartItemId,
+        productTitle: mintProductData.title || 'Piesă Monetaria Statului',
+        productPrice: mintProductData.price || 'Preț indisponibil',
+      });
       return;
     }
 
@@ -102,6 +121,57 @@ export default function CartPage() {
     }
   };
 
+  const handleSubmitMintOrder = async (formData: {
+    name: string;
+    surname: string;
+    address: string;
+    phone: string;
+    email: string;
+  }) => {
+    if (!showMintCheckoutForm || !user) return;
+
+    try {
+      setPlacingOrderFor(showMintCheckoutForm.productId);
+
+      // Send order details to Monetaria Statului
+      const response = await fetch('/api/monetaria-statului/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerName: formData.name,
+          customerSurname: formData.surname,
+          customerAddress: formData.address,
+          customerPhone: formData.phone,
+          customerEmail: formData.email,
+          productTitle: showMintCheckoutForm.productTitle,
+          productPrice: showMintCheckoutForm.productPrice,
+          productId: showMintCheckoutForm.productId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send order to Monetaria Statului');
+      }
+
+      // Remove item from cart after successful order
+      await removeItem(showMintCheckoutForm.cartItemId);
+
+      setOrderSuccess(true);
+      setShowMintCheckoutForm(null);
+
+      alert('Monetăria Statului a fost informată cu privire la intenția dumneavoastră de achiziție. În cel mai scurt timp veți fi contactat prin datele furnizate în cererea de comandă (e-mail / telefon).');
+    } catch (error) {
+      console.error('Failed to submit order:', error);
+      const message =
+        error instanceof Error ? error.message : 'A apărut o eroare la trimitea comenzii.';
+      alert(`Eroare la comandă: ${message}`);
+    } finally {
+      setPlacingOrderFor(null);
+    }
+  };
+
   const handleClearCart = () => {
     if (!items.length) return;
     if (confirm('Ești sigur că vrei să golești întregul coș?')) {
@@ -143,130 +213,168 @@ export default function CartPage() {
   const isEmpty = !loading && lines.length === 0;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-[#e7b73c] mb-1">Coșul meu</h1>
-          {loading ? (
-            <p className="text-slate-300">Se încarcă...</p>
-          ) : isEmpty ? (
-            <p className="text-slate-300">Coșul tău este gol.</p>
-          ) : (
-            <p className="text-slate-300">
-              Ai {lines.length} {lines.length === 1 ? 'piesă' : 'piese'} în coș.
-            </p>
-          )}
-        </div>
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center rounded-full border border-[#e7b73c]/70 px-4 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
-        >
-          ← Înapoi la cont
-        </Link>
-      </div>
-
-      {error && (
-        <div className="bg-red-900/50 border border-red-500/50 rounded-2xl p-6 mb-6 text-center backdrop-blur-sm">
-          <h3 className="text-lg font-semibold text-red-200 mb-2">
-            Eroare la încărcarea coșului
-          </h3>
-          <p className="text-red-300">{error}</p>
-        </div>
-      )}
-
-      {!isEmpty && !loading && (
-        <div className="bg-navy-900/80 rounded-2xl border border-gold-500/30 p-6 mb-6 shadow-[0_14px_40px_rgba(0,0,0,0.8)]">
-          <div className="mb-4">
-            <p className="text-slate-300 mb-1">
-              Total estimat:{' '}
-              <span className="font-semibold text-[#e7b73c]">
-                {formatRON(totalValue)}
-              </span>
-            </p>
+    <>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-[#e7b73c] mb-1">Coșul meu</h1>
+            {loading ? (
+              <p className="text-slate-300">Se încarcă...</p>
+            ) : isEmpty ? (
+              <p className="text-slate-300">Coșul tău este gol.</p>
+            ) : (
+              <p className="text-slate-300">
+                Ai {lines.length} {lines.length === 1 ? 'piesă' : 'piese'} în coș.
+              </p>
+            )}
           </div>
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center rounded-full border border-[#e7b73c]/70 px-4 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
+          >
+            ← Înapoi la cont
+          </Link>
+        </div>
 
-          <div className="space-y-4">
-            {lines.map(({ item, product }) => {
-              const label = product?.name || `Piesă ${item.productId}`;
-              const price =
-                product && typeof product.price === 'number'
-                  ? formatRON(product.price)
-                  : 'Preț indisponibil';
+        {error && (
+          <div className="bg-red-900/50 border border-red-500/50 rounded-2xl p-6 mb-6 text-center backdrop-blur-sm">
+            <h3 className="text-lg font-semibold text-red-200 mb-2">
+              Eroare la încărcarea coșului
+            </h3>
+            <p className="text-red-300">{error}</p>
+          </div>
+        )}
 
-              return (
-                <div
-                  key={item.id}
-                  className="flex flex-col md:flex-row gap-4 rounded-2xl border border-gold-500/30 bg-navy-950 p-4"
-                >
-                  <div className="flex-1 flex flex-col justify-between gap-2">
-                    <div>
-                      <h2 className="text-sm sm:text-base font-semibold text-white mb-1 line-clamp-2">
-                        {label}
-                      </h2>
-                      <p className="text-xs text-slate-400">
-                        ID piesă: {item.productId}
-                      </p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <p className="text-sm font-semibold text-green-400">
-                        {price}
-                      </p>
-                      <div className="flex gap-2">
-                        <Link
-                          href={item.isMintProduct ? `/monetaria-statului/${item.productId}` : `/products/${item.productId}`}
-                          className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-3 py-1 text-xs font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
-                        >
-                          Vezi piesa
-                        </Link>
-                        <button
-                          disabled={placingOrderFor === item.productId}
-                          onClick={() => handleCheckoutItem(item.productId, item.id, item.isMintProduct, item.mintProductData)}
-                          className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-xs font-semibold text-[#000940] hover:bg-[#f0c955] transition-colors disabled:opacity-50"
-                        >
-                          {placingOrderFor === item.productId ? 'Se procesează...' : 'Cumpără acum'}
-                        </button>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="inline-flex items-center justify-center rounded-full border border-red-500/70 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors"
-                        >
-                          Șterge
-                        </button>
+        {!isEmpty && !loading && (
+          <div className="bg-navy-900/80 rounded-2xl border border-gold-500/30 p-6 mb-6 shadow-[0_14px_40px_rgba(0,0,0,0.8)]">
+            <div className="mb-4">
+              <p className="text-slate-300 mb-1">
+                Total estimat:{' '}
+                <span className="font-semibold text-[#e7b73c]">
+                  {formatRON(totalValue)}
+                </span>
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {lines.map(({ item, product }) => {
+                const label = product?.name || `Piesă ${item.productId}`;
+                const price =
+                  product && typeof product.price === 'number'
+                    ? formatRON(product.price)
+                    : 'Preț indisponibil';
+
+                return (
+                  <div
+                    key={item.id}
+                    className="flex flex-col md:flex-row gap-4 rounded-2xl border border-gold-500/30 bg-navy-950 p-4"
+                  >
+                    <div className="flex-1 flex flex-col justify-between gap-2">
+                      <div>
+                        <h2 className="text-sm sm:text-base font-semibold text-white mb-1 line-clamp-2">
+                          {label}
+                        </h2>
+                        <p className="text-xs text-slate-400">
+                          ID piesă: {item.productId}
+                        </p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <p className="text-sm font-semibold text-green-400">
+                          {price}
+                        </p>
+                        <div className="flex gap-2">
+                          <Link
+                            href={item.isMintProduct ? `/monetaria-statului/${item.productId}` : `/products/${item.productId}`}
+                            className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-3 py-1 text-xs font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
+                          >
+                            Vezi piesa
+                          </Link>
+                          <button
+                            disabled={placingOrderFor === item.productId}
+                            onClick={() => handleCheckoutItem(item.productId, item.id, item.isMintProduct, item.mintProductData)}
+                            className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-3 py-1 text-xs font-semibold text-[#000940] hover:bg-[#f0c955] transition-colors disabled:opacity-50"
+                          >
+                            {placingOrderFor === item.productId ? 'Se procesează...' : 'Cumpără acum'}
+                          </button>
+                          <button
+                            onClick={() => removeItem(item.id)}
+                            className="inline-flex items-center justify-center rounded-full border border-red-500/70 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors"
+                          >
+                            Șterge
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
 
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={handleClearCart}
-              className="inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={handleClearCart}
+                className="inline-flex items-center justify-center rounded-full bg-red-600 px-6 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
+              >
+                Golește coșul
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-navy-900/80 rounded-2xl border border-gold-500/30 p-6 shadow-[0_14px_40px_rgba(0,0,0,0.8)]">
+          <h3 className="text-lg font-semibold text-white mb-3">Continuă cumpărăturile</h3>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/products"
+              className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-6 py-2 text-sm font-semibold text-[#000940] shadow-[0_0_24px_rgba(231,183,60,0.75)] hover:bg-[#f0c955] transition-colors"
             >
-              Golește coșul
+              Mergi la catalog
+            </Link>
+            <Link
+              href="/auctions"
+              className="inline-flex items-center justify-center rounded-full border border-[#e7b73c] px-6 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
+            >
+              Vezi licitațiile
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Monetaria Statului Checkout Form */}
+      {showMintCheckoutForm && (
+        <MonetariaStatuluiCheckoutForm
+          product={{
+            product_id: showMintCheckoutForm.productId,
+            title: showMintCheckoutForm.productTitle,
+            price: showMintCheckoutForm.productPrice,
+          }}
+          onSubmit={handleSubmitMintOrder}
+          onCancel={() => setShowMintCheckoutForm(null)}
+        />
+      )}
+
+      {/* Order Success Message */}
+      {orderSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <div className="bg-navy-900 border border-gold-500/20 rounded-2xl p-6 max-w-md w-full mx-4 text-center">
+            <h3 className="text-xl font-bold text-white mb-4">Comandă trimisă cu succes!</h3>
+            <p className="text-slate-300 mb-6">
+              Monetăria Statului a fost informată cu privire la intenția dumneavoastră de achiziție.
+              În cel mai scurt timp veți fi contactat prin datele furnizate în cererea de comandă (e-mail / telefon).
+            </p>
+            <p className="text-slate-300 mb-6">
+              eNumismatica.ro transmite exclusiv datele dumneavoastră către Monetăria Statului și nu este implicată direct în procesul de achiziție.
+            </p>
+            <button
+              type="button"
+              onClick={() => setOrderSuccess(false)}
+              className="bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-6 py-2 rounded-xl font-semibold transition-colors"
+            >
+              Închide
             </button>
           </div>
         </div>
       )}
-
-      <div className="bg-navy-900/80 rounded-2xl border border-gold-500/30 p-6 shadow-[0_14px_40px_rgba(0,0,0,0.8)]">
-        <h3 className="text-lg font-semibold text-white mb-3">Continuă cumpărăturile</h3>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/products"
-            className="inline-flex items-center justify-center rounded-full bg-[#e7b73c] px-6 py-2 text-sm font-semibold text-[#000940] shadow-[0_0_24px_rgba(231,183,60,0.75)] hover:bg-[#f0c955] transition-colors"
-          >
-            Mergi la catalog
-          </Link>
-          <Link
-            href="/auctions"
-            className="inline-flex items-center justify-center rounded-full border border-[#e7b73c] px-6 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
-          >
-            Vezi licitațiile
-          </Link>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
