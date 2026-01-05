@@ -44,7 +44,7 @@ async function sendPronumismaticaFormEmail(data: any) {
   const html = template.html.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k as keyof typeof vars] || '');
 
   await sendEmailWithAttachments({
-    to: 'bogdan.epure@sky.ro',
+    to: 'sorin.pintilie@sky.ro',
     subject,
     html,
     text: template.text?.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k as keyof typeof vars] || ''),
@@ -82,7 +82,7 @@ async function sendPronumismaticaFormEmailWithIdImages(data: any, images: any) {
   }));
 
   await sendEmailWithAttachments({
-    to: 'bogdan.epure@sky.ro',
+    to: 'sorin.pintilie@sky.ro',
     subject,
     html,
     text: template.text?.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k as keyof typeof vars] || ''),
