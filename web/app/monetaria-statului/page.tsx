@@ -166,9 +166,9 @@ export default function MonetariaStatuluiPage() {
     <div className="min-h-screen bg-gradient-to-b from-navy-900 via-navy-950 to-black py-12">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Monetaria Statului</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Monetăria Statului</h1>
           <p className="text-lg text-slate-200 max-w-2xl mx-auto">
-            Colecția oficială a Monetăriei Statului Române.
+            Traditie si Excelenta Fondata in 1870, Monetaria Statului este standardul pentru moneda si artefacte pretioase in Romania.
           </p>
         </div>
 

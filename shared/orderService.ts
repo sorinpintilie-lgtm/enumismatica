@@ -282,8 +282,8 @@ export async function createDirectOrderForProduct(
       console.error('Failed to update order with conversationId/names:', err);
     }
 
-    // Send email to buyer (non-blocking)
-    if (buyerEmail) {
+    // Send email to buyer (non-blocking) - skip for mint products
+    if (buyerEmail && !isMintProduct) {
       sendPurchaseConfirmationEmail(
         buyerEmail,
         productName,
@@ -298,7 +298,7 @@ export async function createDirectOrderForProduct(
       });
     }
 
-    // Send email to seller (non-blocking)
+    // Send email to seller (non-blocking) - skip for mint products
     if (!isMintProduct && sellerEmail) {
       sendProductSoldEmail(
         sellerEmail,

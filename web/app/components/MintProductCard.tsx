@@ -42,7 +42,7 @@ export default function MintProductCard({ product, onCartClick }: { product: Min
             </div>
           )}
         </div>
-        <div className="space-y-2 min-h-[3rem]">
+        <div className="space-y-2 min-h-[4.5rem]">
           <h3 className="font-semibold text-[#000940] text-sm line-clamp-2 group-hover:text-[#e7b73c] transition-colors leading-tight">
             {product.title}
           </h3>
