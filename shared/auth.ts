@@ -57,7 +57,12 @@ export const signUpWithEmail = async (
   email: string,
   password: string,
   referralCode?: string,
-  idDocumentData?: { type?: 'ci' | 'passport'; number?: string },
+  idDocumentData?: {
+    type?: 'ci' | 'passport';
+    number?: string;
+    frontPhoto?: File;
+    backPhoto?: File;
+  },
 ) => {
   try {
     // Sanitize inputs
@@ -80,13 +85,41 @@ export const signUpWithEmail = async (
     const userCredential = await createUserWithEmailAndPassword(auth, sanitizedEmail, sanitizedPassword);
 
     const documentNumber = idDocumentData?.number?.trim();
-    const extraProfileData = documentNumber
+    const extraProfileData: any = documentNumber
       ? {
           idDocumentType: idDocumentData?.type || 'ci',
           idDocumentNumber: documentNumber,
           idVerificationStatus: 'pending' as const,
         }
       : undefined;
+
+    // Handle ID document photo uploads
+    if (idDocumentData?.frontPhoto || idDocumentData?.backPhoto) {
+      const { uploadIdDocumentPhoto } = await import('./storageService');
+      const documentPhotos: string[] = [];
+      
+      if (idDocumentData.frontPhoto) {
+        const frontPhotoUrl = await uploadIdDocumentPhoto(
+          idDocumentData.frontPhoto,
+          userCredential.user.uid,
+          idDocumentData.type || 'ci'
+        );
+        documentPhotos.push(frontPhotoUrl);
+      }
+      
+      if (idDocumentData.backPhoto) {
+        const backPhotoUrl = await uploadIdDocumentPhoto(
+          idDocumentData.backPhoto,
+          userCredential.user.uid,
+          idDocumentData.type || 'ci'
+        );
+        documentPhotos.push(backPhotoUrl);
+      }
+      
+      if (documentPhotos.length > 0) {
+        extraProfileData.idDocumentPhotos = documentPhotos;
+      }
+    }
 
     // Create Firestore profile and apply referral bonuses (if any)
     await createUserProfileAfterSignup(userCredential.user, referralCode || null, extraProfileData);

@@ -73,6 +73,7 @@ export default function ProductDetailPage() {
   const [viewMode, setViewMode] = useState<'owner' | 'preview'>('preview');
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [showOfferManagement, setShowOfferManagement] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
 
   const images = product?.images ?? [];
   const isOwner = user && product && user.uid === product.ownerId;
@@ -88,6 +89,18 @@ export default function ProductDetailPage() {
       setViewMode('owner');
     }
   }, [isOwner, viewMode]);
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (user) {
+        const { isAdmin } = require('shared/adminService');
+        const adminStatus = await isAdmin(user.uid);
+        setIsAdminUser(adminStatus);
+      }
+    };
+    checkAdmin();
+  }, [user]);
 
   // Fetch seller information
   useEffect(() => {
@@ -371,6 +384,22 @@ export default function ProductDetailPage() {
                     Proprietar
                   </button>
                 </div>
+              </div>
+            )}
+            {isAdminUser && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const editUrl = `/products/new?edit=${product.id}`;
+                    window.location.href = editUrl;
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors text-sm"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Modifică Piesă
+                </button>
               </div>
             )}
           </div>

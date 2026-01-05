@@ -77,6 +77,7 @@ export default function AuctionDetailPage() {
   const [showBuyNowConfirm, setShowBuyNowConfirm] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [showOfferManagement, setShowOfferManagement] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
 
   // Track last manual and last seen user bid amounts (for auto-bid notifications)
   const lastManualBidAmountRef = useRef<number | null>(null);
@@ -86,6 +87,18 @@ export default function AuctionDetailPage() {
   // Fetch product details to check ownership
   const { product } = useProduct(auction?.productId || '');
   const isOwner = product?.ownerId === user?.uid;
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (user) {
+        const { isAdmin } = require('shared/adminService');
+        const adminStatus = await isAdmin(user.uid);
+        setIsAdminUser(adminStatus);
+      }
+    };
+    checkAdmin();
+  }, [user]);
 
   // Get other products by the same seller
   const { products: otherProducts } = useProducts(
@@ -584,6 +597,22 @@ export default function AuctionDetailPage() {
                 itemId={id}
                 size="small"
               />
+            </div>
+          )}
+          {isAdminUser && (
+            <div className="ml-4">
+              <button
+                onClick={() => {
+                  const editUrl = `/admin/auctions?edit=${id}`;
+                  window.location.href = editUrl;
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                Modifică Licitație
+              </button>
             </div>
           )}
         </div>

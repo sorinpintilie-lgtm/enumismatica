@@ -18,17 +18,19 @@ export interface User {
   personalDetails?: UserPersonalDetails;
 
   /**
-   * Identity verification fields (Romania CI / Passport).
-   *
-   * - idDocumentType / idDocumentNumber: raw document metadata provided at signup
-   * - idVerificationStatus: manual verification state controlled by admins
-   * - idVerifiedAt / idVerifiedBy: audit trail for who verified and when
-   */
-   idDocumentType?: 'ci' | 'passport';
-   idDocumentNumber?: string;
-   idVerificationStatus?: 'not_provided' | 'pending' | 'verified' | 'rejected';
-   idVerifiedAt?: Date;
-   idVerifiedBy?: string;
+  * Identity verification fields (Romania CI / Passport).
+  *
+  * - idDocumentType / idDocumentNumber: raw document metadata provided at signup
+  * - idVerificationStatus: manual verification state controlled by admins
+  * - idVerifiedAt / idVerifiedBy: audit trail for who verified and when
+  * - idDocumentPhotos: URLs of uploaded ID document photos (front and back)
+  */
+  idDocumentType?: 'ci' | 'passport';
+  idDocumentNumber?: string;
+  idVerificationStatus?: 'not_provided' | 'pending' | 'verified' | 'rejected';
+  idVerifiedAt?: Date;
+  idVerifiedBy?: string;
+  idDocumentPhotos?: string[];
 
   /**
    * Current credit balance for the user.

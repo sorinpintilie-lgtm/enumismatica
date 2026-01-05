@@ -42,6 +42,8 @@ function RegisterForm() {
   const [referralCode, setReferralCode] = useState(initialReferral);
   const [idDocumentType, setIdDocumentType] = useState<'ci' | 'passport' | ''>('');
   const [idDocumentNumber, setIdDocumentNumber] = useState('');
+  const [idDocumentFrontPhoto, setIdDocumentFrontPhoto] = useState<File | null>(null);
+  const [idDocumentBackPhoto, setIdDocumentBackPhoto] = useState<File | null>(null);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -73,6 +75,8 @@ function RegisterForm() {
       ? {
           type: (idDocumentType || 'ci') as 'ci' | 'passport',
           number: idDocumentNumber,
+          frontPhoto: idDocumentFrontPhoto,
+          backPhoto: idDocumentBackPhoto,
         }
       : undefined;
 
@@ -207,6 +211,34 @@ function RegisterForm() {
                     onChange={(e) => setIdDocumentNumber(e.target.value)}
                   />
                 </div>
+                
+                {/* ID Document Photo Uploads */}
+                {idDocumentNumber && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-200 mb-1">
+                        Fotografie față document
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="block w-full text-sm text-slate-400"
+                        onChange={(e) => setIdDocumentFrontPhoto(e.target.files?.[0] || null)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-200 mb-1">
+                        Fotografie spate document (opțional)
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="block w-full text-sm text-slate-400"
+                        onChange={(e) => setIdDocumentBackPhoto(e.target.files?.[0] || null)}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

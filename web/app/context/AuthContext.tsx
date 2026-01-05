@@ -14,6 +14,7 @@ interface ExtendedUser extends FirebaseUser {
   idVerificationStatus?: 'not_provided' | 'pending' | 'verified' | 'rejected';
   idDocumentType?: 'ci' | 'passport';
   idDocumentNumber?: string;
+  idDocumentPhotos?: string[];
 }
 
 interface AuthContextType {
@@ -55,23 +56,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         unsubscribeUserDoc = onSnapshot(
           doc(db, 'users', firebaseUser.uid),
           (userDoc) => {
-            const userData = userDoc.data();
-            const role = userData?.role || 'user';
-            const idVerificationStatus = userData?.idVerificationStatus;
-            const idDocumentType = userData?.idDocumentType;
-            const idDocumentNumber = userData?.idDocumentNumber;
+           const userData = userDoc.data();
+           const role = userData?.role || 'user';
+           const idVerificationStatus = userData?.idVerificationStatus;
+           const idDocumentType = userData?.idDocumentType;
+           const idDocumentNumber = userData?.idDocumentNumber;
+           const idDocumentPhotos = userData?.idDocumentPhotos;
 
-            if (mounted) {
-              const extendedUser = {
-                ...firebaseUser,
-                role,
-                isAdmin: role === 'admin' || role === 'superadmin',
-                isSuperAdmin: role === 'superadmin',
-                displayName: userData?.displayName || firebaseUser.displayName || firebaseUser.email || 'User',
-                idVerificationStatus,
-                idDocumentType,
-                idDocumentNumber,
-              } as ExtendedUser;
+           if (mounted) {
+             const extendedUser = {
+               ...firebaseUser,
+               role,
+               isAdmin: role === 'admin' || role === 'superadmin',
+               isSuperAdmin: role === 'superadmin',
+               displayName: userData?.displayName || firebaseUser.displayName || firebaseUser.email || 'User',
+               idVerificationStatus,
+               idDocumentType,
+               idDocumentNumber,
+               idDocumentPhotos,
+             } as ExtendedUser;
 
               setUser(extendedUser);
               setAuthKey((prev) => prev + 1); // Force re-render

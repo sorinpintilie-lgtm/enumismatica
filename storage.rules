@@ -78,6 +78,17 @@ service firebase.storage {
     }
 
     // ====================
+    // ID DOCUMENT PHOTOS
+    // ====================
+    // Private ID document photos for identity verification
+    // Users can upload their own, admins can view all, only admins can delete
+    match /id-documents/{userId}/{documentId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow write: if isAuthenticated() && isOwner(userId) && isValidImageFile();
+      allow delete: if isAdmin();
+    }
+
+    // ====================
     // ADMIN-ONLY AREAS
     // ====================
     // Site assets and seed data - admin exclusive

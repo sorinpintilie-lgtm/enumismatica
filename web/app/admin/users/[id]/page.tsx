@@ -561,27 +561,55 @@ export default function AdminUserDetail() {
             <div className="bg-navy-800/50 rounded-lg border border-gold-500/20 p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Verificare Identitate</h3>
               {hasIdentityData ? (
-                <div className="space-y-2 text-sm">
-                  <p className="text-slate-300">
-                    Tip document:{' '}
-                    <span className="font-semibold text-gold-300">{documentTypeLabel}</span>
-                  </p>
-                  <p className="text-slate-300">
-                    Număr document:{' '}
-                    <span className="font-mono text-gold-200">{maskedDocumentNumber}</span>
-                  </p>
-                  <p className="text-slate-300">
-                    Status:{' '}
-                    <span className="font-semibold">
-                      {user.idVerificationStatus === 'verified'
-                        ? 'Verificat'
-                        : user.idVerificationStatus === 'pending'
-                        ? 'În așteptare'
-                        : user.idVerificationStatus === 'rejected'
-                        ? 'Respins'
-                        : 'Neverificat'}
-                    </span>
-                  </p>
+                <div className="space-y-4 text-sm">
+                  <div>
+                    <p className="text-slate-300">
+                      Tip document:{' '}
+                      <span className="font-semibold text-gold-300">{documentTypeLabel}</span>
+                    </p>
+                    <p className="text-slate-300">
+                      Număr document:{' '}
+                      <span className="font-mono text-gold-200">{maskedDocumentNumber}</span>
+                    </p>
+                    <p className="text-slate-300">
+                      Status:{' '}
+                      <span className="font-semibold">
+                        {user.idVerificationStatus === 'verified'
+                          ? 'Verificat'
+                          : user.idVerificationStatus === 'pending'
+                          ? 'În așteptare'
+                          : user.idVerificationStatus === 'rejected'
+                          ? 'Respins'
+                          : 'Neverificat'}
+                      </span>
+                    </p>
+                  </div>
+                  
+                  {/* ID Document Photos */}
+                  {(user as any).idDocumentPhotos && (user as any).idDocumentPhotos.length > 0 ? (
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-slate-200">Documente încărcate:</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {(user as any).idDocumentPhotos.map((photoUrl: string, index: number) => (
+                          <div key={index} className="border border-gold-500/30 rounded-lg p-2">
+                            <img
+                              src={photoUrl}
+                              alt={`Document photo ${index + 1}`}
+                              className="w-full h-auto rounded-md max-h-64 object-contain"
+                            />
+                            <p className="text-xs text-slate-400 mt-1 text-center">
+                              {index === 0 ? 'Față document' : 'Spate document'}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-400">
+                      Utilizatorul nu a încărcat fotografii ale documentului.
+                    </p>
+                  )}
+                  
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       type="button"

@@ -187,3 +187,65 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
 
   return { valid: true };
 }
+
+/**
+ * Upload ID document photo
+ * @param file - The document photo file to upload
+ * @param userId - User ID
+ * @param documentType - Type of document (ci or passport)
+ * @returns The download URL of the uploaded document photo
+ */
+export async function uploadIdDocumentPhoto(file: File, userId: string, documentType: 'ci' | 'passport'): Promise<string> {
+	if (!storage) throw new Error('Firebase Storage not initialized');
+
+	// Validate file
+	const validation = validateImageFile(file);
+	if (!validation.valid) {
+		throw new Error(validation.error);
+	}
+
+	// Create storage path
+	const timestamp = Date.now();
+	const filename = `${timestamp}_${documentType}_${file.name}`;
+	const path = `id-documents/${userId}/${filename}`;
+
+	// Upload the file
+	return uploadImage(file, path);
+}
+
+/**
+ * Get ID document photo URLs for a user
+ * @param userId - User ID
+ * @returns Array of document photo URLs
+ */
+export async function getIdDocumentPhotos(userId: string): Promise<string[]> {
+	if (!storage) throw new Error('Firebase Storage not initialized');
+
+	const storageRef = ref(storage, `id-documents/${userId}`);
+	try {
+		const result = await listAll(storageRef);
+		const urlPromises = result.items.map(itemRef => getDownloadURL(itemRef));
+		return Promise.all(urlPromises);
+	} catch (error) {
+		console.error('Error listing ID document photos:', error);
+		return [];
+	}
+}
+
+/**
+ * Delete ID document photos for a user
+ * @param userId - User ID
+ */
+export async function deleteIdDocumentPhotos(userId: string): Promise<void> {
+	if (!storage) throw new Error('Firebase Storage not initialized');
+
+	const storageRef = ref(storage, `id-documents/${userId}`);
+	try {
+		const result = await listAll(storageRef);
+		const deletePromises = result.items.map(itemRef => deleteObject(itemRef));
+		await Promise.all(deletePromises);
+	} catch (error) {
+		console.error('Error deleting ID document photos:', error);
+		throw error;
+	}
+}

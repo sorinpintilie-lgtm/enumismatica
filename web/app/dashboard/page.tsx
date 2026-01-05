@@ -721,6 +721,71 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Personal Details */}
+          {/* ID Verification Section */}
+          {user.idDocumentNumber && (
+            <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">Verificare Identitate</h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-1 text-xs rounded-full font-semibold ${
+                    user.idVerificationStatus === 'verified'
+                      ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-500/40'
+                      : user.idVerificationStatus === 'pending'
+                      ? 'bg-yellow-500/20 text-yellow-200 border border-yellow-500/40'
+                      : 'bg-red-500/20 text-red-200 border border-red-500/40'
+                  }`}>
+                    {user.idVerificationStatus === 'verified' ? 'VERIFICAT' :
+                     user.idVerificationStatus === 'pending' ? 'ÎN AȘTEPTARE' : 'RESPINS'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-slate-300">
+                    Tip document: <span className="font-semibold text-gold-300">{user.idDocumentType === 'passport' ? 'Pașaport' : 'Carte de identitate'}</span>
+                  </p>
+                  <p className="text-sm text-slate-300">
+                    Număr document: <span className="font-mono text-gold-200">{String(user.idDocumentNumber).replace(/.(?=.{4})/g, '•')}</span>
+                  </p>
+                </div>
+                
+                {/* ID Document Photos */}
+                {user.idDocumentPhotos && user.idDocumentPhotos.length > 0 ? (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-slate-200">Documentele tale:</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {user.idDocumentPhotos.map((photoUrl: string, index: number) => (
+                        <div key={index} className="border border-gold-500/30 rounded-lg p-2">
+                          <img
+                            src={photoUrl}
+                            alt={`Document photo ${index + 1}`}
+                            className="w-full h-auto rounded-md max-h-64 object-contain"
+                          />
+                          <p className="text-xs text-slate-400 mt-1 text-center">
+                            {index === 0 ? 'Față document' : 'Spate document'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-400">
+                    Nu ai încărcat fotografii ale documentului.
+                  </p>
+                )}
+                
+                <div className="text-xs text-slate-400 border-t border-gold-500/20 pt-3">
+                  <p>Statusul verificării tale: {user.idVerificationStatus === 'verified' ? 'Contul tău este verificat' :
+                    user.idVerificationStatus === 'pending' ? 'Documentul tău este în curs de verificare de către administratori' :
+                    'Documentul tău a fost respins. Te rugăm să încarci documente valide.'}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>

@@ -339,7 +339,7 @@ function ProductsListContent() {
   // Calculate pagination values first
   const loadedPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
   const totalPagesKnown = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
-  const effectiveMaxPage = hasMore ? Math.max(totalPagesKnown, loadedPages + 1) : totalPagesKnown;
+  const effectiveMaxPage = hasMore ? Math.min(Math.max(totalPagesKnown, loadedPages + 1), totalPagesKnown) : totalPagesKnown;
 
   // Debug pagination calculation
   useEffect(() => {
