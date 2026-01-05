@@ -113,6 +113,56 @@ function ProductsListContent() {
   }, [ownerId, products.length, hasMore, error]);
   const router = useRouter();
   const pathname = usePathname();
+ 
+  // Helper functions to handle diacritics in URLs
+  const normalizeForUrl = (value: string): string => {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .toLowerCase();
+  };
+
+  const denormalizeFromUrl = (value: string): string => {
+    // Map of normalized values to original values with diacritics
+    const diacriticsMap: Record<string, string> = {
+      'romania': 'România',
+      'rusia': 'Rusia',
+      'germania': 'Germania',
+      'franta': 'Franța',
+      'finlanda': 'Finlanda',
+      'spania': 'Spania',
+      'danemarca': 'Danemarca',
+      'mexic': 'Mexic',
+      'austria': 'Austria',
+      'italia': 'Italia',
+      'aur': 'Aur',
+      'argint': 'Argint',
+      'bronz': 'Bronz',
+      'cupru': 'Cupru',
+      'nichel': 'Nichel',
+      'platina': 'Platină',
+      'comuna': 'comună',
+      'neobisnuita': 'neobișnuită',
+      'rara': 'rară',
+      'foarte-rara': 'foarte rară',
+      'extrem-de-rara': 'extrem de rară',
+      'slaba': 'Slabă',
+      'acceptabila': 'Acceptabilă',
+      'buna': 'Bună',
+      'vg': 'VG',
+      'fina': 'Fină',
+      'vf': 'VF',
+      'xf': 'XF',
+      'au': 'AU',
+      'ms-60': 'MS-60',
+      'ms-65': 'MS-65',
+      'ms-70': 'MS-70',
+    };
+    
+    return diacriticsMap[value] || value;
+  };
 
   // Log page navigation for debugging
   useEffect(() => {
@@ -126,27 +176,78 @@ function ProductsListContent() {
   const [page, setPage] = useState(1);
   const [requestedPage, setRequestedPage] = useState<number | null>(null);
   
-  const [filters, setFilters] = useState<FilterOptions>({
-    searchTerm: '',
-    category: 'Toate Categoriile',
-    country: 'Toate Țările',
-    // 0 / 0 = fără filtru de preț în mod implicit. Utilizatorul setează limitele doar dacă dorește.
-    minPrice: 0,
-    maxPrice: 0,
-    // 0 / 0 = fără filtru pe ani în mod implicit. Utilizatorul setează anii doar dacă dorește.
-    minYear: 0,
-    maxYear: 0,
-    metal: 'Toate Metalele',
-    rarity: 'Toate Raritățile',
-    grade: 'Toate Gradele',
-    faceValue: 'Toate Valorile',
-    issueYear: 'Toți Anii',
-    diameter: 'Toate Diametrele',
-    weight: 'Toate Greutățile',
-    mint: 'Toate Monetăriile',
-    era: 'Toate Epocile',
-    sortBy: 'best-match',
-  });
+  // Initialize filters from URL search params to persist across navigation
+  const initializeFiltersFromURL = (): FilterOptions => {
+    const defaultFilters: FilterOptions = {
+      searchTerm: '',
+      category: 'Toate Categoriile',
+      country: 'Toate Țările',
+      minPrice: 0,
+      maxPrice: 0,
+      minYear: 0,
+      maxYear: 0,
+      metal: 'Toate Metalele',
+      rarity: 'Toate Raritățile',
+      grade: 'Toate Gradele',
+      faceValue: 'Toate Valorile',
+      issueYear: 'Toți Anii',
+      diameter: 'Toate Diametrele',
+      weight: 'Toate Greutățile',
+      mint: 'Toate Monetăriile',
+      era: 'Toate Epocile',
+      sortBy: 'best-match',
+    };
+
+    // Read filters from URL search params and denormalize values
+    const searchTerm = searchParams.get('searchTerm') || defaultFilters.searchTerm;
+    const category = searchParams.get('category') || defaultFilters.category;
+    const countryParam = searchParams.get('country');
+    const country = countryParam ? denormalizeFromUrl(countryParam) : defaultFilters.country;
+    const minPrice = searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : defaultFilters.minPrice;
+    const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : defaultFilters.maxPrice;
+    const minYear = searchParams.get('minYear') ? parseInt(searchParams.get('minYear')!) : defaultFilters.minYear;
+    const maxYear = searchParams.get('maxYear') ? parseInt(searchParams.get('maxYear')!) : defaultFilters.maxYear;
+    const metalParam = searchParams.get('metal');
+    const metal = metalParam ? denormalizeFromUrl(metalParam) : defaultFilters.metal;
+    const rarityParam = searchParams.get('rarity');
+    const rarity = rarityParam ? denormalizeFromUrl(rarityParam) : defaultFilters.rarity;
+    const gradeParam = searchParams.get('grade');
+    const grade = gradeParam ? denormalizeFromUrl(gradeParam) : defaultFilters.grade;
+    const faceValue = searchParams.get('faceValue') || defaultFilters.faceValue;
+    const issueYear = searchParams.get('issueYear') || defaultFilters.issueYear;
+    const diameter = searchParams.get('diameter') || defaultFilters.diameter;
+    const weight = searchParams.get('weight') || defaultFilters.weight;
+    const mint = searchParams.get('mint') || defaultFilters.mint;
+    const era = searchParams.get('era') || defaultFilters.era;
+    const sortBy = searchParams.get('sortBy') as FilterOptions['sortBy'] || defaultFilters.sortBy;
+
+    return {
+      searchTerm,
+      category,
+      country,
+      minPrice,
+      maxPrice,
+      minYear,
+      maxYear,
+      metal,
+      rarity,
+      grade,
+      faceValue,
+      issueYear,
+      diameter,
+      weight,
+      mint,
+      era,
+      sortBy,
+    };
+  };
+
+  const [filters, setFilters] = useState<FilterOptions>(initializeFiltersFromURL());
+
+  // Update filters when URL search params change (e.g., when navigating back)
+  useEffect(() => {
+    setFilters(initializeFiltersFromURL());
+  }, [searchParams]);
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -171,37 +272,78 @@ function ProductsListContent() {
   }, [searchParams, page]);
 
   const updatePageInUrl = (nextPage: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-
+    const params = new URLSearchParams();
+    
+    // Add current filter params to URL (normalize values with diacritics)
+    if (filters.searchTerm) params.set('searchTerm', filters.searchTerm);
+    if (filters.category !== 'Toate Categoriile') params.set('category', filters.category);
+    if (filters.country !== 'Toate Țările') params.set('country', normalizeForUrl(filters.country));
+    if (filters.minPrice > 0) params.set('minPrice', filters.minPrice.toString());
+    if (filters.maxPrice > 0) params.set('maxPrice', filters.maxPrice.toString());
+    if (filters.minYear > 0) params.set('minYear', filters.minYear.toString());
+    if (filters.maxYear > 0) params.set('maxYear', filters.maxYear.toString());
+    if (filters.metal !== 'Toate Metalele') params.set('metal', normalizeForUrl(filters.metal));
+    if (filters.rarity !== 'Toate Raritățile') params.set('rarity', normalizeForUrl(filters.rarity));
+    if (filters.grade !== 'Toate Gradele') params.set('grade', normalizeForUrl(filters.grade));
+    if (filters.faceValue !== 'Toate Valorile') params.set('faceValue', filters.faceValue);
+    if (filters.issueYear !== 'Toți Anii') params.set('issueYear', filters.issueYear);
+    if (filters.diameter !== 'Toate Diametrele') params.set('diameter', filters.diameter);
+    if (filters.weight !== 'Toate Greutățile') params.set('weight', filters.weight);
+    if (filters.mint !== 'Toate Monetăriile') params.set('mint', filters.mint);
+    if (filters.era !== 'Toate Epocile') params.set('era', filters.era);
+    if (filters.sortBy !== 'best-match') params.set('sortBy', filters.sortBy);
+    
+    // Add page param if not page 1
     if (nextPage > 1) {
       params.set('page', String(nextPage));
-    } else {
-      params.delete('page');
     }
-
+  
     const queryString = params.toString();
     const target = queryString ? `${pathname}?${queryString}` : pathname;
-
+  
     // Use push so each page navigation creates a history entry
     router.push(target);
   };
 
-  // Handle URL parameters on mount
-  useEffect(() => {
-    const countryParam = searchParams.get('country');
-    if (countryParam) {
-      setFilters(prev => ({
-        ...prev,
-        country: countryParam
-      }));
-    }
-  }, [searchParams]);
+  // Update URL search params when filters change
+  const updateFiltersInURL = (newFilters: FilterOptions) => {
+    const params = new URLSearchParams();
+    
+    // Add filter params to URL (normalize values with diacritics)
+    if (newFilters.searchTerm) params.set('searchTerm', newFilters.searchTerm);
+    if (newFilters.category !== 'Toate Categoriile') params.set('category', newFilters.category);
+    if (newFilters.country !== 'Toate Țările') params.set('country', normalizeForUrl(newFilters.country));
+    if (newFilters.minPrice > 0) params.set('minPrice', newFilters.minPrice.toString());
+    if (newFilters.maxPrice > 0) params.set('maxPrice', newFilters.maxPrice.toString());
+    if (newFilters.minYear > 0) params.set('minYear', newFilters.minYear.toString());
+    if (newFilters.maxYear > 0) params.set('maxYear', newFilters.maxYear.toString());
+    if (newFilters.metal !== 'Toate Metalele') params.set('metal', normalizeForUrl(newFilters.metal));
+    if (newFilters.rarity !== 'Toate Raritățile') params.set('rarity', normalizeForUrl(newFilters.rarity));
+    if (newFilters.grade !== 'Toate Gradele') params.set('grade', normalizeForUrl(newFilters.grade));
+    if (newFilters.faceValue !== 'Toate Valorile') params.set('faceValue', newFilters.faceValue);
+    if (newFilters.issueYear !== 'Toți Anii') params.set('issueYear', newFilters.issueYear);
+    if (newFilters.diameter !== 'Toate Diametrele') params.set('diameter', newFilters.diameter);
+    if (newFilters.weight !== 'Toate Greutățile') params.set('weight', newFilters.weight);
+    if (newFilters.mint !== 'Toate Monetăriile') params.set('mint', newFilters.mint);
+    if (newFilters.era !== 'Toate Epocile') params.set('era', newFilters.era);
+    if (newFilters.sortBy !== 'best-match') params.set('sortBy', newFilters.sortBy);
+    
+    // Add page param if not page 1
+    if (page > 1) params.set('page', page.toString());
+    
+    const queryString = params.toString();
+    const target = queryString ? `${pathname}?${queryString}` : pathname;
+    
+    // Use replace instead of push to avoid creating history entries for every filter change
+    router.replace(target);
+  };
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters change and update URL
   useEffect(() => {
     setPage(1);
     setRequestedPage(null);
     updatePageInUrl(1);
+    updateFiltersInURL(filters);
   }, [
     filters.searchTerm,
     filters.category,
@@ -473,7 +615,15 @@ function ProductsListContent() {
       </div>
 
       {/* Filter Bar */}
-      <FilterBar filters={filters} onFilterChange={setFilters} countryCounts={countryCounts} totalCount={totalInCatalog || 0} />
+      <FilterBar
+        filters={filters}
+        onFilterChange={(newFilters) => {
+          setFilters(newFilters);
+          updateFiltersInURL(newFilters);
+        }}
+        countryCounts={countryCounts}
+        totalCount={totalInCatalog || 0}
+      />
 
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">
