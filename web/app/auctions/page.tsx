@@ -584,9 +584,11 @@ function AuctionsListContent() {
         <p className="text-slate-300">
           Se afișează{' '}
           <span className="font-semibold text-gold-400">
-            {requestedPage === page && pagedAuctions.length === 0 ? '—' : pagedAuctions.length}
-          </span>{' '}
-          licitații din <span className="font-semibold text-gold-400">{totalCount ?? '...'}</span>
+            {requestedPage === page && pagedAuctions.length === 0 ? '—' : Math.min(page * PAGE_SIZE, filteredAuctions.length)}</span>{' '}
+          din{' '}
+          <span className="font-semibold text-gold-400">{filteredAuctions.length}</span>
+          {' licitații din '}
+          <span className="font-semibold text-gold-400">{totalCount ?? '...'}</span>
           {requestedPage === page && (
             <span className="ml-2 text-xs text-slate-400">(Se încarcă…)</span>
           )}
