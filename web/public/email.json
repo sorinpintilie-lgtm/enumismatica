@@ -120,5 +120,15 @@
     "subject": "Mentenanță programată",
     "text": "Salut!\n\nVom avea o mentenanță programată:\nInterval: {{start_time}} – {{end_time}}\nÎn acest timp, unele funcții pot fi indisponibile.\n\n— {{app_name}}\n{{site_url}}",
     "html": "<p>Salut!</p><p>Vom avea o mentenanță programată:</p><p><strong>Interval:</strong> {{start_time}} – {{end_time}}</p><p>În acest timp, unele funcții pot fi indisponibile.</p><hr/><p>— <strong>{{app_name}}</strong><br/>{{site_url}}</p>"
+  },
+  "pronumismatica_form": {
+    "subject": "Formular Pronumismatica de la {{app_name}}",
+    "text": "Formular Pronumismatica\n\nNume: {{lastName}}\nPrenume: {{firstName}}\nCNP: {{cnp}}\nȚara: {{country}}\nJudeț: {{county}}\nOraș: {{city}}\nAdresă: {{address}}\nTip act identitate: {{idType}}\nSerie act identitate: {{idSeries}}\nTelefon: {{phone}}\nEmail: {{email}}\n\nTrimis de pe {{app_name}}\n{{site_url}}",
+    "html": "<h2>Formular Pronumismatica</h2><p><strong>Nume:</strong> {{lastName}}</p><p><strong>Prenume:</strong> {{firstName}}</p><p><strong>CNP:</strong> {{cnp}}</p><p><strong>Țara:</strong> {{country}}</p><p><strong>Județ:</strong> {{county}}</p><p><strong>Oraș:</strong> {{city}}</p><p><strong>Adresă:</strong> {{address}}</p><p><strong>Tip act identitate:</strong> {{idType}}</p><p><strong>Serie act identitate:</strong> {{idSeries}}</p><p><strong>Telefon:</strong> {{phone}}</p><p><strong>Email:</strong> {{email}}</p><p>Trimis de pe {{app_name}}<br/>{{site_url}}</p>"
+  },
+  "pronumismatica_form_with_images": {
+    "subject": "Formular Pronumismatica cu acte de la {{app_name}}",
+    "text": "Formular Pronumismatica cu acte\n\nNume: {{lastName}}\nPrenume: {{firstName}}\nCNP: {{cnp}}\nȚara: {{country}}\nJudeț: {{county}}\nOraș: {{city}}\nAdresă: {{address}}\nTip act identitate: {{idType}}\nSerie act identitate: {{idSeries}}\nTelefon: {{phone}}\nEmail: {{email}}\n\nActe de identitate atașate\n\nTrimis de pe {{app_name}}\n{{site_url}}",
+    "html": "<h2>Formular Pronumismatica cu acte</h2><p><strong>Nume:</strong> {{lastName}}</p><p><strong>Prenume:</strong> {{firstName}}</p><p><strong>CNP:</strong> {{cnp}}</p><p><strong>Țara:</strong> {{country}}</p><p><strong>Județ:</strong> {{county}}</p><p><strong>Oraș:</strong> {{city}}</p><p><strong>Adresă:</strong> {{address}}</p><p><strong>Tip act identitate:</strong> {{idType}}</p><p><strong>Serie act identitate:</strong> {{idSeries}}</p><p><strong>Telefon:</strong> {{phone}}</p><p><strong>Email:</strong> {{email}}</p><p>Acte de identitate atașate</p><p>Trimis de pe {{app_name}}<br/>{{site_url}}</p>"
   }
 }

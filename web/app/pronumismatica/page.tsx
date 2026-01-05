@@ -323,7 +323,7 @@ export default function PronumismaticaPage() {
                     name="country"
                     value={form.country}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   />
                 </div>
@@ -336,7 +336,7 @@ export default function PronumismaticaPage() {
                     name="county"
                     value={form.county}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   />
                 </div>
@@ -349,7 +349,7 @@ export default function PronumismaticaPage() {
                     name="city"
                     value={form.city}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   />
                 </div>
@@ -362,7 +362,7 @@ export default function PronumismaticaPage() {
                     name="address"
                     value={form.address}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   />
                 </div>
@@ -415,7 +415,7 @@ export default function PronumismaticaPage() {
                     name="phone"
                     value={form.phone}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   />
                 </div>
@@ -428,7 +428,7 @@ export default function PronumismaticaPage() {
                     name="email"
                     value={form.email}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-600 bg-navy-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
+                    className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   />
                 </div>
