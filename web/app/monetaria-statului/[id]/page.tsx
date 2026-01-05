@@ -30,6 +30,57 @@ interface RawProduct {
   image_files: string;
 }
 
+// Format description text by cleaning up line breaks and formatting
+function formatDescription(text: string): string {
+  if (!text) return '';
+  
+  // Replace multiple spaces with single space
+  let formatted = text.replace(/\s+/g, ' ');
+  
+  // Replace pipe separators with proper formatting for specifications
+  formatted = formatted.replace(/\|/g, '\n\n');
+  
+  // Clean up any remaining formatting issues
+  formatted = formatted.replace(/\s*-\s*/g, '\n\n');
+  
+  return formatted.trim();
+}
+
+// Format specifications text
+function formatSpecifications(text: string): string {
+  if (!text) return '';
+  
+  // First clean up the text by replacing multiple spaces and fixing line breaks
+  let cleaned = text.replace(/\s+/g, ' ').trim();
+  
+  // Split by pipe and format as a proper list
+  const items = cleaned.split('|').map(item => item.trim()).filter(item => item);
+  
+  if (items.length === 0) return '';
+  
+  // Format each specification item properly
+  return items.map(item => {
+    // Handle items that have colon separators
+    if (item.includes(':')) {
+      const parts = item.split(':').map(p => p.trim()).filter(p => p);
+      if (parts.length === 2) {
+        return `<strong>${parts[0]}:</strong> ${parts[1]}`;
+      }
+    }
+    
+    // Handle items that have dash separators
+    if (item.includes('-')) {
+      const parts = item.split('-').map(p => p.trim()).filter(p => p);
+      if (parts.length === 2) {
+        return `<strong>${parts[0]}:</strong> ${parts[1]}`;
+      }
+    }
+    
+    // If no clear separator, just return the item
+    return item;
+  }).join('<br><br>');
+}
+
 export default function MintProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
@@ -264,8 +315,8 @@ export default function MintProductDetailPage() {
                 <h2 className="text-xl font-semibold text-white mb-3">
                   Descriere
                 </h2>
-                <div className="text-slate-200 leading-relaxed whitespace-pre-line">
-                  {product.full_description}
+                <div className="text-slate-200 leading-relaxed prose max-w-none">
+                  {formatDescription(product.full_description)}
                 </div>
               </div>
 
@@ -274,8 +325,8 @@ export default function MintProductDetailPage() {
                   <h2 className="text-xl font-semibold text-white mb-3">
                     Specificații
                   </h2>
-                  <div className="text-slate-200 leading-relaxed whitespace-pre-line">
-                    {product.specifications}
+                  <div className="text-slate-200 leading-relaxed prose max-w-none"
+                       dangerouslySetInnerHTML={{ __html: formatSpecifications(product.specifications) }}>
                   </div>
                 </div>
               )}
