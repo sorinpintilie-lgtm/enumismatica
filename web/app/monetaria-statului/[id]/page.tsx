@@ -11,6 +11,7 @@ import { createDirectOrderForProduct } from 'shared/orderService';
 import { createOrGetConversation } from 'shared/chatService';
 import { useToast } from '../../components/ToastProvider';
 import { logEvent } from '../../hooks/useActivityLogger';
+import MonetariaStatuluiCheckoutForm from '../../components/MonetariaStatuluiCheckoutForm';
 
 interface RawProduct {
   title: string;
@@ -92,6 +93,8 @@ export default function MintProductDetailPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [buying, setBuying] = useState(false);
   const [showBuyConfirm, setShowBuyConfirm] = useState(false);
+  const [showCheckoutForm, setShowCheckoutForm] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(false);
   const { user } = useAuth();
   const { addToCart } = useCart(user?.uid);
   const { showToast } = useToast();
@@ -129,57 +132,71 @@ export default function MintProductDetailPage() {
       showToast({
         type: 'error',
         title: 'Autentificare necesară',
-        message: 'Trebuie să te autentifici pentru a cumpăra această piesă.',
+        message: 'Trebuie să te autentifici pentru a comanda această piesă.',
       });
       return;
     }
 
-    setShowBuyConfirm(true);
+    setShowCheckoutForm(true);
   };
 
-  const handleBuy = async () => {
+  const handleSubmitOrder = async (formData: {
+    name: string;
+    surname: string;
+    address: string;
+    phone: string;
+    email: string;
+  }) => {
     if (!product || !user) return;
 
     try {
       setBuying(true);
-      const orderId = await createDirectOrderForProduct(id, user.uid, true, product);
 
-      // Admin activity log: direct shop purchase from mint product detail page
-      await logEvent(user, 'mint_product_buy', {
+      // Send order details to Monetaria Statului
+      const response = await fetch('/api/monetaria-statului/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerName: formData.name,
+          customerSurname: formData.surname,
+          customerAddress: formData.address,
+          customerPhone: formData.phone,
+          customerEmail: formData.email,
+          productTitle: product.title,
+          productPrice: product.price,
+          productId: product.product_id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send order to Monetaria Statului');
+      }
+
+      // Admin activity log: Monetaria Statului order from mint product detail page
+      await logEvent(user, 'mint_product_order', {
         productId: id,
         productName: product.title,
         price: parseFloat(product.price.replace(' Lei', '').replace(',', '')),
-        orderId,
         source: 'mint_product_detail',
       });
 
-      // Open a conversation between buyer and the Monetaria Statului pseudo-seller
-      // so the buyer is immediately taken to a chat context after purchase.
-      try {
-        const conversationId = await createOrGetConversation(
-          user.uid,
-          'monetaria-statului',
-          undefined,
-          id,
-          false,
-        );
-        router.push(`/messages?conversation=${conversationId}`);
-      } catch (convError) {
-        console.error('Failed to open conversation after mint product purchase:', convError);
-      }
+      setOrderSuccess(true);
+      setShowCheckoutForm(false);
 
       showToast({
         type: 'success',
-        title: 'Cumpărare reușită',
-        message: `Ai cumpărat această piesă. Comanda ta a fost înregistrată (ID: ${orderId}).`,
+        title: 'Comandă trimisă',
+        message: 'Monetăria Statului a fost informată cu privire la intenția dumneavoastră de achiziție.',
       });
     } catch (error) {
-      console.error('Failed to buy product:', error);
+      console.error('Failed to submit order:', error);
       const message =
-        error instanceof Error ? error.message : 'A apărut o eroare la cumpărarea piesei.';
+        error instanceof Error ? error.message : 'A apărut o eroare la trimitea comenzii.';
       showToast({
         type: 'error',
-        title: 'Eroare la cumpărare',
+        title: 'Eroare la comandă',
         message,
       });
     } finally {
@@ -444,9 +461,9 @@ export default function MintProductDetailPage() {
       {showBuyConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
           <div className="bg-navy-900 border border-gold-500/20 rounded-2xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-white mb-4">Confirmă cumpărarea</h3>
+            <h3 className="text-xl font-bold text-white mb-4">Confirmă comanda</h3>
             <p className="text-slate-300 mb-6">
-              Ești sigur că vrei să cumperi "{product.title}" pentru {product.price}?
+              Ești sigur că vrei să comanzi "{product.title}" pentru {product.price}?
             </p>
             <div className="flex gap-3">
               <button
@@ -460,7 +477,7 @@ export default function MintProductDetailPage() {
                 type="button"
                 onClick={() => {
                   setShowBuyConfirm(false);
-                  handleBuy();
+                  setShowCheckoutForm(true);
                 }}
                 disabled={buying}
                 className="flex-1 bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-4 py-2 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -468,6 +485,42 @@ export default function MintProductDetailPage() {
                 {buying ? 'Se procesează...' : 'Confirmă'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Monetaria Statului Checkout Form */}
+      {showCheckoutForm && product && (
+        <MonetariaStatuluiCheckoutForm
+          product={{
+            product_id: product.product_id,
+            title: product.title,
+            price: product.price,
+          }}
+          onSubmit={handleSubmitOrder}
+          onCancel={() => setShowCheckoutForm(false)}
+        />
+      )}
+
+      {/* Order Success Message */}
+      {orderSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <div className="bg-navy-900 border border-gold-500/20 rounded-2xl p-6 max-w-md w-full mx-4 text-center">
+            <h3 className="text-xl font-bold text-white mb-4">Comandă trimisă cu succes!</h3>
+            <p className="text-slate-300 mb-6">
+              Monetăria Statului a fost informată cu privire la intenția dumneavoastră de achiziție.
+              În cel mai scurt timp veți fi contactat prin datele furnizate în cererea de comandă (e-mail / telefon).
+            </p>
+            <p className="text-slate-300 mb-6">
+              eNumismatica.ro transmite exclusiv datele dumneavoastră către Monetăria Statului și nu este implicată direct în procesul de achiziție.
+            </p>
+            <button
+              type="button"
+              onClick={() => setOrderSuccess(false)}
+              className="bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-6 py-2 rounded-xl font-semibold transition-colors"
+            >
+              Închide
+            </button>
           </div>
         </div>
       )}
