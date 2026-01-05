@@ -461,40 +461,46 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-gradient-to-r from-gold-500 to-gold-600 rounded-2xl shadow-[0_20px_60px_rgba(231,183,60,0.3)] p-6 mb-8 border border-gold-400">
-          <h2 className="text-xl font-semibold text-navy-900 mb-4">Acțiuni Rapide</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Link
-              href="/collection"
-              className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.5)]"
-            >
-              Colecția Mea
-            </Link>
-            <Link
-              href="/messages"
-              className="relative bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.5)]"
-            >
-              Mesaje
-              {totalUnreadCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-navy-900 text-white text-xs font-bold px-2 py-1 rounded-full">
-                  {totalUnreadCount}
-                </span>
-              )}
-            </Link>
-            <Link
-              href="/products"
-              className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.5)]"
-            >
-              Magazin
-            </Link>
-            <Link
-              href="/auctions"
-              className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.5)]"
-            >
-              Licitații
-            </Link>
-          </div>
+      <div className="bg-gradient-to-r from-gold-500 to-gold-600 rounded-2xl shadow-[0_20px_60px_rgba(231,183,60,0.3)] p-6 mb-8 border border-gold-400">
+        <h2 className="text-xl font-semibold text-navy-900 mb-4">Acțiuni Rapide</h2>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <Link
+            href="/collection"
+            className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.5)]"
+          >
+            Colecția Mea
+          </Link>
+          <Link
+            href="/messages"
+            className="relative bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.5)]"
+          >
+            Mesaje
+            {totalUnreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-navy-900 text-white text-xs font-bold px-2 py-1 rounded-full">
+                {totalUnreadCount}
+              </span>
+            )}
+          </Link>
+          <Link
+            href="/products"
+            className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.5)]"
+          >
+            Magazin
+          </Link>
+          <Link
+            href="/auctions"
+            className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.5)]"
+          >
+            Licitații
+          </Link>
+          <Link
+            href="/auction-wins"
+            className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.5)]"
+          >
+            Câștigate
+          </Link>
         </div>
+      </div>
 
         {/* Transactions overview */}
         <div className="mb-8 rounded-2xl border border-gold-500/25 bg-navy-900/70 p-6 shadow-[0_18px_55px_rgba(0,0,0,0.85)]">
@@ -511,6 +517,12 @@ export default function Dashboard() {
                 className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-4 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
               >
                 Cumpărări
+              </Link>
+              <Link
+                href="/auction-wins"
+                className="inline-flex items-center justify-center rounded-full border border-[#e7b73c]/70 px-4 py-2 text-sm font-semibold text-[#e7b73c] hover:bg-[#e7b73c]/10 transition-colors"
+              >
+                Licitații câștigate
               </Link>
               <Link
                 href="/sales"
@@ -969,7 +981,7 @@ export default function Dashboard() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-white">Activitatea mea la licitații</h2>
               <Link
-                href="/auctions"
+                href="/my-auctions"
                 className="text-gold-300 hover:text-gold-200 text-sm font-semibold"
               >
                 Vezi toate

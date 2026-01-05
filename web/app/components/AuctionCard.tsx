@@ -3,7 +3,7 @@
 import { useState, useEffect, memo, useCallback } from 'react';
 import Link from 'next/link';
 import { Auction, Product } from 'shared/types';
-import { placeBid } from 'shared/auctionService';
+import { placeBid, calculateNextBidAmount } from 'shared/auctionService';
 import { useAuth } from '../context/AuthContext';
 import { useProduct } from '../hooks/useProducts';
 import { formatEUR } from '../utils/currency';
@@ -355,11 +355,11 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <input
                 type="number"
-                step="0.01"
-                min={Math.max(currentBid + 0.01, auction.reservePrice)}
+                step="1"
+                min={Math.max(calculateNextBidAmount(currentBid), auction.reservePrice)}
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
-                placeholder={`Minim: ${formatEUR(Math.max(currentBid + 0.01, auction.reservePrice))}`}
+                placeholder={`Minim: ${formatEUR(Math.max(calculateNextBidAmount(currentBid), auction.reservePrice))}`}
                 className="flex-1 px-3 py-2 rounded-md border border-[#e7b73c]/35 bg-navy-900/70 text-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent text-sm"
                 required
               />

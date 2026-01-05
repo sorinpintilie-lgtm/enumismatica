@@ -1,4 +1,4 @@
-import { validateBid, placeBid, setAutoBid, getAutoBids, endAuction } from '../../shared/auctionService';
+import { validateBid, placeBid, setAutoBid, getAutoBids, endAuction, calculateNextBidAmount } from '../../shared/auctionService';
 
 jest.mock('../../shared/firebaseConfig', () => ({
   db: {},
@@ -37,6 +37,22 @@ describe('Auction Service', () => {
     jest.clearAllMocks();
   });
 
+  describe('calculateNextBidAmount', () => {
+    it('should calculate next bid amount with 5% increment and round up', () => {
+      // 100 * 1.05 = 105, should round up to 105 (already whole number)
+      expect(calculateNextBidAmount(100)).toBe(105);
+      
+      // 100 * 1.05 = 105, should round up to 105
+      expect(calculateNextBidAmount(100, 0.05)).toBe(105);
+      
+      // 21.02 * 1.05 = 22.071, should round up to 23
+      expect(calculateNextBidAmount(21.02)).toBe(23);
+      
+      // 50 * 1.10 = 55.00000000000001 due to floating point precision, should round up to 56
+      expect(calculateNextBidAmount(50, 0.10)).toBe(56);
+    });
+  });
+
   describe('validateBid', () => {
     const mockAuction = {
       id: '1',
@@ -48,6 +64,7 @@ describe('Auction Service', () => {
     } as any;
 
     it('should validate a valid bid', () => {
+      // With current bid of 10, next bid should be at least 11 (10 * 1.05 = 10.5, rounded up to 11)
       const result = validateBid(mockAuction, 11, 'user2');
 
       expect(result.valid).toBe(true);
@@ -82,7 +99,17 @@ describe('Auction Service', () => {
       const result = validateBid(mockAuction, 10, 'user2');
 
       expect(result.valid).toBe(false);
-      expect(result.error).toBe('Bid must be at least $10.01');
+      // With 5% increment from 10, next bid should be 11 (10 * 1.05 = 10.5, rounded up to 11)
+      expect(result.error).toBe('Licitația trebuie să fie cel puțin 11 EUR (increment minim 5% din valoarea curentă)');
+    });
+
+    it('should ensure minimum bid is at least reserve price', () => {
+      const auctionWithHighReserve = { ...mockAuction, currentBid: 5, reservePrice: 20 };
+      const result = validateBid(auctionWithHighReserve, 15, 'user2');
+
+      expect(result.valid).toBe(false);
+      // 5 * 1.05 = 5.25, rounded up to 6, but reserve price is 20, so min bid should be 20
+      expect(result.error).toBe('Licitația trebuie să fie cel puțin 20 EUR (increment minim 5% din valoarea curentă)');
     });
   });
 

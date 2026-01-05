@@ -3,7 +3,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<TabParamList>;
   ProductDetails: { productId: string };
-  AuctionDetails: { auctionId: string };
+  AuctionDetails: { auctionId: string; filters?: any };
   BidHistory: { auctionId?: string; userId?: string };
   HelpArticle: { articleId: string };
   /** Istoricul comenzilor (cumpărări) pentru utilizatorul curent */
@@ -17,7 +17,7 @@ export type RootStackParamList = {
 export type TabParamList = {
   Dashboard: undefined;
   ProductCatalog: undefined;
-  AuctionList: undefined;
+  AuctionList: { filters?: any };
   Cart: undefined;
   Watchlist: undefined;
   HelpCenter: undefined;

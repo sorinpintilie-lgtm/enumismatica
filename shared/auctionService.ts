@@ -25,6 +25,17 @@ import { addCollectionItem } from './collectionService';
 import { sendOutbidEmail, sendAuctionWonEmail, sendAuctionSoldEmail } from 'shared/emailService';
 
 /**
+ * Helper function to calculate the next bid amount based on percentage
+ * and round up to the nearest whole number
+ */
+export function calculateNextBidAmount(currentBid: number, basePercentage: number = 0.05): number {
+  // Calculate the next bid amount as current bid + percentage
+  const nextBid = currentBid * (1 + basePercentage);
+  // Round up to the nearest whole number
+  return Math.ceil(nextBid);
+}
+
+/**
  * Validates if a bid is valid for an auction
  */
 export function validateBid(auction: Auction, bidAmount: number, userId: string): { valid: boolean; error?: string } {
@@ -41,12 +52,18 @@ export function validateBid(auction: Auction, bidAmount: number, userId: string)
   }
 
   const currentBid = auction.currentBid || 0;
-  // Bid increment: 5% of current bid amount, rounded up to nearest whole number
-  const bidIncrement = currentBid > 0 ? Math.ceil(currentBid * 0.05) : 0;
-  const minBid = Math.max(currentBid + bidIncrement, auction.reservePrice);
+  
+  // Calculate minimum bid based on percentage of current bid
+  // Base percentage is 5%, and we add 5% for each subsequent bid
+  // For now, we'll use a fixed 5% increment from current bid
+  const basePercentage = 0.05; // 5% base increment
+  const minBidFromCurrent = calculateNextBidAmount(currentBid, basePercentage);
+  
+  // Minimum bid must be at least the reserve price
+  const minBid = Math.max(minBidFromCurrent, auction.reservePrice);
 
   if (bidAmount < minBid) {
-    return { valid: false, error: `Licitația trebuie să fie cel puțin ${minBid.toFixed(2)} RON (5% increment)` };
+    return { valid: false, error: `Licitația trebuie să fie cel puțin ${minBid} EUR (increment minim ${basePercentage * 100}% din valoarea curentă)` };
   }
 
   return { valid: true };
@@ -282,6 +299,35 @@ export async function getUserAutoBidsForUser(
   }
 
   return results;
+}
+
+/**
+ * Gets all won auctions for a user
+ */
+export async function getWonAuctionsForUser(userId: string): Promise<Auction[]> {
+  const auctionsRef = collection(db, 'auctions');
+  const q = query(
+    auctionsRef,
+    where('status', '==', 'ended'),
+    where('winnerId', '==', userId),
+    where('didMeetMinimum', '==', true)
+  );
+  const snapshot = await getDocs(q);
+
+  const auctions: Auction[] = [];
+  for (const auctionDoc of snapshot.docs) {
+    const data = auctionDoc.data() as any;
+    auctions.push({
+      id: auctionDoc.id,
+      ...data,
+      startTime: data.startTime?.toDate() || new Date(),
+      endTime: data.endTime?.toDate() || new Date(),
+      createdAt: data.createdAt?.toDate() || new Date(),
+      updatedAt: data.updatedAt?.toDate() || new Date(),
+    } as Auction);
+  }
+
+  return auctions;
 }
 
 /**

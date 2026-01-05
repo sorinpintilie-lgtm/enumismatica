@@ -146,7 +146,6 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
             <div className="flex items-center gap-4 text-xs text-slate-400">
               {product.country && <span>📍 {product.country}</span>}
               {product.year && <span>📅 {product.year}</span>}
-              {product.metal && <span>🥇 {product.metal}</span>}
             </div>
 
             <div className="flex gap-2">

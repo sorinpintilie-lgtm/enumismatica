@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Modal, ScrollView, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuctions } from '../hooks/useAuctions';
 import { useProducts } from '../hooks/useProducts';
@@ -62,16 +62,16 @@ const CountdownTimer: React.FC<{ endTime: Date }> = ({ endTime }) => {
   );
 };
 
-const AuctionCard: React.FC<{ auction: Auction; product?: Product }> = ({ auction, product }) => {
+const AuctionCard: React.FC<{ auction: Auction; product?: Product; filters: FilterOptions }> = ({ auction, product, filters }) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
+  
   const isEnded = new Date() > auction.endTime;
   const currentBid = auction.currentBid || auction.reservePrice;
-
+  
   return (
     <TouchableOpacity
       className="bg-white rounded-lg shadow-md p-4 mb-4 mx-4"
-      onPress={() => navigation.navigate('AuctionDetails', { auctionId: auction.id })}
+      onPress={() => navigation.navigate('AuctionDetails', { auctionId: auction.id, filters })}
     >
       <View className="w-full h-32 bg-gray-200 mb-3 rounded overflow-hidden items-center justify-center">
         {product && product.images && product.images.length > 0 ? (
@@ -120,20 +120,26 @@ const AuctionCard: React.FC<{ auction: Auction; product?: Product }> = ({ auctio
 const AuctionListScreen: React.FC = () => {
   const { auctions, loading: auctionsLoading, error: auctionsError } = useAuctions('active');
   const { products, loading: productsLoading } = useProducts();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [statusFilter, setStatusFilter] = useState<'active' | 'ended' | 'all'>('active');
   const [showFilters, setShowFilters] = useState(false);
   
-  const [filters, setFilters] = useState<FilterOptions>({
-    searchTerm: '',
-    country: 'All',
-    minPrice: 0,
-    maxPrice: 10000,
-    minYear: 1800,
-    maxYear: new Date().getFullYear(),
-    metal: 'All',
-    rarity: 'All',
-    grade: 'All',
-    sortBy: 'ending-soon',
+  // Initialize filters from route params or use defaults
+  const [filters, setFilters] = useState<FilterOptions>(() => {
+    const route = useRoute();
+    const routeParams = route.params as { filters?: FilterOptions };
+    return routeParams?.filters || {
+      searchTerm: '',
+      country: 'All',
+      minPrice: 0,
+      maxPrice: 10000,
+      minYear: 1800,
+      maxYear: new Date().getFullYear(),
+      metal: 'All',
+      rarity: 'All',
+      grade: 'All',
+      sortBy: 'ending-soon',
+    };
   });
 
   // Create a map of products for quick lookup
@@ -369,6 +375,7 @@ const AuctionListScreen: React.FC = () => {
             <AuctionCard
               auction={item}
               product={productMap.get(item.productId)}
+              filters={filters}
             />
           )}
           showsVerticalScrollIndicator={false}

@@ -2,14 +2,16 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useConversation, useConversations } from '../hooks/useChat';
+import { useAuctionNotifications } from '../hooks/useAuctionNotifications';
 import { useAuth } from '../context/AuthContext';
-import { ChatMessage, Conversation } from 'shared/types';
+import { ChatMessage, Conversation, AuctionNotification } from 'shared/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import Link from 'next/link';
 import { ContactDetailsModal } from './ContactDetailsModal';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { markAuctionNotificationAsRead } from 'shared/auctionNotificationService';
 
 interface PrivateChatProps {
   conversationId: string | null;
@@ -374,6 +376,7 @@ interface ConversationListProps {
 export function ConversationList({ onSelectConversation, selectedConversationId }: ConversationListProps) {
   const { user } = useAuth();
   const { conversations, loading, totalUnreadCount, startConversation } = useConversations(user?.uid || null);
+  const { notifications: auctionNotifications, loading: auctionLoading } = useAuctionNotifications(user?.uid || null);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [adminTargetUserId, setAdminTargetUserId] = useState('');
 
@@ -474,11 +477,11 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
 
       {/* Conversations List */}
       <div className="divide-y divide-gold-500/20 max-h-[600px] overflow-y-auto">
-        {loading ? (
+        {loading || auctionLoading ? (
           <div className="flex justify-center items-center p-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#e7b73c]"></div>
           </div>
-        ) : conversations.length === 0 ? (
+        ) : conversations.length === 0 && auctionNotifications.length === 0 ? (
           <div className="p-8 text-center text-slate-400">
             <svg className="w-12 h-12 text-slate-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -487,44 +490,100 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
             <p className="text-xs mt-1">Conversațiile vor apărea aici după încheierea licitațiilor</p>
           </div>
         ) : (
-          conversations.map((conversation) => {
-            const isSelected = conversation.id === selectedConversationId;
-            const unreadCount = user?.uid ? (conversation.unreadCount[user.uid] || 0) : 0;
-            const isAdminChat = conversation.isAdminSupport;
+          <>
+            {conversations.map((conversation) => {
+              const isSelected = conversation.id === selectedConversationId;
+              const unreadCount = user?.uid ? (conversation.unreadCount[user.uid] || 0) : 0;
+              const isAdminChat = conversation.isAdminSupport;
 
-            return (
-              <button
-                key={conversation.id}
-                onClick={() => onSelectConversation(conversation.id)}
-                className={`w-full p-4 text-left hover:bg-navy-900/60 transition-colors ${
-                  isSelected ? 'bg-navy-900/80 border-l-4 border-[#e7b73c]' : ''
-                } ${isAdminChat ? 'bg-gradient-to-r from-amber-900/20 to-orange-900/20 border-r-2 border-amber-500/50' : ''}`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-100 truncate">
-                      {getOtherUserName(conversation)}
-                    </p>
-                    {conversation.lastMessage && (
-                      <p className="text-sm text-slate-400 truncate mt-1">
-                        {conversation.lastMessage}
+              return (
+                <button
+                  key={conversation.id}
+                  onClick={() => onSelectConversation(conversation.id)}
+                  className={`w-full p-4 text-left hover:bg-navy-900/60 transition-colors ${
+                    isSelected ? 'bg-navy-900/80 border-l-4 border-[#e7b73c]' : ''
+                  } ${isAdminChat ? 'bg-gradient-to-r from-amber-900/20 to-orange-900/20 border-r-2 border-amber-500/50' : ''}`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-100 truncate">
+                        {getOtherUserName(conversation)}
                       </p>
-                    )}
-                    {conversation.lastMessageAt && (
-                      <p className="text-xs text-slate-500 mt-1">
-                        {formatDistanceToNow(conversation.lastMessageAt, { addSuffix: true, locale: ro })}
-                      </p>
+                      {conversation.lastMessage && (
+                        <p className="text-sm text-slate-400 truncate mt-1">
+                          {conversation.lastMessage}
+                        </p>
+                      )}
+                      {conversation.lastMessageAt && (
+                        <p className="text-xs text-slate-500 mt-1">
+                          {formatDistanceToNow(conversation.lastMessageAt, { addSuffix: true, locale: ro })}
+                        </p>
+                      )}
+                    </div>
+                    {unreadCount > 0 && (
+                      <span className="ml-2 bg-[#e7b73c] text-[#000940] text-xs font-bold px-2 py-1 rounded-full">
+                        {unreadCount}
+                      </span>
                     )}
                   </div>
-                  {unreadCount > 0 && (
-                    <span className="ml-2 bg-[#e7b73c] text-[#000940] text-xs font-bold px-2 py-1 rounded-full">
-                      {unreadCount}
-                    </span>
-                  )}
-                </div>
-              </button>
-            );
-          })
+                </button>
+              );
+            })}
+
+            {/* Auction Notifications */}
+            {auctionNotifications.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gold-500/20">
+                <h4 className="px-4 py-2 text-sm font-semibold text-gold-200 bg-navy-800/50">
+                  Notificări Licitații
+                </h4>
+                {auctionNotifications.map((notification) => {
+                  const handleClick = async (e: React.MouseEvent) => {
+                    if (user && !notification.read) {
+                      try {
+                        await markAuctionNotificationAsRead(user.uid, notification.id);
+                      } catch (error) {
+                        console.error('Failed to mark auction notification as read:', error);
+                      }
+                    }
+                  };
+
+                  return (
+                    <Link
+                      key={notification.id}
+                      href={notification.auctionId ? `/auctions/${notification.auctionId}` : '#'}
+                      className={`w-full p-4 text-left hover:bg-navy-900/60 transition-colors block ${
+                        !notification.read ? 'bg-red-900/20 border-l-4 border-red-500' : ''
+                      }`}
+                      onClick={handleClick}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-slate-100 truncate">
+                            {notification.type === 'outbid' ? 'Depășit la licitație' :
+                             notification.type === 'auction_won' ? 'Licitație câștigată' :
+                             'Licitație încheiată'}
+                          </p>
+                          <p className="text-sm text-slate-400 truncate mt-1">
+                            {notification.message}
+                          </p>
+                          {notification.createdAt && (
+                            <p className="text-xs text-slate-500 mt-1">
+                              {formatDistanceToNow(notification.createdAt, { addSuffix: true, locale: ro })}
+                            </p>
+                          )}
+                        </div>
+                        {!notification.read && (
+                          <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            Nou
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

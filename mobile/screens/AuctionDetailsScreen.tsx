@@ -65,7 +65,7 @@ const AuctionDetailsScreen: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'AuctionDetails'>>();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { user } = useAuth();
-  const { auctionId } = route.params;
+  const { auctionId, filters } = route.params;
   const { auction, loading: auctionLoading, error: auctionError } = useAuction(auctionId);
   const { bids, loading: bidsLoading } = useBids(auctionId);
 
@@ -146,7 +146,10 @@ const AuctionDetailsScreen: React.FC = () => {
         </Text>
         <TouchableOpacity
           className="bg-blue-600 py-2 px-4 rounded-md"
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.navigate('MainTabs', {
+            screen: 'AuctionList',
+            params: { filters }
+          })}
         >
           <Text className="text-white font-semibold">Go Back</Text>
         </TouchableOpacity>
@@ -161,7 +164,10 @@ const AuctionDetailsScreen: React.FC = () => {
         <View className="flex-row justify-between items-center mb-4">
           <TouchableOpacity
             className="bg-gray-200 py-2 px-4 rounded-md"
-            onPress={() => navigation.goBack()}
+            onPress={() => navigation.navigate('MainTabs', {
+              screen: 'AuctionList',
+              params: { filters }
+            })}
           >
             <Text className="text-gray-700 font-semibold">← Back</Text>
           </TouchableOpacity>
