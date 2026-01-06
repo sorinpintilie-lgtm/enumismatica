@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { parseCnp, validCnp } from '../../lib/validatorsRo/cnp';
 
@@ -10,6 +10,9 @@ interface PronumismaticaForm {
   lastName: string;
   firstName: string;
   cnp: string;
+  dateOfBirth: string;
+  birthCounty: string;
+  sex: 'M' | 'F' | '';
   country: string;
   county: string;
   city: string;
@@ -24,6 +27,9 @@ const initialForm: PronumismaticaForm = {
   lastName: '',
   firstName: '',
   cnp: '',
+  dateOfBirth: '',
+  birthCounty: '',
+  sex: '',
   country: '',
   county: '',
   city: '',
@@ -52,6 +58,31 @@ export default function PronumismaticaPage() {
   };
 
   const cnpStatus = form.cnp.trim().length > 0 ? parseCnp(form.cnp) : null;
+
+  // Auto-fill derived fields when the CNP becomes valid.
+  // Keep this UI-only (still included in FormData, but API ignores unknown fields).
+  useEffect(() => {
+    const cnp = form.cnp.trim();
+    if (cnp.length !== 13) {
+      setForm((prev) => ({ ...prev, dateOfBirth: '', birthCounty: '', sex: '' }));
+      return;
+    }
+
+    const parsed = parseCnp(cnp);
+    if (!parsed.valid) {
+      setForm((prev) => ({ ...prev, dateOfBirth: '', birthCounty: '', sex: '' }));
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      dateOfBirth: parsed.parsed.date_of_birth,
+      birthCounty: parsed.parsed.county_of_birth,
+      sex: parsed.parsed.sex === 'm' ? 'M' : 'F',
+      // Convenience: if country is empty, default to Romania.
+      country: prev.country.trim() ? prev.country : 'România',
+    }));
+  }, [form.cnp]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
@@ -339,6 +370,45 @@ export default function PronumismaticaPage() {
                       CNP valid • Născut(ă): {cnpStatus.parsed.date_of_birth} • Județ: {cnpStatus.parsed.county_of_birth}
                     </p>
                   )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                      Data nașterii (din CNP)
+                    </label>
+                    <input
+                      type="text"
+                      name="dateOfBirth"
+                      value={form.dateOfBirth}
+                      readOnly
+                      className="w-full rounded-xl border border-slate-600 bg-slate-100/90 px-3 py-2 text-sm text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                      Județ naștere (din CNP)
+                    </label>
+                    <input
+                      type="text"
+                      name="birthCounty"
+                      value={form.birthCounty}
+                      readOnly
+                      className="w-full rounded-xl border border-slate-600 bg-slate-100/90 px-3 py-2 text-sm text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-200 mb-1 text-xs font-semibold">
+                      Sex (din CNP)
+                    </label>
+                    <input
+                      type="text"
+                      name="sex"
+                      value={form.sex}
+                      readOnly
+                      className="w-full rounded-xl border border-slate-600 bg-slate-100/90 px-3 py-2 text-sm text-slate-900"
+                    />
+                  </div>
                 </div>
               </div>
             )}
