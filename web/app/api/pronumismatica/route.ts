@@ -1,48 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 
-type TemplatesFile = Record<string, { subject: string; html: string; text?: string }>;
+const PRONUMISMATICA_TO_EMAIL = process.env.PRONUMISMATICA_TO_EMAIL || 'sorin.pintilie@sky.ro';
+const APP_NAME = 'Enumismatica.ro';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'https://enumismatica.ro';
 
-let templatesCache: { loadedAt: number; data: TemplatesFile } | null = null;
+// Helper function to call the internal email API.
+// IMPORTANT: do not call localhost in production. We derive the origin from the incoming request URL.
+async function sendInternalEmail(
+  emailEndpoint: string,
+  templateKey: string,
+  vars: Record<string, any>,
+) {
+  console.log('Calling internal email API:', { emailEndpoint, templateKey });
 
-async function loadTemplates(): Promise<TemplatesFile> {
-  const now = Date.now();
-  if (templatesCache && now - templatesCache.loadedAt < 60_000) {
-    console.log('Using cached templates');
-    return templatesCache.data;
-  }
-
-  const filePath = path.join(process.cwd(), 'public', 'email.json');
-  console.log('Loading templates from:', filePath);
   try {
-    const raw = await readFile(filePath, 'utf8');
-    const data = JSON.parse(raw) as TemplatesFile;
-    console.log('Templates loaded successfully. Available templates:', Object.keys(data));
-    templatesCache = { loadedAt: now, data };
-    return data;
-  } catch (error) {
-    console.error('Failed to load templates:', error);
-    throw new Error('Failed to load email templates');
-  }
-}
-
-// Helper function to call the internal email API
-async function sendInternalEmail(templateKey: string, vars: Record<string, any>) {
-  console.log('Calling internal email API with template:', templateKey);
-  
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/email/send`, {
+    const response = await fetch(emailEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        to: 'sorin.pintilie@sky.ro',
+        to: PRONUMISMATICA_TO_EMAIL,
         templateKey,
         vars: {
-          app_name: 'Enumismatica.ro',
-          site_url: 'https://enumismatica.ro',
+          app_name: APP_NAME,
+          site_url: SITE_URL,
           ...vars,
         },
       }),
@@ -51,18 +33,24 @@ async function sendInternalEmail(templateKey: string, vars: Record<string, any>)
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('Internal email API error:', response.status, errorData);
-      throw new Error(`Email API failed: ${response.status} - ${errorData.error || 'Unknown error'}`);
+      throw new Error(
+        `Email API failed: ${response.status} - ${
+          (errorData as any)?.error || (errorData as any)?.details || 'Unknown error'
+        }`,
+      );
     }
 
     console.log('Internal email API call successful');
     return await response.json();
   } catch (error) {
     console.error('Failed to call internal email API:', error);
-    throw new Error(`Failed to send email via internal API: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to send email via internal API: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
   }
 }
 
-async function sendPronumismaticaFormEmail(data: any) {
+async function sendPronumismaticaFormEmail(emailEndpoint: string, data: any) {
   console.log('sendPronumismaticaFormEmail called with data:', data);
 
   // Use the internal email API instead of direct SendGrid
@@ -80,17 +68,18 @@ async function sendPronumismaticaFormEmail(data: any) {
     email: data.email,
   };
 
-  // For testing purposes, send to sorin.pintilie@sky.ro instead of marketing@monetariastatului.ro
-  // This can be changed back to production email when ready
-  const targetEmail = 'sorin.pintilie@sky.ro'; // Test email address
-  
-  // For testing purposes, override the default recipient in vars
-  const emailVars = { ...vars, email: targetEmail };
-  await sendInternalEmail('pronumismatica_form', emailVars);
-  console.log('Email sent successfully via internal API to:', targetEmail);
+  await sendInternalEmail(emailEndpoint, 'pronumismatica_form', vars);
+  console.log('Email sent successfully via internal API to:', PRONUMISMATICA_TO_EMAIL);
 }
 
-async function sendPronumismaticaFormEmailWithIdImages(data: any, images: any) {
+async function sendPronumismaticaFormEmailWithIdImages(
+  emailEndpoint: string,
+  data: any,
+  imagesMeta: {
+    front: { filename: string; contentType: string; size: number };
+    back: { filename: string; contentType: string; size: number };
+  },
+) {
   console.log('sendPronumismaticaFormEmailWithIdImages called with data:', data);
 
   // For forms with ID images, we need to handle attachments differently
@@ -110,11 +99,15 @@ async function sendPronumismaticaFormEmailWithIdImages(data: any, images: any) {
     phone: data.phone,
     email: data.email,
     // Add note about attachments
-    attachments_note: 'Acest formular include acte de identitate atașate care vor fi procesate separat.',
+    attachments_note: `Acte încărcate: ${imagesMeta.front.filename} (${Math.round(
+      imagesMeta.front.size / 1024,
+    )} KB, ${imagesMeta.front.contentType}) și ${imagesMeta.back.filename} (${Math.round(
+      imagesMeta.back.size / 1024,
+    )} KB, ${imagesMeta.back.contentType}).`,
   };
 
   // Use the template for forms with images
-  await sendInternalEmail('pronumismatica_form_with_images', vars);
+  await sendInternalEmail(emailEndpoint, 'pronumismatica_form_with_images', vars);
   console.log('Email sent successfully via internal API');
 
   // TODO: In a production environment, you would need to:
@@ -122,12 +115,16 @@ async function sendPronumismaticaFormEmailWithIdImages(data: any, images: any) {
   // 2. Include download links in the email or process them separately
   // 3. Notify the recipient about the attachments through another channel
   
-  console.log('Note: ID image attachments need to be handled separately in production');
+  console.log('Note: ID images were not attached to email (metadata only).');
 }
 
 export async function POST(req: NextRequest) {
   console.log('PRONUMISMATICA API: Received request');
   try {
+    // Build a same-origin absolute URL for the internal email route.
+    // This avoids relying on NEXT_PUBLIC_SITE_URL (which may be missing) and avoids localhost in production.
+    const emailEndpoint = new URL('/api/email/send', req.url).toString();
+
     const contentType = req.headers.get('content-type') || '';
     console.log('Content-Type:', contentType);
 
@@ -175,16 +172,56 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (!(idFront instanceof File) || !(idBack instanceof File)) {
-        console.error('ID files are not valid File objects');
+      // Check if ID files are provided and valid
+      if (idFront && !(idFront instanceof File)) {
+        console.error('ID front file is not a valid File object');
+        return NextResponse.json(
+          { error: 'Fișierul față al actului de identitate nu este valid.' },
+          { status: 400 },
+        );
+      }
+
+      if (idBack && !(idBack instanceof File)) {
+        console.error('ID back file is not a valid File object');
+        return NextResponse.json(
+          { error: 'Fișierul verso al actului de identitate nu este valid.' },
+          { status: 400 },
+        );
+      }
+
+      // If no ID files are provided, proceed without images
+      if (!idFront && !idBack) {
+        console.log('No ID files provided, proceeding without images');
+        await sendPronumismaticaFormEmail(emailEndpoint, {
+          lastName,
+          firstName,
+          cnp,
+          country,
+          county,
+          city,
+          address,
+          idType,
+          idSeries,
+          phone,
+          email,
+        });
+        return NextResponse.json({ success: true });
+      }
+      // If only one file is provided, return an error
+      if ((idFront && !idBack) || (!idFront && idBack)) {
+        console.error('Only one ID file provided');
         return NextResponse.json(
           { error: 'Te rugăm să încarci ambele imagini (față și verso).' },
           { status: 400 },
         );
       }
 
-      console.log('ID file types:', idFront.type, idBack.type);
-      if (!idFront.type.startsWith('image/') || !idBack.type.startsWith('image/')) {
+      // At this point both files must be present and validated.
+      const idFrontFile = idFront as File;
+      const idBackFile = idBack as File;
+
+      console.log('ID file types:', idFrontFile.type, idBackFile.type);
+      if (!idFrontFile.type.startsWith('image/') || !idBackFile.type.startsWith('image/')) {
         console.error('ID files are not images');
         return NextResponse.json(
           { error: 'Fișierele încărcate trebuie să fie imagini.' },
@@ -192,10 +229,10 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      console.log('ID file sizes:', idFront.size, idBack.size);
+      console.log('ID file sizes:', idFrontFile.size, idBackFile.size);
       // 15MB max per image (align with storage rules logic)
       const maxSize = 15 * 1024 * 1024;
-      if (idFront.size > maxSize || idBack.size > maxSize) {
+      if (idFrontFile.size > maxSize || idBackFile.size > maxSize) {
         console.error('ID files are too large');
         return NextResponse.json(
           { error: 'Imaginile sunt prea mari (maxim 15MB fiecare).' },
@@ -203,13 +240,9 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      console.log('Converting files to buffers');
-      const frontBuf = Buffer.from(await idFront.arrayBuffer());
-      const backBuf = Buffer.from(await idBack.arrayBuffer());
-      console.log('Buffers created successfully');
-
       console.log('Sending email with ID images');
       await sendPronumismaticaFormEmailWithIdImages(
+        emailEndpoint,
         {
           lastName,
           firstName,
@@ -225,14 +258,14 @@ export async function POST(req: NextRequest) {
         },
         {
           front: {
-            filename: idFront.name || 'id-front.jpg',
-            contentType: idFront.type || 'image/jpeg',
-            data: frontBuf,
+            filename: idFrontFile.name || 'id-front.jpg',
+            contentType: idFrontFile.type || 'image/jpeg',
+            size: idFrontFile.size,
           },
           back: {
-            filename: idBack.name || 'id-back.jpg',
-            contentType: idBack.type || 'image/jpeg',
-            data: backBuf,
+            filename: idBackFile.name || 'id-back.jpg',
+            contentType: idBackFile.type || 'image/jpeg',
+            size: idBackFile.size,
           },
         },
       );
@@ -276,7 +309,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await sendPronumismaticaFormEmail({
+    await sendPronumismaticaFormEmail(emailEndpoint, {
       lastName,
       firstName,
       cnp,
