@@ -10,9 +10,6 @@ interface PronumismaticaForm {
   lastName: string;
   firstName: string;
   cnp: string;
-  dateOfBirth: string;
-  birthCounty: string;
-  sex: 'M' | 'F' | '';
   country: string;
   county: string;
   city: string;
@@ -27,9 +24,6 @@ const initialForm: PronumismaticaForm = {
   lastName: '',
   firstName: '',
   cnp: '',
-  dateOfBirth: '',
-  birthCounty: '',
-  sex: '',
   country: '',
   county: '',
   city: '',
@@ -59,29 +53,33 @@ export default function PronumismaticaPage() {
 
   const cnpStatus = form.cnp.trim().length > 0 ? parseCnp(form.cnp) : null;
 
-  // Auto-fill derived fields when the CNP becomes valid.
-  // Keep this UI-only (still included in FormData, but API ignores unknown fields).
+  // Auto-fill relevant form fields when the CNP becomes valid.
+  // (We intentionally do NOT add extra DOB/sex fields to the UI.)
   useEffect(() => {
     const cnp = form.cnp.trim();
-    if (cnp.length !== 13) {
-      setForm((prev) => ({ ...prev, dateOfBirth: '', birthCounty: '', sex: '' }));
-      return;
-    }
-
+    if (cnp.length !== 13) return;
     const parsed = parseCnp(cnp);
-    if (!parsed.valid) {
-      setForm((prev) => ({ ...prev, dateOfBirth: '', birthCounty: '', sex: '' }));
-      return;
-    }
+    if (!parsed.valid) return;
 
-    setForm((prev) => ({
-      ...prev,
-      dateOfBirth: parsed.parsed.date_of_birth,
-      birthCounty: parsed.parsed.county_of_birth,
-      sex: parsed.parsed.sex === 'm' ? 'M' : 'F',
+    setForm((prev) => {
+      let changed = false;
+      const next = { ...prev };
+
       // Convenience: if country is empty, default to Romania.
-      country: prev.country.trim() ? prev.country : 'România',
-    }));
+      if (!prev.country.trim()) {
+        next.country = 'România';
+        changed = true;
+      }
+
+      // Convenience: if address county is empty, use the county decoded from the CNP.
+      // Skip if it's "Străinătate".
+      if (!prev.county.trim() && parsed.parsed.county_of_birth !== 'Străinătate') {
+        next.county = parsed.parsed.county_of_birth;
+        changed = true;
+      }
+
+      return changed ? next : prev;
+    });
   }, [form.cnp]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -372,44 +370,6 @@ export default function PronumismaticaPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-slate-200 mb-1 text-xs font-semibold">
-                      Data nașterii (din CNP)
-                    </label>
-                    <input
-                      type="text"
-                      name="dateOfBirth"
-                      value={form.dateOfBirth}
-                      readOnly
-                      className="w-full rounded-xl border border-slate-600 bg-slate-100/90 px-3 py-2 text-sm text-slate-900"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-200 mb-1 text-xs font-semibold">
-                      Județ naștere (din CNP)
-                    </label>
-                    <input
-                      type="text"
-                      name="birthCounty"
-                      value={form.birthCounty}
-                      readOnly
-                      className="w-full rounded-xl border border-slate-600 bg-slate-100/90 px-3 py-2 text-sm text-slate-900"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-200 mb-1 text-xs font-semibold">
-                      Sex (din CNP)
-                    </label>
-                    <input
-                      type="text"
-                      name="sex"
-                      value={form.sex}
-                      readOnly
-                      className="w-full rounded-xl border border-slate-600 bg-slate-100/90 px-3 py-2 text-sm text-slate-900"
-                    />
-                  </div>
-                </div>
               </div>
             )}
 
