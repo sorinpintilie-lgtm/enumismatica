@@ -3,6 +3,28 @@ import { storage } from './firebaseConfig';
 import { convertToWebP } from './utils/imageUtils';
 
 const MAX_UPLOAD_IMAGE_KB = 750;
+const MAX_CONCURRENT_IMAGE_UPLOADS = 2;
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let nextIndex = 0;
+
+  const workerCount = Math.max(1, Math.min(concurrency, items.length));
+  const workers = Array.from({ length: workerCount }, async () => {
+    while (true) {
+      const current = nextIndex++;
+      if (current >= items.length) return;
+      results[current] = await mapper(items[current], current);
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
+}
 
 async function optimizeImageForUpload(file: File): Promise<File> {
 	// Use server-side Tinify (via Next.js API route) when running in a browser.
@@ -104,14 +126,24 @@ export async function uploadVideo(file: File, path: string): Promise<string> {
  * @returns Array of download URLs
  */
 export async function uploadMultipleImages(files: File[], basePath: string): Promise<string[]> {
-  const uploadPromises = files.map((file, index) => {
-    const timestamp = Date.now();
-    const filename = `${timestamp}_${index}_${file.name}`;
-    const path = `${basePath}/${filename}`;
-    return uploadImage(file, path);
-  });
+	console.log('[uploadMultipleImages] Starting batch upload', {
+		count: files.length,
+		basePath,
+		concurrency: MAX_CONCURRENT_IMAGE_UPLOADS,
+	});
 
-  return Promise.all(uploadPromises);
+	return mapWithConcurrency(files, MAX_CONCURRENT_IMAGE_UPLOADS, async (file, index) => {
+		const timestamp = Date.now();
+		const filename = `${timestamp}_${index}_${file.name}`;
+		const path = `${basePath}/${filename}`;
+		console.log('[uploadMultipleImages] Uploading', {
+			index,
+			originalName: file.name,
+			originalSize: file.size,
+			path,
+		});
+		return uploadImage(file, path);
+	});
 }
 
 /**
