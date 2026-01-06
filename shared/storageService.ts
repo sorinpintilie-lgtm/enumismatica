@@ -2,6 +2,46 @@ import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from 'firebas
 import { storage } from './firebaseConfig';
 import { convertToWebP } from './utils/imageUtils';
 
+const MAX_UPLOAD_IMAGE_KB = 750;
+
+async function optimizeImageForUpload(file: File): Promise<File> {
+	// Use server-side Tinify (via Next.js API route) when running in a browser.
+	// This keeps the Tinify API key on the server (Netlify env: TINIFY_API_KEY).
+	const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+	if (isBrowser) {
+		try {
+			const formData = new FormData();
+			formData.append('file', file);
+
+			const response = await fetch('/api/tinify', {
+				method: 'POST',
+				body: formData,
+			});
+
+			if (response.ok) {
+				const blob = await response.blob();
+				const tinified = new File(
+					[blob],
+					file.name.replace(/\.[^/.]+$/, '.webp'),
+					{ type: 'image/webp' }
+				);
+
+				// Hard guarantee: if Tinify output is still too large, do an extra browser WebP pass.
+				if (tinified.size <= MAX_UPLOAD_IMAGE_KB * 1024) {
+					return tinified;
+				}
+
+				return await convertToWebP(tinified, MAX_UPLOAD_IMAGE_KB);
+			}
+		} catch (error) {
+			console.warn('[uploadImage] Tinify optimization failed, falling back to browser WebP conversion', error);
+		}
+	}
+
+	// Fallback: browser-only WebP conversion (or original file if conversion is unsupported).
+	return await convertToWebP(file, MAX_UPLOAD_IMAGE_KB);
+}
+
 /**
  * Upload an image to Firebase Storage
  * @param file - The image file to upload
@@ -17,8 +57,8 @@ export async function uploadImage(file: File, path: string): Promise<string> {
 		originalType: file.type,
 	});
 
-	// Convert to WebP format with size optimization (max 700KB)
-	const webpFile = await convertToWebP(file, 700);
+	// Optimize for upload (hard target: <= 750KB)
+	const webpFile = await optimizeImageForUpload(file);
 
 	// Update path to use .webp extension
 	const webpPath = path.replace(/\.[^/.]+$/, '.webp');

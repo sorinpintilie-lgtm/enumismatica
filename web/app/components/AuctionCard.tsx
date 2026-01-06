@@ -143,35 +143,44 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
         }`}
       >
         {/* Image */}
-        <Link href={`/auctions/${auction.id}`} className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
-          {product && product.images && product.images.length > 0 ? (
-            <img
-              src={`${product.images[0]}?width=200`}
-              alt={product.name || 'Piesă Licitație'}
-              className="w-full h-full object-contain"
-            />
-          ) : (
-            <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-              <span className="text-slate-400 text-xs">Se încarcă...</span>
+        <div className="relative w-32 h-24 flex-shrink-0">
+          <Link href={`/auctions/${auction.id}`} className="block w-full h-full bg-white rounded-lg overflow-hidden">
+            {product && product.images && product.images.length > 0 ? (
+              <img
+                src={`${product.images[0]}?width=200`}
+                alt={product.name || 'Piesă Licitație'}
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                <span className="text-slate-400 text-xs">Se încarcă...</span>
+              </div>
+            )}
+            {product && product.images && product.images.length > 1 && (
+              <span className="absolute bottom-1 left-1 z-10 rounded-full bg-navy-950/80 px-2 py-0.5 text-[10px] font-semibold text-slate-100 border border-gold-500/30">
+                Alte poze
+              </span>
+            )}
+            <span
+              className={`absolute top-1 left-1 z-10 px-1.5 py-0.5 rounded-full text-[9px] font-semibold tracking-wide ${
+                auction.status === 'active'
+                  ? 'bg-[#e7b73c]/90 text-[#000940]'
+                  : auction.status === 'ended'
+                  ? 'bg-red-900/90 text-red-200'
+                  : 'bg-slate-800/90 text-slate-100'
+              }`}
+            >
+              {auction.status.toUpperCase()}
+            </span>
+          </Link>
+
+          {/* Watchlist overlay (mobile-friendly for list layout) */}
+          {showWatchlistButton && (
+            <div className="absolute top-1 right-1 z-20">
+              <WatchlistButton itemType="auction" itemId={auction.id} size="small" />
             </div>
           )}
-          {product && product.images && product.images.length > 1 && (
-            <span className="absolute bottom-1 left-1 z-10 rounded-full bg-navy-950/80 px-2 py-0.5 text-[10px] font-semibold text-slate-100 border border-gold-500/30">
-              Alte poze
-            </span>
-          )}
-          <span
-            className={`absolute top-1 left-1 z-10 px-1.5 py-0.5 rounded-full text-[9px] font-semibold tracking-wide ${
-              auction.status === 'active'
-                ? 'bg-[#e7b73c]/90 text-[#000940]'
-                : auction.status === 'ended'
-                ? 'bg-red-900/90 text-red-200'
-                : 'bg-slate-800/90 text-slate-100'
-            }`}
-          >
-            {auction.status.toUpperCase()}
-          </span>
-        </Link>
+        </div>
         
         {/* Content */}
         <div className="flex-1 min-w-0 relative">
@@ -209,13 +218,6 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
                   {formatEUR(currentBid)}
                 </p>
               </div>
-              {showWatchlistButton && (
-                <WatchlistButton
-                  itemType="auction"
-                  itemId={auction.id}
-                  size="small"
-                />
-              )}
             </div>
           </div>
           

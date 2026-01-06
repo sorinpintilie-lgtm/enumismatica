@@ -71,30 +71,39 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
     return (
       <div className="relative group flex gap-4 p-4 rounded-xl border border-[#e7b73c]/40 bg-gradient-to-r from-navy-600 to-navy-800 shadow-[0_8px_25px_rgba(231,183,60,0.2)] hover:border-[#e7b73c] hover:shadow-[0_12px_35px_rgba(231,183,60,0.35)] transition-all duration-300 w-full">
         {/* Image */}
-        <Link href={`/products/${product.id}`} className="relative w-32 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden">
-          {product.images && product.images.length > 0 ? (
-              <LazyImage
-                src={buildImageUrlWithWidth(product.images[0], 200)}
-                alt={product.name || 'Piesă'}
-                className="h-full w-full object-contain transition duration-300 group-hover:scale-105"
-                placeholder="Loading..."
-              />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
-              Fără imagine
+        <div className="relative w-32 h-24 flex-shrink-0">
+          <Link href={`/products/${product.id}`} className="block w-full h-full bg-white rounded-lg overflow-hidden">
+            {product.images && product.images.length > 0 ? (
+                <LazyImage
+                  src={buildImageUrlWithWidth(product.images[0], 200)}
+                  alt={product.name || 'Piesă'}
+                  className="h-full w-full object-contain transition duration-300 group-hover:scale-105"
+                  placeholder="Loading..."
+                />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
+                Fără imagine
+              </div>
+            )}
+            {product.images && product.images.length > 1 && (
+              <span className="absolute bottom-1 left-1 z-10 rounded-full bg-navy-950/80 px-2 py-0.5 text-[10px] font-semibold text-slate-100 border border-gold-500/30">
+                Alte poze
+              </span>
+            )}
+            {estePromovat && (
+              <span className="absolute top-1 left-1 z-10 rounded-full bg-emerald-500 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-navy-900 shadow-md">
+                Promovat
+              </span>
+            )}
+          </Link>
+
+          {/* Watchlist overlay (prevents overlapping the title on narrow screens) */}
+          {showWatchlistButton !== false && (
+            <div className="absolute top-1 right-1 z-20">
+              <WatchlistButton itemType="product" itemId={product.id} size="small" />
             </div>
           )}
-          {product.images && product.images.length > 1 && (
-            <span className="absolute bottom-1 left-1 z-10 rounded-full bg-navy-950/80 px-2 py-0.5 text-[10px] font-semibold text-slate-100 border border-gold-500/30">
-              Alte poze
-            </span>
-          )}
-          {estePromovat && (
-            <span className="absolute top-1 left-1 z-10 rounded-full bg-emerald-500 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-navy-900 shadow-md">
-              Promovat
-            </span>
-          )}
-        </Link>
+        </div>
         
         {/* Content */}
         <div className="flex-1 min-w-0 relative">
@@ -128,13 +137,6 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
               <span className="text-xl font-bold text-[#e7b73c]">
                 {formatEUR(product.price)}
               </span>
-              {showWatchlistButton !== false && (
-                <WatchlistButton
-                  itemType="product"
-                  itemId={product.id}
-                  size="small"
-                />
-              )}
             </div>
           </div>
           

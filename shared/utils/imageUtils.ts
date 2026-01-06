@@ -3,11 +3,18 @@
 /**
  * Convert image to WebP format with size optimization
  * @param file - Image file to convert
- * @param maxSizeKB - Maximum file size in KB (default: 700KB)
+ * @param maxSizeKB - Maximum file size in KB (default: 750KB)
  * @returns Promise with optimized WebP file
  */
-export async function convertToWebP(file: File, maxSizeKB: number = 700): Promise<File> {
+export async function convertToWebP(file: File, maxSizeKB: number = 750): Promise<File> {
   return new Promise((resolve, reject) => {
+    // This helper is intended for browser usage. If called in a non-browser runtime
+    // (SSR / Node / React Native), just return the original file.
+    if (typeof window === 'undefined') {
+      resolve(file);
+      return;
+    }
+
     // Check if file is already WebP and within size limits
     if (file.type === 'image/webp' && file.size <= maxSizeKB * 1024) {
       console.log(`[ImageOptimization] File already optimized: ${file.name} (${Math.round(file.size/1024)}KB)`);
@@ -41,49 +48,82 @@ export async function convertToWebP(file: File, maxSizeKB: number = 700): Promis
               targetWidth = Math.round(img.width * sizeRatio);
               targetHeight = Math.round(img.height * sizeRatio);
               
-              // Ensure minimum dimensions
-              targetWidth = Math.max(targetWidth, 800);
-              targetHeight = Math.max(targetHeight, 600);
+              // Ensure minimum dimensions (avoid generating unusably tiny images)
+              targetWidth = Math.max(targetWidth, 320);
+              targetHeight = Math.max(targetHeight, 240);
               
               console.log(`[ImageOptimization] Resizing ${file.name}: ${img.width}x${img.height} -> ${targetWidth}x${targetHeight}`);
             }
  
             // Create canvas and convert to WebP
             const canvas = document.createElement('canvas');
-            canvas.width = targetWidth;
-            canvas.height = targetHeight;
- 
             const ctx = canvas.getContext('2d');
             if (!ctx) {
               throw new Error('Could not get canvas context');
             }
- 
-            ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
- 
-            // Start with aggressive compression and adjust if needed
-            let quality = 0.7; // Start with 70% quality
+
+            const maxBytes = maxSizeKB * 1024;
             let webpBlob: Blob | null = null;
-            let attempts = 0;
-            const maxAttempts = 3;
- 
-            // Try different quality levels to achieve target file size
-            while (attempts < maxAttempts) {
-              webpBlob = await new Promise<Blob | null>((resolveBlob) => {
-                canvas.toBlob(resolveBlob, 'image/webp', quality);
-              });
- 
-              if (webpBlob && webpBlob.size <= maxSizeKB * 1024) {
-                console.log(`[ImageOptimization] Success: ${file.name} -> ${Math.round(webpBlob.size/1024)}KB (quality: ${quality})`);
-                break;
-              } else if (webpBlob) {
-                console.log(`[ImageOptimization] Attempt ${attempts + 1}: ${Math.round(webpBlob.size/1024)}KB too large, reducing quality`);
-                quality -= 0.1; // Reduce quality by 10% for next attempt
+
+            // Two-stage strategy:
+            // 1) try lowering WebP quality a few times
+            // 2) if still too large, scale down dimensions and retry
+            let resizePass = 0;
+            const maxResizePasses = 4;
+
+            while (resizePass < maxResizePasses) {
+              canvas.width = targetWidth;
+              canvas.height = targetHeight;
+              ctx.clearRect(0, 0, targetWidth, targetHeight);
+              ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+              let quality = 0.75;
+              let attempts = 0;
+              const maxAttempts = 5;
+
+              while (attempts < maxAttempts) {
+                webpBlob = await new Promise<Blob | null>((resolveBlob) => {
+                  canvas.toBlob(resolveBlob, 'image/webp', quality);
+                });
+
+                if (!webpBlob) {
+                  throw new Error('WebP conversion failed');
+                }
+
+                if (webpBlob.size <= maxBytes) {
+                  console.log(
+                    `[ImageOptimization] Success: ${file.name} -> ${Math.round(webpBlob.size / 1024)}KB (quality: ${quality}, size: ${targetWidth}x${targetHeight})`
+                  );
+                  break;
+                }
+
+                quality -= 0.08;
                 attempts++;
-              } else {
+              }
+
+              if (webpBlob && webpBlob.size <= maxBytes) {
+                break;
+              }
+
+              if (!webpBlob) {
                 throw new Error('WebP conversion failed');
               }
+
+              // Still too large: scale down and try again.
+              const scale = Math.sqrt(maxBytes / webpBlob.size);
+              const nextWidth = Math.max(320, Math.floor(targetWidth * scale));
+              const nextHeight = Math.max(240, Math.floor(targetHeight * scale));
+
+              // If we can no longer shrink meaningfully, stop and return best-effort.
+              if (nextWidth >= targetWidth && nextHeight >= targetHeight) {
+                break;
+              }
+
+              targetWidth = nextWidth;
+              targetHeight = nextHeight;
+              resizePass++;
             }
- 
+
             if (!webpBlob) {
               throw new Error('WebP conversion failed after multiple attempts');
             }
