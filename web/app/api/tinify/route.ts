@@ -4,6 +4,12 @@ export const runtime = 'nodejs';
 
 const MAX_OUTPUT_BYTES = 750 * 1024;
 
+// Best-effort per-instance throttling.
+// In serverless environments instances are ephemeral, but they can be reused.
+// This prevents a single warm instance from spawning too many concurrent Tinify calls.
+let inFlight = 0;
+const MAX_IN_FLIGHT = 4;
+
 function getTinifyKey(): string {
   const key = process.env.TINIFY_API_KEY;
   if (!key) {
@@ -22,6 +28,17 @@ function toBufferAsync(source: any): Promise<Buffer> {
 }
 
 export async function POST(request: Request) {
+  if (inFlight >= MAX_IN_FLIGHT) {
+    return new Response(JSON.stringify({ error: 'Tinify is busy, retry later' }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': '2',
+      },
+    });
+  }
+
+  inFlight++;
   try {
     tinify.key = getTinifyKey();
 
@@ -69,6 +86,8 @@ export async function POST(request: Request) {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
+  } finally {
+    inFlight = Math.max(0, inFlight - 1);
   }
 }
 
