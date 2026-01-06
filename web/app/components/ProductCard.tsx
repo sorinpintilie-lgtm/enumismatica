@@ -167,13 +167,13 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
 
   // Grid variant (original layout)
   return (
-    <div className="relative group h-full flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 rounded-2xl border border-[#e7b73c]/70 bg-gradient-to-br from-navy-500 to-navy-600 shadow-[0_10px_35px_rgba(231,183,60,0.3)] hover:border-[#e7b73c] hover:shadow-[0_15px_45px_rgba(231,183,60,0.45)]">
+    <div className="relative group h-full flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-0.5 rounded-2xl border border-[#e7b73c]/70 bg-gradient-to-br from-navy-500 to-navy-600 shadow-[0_10px_35px_rgba(231,183,60,0.3)] hover:border-[#e7b73c] hover:shadow-[0_12px_40px_rgba(231,183,60,0.4)]">
       <Link href={`/products/${product.id}`} className="relative aspect-[4/3] overflow-hidden bg-white rounded-t-2xl">
         {product.images && product.images.length > 0 ? (
           <LazyImage
             src={buildImageUrlWithWidth(product.images[0], 400)}
             alt={product.name || 'Piesă'}
-            className="h-full w-full object-contain transition duration-500 group-hover:scale-105"
+            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
             placeholder="Loading..."
           />
         ) : (
@@ -230,7 +230,7 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
            </div>
            <Link
              href={`/products/${product.id}`}
-             className="inline-flex items-center justify-center w-full gap-2 rounded-full bg-[#e7b73c] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.6)] transition hover:-translate-y-0.5 hover:bg-[#f0c955]"
+             className="inline-flex items-center justify-center w-full gap-2 rounded-full bg-[#e7b73c] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.6)] transition-all duration-200 hover:shadow-[0_0_30px_rgba(231,183,60,0.8)] hover:bg-[#f0c955]"
            >
              Detalii
              <span aria-hidden>→</span>

@@ -9,6 +9,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 import type { Product, Order } from './types';
@@ -359,4 +360,28 @@ export async function getSalesForSeller(userId: string): Promise<Order[]> {
 
   const snapshot = await getDocs(q);
   return snapshot.docs.map(mapOrderSnapshot);
+}
+
+/**
+ * Fetch order by conversationId.
+ * Used to find the order associated with a chat conversation.
+ */
+export async function getOrderByConversationId(conversationId: string): Promise<Order | null> {
+  if (!db) {
+    throw new Error('Firestore not initialized');
+  }
+
+  const ordersRef = collection(db, 'orders');
+  const q = query(
+    ordersRef,
+    where('conversationId', '==', conversationId),
+    limit(1),
+  );
+
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) {
+    return null;
+  }
+
+  return mapOrderSnapshot(snapshot.docs[0]);
 }

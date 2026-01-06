@@ -260,7 +260,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
   // Grid variant (original layout)
   return (
     <div
-      className={`group relative h-full flex flex-col bg-gradient-to-br from-navy-600 via-navy-800 to-navy-950 rounded-2xl border border-[#e7b73c]/40 shadow-[0_18px_55px_rgba(0,0,0,0.9)] overflow-hidden hover:border-[#e7b73c] hover:shadow-[0_26px_70px_rgba(231,183,60,0.55)] transition-all duration-300 ${
+      className={`group relative h-full flex flex-col bg-gradient-to-br from-navy-600 via-navy-800 to-navy-950 rounded-2xl border border-[#e7b73c]/40 shadow-[0_18px_55px_rgba(0,0,0,0.9)] overflow-hidden hover:border-[#e7b73c]/60 hover:shadow-[0_20px_60px_rgba(231,183,60,0.4)] transition-all duration-300 ${
         isUserHighestBidder ? 'ring-2 ring-emerald-400/80 ring-offset-2 ring-offset-navy-900' : ''
       }`}
     >
@@ -269,7 +269,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             <img
               src={`${product.images[0]}?width=400`}
               alt={product.name || 'Piesă Licitație'}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
             />
         ) : (
           <div className="w-full h-full bg-slate-100 flex items-center justify-center">
@@ -393,7 +393,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
           )}
           <Link
             href={`/auctions/${auction.id}`}
-            className="flex-1 text-center bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-4 py-2.5 rounded-md text-sm font-semibold transition-colors duration-200 shadow-[0_0_24px_rgba(231,183,60,0.75)]"
+            className="flex-1 text-center bg-[#e7b73c] hover:bg-[#f0c955] text-[#000940] px-4 py-2.5 rounded-md text-sm font-semibold transition-all duration-200 shadow-[0_0_24px_rgba(231,183,60,0.75)] hover:shadow-[0_0_30px_rgba(231,183,60,0.9)]"
           >
             Detalii
           </Link>

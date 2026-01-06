@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useConversation, useConversations } from '../hooks/useChat';
 import { useAuctionNotifications } from '../hooks/useAuctionNotifications';
 import { useAuth } from '../context/AuthContext';
-import { ChatMessage, Conversation, AuctionNotification } from 'shared/types';
+import { ChatMessage, Conversation, AuctionNotification, Order } from 'shared/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import Link from 'next/link';
@@ -12,6 +12,7 @@ import { ContactDetailsModal } from './ContactDetailsModal';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { markAuctionNotificationAsRead } from 'shared/auctionNotificationService';
+import { getOrderByConversationId } from 'shared/orderService';
 
 interface PrivateChatProps {
   conversationId: string | null;
@@ -47,6 +48,7 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
     productId?: string;
     auctionId?: string;
   } | null>(null);
+  const [order, setOrder] = useState<Order | null>(null);
 
   // Load basic conversation metadata so we can show contact details directly from chat.
   useEffect(() => {
@@ -80,6 +82,31 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
     };
 
     loadMeta();
+    return () => {
+      cancelled = true;
+    };
+  }, [conversationId]);
+
+  // Load order associated with this conversation
+  useEffect(() => {
+    let cancelled = false;
+    const loadOrder = async () => {
+      if (!conversationId) {
+        setOrder(null);
+        return;
+      }
+      try {
+        const orderData = await getOrderByConversationId(conversationId);
+        if (!cancelled) {
+          setOrder(orderData);
+        }
+      } catch (err) {
+        console.error('Failed to load order for conversation', err);
+        if (!cancelled) setOrder(null);
+      }
+    };
+
+    loadOrder();
     return () => {
       cancelled = true;
     };
@@ -231,14 +258,14 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
           <div className="flex items-center gap-2">
             {conversationMeta?.productId && (
               <Link
-                href={conversationMeta.auctionId ? `/auctions/${conversationMeta.auctionId}` : `/products/${conversationMeta.productId}`}
+                href={order ? `/orders/${order.id}` : (conversationMeta.auctionId ? `/auctions/${conversationMeta.auctionId}` : `/products/${conversationMeta.productId}`)}
                 className="inline-flex items-center gap-1 rounded-full border border-gold-500/40 px-3 py-1 text-xs font-semibold text-gold-200 hover:bg-gold-500/10 transition-colors"
-                title={conversationMeta.auctionId ? "Vezi licitația asociată" : "Vezi produsul asociat"}
+                title={order ? "Vezi comanda asociată" : (conversationMeta.auctionId ? "Vezi licitația asociată" : "Vezi produsul asociat")}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>{conversationMeta.auctionId ? "Licitație" : "Produs"}</span>
+                <span>{order ? "Comandă" : (conversationMeta.auctionId ? "Licitație" : "Produs")}</span>
               </Link>
             )}
             <button

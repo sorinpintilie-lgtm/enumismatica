@@ -62,18 +62,18 @@ export default function Navigation() {
 
           {/* Center: menu items with separators */}
           <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-300">
-            <Link href="/products" className="hover:text-gold-400 transition-colors whitespace-nowrap">
+            <Link href="/products" className="hover:text-gold-400 transition-colors duration-200 whitespace-nowrap">
               E-shop
             </Link>
-            <Link href="/auctions" className="hover:text-gold-400 transition-colors whitespace-nowrap">
+            <Link href="/auctions" className="hover:text-gold-400 transition-colors duration-200 whitespace-nowrap">
               Licitații
             </Link>
             <span className="text-gold-400/80">|</span>
-            <Link href="/monetaria-statului" className="hover:text-gold-400 transition-colors whitespace-nowrap">
+            <Link href="/monetaria-statului" className="hover:text-gold-400 transition-colors duration-200 whitespace-nowrap">
               Monetăria Statului
             </Link>
             <span className="text-gold-400/80">|</span>
-            <Link href="/pronumismatica" className="hover:text-gold-400 transition-colors whitespace-nowrap">
+            <Link href="/pronumismatica" className="hover:text-gold-400 transition-colors duration-200 whitespace-nowrap">
               Pronumismatica
             </Link>
             {user && isAdminUser && (

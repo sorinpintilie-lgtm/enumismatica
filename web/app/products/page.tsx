@@ -6,6 +6,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/ProductCard';
 import FilterBar, { FilterOptions } from '../components/FilterBar';
+import ProductCardSkeleton from '../components/skeletons/ProductCardSkeleton';
+import FilterBarSkeleton from '../components/skeletons/FilterBarSkeleton';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../lib/firebase';
 import { collection, query, where, getCountFromServer } from 'firebase/firestore';
@@ -576,9 +578,29 @@ function ProductsListContent() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
-          <p className="ml-4 text-slate-300">Se încarcă piesele...</p>
+        {/* Page Header Skeleton */}
+        <div className="mb-8">
+          <div className="h-10 bg-navy-700 rounded w-48 mb-2 animate-pulse"></div>
+          <div className="h-5 bg-navy-700 rounded w-64 animate-pulse"></div>
+        </div>
+
+        {/* Filter Bar Skeleton */}
+        <FilterBarSkeleton />
+
+        {/* Results Summary Skeleton */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="h-5 bg-navy-700 rounded w-48 animate-pulse"></div>
+          <div className="flex gap-2">
+            <div className="h-10 bg-navy-700 rounded-md w-10 animate-pulse"></div>
+            <div className="h-10 bg-navy-700 rounded-md w-10 animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Products Grid Skeleton */}
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <ProductCardSkeleton key={index} variant="grid" />
+          ))}
         </div>
       </div>
     );
@@ -818,9 +840,29 @@ export default function ProductsPage() {
     <Suspense
       fallback={
         <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
-            <p className="ml-4 text-slate-300">Se încarcă piesele...</p>
+          {/* Page Header Skeleton */}
+          <div className="mb-8">
+            <div className="h-10 bg-navy-700 rounded w-48 mb-2 animate-pulse"></div>
+            <div className="h-5 bg-navy-700 rounded w-64 animate-pulse"></div>
+          </div>
+
+          {/* Filter Bar Skeleton */}
+          <FilterBarSkeleton />
+
+          {/* Results Summary Skeleton */}
+          <div className="mb-6 flex items-center justify-between">
+            <div className="h-5 bg-navy-700 rounded w-48 animate-pulse"></div>
+            <div className="flex gap-2">
+              <div className="h-10 bg-navy-700 rounded-md w-10 animate-pulse"></div>
+              <div className="h-10 bg-navy-700 rounded-md w-10 animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Products Grid Skeleton */}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <ProductCardSkeleton key={index} variant="grid" />
+            ))}
           </div>
         </div>
       }
