@@ -18,6 +18,8 @@ export default function SeedDatabase() {
   const [compressionTestLoading, setCompressionTestLoading] = useState(false);
   const [compressionTestMessage, setCompressionTestMessage] = useState('');
   const [compressionTestError, setCompressionTestError] = useState('');
+  const [compressionOriginalUrl, setCompressionOriginalUrl] = useState<string | null>(null);
+  const [compressionOptimizedUrl, setCompressionOptimizedUrl] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,6 +58,14 @@ export default function SeedDatabase() {
       cancelled = true;
     };
   }, [user?.uid]);
+
+  // Manage preview object URLs
+  useEffect(() => {
+    return () => {
+      if (compressionOriginalUrl) URL.revokeObjectURL(compressionOriginalUrl);
+      if (compressionOptimizedUrl) URL.revokeObjectURL(compressionOptimizedUrl);
+    };
+  }, [compressionOriginalUrl, compressionOptimizedUrl]);
 
   const handleTestTinifyCompression = async () => {
     if (!compressionTestFile) {
@@ -106,6 +116,12 @@ export default function SeedDatabase() {
       const compressedFile = new File([blob], compressionTestFile.name.replace(/\.[^/.]+$/, '.webp'), {
         type: 'image/webp',
       });
+
+      // Update preview of compressed output
+      if (compressionOptimizedUrl) {
+        URL.revokeObjectURL(compressionOptimizedUrl);
+      }
+      setCompressionOptimizedUrl(URL.createObjectURL(compressedFile));
 
       console.log('[TinifyTest] Compressed output', {
         outputBytes: compressedFile.size,
@@ -285,6 +301,17 @@ export default function SeedDatabase() {
               setCompressionTestFile(file);
               setCompressionTestMessage('');
               setCompressionTestError('');
+
+              // Update original preview
+              if (compressionOriginalUrl) {
+                URL.revokeObjectURL(compressionOriginalUrl);
+              }
+              if (compressionOptimizedUrl) {
+                URL.revokeObjectURL(compressionOptimizedUrl);
+                setCompressionOptimizedUrl(null);
+              }
+              setCompressionOriginalUrl(file ? URL.createObjectURL(file) : null);
+
               console.log('[TinifyTest] File input changed', {
                 hasFile: !!file,
                 name: file?.name,
@@ -294,6 +321,46 @@ export default function SeedDatabase() {
               });
             }}
           />
+
+          {(compressionOriginalUrl || compressionOptimizedUrl) && (
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-md border border-gray-200 p-3">
+                <p className="text-sm font-semibold text-gray-900 mb-2">Original</p>
+                {compressionOriginalUrl ? (
+                  <img
+                    src={compressionOriginalUrl}
+                    alt="Original preview"
+                    className="w-full h-auto rounded bg-gray-50"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-500">No file selected</p>
+                )}
+              </div>
+
+              <div className="rounded-md border border-gray-200 p-3">
+                <p className="text-sm font-semibold text-gray-900 mb-2">Compressed (Tinify)</p>
+                {compressionOptimizedUrl ? (
+                  <img
+                    src={compressionOptimizedUrl}
+                    alt="Compressed preview"
+                    className="w-full h-auto rounded bg-gray-50"
+                  />
+                ) : (
+                  <p className="text-sm text-gray-500">Run the test to generate a compressed preview</p>
+                )}
+
+                {compressionOptimizedUrl && (
+                  <a
+                    href={compressionOptimizedUrl}
+                    download={compressionTestFile?.name.replace(/\.[^/.]+$/, '.webp') || 'compressed.webp'}
+                    className="mt-3 inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+                  >
+                    Download compressed file
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
 
           {compressionTestMessage && (
             <div className="mt-4 p-4 bg-green-100 text-green-800 rounded-md border border-green-200">
