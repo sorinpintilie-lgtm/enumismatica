@@ -8,8 +8,15 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'ht
 // IMPORTANT: do not call localhost in production. We derive the origin from the incoming request URL.
 async function sendInternalEmail(
   emailEndpoint: string,
+  to: string,
   templateKey: string,
   vars: Record<string, any>,
+  attachments?: Array<{
+    content: string; // base64
+    filename: string;
+    type?: string;
+    disposition?: 'attachment' | 'inline';
+  }>,
 ) {
   console.log('Calling internal email API:', { emailEndpoint, templateKey });
 
@@ -20,13 +27,14 @@ async function sendInternalEmail(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        to: PRONUMISMATICA_TO_EMAIL,
+        to,
         templateKey,
         vars: {
           app_name: APP_NAME,
           site_url: SITE_URL,
           ...vars,
         },
+        attachments,
       }),
     });
 
@@ -68,8 +76,8 @@ async function sendPronumismaticaFormEmail(emailEndpoint: string, data: any) {
     email: data.email,
   };
 
-  await sendInternalEmail(emailEndpoint, 'pronumismatica_form', vars);
-  console.log('Email sent successfully via internal API to:', PRONUMISMATICA_TO_EMAIL);
+  await sendInternalEmail(emailEndpoint, PRONUMISMATICA_TO_EMAIL, 'pronumismatica_form', vars);
+  console.log('Admin email sent successfully via internal API to:', PRONUMISMATICA_TO_EMAIL);
 }
 
 async function sendPronumismaticaFormEmailWithIdImages(
@@ -79,6 +87,7 @@ async function sendPronumismaticaFormEmailWithIdImages(
     front: { filename: string; contentType: string; size: number };
     back: { filename: string; contentType: string; size: number };
   },
+  attachments: Array<{ content: string; filename: string; type?: string; disposition?: 'attachment' | 'inline' }>,
 ) {
   console.log('sendPronumismaticaFormEmailWithIdImages called with data:', data);
 
@@ -107,7 +116,13 @@ async function sendPronumismaticaFormEmailWithIdImages(
   };
 
   // Use the template for forms with images
-  await sendInternalEmail(emailEndpoint, 'pronumismatica_form_with_images', vars);
+  await sendInternalEmail(
+    emailEndpoint,
+    PRONUMISMATICA_TO_EMAIL,
+    'pronumismatica_form_with_images',
+    vars,
+    attachments,
+  );
   console.log('Email sent successfully via internal API');
 
   // TODO: In a production environment, you would need to:
@@ -115,7 +130,26 @@ async function sendPronumismaticaFormEmailWithIdImages(
   // 2. Include download links in the email or process them separately
   // 3. Notify the recipient about the attachments through another channel
   
-  console.log('Note: ID images were not attached to email (metadata only).');
+  console.log('Note: ID images were attached to the admin email (SendGrid attachments).');
+}
+
+async function sendPronumismaticaUserConfirmation(emailEndpoint: string, data: any) {
+  const to = String(data.email || '').trim();
+  if (!to) return;
+
+  const vars = {
+    lastName: data.lastName,
+    firstName: data.firstName,
+    email: data.email,
+    phone: data.phone,
+  };
+
+  await sendInternalEmail(
+    emailEndpoint,
+    to,
+    'pronumismatica_user_confirmation',
+    vars,
+  );
 }
 
 export async function POST(req: NextRequest) {
@@ -205,6 +239,12 @@ export async function POST(req: NextRequest) {
           phone,
           email,
         });
+        await sendPronumismaticaUserConfirmation(emailEndpoint, {
+          lastName,
+          firstName,
+          phone,
+          email,
+        });
         return NextResponse.json({ success: true });
       }
       // If only one file is provided, return an error
@@ -230,17 +270,24 @@ export async function POST(req: NextRequest) {
       }
 
       console.log('ID file sizes:', idFrontFile.size, idBackFile.size);
-      // 15MB max per image (align with storage rules logic)
-      const maxSize = 15 * 1024 * 1024;
+      // Attachments are sent via SendGrid (base64-encoded), so keep a conservative size.
+      // 7MB binary ~= 9.3MB base64.
+      const maxSize = 7 * 1024 * 1024;
       if (idFrontFile.size > maxSize || idBackFile.size > maxSize) {
         console.error('ID files are too large');
         return NextResponse.json(
-          { error: 'Imaginile sunt prea mari (maxim 15MB fiecare).' },
+          { error: 'Imaginile sunt prea mari (maxim 7MB fiecare).' },
           { status: 400 },
         );
       }
 
       console.log('Sending email with ID images');
+
+      // Encode attachments for SendGrid.
+      // NOTE: base64 adds ~33% overhead; large images may be rejected by SendGrid.
+      const idFrontBase64 = Buffer.from(await idFrontFile.arrayBuffer()).toString('base64');
+      const idBackBase64 = Buffer.from(await idBackFile.arrayBuffer()).toString('base64');
+
       await sendPronumismaticaFormEmailWithIdImages(
         emailEndpoint,
         {
@@ -268,8 +315,29 @@ export async function POST(req: NextRequest) {
             size: idBackFile.size,
           },
         },
+        [
+          {
+            content: idFrontBase64,
+            filename: idFrontFile.name || 'id-front.jpg',
+            type: idFrontFile.type || 'image/jpeg',
+            disposition: 'attachment',
+          },
+          {
+            content: idBackBase64,
+            filename: idBackFile.name || 'id-back.jpg',
+            type: idBackFile.type || 'image/jpeg',
+            disposition: 'attachment',
+          },
+        ],
       );
       console.log('Email sent successfully');
+
+      await sendPronumismaticaUserConfirmation(emailEndpoint, {
+        lastName,
+        firstName,
+        phone,
+        email,
+      });
 
       return NextResponse.json({ success: true });
     }
@@ -319,6 +387,13 @@ export async function POST(req: NextRequest) {
       address,
       idType,
       idSeries,
+      phone,
+      email,
+    });
+
+    await sendPronumismaticaUserConfirmation(emailEndpoint, {
+      lastName,
+      firstName,
       phone,
       email,
     });

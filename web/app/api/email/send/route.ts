@@ -3,6 +3,14 @@ import sgMail from '@sendgrid/mail';
 import fs from 'fs';
 import path from 'path';
 
+type SendgridAttachment = {
+  content: string; // base64
+  filename: string;
+  type?: string;
+  disposition?: 'attachment' | 'inline';
+  contentId?: string;
+};
+
 // Configure SendGrid
 // IMPORTANT:
 // Do NOT throw at module import time.
@@ -37,7 +45,7 @@ export async function POST(request: NextRequest) {
     sgMail.setApiKey(sendgridKey);
 
     const body = await request.json();
-    const { to, templateKey, vars = {}, fallbackKey } = body;
+    const { to, templateKey, vars = {}, fallbackKey, attachments } = body;
 
     console.log('Email API called:', { to, templateKey, fallbackKey });
 
@@ -76,13 +84,39 @@ export async function POST(request: NextRequest) {
     });
     
     // Prepare email data
-    const msg = {
+    const msg: any = {
       to,
       from: FROM_EMAIL,
       subject: template.subject,
       text: textContent,
       html: htmlContent,
     };
+
+    // Optional attachments (SendGrid expects base64 content)
+    if (Array.isArray(attachments) && attachments.length > 0) {
+      const normalized: SendgridAttachment[] = attachments
+        .filter(Boolean)
+        .map((a: any) => ({
+          content: String(a.content || ''),
+          filename: String(a.filename || 'attachment'),
+          type: a.type ? String(a.type) : undefined,
+          disposition: a.disposition === 'inline' ? 'inline' : 'attachment',
+          contentId: a.contentId ? String(a.contentId) : undefined,
+        }));
+
+      // Basic safety: avoid huge payloads accidentally taking down the function.
+      // NOTE: SendGrid has its own max size limits; keep this conservative.
+      const totalBase64Chars = normalized.reduce((sum, a) => sum + (a.content?.length || 0), 0);
+      const MAX_TOTAL_BASE64_CHARS = 28 * 1024 * 1024; // ~28MB of base64 chars (rough safety guard)
+      if (totalBase64Chars > MAX_TOTAL_BASE64_CHARS) {
+        return NextResponse.json(
+          { error: 'Attachments are too large' },
+          { status: 413 },
+        );
+      }
+
+      msg.attachments = normalized;
+    }
 
     // Send email
     console.log('Sending email:', { to, from: FROM_EMAIL, subject: template.subject });

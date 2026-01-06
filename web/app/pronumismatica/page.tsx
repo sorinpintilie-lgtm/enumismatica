@@ -57,6 +57,11 @@ export default function PronumismaticaPage() {
       setError('Fișierul trebuie să fie o imagine.');
       return;
     }
+    const maxSize = 7 * 1024 * 1024; // 7MB (kept in sync with the API)
+    if (file.size > maxSize) {
+      setError('Imaginea este prea mare (maxim 7MB).');
+      return;
+    }
     setError(null);
     if (name === 'idFront') setIdFront(file);
     if (name === 'idBack') setIdBack(file);
