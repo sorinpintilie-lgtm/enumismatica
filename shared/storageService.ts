@@ -170,6 +170,57 @@ export async function uploadMultipleImages(files: File[], basePath: string): Pro
 }
 
 /**
+ * Upload product images as *raw/originals* for async server-side optimization.
+ *
+ * The Firebase Storage trigger (Cloud Function) will detect these uploads via metadata
+ * and will write an optimized WebP back, then update the Firestore product document.
+ *
+ * This lets users navigate away while compression happens in the background.
+ */
+export async function uploadMultipleProductImagesForAsyncCompression(
+	files: File[],
+	ownerId: string,
+	productId: string,
+): Promise<string[]> {
+	if (!storage) throw new Error('Firebase Storage not initialized');
+
+	console.log('[uploadMultipleProductImagesForAsyncCompression] Starting', {
+		count: files.length,
+		ownerId,
+		productId,
+		concurrency: MAX_CONCURRENT_IMAGE_UPLOADS,
+	});
+
+	return mapWithConcurrency(files, MAX_CONCURRENT_IMAGE_UPLOADS, async (file, index) => {
+		const timestamp = Date.now();
+		const safeName = (file.name || `image_${index}`).replace(/[^a-zA-Z0-9._-]+/g, '_');
+		const path = `products/${ownerId}/${productId}__${index}__raw__${timestamp}__${safeName}`;
+
+		console.log('[uploadMultipleProductImagesForAsyncCompression] Uploading raw image', {
+			index,
+			name: file.name,
+			size: file.size,
+			type: file.type,
+			path,
+		});
+
+		const storageRef = ref(storage, path);
+		const snapshot = await uploadBytes(storageRef, file, {
+			contentType: file.type || 'application/octet-stream',
+			customMetadata: {
+				needsOptimization: 'true',
+				ownerId,
+				productId,
+				index: String(index),
+			},
+		});
+
+		const downloadURL = await getDownloadURL(snapshot.ref);
+		return downloadURL;
+	});
+}
+
+/**
  * Delete an image from Firebase Storage
  * @param imageUrl - The full download URL of the image
  */

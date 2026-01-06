@@ -13,9 +13,83 @@ const admin = require('firebase-admin');
 const { PDFDocument } = require('pdf-lib');
 const axios = require('axios');
 const FormData = require('form-data');
+const tinify = require('tinify');
+const { randomUUID } = require('crypto');
 
 // Initialize Firebase Admin SDK (uses default project & storage bucket)
 admin.initializeApp();
+
+// ====================
+// TINIFY IMAGE COMPRESSION (BACKGROUND WORKER)
+// ====================
+const TINIFY_API_KEY =
+  (functions.config().tinify && functions.config().tinify.key) ||
+  process.env.TINIFY_API_KEY;
+
+if (!TINIFY_API_KEY) {
+  console.warn('⚠️  TINIFY_API_KEY is not set. Image compression worker will fail until configured.');
+} else {
+  tinify.key = TINIFY_API_KEY;
+}
+
+const MAX_IMAGE_BYTES = 750 * 1024;
+let imageInFlight = 0;
+const MAX_IMAGE_IN_FLIGHT = 2;
+
+function toBufferAsync(source) {
+  return new Promise((resolve, reject) => {
+    source.toBuffer((err, resultData) => {
+      if (err) return reject(err);
+      resolve(resultData);
+    });
+  });
+}
+
+function buildFirebaseDownloadUrl(bucketName, objectPath, token) {
+  return `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(
+    objectPath
+  )}?alt=media&token=${token}`;
+}
+
+async function compressToWebpUnderLimit(inputBuffer) {
+  // Tinify itself does not guarantee a strict byte limit; we enforce best-effort by
+  // progressively scaling down if needed.
+  const attempts = [
+    { width: null, label: 'convert-only' },
+    { width: 1600, label: 'scale-1600' },
+    { width: 1200, label: 'scale-1200' },
+    { width: 1000, label: 'scale-1000' },
+    { width: 800, label: 'scale-800' },
+    { width: 640, label: 'scale-640' },
+  ];
+
+  let best = null;
+
+  for (const step of attempts) {
+    let src = tinify.fromBuffer(inputBuffer);
+    if (step.width) {
+      src = src.resize({ method: 'scale', width: step.width });
+    }
+    src = src.convert({ type: 'image/webp' });
+
+    const out = await toBufferAsync(src);
+    if (!best || out.length < best.length) {
+      best = out;
+    }
+
+    console.log('[imageCompression] Tinify attempt', {
+      step: step.label,
+      outBytes: out.length,
+      underLimit: out.length <= MAX_IMAGE_BYTES,
+    });
+
+    if (out.length <= MAX_IMAGE_BYTES) {
+      return out;
+    }
+  }
+
+  return best;
+}
 
 // eSemneaza API Configuration (API key is loaded from environment)
 const ESEMNEAZA_API_KEY =
@@ -561,5 +635,185 @@ exports.onUserCreatedApplyReferral = functions
     await batch.commit();
     console.log('Referral bonuses applied', { newUserId, referredBy });
     return null;
+  });
+
+/**
+ * onProductImageUploaded
+ *
+ * TRIGGER: Firebase Storage finalize
+ *
+ * When the client uploads a product image with customMetadata.needsOptimization === 'true',
+ * this worker will:
+ *  - download the raw image
+ *  - compress + convert to WebP (best-effort <= 750KB)
+ *  - upload an optimized WebP back to Storage
+ *  - update Firestore products/{productId}.images[index] with the optimized URL
+ *  - increment products/{productId}.imageProcessingDone and set status done when complete
+ */
+exports.onProductImageUploaded = functions
+  .region('europe-west1')
+  .storage.object()
+  .onFinalize(async (object) => {
+    const filePath = object.name;
+    const contentType = object.contentType || '';
+
+    if (!filePath) return null;
+    if (!contentType.startsWith('image/')) return null;
+
+    const meta = object.metadata || {};
+    if (meta.needsOptimization !== 'true') return null;
+    if (meta.optimized === 'true') return null;
+
+    // Avoid loops if someone uploads an optimized file with the same metadata.
+    if (filePath.includes('__optimized')) return null;
+
+    const ownerId = meta.ownerId;
+    const productId = meta.productId;
+    const indexRaw = meta.index;
+    const index = Number(indexRaw);
+
+    if (!ownerId || !productId || !Number.isFinite(index) || index < 0) {
+      console.warn('[imageCompression] Missing/invalid metadata', {
+        filePath,
+        ownerId,
+        productId,
+        indexRaw,
+      });
+      return null;
+    }
+
+    if (!TINIFY_API_KEY) {
+      console.error('[imageCompression] TINIFY_API_KEY is missing; cannot compress', {
+        filePath,
+        productId,
+      });
+      await admin.firestore().collection('products').doc(productId).set(
+        {
+          imageProcessingStatus: 'error',
+          imageProcessingError: 'TINIFY_API_KEY is not configured on server',
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      return null;
+    }
+
+    // Simple per-instance throttle (helps prevent a single warm function instance from spiking Tinify).
+    while (imageInFlight >= MAX_IMAGE_IN_FLIGHT) {
+      await new Promise((r) => setTimeout(r, 500));
+    }
+
+    imageInFlight++;
+    const startedAt = Date.now();
+    try {
+      const bucket = admin.storage().bucket(object.bucket);
+      const rawFile = bucket.file(filePath);
+
+      console.log('[imageCompression] Starting', {
+        filePath,
+        productId,
+        ownerId,
+        index,
+        size: object.size,
+        contentType,
+      });
+
+      const [rawBuffer] = await rawFile.download();
+      console.log('[imageCompression] Downloaded raw', {
+        bytes: rawBuffer.length,
+      });
+
+      const optimizedBuffer = await compressToWebpUnderLimit(rawBuffer);
+      if (!optimizedBuffer) {
+        throw new Error('Tinify did not return output');
+      }
+
+      const optimizedPath = `products/${ownerId}/${productId}__${index}__optimized.webp`;
+      const token = randomUUID();
+      const optimizedFile = bucket.file(optimizedPath);
+      await optimizedFile.save(optimizedBuffer, {
+        resumable: false,
+        metadata: {
+          contentType: 'image/webp',
+          metadata: {
+            firebaseStorageDownloadTokens: token,
+            optimized: 'true',
+            ownerId,
+            productId,
+            index: String(index),
+          },
+        },
+      });
+
+      const optimizedUrl = buildFirebaseDownloadUrl(object.bucket, optimizedPath, token);
+
+      console.log('[imageCompression] Uploaded optimized', {
+        optimizedPath,
+        optimizedBytes: optimizedBuffer.length,
+        optimizedUrl,
+        underLimit: optimizedBuffer.length <= MAX_IMAGE_BYTES,
+        durationMs: Date.now() - startedAt,
+      });
+
+      const productRef = admin.firestore().collection('products').doc(productId);
+      await admin.firestore().runTransaction(async (tx) => {
+        const snap = await tx.get(productRef);
+        if (!snap.exists) {
+          console.warn('[imageCompression] Product doc missing', { productId });
+          return;
+        }
+        const data = snap.data() || {};
+        const total = typeof data.imageProcessingTotal === 'number' ? data.imageProcessingTotal : null;
+        const prevDone = typeof data.imageProcessingDone === 'number' ? data.imageProcessingDone : 0;
+        const nextDone = prevDone + 1;
+
+        const images = Array.isArray(data.images) ? [...data.images] : [];
+        const targetLen = Math.max(images.length, total || 0, index + 1);
+        while (images.length < targetLen) images.push('');
+        images[index] = optimizedUrl;
+
+        const nextStatus = total && nextDone >= total ? 'done' : 'processing';
+        tx.set(
+          productRef,
+          {
+            images,
+            imageProcessingDone: nextDone,
+            imageProcessingStatus: nextStatus,
+            imageProcessingError: null,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+      });
+
+      // Best-effort cleanup: delete raw upload after optimization.
+      try {
+        await rawFile.delete();
+        console.log('[imageCompression] Deleted raw file', { filePath });
+      } catch (e) {
+        console.warn('[imageCompression] Failed to delete raw file (non-fatal)', { filePath, error: e?.message });
+      }
+
+      return null;
+    } catch (error) {
+      console.error('[imageCompression] Failed', {
+        filePath,
+        productId,
+        error: error?.message || error,
+      });
+
+      await admin.firestore().collection('products').doc(productId).set(
+        {
+          imageProcessingStatus: 'error',
+          imageProcessingError: error?.message || String(error),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      return null;
+    } finally {
+      imageInFlight = Math.max(0, imageInFlight - 1);
+    }
   });
 

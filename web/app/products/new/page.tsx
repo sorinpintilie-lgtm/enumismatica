@@ -4,10 +4,10 @@ export const dynamic = 'force-dynamic';
 
 import { FormEvent, useState, ChangeEvent, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, Timestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
-import { uploadMultipleImages, uploadVideo, validateImageFile } from 'shared/storageService';
+import { uploadMultipleImages, uploadMultipleProductImagesForAsyncCompression, uploadVideo, validateImageFile } from 'shared/storageService';
 import { addCollectionItem, getCollectionItem, updateCollectionItem } from 'shared/collectionService';
 import { useToast } from '../../components/ToastProvider';
 import { useCoinAutocomplete } from '../../hooks/useCoinAutocomplete';
@@ -539,15 +539,6 @@ function NewProductPageContent() {
         productPrice = reserve;
       }
 
-      let imageUrls: string[] = [];
-      if (collectionItem && collectionItem.images && collectionItem.images.length > 0) {
-        // Use existing images from collection item
-        imageUrls = collectionItem.images;
-      } else if (files.length > 0) {
-        // Upload new images
-        imageUrls = await uploadMultipleImages(files, `products/${user.uid}`);
-      }
-
       let videoUrl: string | null = null;
       if (videoFile && canUploadVideo) {
         // Upload video file
@@ -587,11 +578,17 @@ function NewProductPageContent() {
         });
         productRef = { id: editingProduct.id };
       } else {
-        // Create new product
+        // Create new product FIRST, then upload raw images for async compression.
+        // This allows users to navigate away while image optimization happens in the background.
+        const imagesToProcess = !collectionItem ? files.length : 0;
         productRef = await addDoc(collection(db, 'products'), {
           name: name.trim(),
           description: description.trim(),
-          images: imageUrls,
+          images: [],
+          imagesRaw: [],
+          imageProcessingStatus: imagesToProcess > 0 ? 'processing' : 'done',
+          imageProcessingTotal: imagesToProcess,
+          imageProcessingDone: 0,
           video: videoUrl,
           price: productPrice,
           category: category || null,
@@ -618,15 +615,40 @@ function NewProductPageContent() {
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
+
+        // Upload images (collection items keep their existing image URLs)
+        if (collectionItem && collectionItem.images && collectionItem.images.length > 0) {
+          // If coming from collection, keep existing images.
+          await updateDoc(doc(db, 'products', productRef.id), {
+            images: collectionItem.images,
+            imagesRaw: collectionItem.images,
+            imageProcessingStatus: 'done',
+            imageProcessingTotal: collectionItem.images.length,
+            imageProcessingDone: collectionItem.images.length,
+            updatedAt: serverTimestamp(),
+          });
+        } else if (files.length > 0) {
+          // Upload raw images for async Tinify compression (Firebase Function will fill `images` later).
+          const rawUrls = await uploadMultipleProductImagesForAsyncCompression(files, user.uid, productRef.id);
+          await updateDoc(doc(db, 'products', productRef.id), {
+            imagesRaw: rawUrls,
+            updatedAt: serverTimestamp(),
+          });
+        }
       }
 
       // Only add to collection if not from existing collection item and not editing
       if (!collectionItem && !editingProduct) {
         try {
+          // For the personal collection entry, use raw URLs if we have them.
+          const productSnap = await getDoc(doc(db, 'products', productRef.id));
+          const productData = productSnap.data() as any;
+          const collectionImages: string[] = Array.isArray(productData?.imagesRaw) ? productData.imagesRaw : [];
+
           await addCollectionItem(user.uid, {
             name: name.trim(),
             description: description.trim(),
-            images: imageUrls,
+            images: collectionImages,
             video: videoUrl,
             category: category || undefined,
             country: country || undefined,

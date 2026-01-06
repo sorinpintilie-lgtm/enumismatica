@@ -96,6 +96,20 @@ export interface Product {
   name: string;
   description: string;
   images: string[]; // Array of image URLs
+  /**
+   * Raw/original image URLs (optional).
+   * When using async/background compression, uploads may land here first.
+   */
+  imagesRaw?: string[];
+
+  /**
+   * Async image processing status (optional).
+   * Used when images are uploaded first and optimized later.
+   */
+  imageProcessingStatus?: 'processing' | 'done' | 'error';
+  imageProcessingTotal?: number;
+  imageProcessingDone?: number;
+  imageProcessingError?: string;
   video?: string; // Optional video URL for demonstration
   price: number; // Base price in the platform's currency
   ownerId: string; // Reference to the user who owns this product
