@@ -38,7 +38,7 @@ async function sendInternalEmail(templateKey: string, vars: Record<string, any>)
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        to: 'marketing@monetariastatului.ro',
+        to: 'sorin.pintilie@sky.ro',
         templateKey,
         vars: {
           app_name: 'Enumismatica.ro',
