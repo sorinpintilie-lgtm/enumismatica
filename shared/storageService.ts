@@ -29,27 +29,52 @@ async function mapWithConcurrency<T, R>(
 async function optimizeImageForUpload(file: File): Promise<File> {
 	// Fast-path: already in target format and under size limit.
 	if (file.type === 'image/webp' && file.size <= MAX_UPLOAD_IMAGE_KB * 1024) {
+		console.log('[uploadImage] Optimization skipped (already WebP + under limit)', {
+			name: file.name,
+			size: file.size,
+			type: file.type,
+		});
 		return file;
 	}
 
 	// Use server-side Tinify (via Next.js API route) when running in a browser.
 	// This keeps the Tinify API key on the server (Netlify env: TINIFY_API_KEY).
 	const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
-	const canClientConvertToWebP =
-		isBrowser &&
-		// convertToWebP() depends on these checks internally; we expose them here to reduce Tinify load.
-		typeof (window as any).createImageBitmap !== 'undefined' &&
-		typeof (window as any).OffscreenCanvas !== 'undefined';
+	const hasCreateImageBitmap = isBrowser && typeof (window as any).createImageBitmap !== 'undefined';
+	const hasOffscreenCanvas = isBrowser && typeof (window as any).OffscreenCanvas !== 'undefined';
+	const hasCanvasToBlob = isBrowser && typeof (document?.createElement('canvas') as any)?.toBlob !== 'undefined';
+	const canClientConvertToWebP = isBrowser && hasCanvasToBlob;
+
+	console.log('[uploadImage] Optimization decision inputs', {
+		name: file.name,
+		size: file.size,
+		type: file.type,
+		isBrowser,
+		hasCreateImageBitmap,
+		hasOffscreenCanvas,
+		hasCanvasToBlob,
+		canClientConvertToWebP,
+	});
 
 	// If the file is relatively small and the browser can convert locally, prefer local conversion.
 	// This significantly reduces Tinify traffic when many users upload at once.
 	const LOCAL_CONVERT_THRESHOLD_BYTES = 1024 * 1024; // 1MB
 	if (canClientConvertToWebP && file.size <= LOCAL_CONVERT_THRESHOLD_BYTES) {
+		console.log('[uploadImage] Using local WebP conversion (small file)', {
+			name: file.name,
+			size: file.size,
+			threshold: LOCAL_CONVERT_THRESHOLD_BYTES,
+		});
 		return await convertToWebP(file, MAX_UPLOAD_IMAGE_KB);
 	}
 
 	if (isBrowser) {
 		try {
+			console.log('[uploadImage] Using server Tinify via /api/tinify', {
+				name: file.name,
+				size: file.size,
+				type: file.type,
+			});
 			const formData = new FormData();
 			formData.append('file', file);
 
@@ -64,6 +89,13 @@ async function optimizeImageForUpload(file: File): Promise<File> {
 			}
 
 			if (response.ok) {
+				const originalSizeHeader = response.headers.get('x-original-size');
+				const optimizedSizeHeader = response.headers.get('x-optimized-size');
+				console.log('[uploadImage] Tinify responded OK', {
+					name: file.name,
+					xOriginalSize: originalSizeHeader,
+					xOptimizedSize: optimizedSizeHeader,
+				});
 				const blob = await response.blob();
 				const tinified = new File(
 					[blob],
@@ -73,9 +105,19 @@ async function optimizeImageForUpload(file: File): Promise<File> {
 
 				// Hard guarantee: if Tinify output is still too large, do an extra browser WebP pass.
 				if (tinified.size <= MAX_UPLOAD_IMAGE_KB * 1024) {
+					console.log('[uploadImage] Tinify output under limit', {
+						name: tinified.name,
+						size: tinified.size,
+						maxBytes: MAX_UPLOAD_IMAGE_KB * 1024,
+					});
 					return tinified;
 				}
 
+				console.warn('[uploadImage] Tinify output still over limit; attempting extra local pass', {
+					name: tinified.name,
+					size: tinified.size,
+					maxBytes: MAX_UPLOAD_IMAGE_KB * 1024,
+				});
 				return await convertToWebP(tinified, MAX_UPLOAD_IMAGE_KB);
 			}
 		} catch (error) {
@@ -84,6 +126,11 @@ async function optimizeImageForUpload(file: File): Promise<File> {
 	}
 
 	// Fallback: browser-only WebP conversion (or original file if conversion is unsupported).
+	console.log('[uploadImage] Falling back to local WebP conversion', {
+		name: file.name,
+		size: file.size,
+		type: file.type,
+	});
 	return await convertToWebP(file, MAX_UPLOAD_IMAGE_KB);
 }
 

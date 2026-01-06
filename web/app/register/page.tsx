@@ -9,11 +9,18 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { z } from 'zod';
 import { signUpWithEmail, signInWithGoogle } from 'shared/auth';
+import { validCnp } from '../../lib/validatorsRo/cnp';
 
 const registerSchema = z.object({
   email: z.string().email('Adresă de email invalidă'),
   password: z.string().min(6, 'Parola trebuie să aibă cel puțin 6 caractere'),
   confirmPassword: z.string(),
+  cnp: z
+    .string()
+    .optional()
+    .refine((val) => !val || validCnp(val), {
+      message: 'CNP invalid',
+    }),
   idDocumentType: z.enum(['ci', 'passport']).optional(),
   idDocumentNumber: z.string().optional(),
   acceptTerms: z.boolean().refine((val) => val === true, {
@@ -40,6 +47,7 @@ function RegisterForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [referralCode, setReferralCode] = useState(initialReferral);
+  const [cnp, setCnp] = useState('');
   const [idDocumentType, setIdDocumentType] = useState<'ci' | 'passport' | ''>('');
   const [idDocumentNumber, setIdDocumentNumber] = useState('');
   const [idDocumentFrontPhoto, setIdDocumentFrontPhoto] = useState<File | null>(null);
@@ -59,6 +67,7 @@ function RegisterForm() {
         email,
         password,
         confirmPassword,
+        cnp: cnp || undefined,
         idDocumentType: idDocumentType || undefined,
         idDocumentNumber: idDocumentNumber || undefined,
         acceptTerms,
@@ -85,6 +94,7 @@ function RegisterForm() {
       password,
       referralCode || undefined,
       idDocumentPayload,
+      cnp || undefined,
     );
     setLoading(false);
     if (error) {
@@ -183,6 +193,32 @@ function RegisterForm() {
                 Verificare identitate (opțional) – pe platforma enumismatica.ro poți furniza datele din CI sau pașaport pentru obținerea unui cont verificat, crescând încrederea în anunțurile și ofertele tale.
               </p>
               <div className="flex flex-col gap-3">
+                <div>
+                  <label htmlFor="cnp" className="block text-sm font-medium text-slate-200 mb-1">
+                    CNP (opțional)
+                  </label>
+                  <input
+                    id="cnp"
+                    name="cnp"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={13}
+                    className="appearance-none relative block w-full px-4 py-3 border border-gold-500/40 placeholder-slate-400 text-slate-50 rounded-xl bg-navy-900/70 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent focus:z-10 sm:text-sm"
+                    placeholder="13 cifre"
+                    value={cnp}
+                    onChange={(e) => setCnp(e.target.value.replace(/\D+/g, ''))}
+                  />
+                  {cnp.length > 0 && cnp.length < 13 && (
+                    <p className="mt-1 text-xs text-slate-400">CNP trebuie să conțină 13 cifre.</p>
+                  )}
+                  {cnp.length === 13 && !validCnp(cnp) && (
+                    <p className="mt-1 text-xs text-red-300">CNP invalid.</p>
+                  )}
+                  {cnp.length === 13 && validCnp(cnp) && (
+                    <p className="mt-1 text-xs text-emerald-300">CNP valid.</p>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-slate-200 mb-1">
                     Tip document

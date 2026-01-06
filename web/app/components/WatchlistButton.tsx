@@ -105,21 +105,31 @@ export const WatchlistButton: React.FC<WatchlistButtonProps> = ({
     }
   };
 
+  // Keep icon-only buttons compact (used as an overlay on cards).
+  const gapClass = showText ? 'gap-2' : 'gap-0';
+  const shapeClass = showText ? 'rounded-lg' : 'rounded-full';
+
+  const stateClass = isInWatchlist
+    ? // Active
+      showText
+      ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
+      : 'bg-yellow-500/90 hover:bg-yellow-500 text-navy-950 border border-yellow-300/40'
+    : // Inactive
+    showText
+    ? 'bg-gray-700 hover:bg-gray-600 text-gray-300 border border-gray-600'
+    : 'bg-black/45 hover:bg-black/60 text-slate-100 border border-white/15 backdrop-blur-sm';
+
   return (
     <button
       onClick={handleToggleWatchlist}
       disabled={loading}
-      className={`flex items-center justify-center gap-2 rounded-lg transition-all duration-200 ${getButtonSize()} ${
-        isInWatchlist
-          ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
-          : 'bg-gray-700 hover:bg-gray-600 text-gray-300 border border-gray-600'
-      } ${className}`}
+      className={`inline-flex items-center justify-center ${gapClass} ${shapeClass} shrink-0 leading-none transition-all duration-200 ${getButtonSize()} ${stateClass} ${className}`}
       aria-label={isInWatchlist ? 'Îndepărtează din lista de urmărire' : 'Adaugă la lista de urmărire'}
       title={isInWatchlist ? 'Îndepărtează din lista de urmărire' : 'Adaugă la lista de urmărire'}
     >
       {isInWatchlist ? (
         <svg
-          className="text-yellow-300"
+          className={showText ? 'text-yellow-300' : 'text-navy-950'}
           width={getIconSize()}
           height={getIconSize()}
           viewBox="0 0 24 24"
@@ -131,7 +141,7 @@ export const WatchlistButton: React.FC<WatchlistButtonProps> = ({
         </svg>
       ) : (
         <svg
-          className="text-gray-300"
+          className={showText ? 'text-gray-300' : 'text-slate-100'}
           width={getIconSize()}
           height={getIconSize()}
           viewBox="0 0 24 24"

@@ -58,6 +58,24 @@ export default function Dashboard() {
     bankAccount: '',
   });
 
+  useEffect(() => {
+    // Diagnostic logging for "stuck on loading" / unauthenticated dashboard.
+    console.log('[dashboard] auth state', {
+      loading,
+      hasUser: !!user,
+      uid: user?.uid,
+    });
+  }, [loading, user?.uid]);
+
+  useEffect(() => {
+    // If the user is not authenticated, do not leave them stuck on a spinner.
+    // Redirect to login.
+    if (!loading && !user) {
+      console.warn('[dashboard] unauthenticated: redirecting to /login');
+      router.replace('/login');
+    }
+  }, [loading, user, router]);
+
   // Funcție pentru copierea adresei de livrare la adresa de facturare
   const copyDeliveryToBilling = () => {
     setPersonalDetails((p) => ({
@@ -318,13 +336,21 @@ export default function Dashboard() {
     router.push('/login');
   };
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-500"></div>
           <p className="ml-4 text-slate-300">Se încarcă...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p className="text-slate-300">Redirecționare către autentificare...</p>
       </div>
     );
   }

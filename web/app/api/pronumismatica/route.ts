@@ -3,6 +3,9 @@ import sgMail from '@sendgrid/mail';
 import fs from 'fs';
 import path from 'path';
 import { validCnp } from '../../../lib/validatorsRo/cnp';
+import tinify from 'tinify';
+
+export const runtime = 'nodejs';
 
 const PRONUMISMATICA_TO_EMAIL = process.env.PRONUMISMATICA_TO_EMAIL || 'sorin.pintilie@sky.ro';
 const FROM_EMAIL = process.env.FROM_EMAIL || 'contact@enumismatica.ro';
@@ -21,6 +24,102 @@ type SendgridAttachment = {
 };
 
 let templatesCache: { loadedAt: number; data: TemplatesFile } | null = null;
+
+function makeReqId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function getTinifyKey(): string | null {
+  return process.env.TINIFY_API_KEY || null;
+}
+
+function toBufferAsync(source: any): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    source.toBuffer((err: any, resultData: Buffer) => {
+      if (err) return reject(err);
+      resolve(resultData);
+    });
+  });
+}
+
+async function compressIdImageToWebp(input: Buffer, reqId: string, label: string): Promise<Buffer> {
+  const key = getTinifyKey();
+  if (!key) {
+    console.warn('PRONUMISMATICA API: Tinify key missing; skipping compression', { reqId, label });
+    return input;
+  }
+
+  tinify.key = key;
+
+  // Best-effort: convert to WebP, and if still large, resize down.
+  // ID photos usually have lots of detail; keep dimensions relatively high.
+  const attempts: Array<{ width?: number; name: string }> = [
+    { name: 'convert-only' },
+    { width: 1600, name: 'scale-1600' },
+    { width: 1200, name: 'scale-1200' },
+    { width: 1000, name: 'scale-1000' },
+  ];
+
+  let best: Buffer | null = null;
+
+  for (const step of attempts) {
+    let src = tinify.fromBuffer(input);
+    if (step.width) {
+      src = src.resize({ method: 'scale', width: step.width });
+    }
+    src = src.convert({ type: 'image/webp' });
+
+    const out = await toBufferAsync(src);
+    if (!best || out.length < best.length) best = out;
+
+    console.log('PRONUMISMATICA API: Tinify attempt', {
+      reqId,
+      label,
+      step: step.name,
+      inBytes: input.length,
+      outBytes: out.length,
+    });
+
+    // Stop early if we got a reasonably small attachment.
+    if (out.length <= 900 * 1024) {
+      return out;
+    }
+  }
+
+  return best || input;
+}
+
+async function prepareAttachment(file: File, reqId: string, label: string): Promise<{
+  buffer: Buffer;
+  filename: string;
+  type: string;
+  inBytes: number;
+  outBytes: number;
+}> {
+  const raw = Buffer.from(await file.arrayBuffer());
+  const key = getTinifyKey();
+
+  // If Tinify isn't configured, keep the original bytes + metadata.
+  if (!key) {
+    return {
+      buffer: raw,
+      filename: file.name || `${label}.jpg`,
+      type: file.type || 'application/octet-stream',
+      inBytes: raw.length,
+      outBytes: raw.length,
+    };
+  }
+
+  const optimized = await compressIdImageToWebp(raw, reqId, label);
+  const base = (file.name || label).replace(/\.[^/.]+$/, '');
+  return {
+    buffer: optimized,
+    filename: `${base}.webp`,
+    type: 'image/webp',
+    inBytes: raw.length,
+    outBytes: optimized.length,
+  };
+}
 
 function loadTemplates(): TemplatesFile {
   const now = Date.now();
@@ -156,6 +255,7 @@ async function trySendUserConfirmation(data: any) {
 }
 
 export async function POST(req: NextRequest) {
+  const reqId = makeReqId();
   console.log('PRONUMISMATICA API: Received request');
   try {
     const contentType = req.headers.get('content-type') || '';
@@ -195,6 +295,10 @@ export async function POST(req: NextRequest) {
       }
 
       if (!validCnp(cnp)) {
+        console.warn('PRONUMISMATICA API: Invalid CNP provided (redacted)', {
+          cnpLength: cnp.length,
+          last4: cnp.slice(-4),
+        });
         return NextResponse.json({ error: 'CNP invalid.' }, { status: 400 });
       }
 
@@ -221,27 +325,46 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Imaginile sunt prea mari (maxim 7MB fiecare).' }, { status: 400 });
       }
 
-      const idFrontBase64 = Buffer.from(await idFront.arrayBuffer()).toString('base64');
-      const idBackBase64 = Buffer.from(await idBack.arrayBuffer()).toString('base64');
+      console.log('PRONUMISMATICA API: Attachments received', {
+        reqId,
+        idFrontBytes: idFront.size,
+        idFrontType: idFront.type,
+        idBackBytes: idBack.size,
+        idBackType: idBack.type,
+      });
+
+      const front = await prepareAttachment(idFront, reqId, 'id-front');
+      const back = await prepareAttachment(idBack, reqId, 'id-back');
+
+      const idFrontBase64 = front.buffer.toString('base64');
+      const idBackBase64 = back.buffer.toString('base64');
 
       const attachments: SendgridAttachment[] = [
         {
           content: idFrontBase64,
-          filename: idFront.name || 'id-front.jpg',
-          type: idFront.type || 'image/jpeg',
+          filename: front.filename,
+          type: front.type,
           disposition: 'attachment',
         },
         {
           content: idBackBase64,
-          filename: idBack.name || 'id-back.jpg',
-          type: idBack.type || 'image/jpeg',
+          filename: back.filename,
+          type: back.type,
           disposition: 'attachment',
         },
       ];
 
       const attachments_note = `Acte atașate: ${attachments[0].filename} (${Math.round(
-        idFront.size / 1024,
-      )} KB) și ${attachments[1].filename} (${Math.round(idBack.size / 1024)} KB).`;
+        front.outBytes / 1024,
+      )} KB) și ${attachments[1].filename} (${Math.round(back.outBytes / 1024)} KB).`;
+
+      console.log('PRONUMISMATICA API: Attachments compressed', {
+        reqId,
+        idFrontInBytes: front.inBytes,
+        idFrontOutBytes: front.outBytes,
+        idBackInBytes: back.inBytes,
+        idBackOutBytes: back.outBytes,
+      });
 
       await sendAdminEmail(
         {
@@ -287,6 +410,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!validCnp(String(cnp))) {
+      console.warn('PRONUMISMATICA API: Invalid CNP provided (legacy JSON)');
       return NextResponse.json({ error: 'CNP invalid.' }, { status: 400 });
     }
 

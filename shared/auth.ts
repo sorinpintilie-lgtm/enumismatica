@@ -63,6 +63,7 @@ export const signUpWithEmail = async (
     frontPhoto?: File;
     backPhoto?: File;
   },
+  cnp?: string,
 ) => {
   try {
     // Sanitize inputs
@@ -85,13 +86,22 @@ export const signUpWithEmail = async (
     const userCredential = await createUserWithEmailAndPassword(auth, sanitizedEmail, sanitizedPassword);
 
     const documentNumber = idDocumentData?.number?.trim();
-    const extraProfileData: any = documentNumber
-      ? {
-          idDocumentType: idDocumentData?.type || 'ci',
-          idDocumentNumber: documentNumber,
-          idVerificationStatus: 'pending' as const,
-        }
-      : undefined;
+    const normalizedCnp = (cnp || '').trim().replace(/[\s-]+/g, '');
+
+    const extraProfileData: any = {};
+
+    if (documentNumber) {
+      extraProfileData.idDocumentType = idDocumentData?.type || 'ci';
+      extraProfileData.idDocumentNumber = documentNumber;
+      extraProfileData.idVerificationStatus = 'pending' as const;
+    }
+
+    if (normalizedCnp) {
+      // Validation happens in the caller (web/mobile UI). Here we only store.
+      extraProfileData.cnp = normalizedCnp;
+    }
+
+    const hasExtraProfileData = Object.keys(extraProfileData).length > 0;
 
     // Handle ID document photo uploads
     if (idDocumentData?.frontPhoto || idDocumentData?.backPhoto) {
@@ -122,7 +132,11 @@ export const signUpWithEmail = async (
     }
 
     // Create Firestore profile and apply referral bonuses (if any)
-    await createUserProfileAfterSignup(userCredential.user, referralCode || null, extraProfileData);
+    await createUserProfileAfterSignup(
+      userCredential.user,
+      referralCode || null,
+      hasExtraProfileData ? extraProfileData : undefined,
+    );
 
     // Send welcome email (non-blocking)
     sendWelcomeEmail(

@@ -23,11 +23,34 @@ export async function convertToWebP(file: File, maxSizeKB: number = 750): Promis
     }
  
     // Check if browser supports WebP conversion
-    if (!window.createImageBitmap || !window.OffscreenCanvas) {
-      console.warn('WebP conversion not supported in this browser, using original file');
+    // NOTE: Historically we gated on OffscreenCanvas, but this helper uses a normal <canvas>.
+    // Keep logging here so we can diagnose clients where conversion is skipped.
+    const hasCreateImageBitmap = typeof (window as any).createImageBitmap !== 'undefined';
+    const hasOffscreenCanvas = typeof (window as any).OffscreenCanvas !== 'undefined';
+    const hasCanvasToBlob = typeof (document?.createElement('canvas') as any)?.toBlob !== 'undefined';
+
+    if (!hasCanvasToBlob) {
+      console.warn('[ImageOptimization] Canvas toBlob not supported; using original file', {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        hasCreateImageBitmap,
+        hasOffscreenCanvas,
+        hasCanvasToBlob,
+      });
       resolve(file);
       return;
     }
+
+    console.log('[ImageOptimization] Starting WebP conversion', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      maxSizeKB,
+      hasCreateImageBitmap,
+      hasOffscreenCanvas,
+      hasCanvasToBlob,
+    });
  
     const reader = new FileReader();
     reader.onload = async (event) => {
@@ -52,7 +75,7 @@ export async function convertToWebP(file: File, maxSizeKB: number = 750): Promis
               targetWidth = Math.max(targetWidth, 320);
               targetHeight = Math.max(targetHeight, 240);
               
-              console.log(`[ImageOptimization] Resizing ${file.name}: ${img.width}x${img.height} -> ${targetWidth}x${targetHeight}`);
+               console.log(`[ImageOptimization] Resizing ${file.name}: ${img.width}x${img.height} -> ${targetWidth}x${targetHeight}`);
             }
  
             // Create canvas and convert to WebP

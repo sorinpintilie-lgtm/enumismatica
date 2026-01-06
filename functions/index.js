@@ -20,6 +20,22 @@ const { randomUUID } = require('crypto');
 admin.initializeApp();
 
 // ====================
+// CLOUD FUNCTIONS RUNTIME SERVICE ACCOUNT
+// ====================
+// Deploy error observed:
+//   "Default service account '...-compute@developer.gserviceaccount.com' doesn't exist"
+// For 1st gen functions, Cloud Functions will run as a service account.
+// If the default Compute Engine service account is missing, explicitly set one.
+//
+// Note: the deploying identity must have `iam.serviceAccounts.actAs` on this account.
+const RUNTIME_SERVICE_ACCOUNT =
+  process.env.FUNCTIONS_SERVICE_ACCOUNT ||
+  (functions.config().runtime && functions.config().runtime.service_account) ||
+  'firebase-adminsdk-fbsvc@e-numismatica-ro.iam.gserviceaccount.com';
+
+const fn = functions.runWith({ serviceAccount: RUNTIME_SERVICE_ACCOUNT });
+
+// ====================
 // TINIFY IMAGE COMPRESSION (BACKGROUND WORKER)
 // ====================
 const TINIFY_API_KEY =
@@ -344,7 +360,7 @@ async function sendToEsemneaza(contractFile, transactionData) {
  * 4. Sends contract to eSemneaza for electronic signature
  * 5. Updates transaction with contract tracking info
  */
-exports.onTransactionComplete = functions
+exports.onTransactionComplete = fn
   .region('europe-west1')
   .firestore.document('transactions/{transactionId}')
   .onUpdate(async (change, context) => {
@@ -432,7 +448,7 @@ exports.onTransactionComplete = functions
  * Allows authenticated users to retrieve download URL for completed contracts.
  * Only buyer or seller can access their transaction's contract.
  */
-exports.getCompletedContract = functions
+exports.getCompletedContract = fn
   .region('europe-west1')
   .https.onCall(async (data, context) => {
     // Verify user is authenticated
@@ -524,7 +540,7 @@ exports.getCompletedContract = functions
  * This mirrors the referral bonus rules from shared/creditService.ts but runs
  * on the server with admin privileges, so it is not blocked by client security rules.
  */
-exports.onUserCreatedApplyReferral = functions
+exports.onUserCreatedApplyReferral = fn
   .region('europe-west1')
   .firestore.document('users/{userId}')
   .onCreate(async (snap, context) => {
@@ -650,7 +666,7 @@ exports.onUserCreatedApplyReferral = functions
  *  - update Firestore products/{productId}.images[index] with the optimized URL
  *  - increment products/{productId}.imageProcessingDone and set status done when complete
  */
-exports.onProductImageUploaded = functions
+exports.onProductImageUploaded = fn
   .region('europe-west1')
   .storage.object()
   .onFinalize(async (object) => {

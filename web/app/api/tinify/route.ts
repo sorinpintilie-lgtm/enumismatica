@@ -4,6 +4,10 @@ export const runtime = 'nodejs';
 
 const MAX_OUTPUT_BYTES = 750 * 1024;
 
+function makeReqId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 // Best-effort per-instance throttling.
 // In serverless environments instances are ephemeral, but they can be reused.
 // This prevents a single warm instance from spawning too many concurrent Tinify calls.
@@ -28,7 +32,9 @@ function toBufferAsync(source: any): Promise<Buffer> {
 }
 
 export async function POST(request: Request) {
+  const reqId = makeReqId();
   if (inFlight >= MAX_IN_FLIGHT) {
+    console.warn('[tinify]', reqId, 'rate-limited: too many in-flight', { inFlight, MAX_IN_FLIGHT });
     return new Response(JSON.stringify({ error: 'Tinify is busy, retry later' }), {
       status: 429,
       headers: {
@@ -56,9 +62,24 @@ export async function POST(request: Request) {
     const inputFile = file as File;
     const inputBuffer = Buffer.from(await inputFile.arrayBuffer());
 
+    console.log('[tinify]', reqId, 'received', {
+      name: inputFile.name,
+      type: inputFile.type,
+      bytes: inputBuffer.byteLength,
+      inFlight,
+    });
+
     // Compress + convert to WebP (client upload code expects WebP extension)
     const converted = tinify.fromBuffer(inputBuffer).convert({ type: 'image/webp' });
     const outputBuffer = await toBufferAsync(converted);
+
+    const overLimit = outputBuffer.byteLength > MAX_OUTPUT_BYTES;
+    console.log('[tinify]', reqId, 'done', {
+      inBytes: inputBuffer.byteLength,
+      outBytes: outputBuffer.byteLength,
+      maxBytes: MAX_OUTPUT_BYTES,
+      overLimit,
+    });
 
     // Convert Node Buffer -> Uint8Array for the Fetch API Response typing.
     const outputBody = new Uint8Array(outputBuffer);
@@ -76,12 +97,17 @@ export async function POST(request: Request) {
       headers: {
         'Content-Type': 'image/webp',
         'Cache-Control': 'no-store',
+        'x-request-id': reqId,
         ...sizeHeader,
       },
     });
   } catch (err: any) {
     // Avoid leaking sensitive details.
     const message = err instanceof Error ? err.message : 'Tinify optimization failed';
+    console.error('[tinify]', reqId, 'failed', {
+      message,
+      inFlight,
+    });
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
