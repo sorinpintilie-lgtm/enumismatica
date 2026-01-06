@@ -152,6 +152,15 @@ async function sendPronumismaticaUserConfirmation(emailEndpoint: string, data: a
   );
 }
 
+async function trySendPronumismaticaUserConfirmation(emailEndpoint: string, data: any) {
+  try {
+    await sendPronumismaticaUserConfirmation(emailEndpoint, data);
+  } catch (error) {
+    // Do not fail the whole form submission if the confirmation email fails.
+    console.error('Pronumismatica user confirmation email failed:', error);
+  }
+}
+
 export async function POST(req: NextRequest) {
   console.log('PRONUMISMATICA API: Received request');
   try {
@@ -239,7 +248,7 @@ export async function POST(req: NextRequest) {
           phone,
           email,
         });
-        await sendPronumismaticaUserConfirmation(emailEndpoint, {
+        await trySendPronumismaticaUserConfirmation(emailEndpoint, {
           lastName,
           firstName,
           phone,
@@ -332,7 +341,7 @@ export async function POST(req: NextRequest) {
       );
       console.log('Email sent successfully');
 
-      await sendPronumismaticaUserConfirmation(emailEndpoint, {
+      await trySendPronumismaticaUserConfirmation(emailEndpoint, {
         lastName,
         firstName,
         phone,
@@ -391,7 +400,7 @@ export async function POST(req: NextRequest) {
       email,
     });
 
-    await sendPronumismaticaUserConfirmation(emailEndpoint, {
+    await trySendPronumismaticaUserConfirmation(emailEndpoint, {
       lastName,
       firstName,
       phone,

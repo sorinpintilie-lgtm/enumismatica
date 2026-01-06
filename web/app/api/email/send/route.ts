@@ -76,18 +76,20 @@ export async function POST(request: NextRequest) {
     // Replace template variables
     let htmlContent = template.html;
     let textContent = template.text;
+    let subjectContent = template.subject;
     
     Object.entries(vars).forEach(([key, value]) => {
       const placeholder = `{{${key}}}`;
       htmlContent = htmlContent.replace(new RegExp(placeholder, 'g'), String(value));
       textContent = textContent.replace(new RegExp(placeholder, 'g'), String(value));
+      subjectContent = subjectContent.replace(new RegExp(placeholder, 'g'), String(value));
     });
     
     // Prepare email data
     const msg: any = {
       to,
       from: FROM_EMAIL,
-      subject: template.subject,
+      subject: subjectContent,
       text: textContent,
       html: htmlContent,
     };
