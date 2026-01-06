@@ -121,5 +121,16 @@ eas submit --platform all
 
 MIT License
 
-<!-- Test comment -->
-<!-- Confirmation comment for git push test -->
+## Documentation
+
+For more detailed information, refer to the following documents:
+
+- [Project Overview](PROJECT_OVERVIEW.md): Comprehensive overview of the project's structure, features, and development process.
+- [Setup and Installation Guide](SETUP_AND_INSTALLATION.md): Step-by-step instructions for setting up and installing the project.
+- [Architecture and Design Decisions](ARCHITECTURE_AND_DESIGN.md): Insights into the architectural and design decisions made during development.
+- [Development Process](DEVELOPMENT_PROCESS.md): Details on the development process, including methodologies, milestones, and challenges faced.
+- [Deployment Process](DEPLOYMENT_PROCESS.md): Guide to deploying the application, including environment setup and deployment steps.
+
+## Support
+
+For questions or issues, please open an issue on the GitHub repository or contact the project maintainers.
