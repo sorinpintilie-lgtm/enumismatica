@@ -124,19 +124,19 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
                 </div>
               )}
             </div>
-            <span className="text-xl font-bold text-[#e7b73c] flex-shrink-0">
-              {formatEUR(product.price)}
-            </span>
-          </div>
-          {showWatchlistButton !== false && (
-            <div className="absolute top-2 left-2 z-10">
-              <WatchlistButton
-                itemType="product"
-                itemId={product.id}
-                size="small"
-              />
+            <div className="flex items-start gap-2 flex-shrink-0">
+              <span className="text-xl font-bold text-[#e7b73c]">
+                {formatEUR(product.price)}
+              </span>
+              {showWatchlistButton !== false && (
+                <WatchlistButton
+                  itemType="product"
+                  itemId={product.id}
+                  size="small"
+                />
+              )}
             </div>
-          )}
+          </div>
           
           <p className="text-sm text-slate-300 line-clamp-2 mb-3">
             {product.description}
@@ -144,8 +144,8 @@ function ProductCard({ product, showWatchlistButton = true, showOfferButton = tr
           
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4 text-xs text-slate-400">
-              {product.country && <span>📍 {product.country}</span>}
-              {product.year && <span>📅 {product.year}</span>}
+              {product.country && <span>Țară: {product.country}</span>}
+              {product.year && <span>An: {product.year}</span>}
             </div>
 
             <div className="flex gap-2">

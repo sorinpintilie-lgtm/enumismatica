@@ -165,25 +165,46 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
   }, [open, orderId, currentUserId, isBuyer, isSeller, counterpartyId]);
 
   const handleOpenChat = async () => {
-    if (!order || !counterpartyId) return;
+    if (!order || !counterpartyId) {
+      setError('Nu se pot determina participanții conversației pentru această comandă.');
+      return;
+    }
     
     if (counterpartyId === 'monetaria-statului') {
+      onClose();
       router.push('/contact');
       return;
     }
 
     try {
       setOpeningChat(true);
-      const conversationId = 
+      const conversationId =
         order.conversationId ||
-        (await createOrGetConversation(
-          isBuyer ? order.buyerId : order.sellerId,
-          isBuyer ? order.sellerId : order.buyerId,
-          undefined,
-          order.productId,
-          false
-        ));
-      router.push(`/messages?conversation=${conversationId}`);
+        (await createOrGetConversation(order.buyerId, order.sellerId, undefined, order.productId, false));
+
+      // Persist conversationId on the order for future quick-open.
+      if (!order.conversationId && db) {
+        try {
+          await updateDoc(doc(db, 'orders', orderId), {
+            conversationId,
+            updatedAt: serverTimestamp(),
+          });
+        } catch (err) {
+          // Non-blocking.
+          console.warn('Failed to persist conversationId on order:', err);
+        }
+      }
+
+      const url = `/messages?conversation=${conversationId}`;
+      onClose();
+      router.push(url);
+
+      // Fallback: if Next router navigation is blocked for any reason, force navigation.
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && window.location.pathname !== '/messages') {
+          window.location.href = url;
+        }
+      }, 50);
     } catch (err: any) {
       console.error('Failed to open conversation', err);
       setError(err?.message || 'Nu s-a putut deschide conversația.');

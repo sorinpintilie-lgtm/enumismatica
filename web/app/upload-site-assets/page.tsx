@@ -39,7 +39,7 @@ export default function UploadSiteAssetsPage() {
       setStatus('Homepage hero image uploaded successfully!');
 
       setResults(uploadResults);
-      setStatus('All assets uploaded successfully! ✅');
+      setStatus('SUCCESS: All assets uploaded successfully!');
     } catch (error: any) {
       console.error('Error uploading assets:', error);
       setStatus(`Error: ${error.message}`);
@@ -73,9 +73,9 @@ export default function UploadSiteAssetsPage() {
 
             {status && (
               <div className={`p-4 rounded-lg ${
-                status.includes('Error') 
+                status.startsWith('Error') 
                   ? 'bg-red-50 border border-red-200 text-red-800'
-                  : status.includes('✅')
+                  : status.startsWith('SUCCESS')
                   ? 'bg-green-50 border border-green-200 text-green-800'
                   : 'bg-blue-50 border border-blue-200 text-blue-800'
               }`}>
@@ -96,7 +96,7 @@ export default function UploadSiteAssetsPage() {
                     }`}
                   >
                     <h3 className="font-semibold text-slate-900 mb-2">
-                      {result.name} {result.success ? '✅' : '❌'}
+                      {result.name} {result.success ? '(OK)' : '(FAIL)'}
                     </h3>
                     {result.success && result.data && (
                       <div className="text-sm text-slate-700 space-y-1">
@@ -115,7 +115,7 @@ export default function UploadSiteAssetsPage() {
             )}
 
             <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <h3 className="font-semibold text-amber-900 mb-2">⚠️ Important Notes:</h3>
+              <h3 className="font-semibold text-amber-900 mb-2">Important Notes:</h3>
               <ul className="text-sm text-amber-800 space-y-1 list-disc list-inside">
                 <li>This will upload images to Firebase Storage</li>
                 <li>Firestore documents will be created in the 'siteAssets' collection</li>

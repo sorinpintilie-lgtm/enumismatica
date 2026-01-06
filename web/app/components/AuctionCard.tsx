@@ -202,28 +202,31 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
                 )}
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-slate-300">Preț curent</p>
-              <p className="text-xl font-bold text-[#e7b73c]">
-                {formatEUR(currentBid)}
-              </p>
+            <div className="flex items-start gap-2">
+              <div className="text-right">
+                <p className="text-sm text-slate-300">Preț curent</p>
+                <p className="text-xl font-bold text-[#e7b73c]">
+                  {formatEUR(currentBid)}
+                </p>
+              </div>
+              {showWatchlistButton && (
+                <WatchlistButton
+                  itemType="auction"
+                  itemId={auction.id}
+                  size="small"
+                />
+              )}
             </div>
           </div>
-          {showWatchlistButton && (
-            <div className="absolute top-2 left-2 z-10">
-              <WatchlistButton
-                itemType="auction"
-                itemId={auction.id}
-                size="small"
-              />
-            </div>
-          )}
           
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-4 text-xs text-slate-400">
-              <span>⏰ <CountdownTimer endTime={auction.endTime} /></span>
+              <span className="inline-flex items-center gap-1">
+                <span className="text-slate-400">Timp:</span>
+                <CountdownTimer endTime={auction.endTime} />
+              </span>
               {canBuyNow && (
-                <span className="text-emerald-300">💰 {formatEUR(auction.buyNowPrice as number)}</span>
+                <span className="text-emerald-300">Cumpără acum: {formatEUR(auction.buyNowPrice as number)}</span>
               )}
             </div>
             

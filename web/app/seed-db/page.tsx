@@ -27,7 +27,7 @@ export default function SeedDatabase() {
   };
 
   const handleReset = async () => {
-    if (!confirm('⚠️ WARNING: This will DELETE ONLY seeded data from your database! Manually created data will be preserved. Are you sure?')) return;
+    if (!confirm('WARNING: This will DELETE ONLY seeded data from your database! Manually created data will be preserved. Are you sure?')) return;
     
     setLoading(true);
     setMessage('');
@@ -103,7 +103,7 @@ export default function SeedDatabase() {
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Processing...' : '📦 Seed Database (Add Sample Data)'}
+            {loading ? 'Processing...' : 'Seed Database (Add Sample Data)'}
           </button>
 
           <button
@@ -111,7 +111,7 @@ export default function SeedDatabase() {
             disabled={loading}
             className="w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Processing...' : '🔄 Reset & Seed (Fresh Start)'}
+            {loading ? 'Processing...' : 'Reset & Seed (Fresh Start)'}
           </button>
 
           <button
@@ -119,7 +119,7 @@ export default function SeedDatabase() {
             disabled={loading}
             className="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Processing...' : '⚠️ Reset Seeded Data'}
+            {loading ? 'Processing...' : 'Reset Seeded Data'}
           </button>
         </div>
 

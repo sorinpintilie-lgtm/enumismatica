@@ -217,10 +217,10 @@ export default function PriceEvolutionChart({ itemId, type, title }: PriceEvolut
         <div className="flex flex-wrap gap-2">
           {Array.from(new Set(priceHistory.map(h => h.source))).map((source) => (
             <span key={source} className="text-xs px-2 py-1 bg-navy-900/70 text-slate-200 border border-gold-500/20 rounded">
-              {source === 'auction_bid' ? '🔨 Licitare' :
-               source === 'manual' ? '✏️ Manual' :
-               source === 'market_update' ? '📈 Piață' :
-               '📦 Colecție'}
+              {source === 'auction_bid' ? 'Licitare' :
+               source === 'manual' ? 'Manual' :
+               source === 'market_update' ? 'Piață' :
+               'Colecție'}
             </span>
           ))}
         </div>

@@ -212,9 +212,9 @@ export default function BidHistoryChart({ auctionId, title, showUserAvatars = tr
               <p className={`text-sm font-bold ${
                 trends.trendAnalysis.overallTrend === 'up' ? 'text-emerald-300' :
                 trends.trendAnalysis.overallTrend === 'down' ? 'text-red-400' : 'text-blue-300'
-              }`}>
-                {trends.trendAnalysis.overallTrend === 'up' ? '📈 Crescător' :
-                 trends.trendAnalysis.overallTrend === 'down' ? '📉 Descrescător' : '📊 Stabil'}
+              }`}> 
+                {trends.trendAnalysis.overallTrend === 'up' ? 'Crescător' :
+                 trends.trendAnalysis.overallTrend === 'down' ? 'Descrescător' : 'Stabil'}
               </p>
             </div>
             <div className="text-center">
