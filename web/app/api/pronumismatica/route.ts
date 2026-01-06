@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import sgMail from '@sendgrid/mail';
 import fs from 'fs';
 import path from 'path';
+import { validCnp } from '../../../lib/validatorsRo/cnp';
 
 const PRONUMISMATICA_TO_EMAIL = process.env.PRONUMISMATICA_TO_EMAIL || 'sorin.pintilie@sky.ro';
 const FROM_EMAIL = process.env.FROM_EMAIL || 'contact@enumismatica.ro';
@@ -193,6 +194,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Câmpuri obligatorii lipsă în formular.' }, { status: 400 });
       }
 
+      if (!validCnp(cnp)) {
+        return NextResponse.json({ error: 'CNP invalid.' }, { status: 400 });
+      }
+
       if (!idFront || !idBack) {
         return NextResponse.json(
           { error: 'Te rugăm să încarci ambele imagini (față și verso).' },
@@ -279,6 +284,10 @@ export async function POST(req: NextRequest) {
       !email
     ) {
       return NextResponse.json({ error: 'Câmpuri obligatorii lipsă în formular.' }, { status: 400 });
+    }
+
+    if (!validCnp(String(cnp))) {
+      return NextResponse.json({ error: 'CNP invalid.' }, { status: 400 });
     }
 
     await sendAdminEmail({ lastName, firstName, cnp, country, county, city, address, idType, idSeries, phone, email });

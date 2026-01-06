@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { parseCnp, validCnp } from '../../lib/validatorsRo/cnp';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -46,8 +47,11 @@ export default function PronumismaticaPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const sanitizedValue = name === 'cnp' ? value.replace(/\D+/g, '') : value;
+    setForm((prev) => ({ ...prev, [name]: sanitizedValue }));
   };
+
+  const cnpStatus = form.cnp.trim().length > 0 ? parseCnp(form.cnp) : null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
@@ -72,7 +76,7 @@ export default function PronumismaticaPage() {
       return (
         form.lastName.trim() !== '' &&
         form.firstName.trim() !== '' &&
-        form.cnp.trim().length >= 10
+        validCnp(form.cnp)
       );
     }
     if (step === 2) {
@@ -97,6 +101,13 @@ export default function PronumismaticaPage() {
 
   const nextStep = () => {
     if (step < 5 && canGoNext()) {
+      if (step === 1) {
+        const parsed = parseCnp(form.cnp);
+        if (parsed.valid) {
+          // Avoid logging the raw CNP; only log the parsed fields.
+          console.log('Parsed CNP:', parsed.parsed);
+        }
+      }
       setStep((prev) => (prev + 1) as Step);
     }
   };
@@ -313,6 +324,21 @@ export default function PronumismaticaPage() {
                     className="w-full rounded-xl border border-slate-600 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e7b73c] focus:border-transparent"
                     required
                   />
+                  {form.cnp.trim().length > 0 && form.cnp.trim().length < 13 && (
+                    <p className="mt-1 text-[11px] text-slate-300">
+                      CNP trebuie să conțină 13 cifre.
+                    </p>
+                  )}
+                  {form.cnp.trim().length === 13 && cnpStatus && !cnpStatus.valid && (
+                    <p className="mt-1 text-[11px] text-red-200">
+                      CNP invalid.
+                    </p>
+                  )}
+                  {form.cnp.trim().length === 13 && cnpStatus && cnpStatus.valid && (
+                    <p className="mt-1 text-[11px] text-emerald-200">
+                      CNP valid • Născut(ă): {cnpStatus.parsed.date_of_birth} • Județ: {cnpStatus.parsed.county_of_birth}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
