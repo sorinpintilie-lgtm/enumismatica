@@ -1,68 +1,110 @@
 import { NextRequest, NextResponse } from 'next/server';
+import sgMail from '@sendgrid/mail';
+import fs from 'fs';
+import path from 'path';
 
 const PRONUMISMATICA_TO_EMAIL = process.env.PRONUMISMATICA_TO_EMAIL || 'sorin.pintilie@sky.ro';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'contact@enumismatica.ro';
 const APP_NAME = 'Enumismatica.ro';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'https://enumismatica.ro';
 
-// Helper function to call the internal email API.
-// IMPORTANT: do not call localhost in production. We derive the origin from the incoming request URL.
-async function sendInternalEmail(
-  emailEndpoint: string,
-  to: string,
-  templateKey: string,
-  vars: Record<string, any>,
-  attachments?: Array<{
-    content: string; // base64
-    filename: string;
-    type?: string;
-    disposition?: 'attachment' | 'inline';
-  }>,
-) {
-  console.log('Calling internal email API:', { emailEndpoint, templateKey });
+type Template = { subject: string; html: string; text: string };
+type TemplatesFile = Record<string, Template>;
 
-  try {
-    const response = await fetch(emailEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        to,
-        templateKey,
-        vars: {
-          app_name: APP_NAME,
-          site_url: SITE_URL,
-          ...vars,
-        },
-        attachments,
-      }),
-    });
+type SendgridAttachment = {
+  content: string; // base64
+  filename: string;
+  type?: string;
+  disposition?: 'attachment' | 'inline';
+  contentId?: string;
+};
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Internal email API error:', response.status, errorData);
-      throw new Error(
-        `Email API failed: ${response.status} - ${
-          (errorData as any)?.error || (errorData as any)?.details || 'Unknown error'
-        }`,
-      );
-    }
+let templatesCache: { loadedAt: number; data: TemplatesFile } | null = null;
 
-    console.log('Internal email API call successful');
-    return await response.json();
-  } catch (error) {
-    console.error('Failed to call internal email API:', error);
-    throw new Error(
-      `Failed to send email via internal API: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
+function loadTemplates(): TemplatesFile {
+  const now = Date.now();
+  if (templatesCache && now - templatesCache.loadedAt < 60_000) {
+    return templatesCache.data;
   }
+
+  const templatesPath = path.join(process.cwd(), 'public', 'email-templates.json');
+  const raw = fs.readFileSync(templatesPath, 'utf-8');
+  const cleaned = raw.replace(/^\uFEFF/, '');
+  const data = JSON.parse(cleaned) as TemplatesFile;
+  templatesCache = { loadedAt: now, data };
+  return data;
 }
 
-async function sendPronumismaticaFormEmail(emailEndpoint: string, data: any) {
-  console.log('sendPronumismaticaFormEmail called with data:', data);
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
-  // Use the internal email API instead of direct SendGrid
+function applyVars(input: string, vars: Record<string, unknown>) {
+  let out = input;
+  for (const [key, value] of Object.entries(vars)) {
+    const placeholder = `{{${key}}}`;
+    out = out.replace(new RegExp(escapeRegExp(placeholder), 'g'), String(value ?? ''));
+  }
+  return out;
+}
+
+function renderTemplate(
+  templateKey: string,
+  vars: Record<string, unknown>,
+  fallbackKey?: string,
+): Template {
+  const templates = loadTemplates();
+  const base = templates[templateKey] || (fallbackKey ? templates[fallbackKey] : undefined);
+
+  const template: Template =
+    base ||
+    ({
+      subject: 'Notificare de la E-numismatica.ro',
+      html: '<p>Ai primit o notificare de la platforma noastră.</p>',
+      text: 'Ai primit o notificare de la platforma noastră.',
+    } satisfies Template);
+
+  return {
+    subject: applyVars(template.subject, vars),
+    html: applyVars(template.html, vars),
+    text: applyVars(template.text, vars),
+  };
+}
+
+async function sendTemplateEmail(input: {
+  to: string;
+  templateKey: string;
+  vars: Record<string, unknown>;
+  fallbackKey?: string;
+  attachments?: SendgridAttachment[];
+}) {
+  const sendgridKey = process.env.SENDGRID_API_KEY || process.env.SENDGRID_KEY;
+  if (!sendgridKey) {
+    throw new Error('Email service is not configured (missing SendGrid API key)');
+  }
+  sgMail.setApiKey(sendgridKey);
+
+  const rendered = renderTemplate(input.templateKey, input.vars, input.fallbackKey);
+
+  const msg: any = {
+    to: input.to,
+    from: FROM_EMAIL,
+    subject: rendered.subject,
+    html: rendered.html,
+    text: rendered.text,
+  };
+
+  if (input.attachments?.length) {
+    msg.attachments = input.attachments;
+  }
+
+  await sgMail.send(msg);
+}
+
+async function sendAdminEmail(data: any, attachments?: SendgridAttachment[]) {
   const vars = {
+    app_name: APP_NAME,
+    site_url: SITE_URL,
     lastName: data.lastName,
     firstName: data.firstName,
     cnp: data.cnp,
@@ -74,89 +116,40 @@ async function sendPronumismaticaFormEmail(emailEndpoint: string, data: any) {
     idSeries: data.idSeries,
     phone: data.phone,
     email: data.email,
+    attachments_note: data.attachments_note,
   };
 
-  await sendInternalEmail(emailEndpoint, PRONUMISMATICA_TO_EMAIL, 'pronumismatica_form', vars);
-  console.log('Admin email sent successfully via internal API to:', PRONUMISMATICA_TO_EMAIL);
-}
+  const templateKey = attachments?.length ? 'pronumismatica_form_with_images' : 'pronumismatica_form';
 
-async function sendPronumismaticaFormEmailWithIdImages(
-  emailEndpoint: string,
-  data: any,
-  imagesMeta: {
-    front: { filename: string; contentType: string; size: number };
-    back: { filename: string; contentType: string; size: number };
-  },
-  attachments: Array<{ content: string; filename: string; type?: string; disposition?: 'attachment' | 'inline' }>,
-) {
-  console.log('sendPronumismaticaFormEmailWithIdImages called with data:', data);
-
-  // For forms with ID images, we need to handle attachments differently
-  // Since the internal email API doesn't support attachments, we'll use the basic template
-  // and include a note about the attachments
-  
-  const vars = {
-    lastName: data.lastName,
-    firstName: data.firstName,
-    cnp: data.cnp,
-    country: data.country,
-    county: data.county,
-    city: data.city,
-    address: data.address,
-    idType: data.idType,
-    idSeries: data.idSeries,
-    phone: data.phone,
-    email: data.email,
-    // Add note about attachments
-    attachments_note: `Acte încărcate: ${imagesMeta.front.filename} (${Math.round(
-      imagesMeta.front.size / 1024,
-    )} KB, ${imagesMeta.front.contentType}) și ${imagesMeta.back.filename} (${Math.round(
-      imagesMeta.back.size / 1024,
-    )} KB, ${imagesMeta.back.contentType}).`,
-  };
-
-  // Use the template for forms with images
-  await sendInternalEmail(
-    emailEndpoint,
-    PRONUMISMATICA_TO_EMAIL,
-    'pronumismatica_form_with_images',
+  await sendTemplateEmail({
+    to: PRONUMISMATICA_TO_EMAIL,
+    templateKey,
     vars,
     attachments,
-  );
-  console.log('Email sent successfully via internal API');
-
-  // TODO: In a production environment, you would need to:
-  // 1. Upload the attachment files to cloud storage (Firebase Storage, S3, etc.)
-  // 2. Include download links in the email or process them separately
-  // 3. Notify the recipient about the attachments through another channel
-  
-  console.log('Note: ID images were attached to the admin email (SendGrid attachments).');
+  });
 }
 
-async function sendPronumismaticaUserConfirmation(emailEndpoint: string, data: any) {
+async function trySendUserConfirmation(data: any) {
   const to = String(data.email || '').trim();
   if (!to) return;
 
   const vars = {
+    app_name: APP_NAME,
+    site_url: SITE_URL,
     lastName: data.lastName,
     firstName: data.firstName,
     email: data.email,
     phone: data.phone,
   };
 
-  await sendInternalEmail(
-    emailEndpoint,
-    to,
-    'pronumismatica_user_confirmation',
-    vars,
-  );
-}
-
-async function trySendPronumismaticaUserConfirmation(emailEndpoint: string, data: any) {
   try {
-    await sendPronumismaticaUserConfirmation(emailEndpoint, data);
+    await sendTemplateEmail({
+      to,
+      templateKey: 'pronumismatica_user_confirmation',
+      vars,
+    });
   } catch (error) {
-    // Do not fail the whole form submission if the confirmation email fails.
+    // Confirmation must not fail the whole submission.
     console.error('Pronumismatica user confirmation email failed:', error);
   }
 }
@@ -164,18 +157,10 @@ async function trySendPronumismaticaUserConfirmation(emailEndpoint: string, data
 export async function POST(req: NextRequest) {
   console.log('PRONUMISMATICA API: Received request');
   try {
-    // Build a same-origin absolute URL for the internal email route.
-    // This avoids relying on NEXT_PUBLIC_SITE_URL (which may be missing) and avoids localhost in production.
-    const emailEndpoint = new URL('/api/email/send', req.url).toString();
-
     const contentType = req.headers.get('content-type') || '';
-    console.log('Content-Type:', contentType);
 
-    // Support both legacy JSON submissions and new multipart submissions with ID images.
     if (contentType.includes('multipart/form-data')) {
-      console.log('Processing multipart/form-data submission');
       const formData = await req.formData();
-      console.log('Form data keys:', Array.from(formData.keys()));
 
       const lastName = String(formData.get('lastName') || '').trim();
       const firstName = String(formData.get('firstName') || '').trim();
@@ -189,11 +174,8 @@ export async function POST(req: NextRequest) {
       const phone = String(formData.get('phone') || '').trim();
       const email = String(formData.get('email') || '').trim();
 
-      console.log('Extracted form data:', { lastName, firstName, cnp, country, county, city, address, idType, idSeries, phone, email });
-
       const idFront = formData.get('idFront');
       const idBack = formData.get('idBack');
-      console.log('ID files:', { idFront: idFront ? 'present' : 'missing', idBack: idBack ? 'present' : 'missing' });
 
       if (
         !lastName ||
@@ -208,97 +190,55 @@ export async function POST(req: NextRequest) {
         !phone ||
         !email
       ) {
-        console.error('Missing required fields');
-        return NextResponse.json(
-          { error: 'Câmpuri obligatorii lipsă în formular.' },
-          { status: 400 },
-        );
+        return NextResponse.json({ error: 'Câmpuri obligatorii lipsă în formular.' }, { status: 400 });
       }
 
-      // Check if ID files are provided and valid
-      if (idFront && !(idFront instanceof File)) {
-        console.error('ID front file is not a valid File object');
-        return NextResponse.json(
-          { error: 'Fișierul față al actului de identitate nu este valid.' },
-          { status: 400 },
-        );
-      }
-
-      if (idBack && !(idBack instanceof File)) {
-        console.error('ID back file is not a valid File object');
-        return NextResponse.json(
-          { error: 'Fișierul verso al actului de identitate nu este valid.' },
-          { status: 400 },
-        );
-      }
-
-      // If no ID files are provided, proceed without images
-      if (!idFront && !idBack) {
-        console.log('No ID files provided, proceeding without images');
-        await sendPronumismaticaFormEmail(emailEndpoint, {
-          lastName,
-          firstName,
-          cnp,
-          country,
-          county,
-          city,
-          address,
-          idType,
-          idSeries,
-          phone,
-          email,
-        });
-        await trySendPronumismaticaUserConfirmation(emailEndpoint, {
-          lastName,
-          firstName,
-          phone,
-          email,
-        });
-        return NextResponse.json({ success: true });
-      }
-      // If only one file is provided, return an error
-      if ((idFront && !idBack) || (!idFront && idBack)) {
-        console.error('Only one ID file provided');
+      if (!idFront || !idBack) {
         return NextResponse.json(
           { error: 'Te rugăm să încarci ambele imagini (față și verso).' },
           { status: 400 },
         );
       }
-
-      // At this point both files must be present and validated.
-      const idFrontFile = idFront as File;
-      const idBackFile = idBack as File;
-
-      console.log('ID file types:', idFrontFile.type, idBackFile.type);
-      if (!idFrontFile.type.startsWith('image/') || !idBackFile.type.startsWith('image/')) {
-        console.error('ID files are not images');
+      if (!(idFront instanceof File) || !(idBack instanceof File)) {
         return NextResponse.json(
-          { error: 'Fișierele încărcate trebuie să fie imagini.' },
+          { error: 'Fișierele încărcate nu sunt valide.' },
           { status: 400 },
         );
       }
 
-      console.log('ID file sizes:', idFrontFile.size, idBackFile.size);
-      // Attachments are sent via SendGrid (base64-encoded), so keep a conservative size.
-      // 7MB binary ~= 9.3MB base64.
+      if (!idFront.type.startsWith('image/') || !idBack.type.startsWith('image/')) {
+        return NextResponse.json({ error: 'Fișierele încărcate trebuie să fie imagini.' }, { status: 400 });
+      }
+
+      // Attachments are base64; keep conservative.
       const maxSize = 7 * 1024 * 1024;
-      if (idFrontFile.size > maxSize || idBackFile.size > maxSize) {
-        console.error('ID files are too large');
-        return NextResponse.json(
-          { error: 'Imaginile sunt prea mari (maxim 7MB fiecare).' },
-          { status: 400 },
-        );
+      if (idFront.size > maxSize || idBack.size > maxSize) {
+        return NextResponse.json({ error: 'Imaginile sunt prea mari (maxim 7MB fiecare).' }, { status: 400 });
       }
 
-      console.log('Sending email with ID images');
+      const idFrontBase64 = Buffer.from(await idFront.arrayBuffer()).toString('base64');
+      const idBackBase64 = Buffer.from(await idBack.arrayBuffer()).toString('base64');
 
-      // Encode attachments for SendGrid.
-      // NOTE: base64 adds ~33% overhead; large images may be rejected by SendGrid.
-      const idFrontBase64 = Buffer.from(await idFrontFile.arrayBuffer()).toString('base64');
-      const idBackBase64 = Buffer.from(await idBackFile.arrayBuffer()).toString('base64');
+      const attachments: SendgridAttachment[] = [
+        {
+          content: idFrontBase64,
+          filename: idFront.name || 'id-front.jpg',
+          type: idFront.type || 'image/jpeg',
+          disposition: 'attachment',
+        },
+        {
+          content: idBackBase64,
+          filename: idBack.name || 'id-back.jpg',
+          type: idBack.type || 'image/jpeg',
+          disposition: 'attachment',
+        },
+      ];
 
-      await sendPronumismaticaFormEmailWithIdImages(
-        emailEndpoint,
+      const attachments_note = `Acte atașate: ${attachments[0].filename} (${Math.round(
+        idFront.size / 1024,
+      )} KB) și ${attachments[1].filename} (${Math.round(idBack.size / 1024)} KB).`;
+
+      await sendAdminEmail(
         {
           lastName,
           firstName,
@@ -311,61 +251,19 @@ export async function POST(req: NextRequest) {
           idSeries,
           phone,
           email,
+          attachments_note,
         },
-        {
-          front: {
-            filename: idFrontFile.name || 'id-front.jpg',
-            contentType: idFrontFile.type || 'image/jpeg',
-            size: idFrontFile.size,
-          },
-          back: {
-            filename: idBackFile.name || 'id-back.jpg',
-            contentType: idBackFile.type || 'image/jpeg',
-            size: idBackFile.size,
-          },
-        },
-        [
-          {
-            content: idFrontBase64,
-            filename: idFrontFile.name || 'id-front.jpg',
-            type: idFrontFile.type || 'image/jpeg',
-            disposition: 'attachment',
-          },
-          {
-            content: idBackBase64,
-            filename: idBackFile.name || 'id-back.jpg',
-            type: idBackFile.type || 'image/jpeg',
-            disposition: 'attachment',
-          },
-        ],
+        attachments,
       );
-      console.log('Email sent successfully');
 
-      await trySendPronumismaticaUserConfirmation(emailEndpoint, {
-        lastName,
-        firstName,
-        phone,
-        email,
-      });
+      await trySendUserConfirmation({ lastName, firstName, phone, email });
 
       return NextResponse.json({ success: true });
     }
 
+    // Legacy JSON submission
     const body = await req.json();
-
-    const {
-      lastName,
-      firstName,
-      cnp,
-      country,
-      county,
-      city,
-      address,
-      idType,
-      idSeries,
-      phone,
-      email,
-    } = body || {};
+    const { lastName, firstName, cnp, country, county, city, address, idType, idSeries, phone, email } = body || {};
 
     if (
       !lastName ||
@@ -380,45 +278,17 @@ export async function POST(req: NextRequest) {
       !phone ||
       !email
     ) {
-      return NextResponse.json(
-        { error: 'Câmpuri obligatorii lipsă în formular.' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Câmpuri obligatorii lipsă în formular.' }, { status: 400 });
     }
 
-    await sendPronumismaticaFormEmail(emailEndpoint, {
-      lastName,
-      firstName,
-      cnp,
-      country,
-      county,
-      city,
-      address,
-      idType,
-      idSeries,
-      phone,
-      email,
-    });
-
-    await trySendPronumismaticaUserConfirmation(emailEndpoint, {
-      lastName,
-      firstName,
-      phone,
-      email,
-    });
-
+    await sendAdminEmail({ lastName, firstName, cnp, country, county, city, address, idType, idSeries, phone, email });
+    await trySendUserConfirmation({ lastName, firstName, phone, email });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error handling PRONUMISMATICA form submission:', error);
-    if (error instanceof Error) {
-      console.error('Error stack trace:', error.stack);
-      return NextResponse.json(
-        { error: `A apărut o eroare la procesarea formularului: ${error.message}` },
-        { status: 500 },
-      );
-    }
+    const msg = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'A apărut o eroare la procesarea formularului.' },
+      { error: `A apărut o eroare la procesarea formularului: ${msg}` },
       { status: 500 },
     );
   }
