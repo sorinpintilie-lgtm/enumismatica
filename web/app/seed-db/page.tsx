@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { seedAllData, resetDatabase } from 'shared/seed';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
+import { isSuperAdmin } from 'shared/adminService';
 
 export default function SeedDatabase() {
   const { user, loading: authLoading } = useAuth();
+  const [superAdminChecked, setSuperAdminChecked] = useState(false);
+  const [isSuperAdminUser, setIsSuperAdminUser] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -15,6 +18,44 @@ export default function SeedDatabase() {
   const [compressionTestLoading, setCompressionTestLoading] = useState(false);
   const [compressionTestMessage, setCompressionTestMessage] = useState('');
   const [compressionTestError, setCompressionTestError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      if (!user?.uid) {
+        setSuperAdminChecked(true);
+        setIsSuperAdminUser(false);
+        return;
+      }
+
+      setSuperAdminChecked(false);
+      try {
+        console.log('[SeedDB] Checking superadmin status for user', {
+          uid: user.uid,
+          email: user.email,
+          roleFromProfile: (user as any).role,
+          isSuperAdminFromProfile: (user as any).isSuperAdmin,
+        });
+
+        const status = await isSuperAdmin(user.uid);
+        console.log('[SeedDB] isSuperAdmin() result', { uid: user.uid, status });
+        if (cancelled) return;
+        setIsSuperAdminUser(status);
+        setSuperAdminChecked(true);
+      } catch (e) {
+        console.error('[SeedDB] Failed to check superadmin status', e);
+        if (cancelled) return;
+        setIsSuperAdminUser(false);
+        setSuperAdminChecked(true);
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid]);
 
   const handleTestTinifyCompression = async () => {
     if (!compressionTestFile) {
@@ -137,23 +178,26 @@ export default function SeedDatabase() {
     }
   };
 
-  if (authLoading) {
+  if (authLoading || !superAdminChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <div className="max-w-2xl w-full bg-white p-8 rounded-lg shadow-md">
-          <p className="text-gray-700">Loading auth...</p>
+          <p className="text-gray-700">Loading auth / permissions...</p>
         </div>
       </div>
     );
   }
 
-  if (!user?.isSuperAdmin) {
+  if (!isSuperAdminUser) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <div className="max-w-2xl w-full bg-white p-8 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Access denied</h1>
           <p className="text-gray-700">
             This page is restricted to superadmins.
+          </p>
+          <p className="mt-2 text-xs text-gray-500">
+            Signed in as: {user?.email || 'unknown'} ({user?.uid || 'no uid'})
           </p>
           <div className="mt-6">
             <Link href="/" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
