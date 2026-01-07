@@ -24,15 +24,21 @@ export function useProducts(ownerId?: string, pageSize: number = 20, fields: str
   const [hasMore, setHasMore] = useState(true);
   const [lastVisible, setLastVisible] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const currentUnsubscribeRef = useRef<(() => void) | null>(null);
+  
+  // Log initial state
+  console.log('useProducts hook initialized', { ownerId, pageSize, fields });
 
   const loadProducts = useCallback((startAfterDoc?: QueryDocumentSnapshot<DocumentData>) => {
     // Skip Firebase calls if db is not available
     if (!db) {
+      console.log('Firebase db is not available');
       setProducts([]);
       setLoading(false);
       setHasMore(false);
       return () => {};
     }
+    
+    console.log('Firebase db is available:', db);
 
     // Clean up previous listener without triggering re-renders
     if (currentUnsubscribeRef.current) {

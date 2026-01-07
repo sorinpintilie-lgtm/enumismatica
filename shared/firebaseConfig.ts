@@ -87,6 +87,8 @@ export {
   addDoc,
   deleteDoc,
   serverTimestamp,
+  Timestamp,
+  updateDoc,
 } from 'firebase/firestore';
 
 export type { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';

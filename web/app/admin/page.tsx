@@ -484,6 +484,16 @@ export default function AdminDashboard() {
         {/* Quick Links */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Link
+            href="/admin/verification"
+            className="bg-navy-800/50 hover:bg-navy-700/50 border border-gold-500/20 hover:border-gold-500/40 rounded-lg p-6 transition-colors"
+          >
+            <h3 className="text-lg font-semibold text-white mb-2">Verificare Identitate</h3>
+            <p className="text-sm text-slate-400">
+              Cereri de verificare documentelor de identitate
+            </p>
+          </Link>
+
+          <Link
             href="/admin/users"
             className="bg-navy-800/50 hover:bg-navy-700/50 border border-gold-500/20 hover:border-gold-500/40 rounded-lg p-6 transition-colors"
           >
@@ -510,16 +520,6 @@ export default function AdminDashboard() {
             <h3 className="text-lg font-semibold text-white mb-2">Loguri Detaliate</h3>
             <p className="text-sm text-slate-400">
               Monitorizare completă a activității utilizatorilor
-            </p>
-          </Link>
-
-          <Link
-            href="/admin/conversations"
-            className="bg-navy-800/50 hover:bg-navy-700/50 border border-gold-500/20 hover:border-gold-500/40 rounded-lg p-6 transition-colors"
-          >
-            <h3 className="text-lg font-semibold text-white mb-2">Conversații</h3>
-            <p className="text-sm text-slate-400">
-              Monitorizează mesajele și conversațiile utilizatorilor
             </p>
           </Link>
         </div>

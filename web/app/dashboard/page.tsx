@@ -748,12 +748,12 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Personal Details */}
           {/* ID Verification Section */}
-          {user.idDocumentNumber && (
-            <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-white">Verificare Identitate</h2>
-                </div>
+          <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Verificare Identitate</h2>
+              </div>
+              {user.idDocumentNumber && (
                 <div className="flex items-center gap-2">
                   <span className={`px-2 py-1 text-xs rounded-full font-semibold ${
                     user.idVerificationStatus === 'verified'
@@ -766,8 +766,10 @@ export default function Dashboard() {
                      user.idVerificationStatus === 'pending' ? 'ÎN AȘTEPTARE' : 'RESPINS'}
                   </span>
                 </div>
-              </div>
-              
+              )}
+            </div>
+            
+            {user.idDocumentNumber ? (
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-slate-300">
@@ -809,8 +811,66 @@ export default function Dashboard() {
                     'Documentul tău a fost respins. Te rugăm să încarci documente valide.'}</p>
                 </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="space-y-4">
+                <p className="text-sm text-slate-300">
+                  Verifică-ți identitatea pentru a beneficia de funcționalități avansate și pentru a câștiga încrederea cumpărătorilor.
+                </p>
+                
+                <div className="bg-navy-900/40 rounded-lg border border-gold-500/20 p-4">
+                  <h3 className="text-base font-semibold text-white mb-3">Încarcă documentul de identitate</h3>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-200 mb-1">Tip document</label>
+                      <select
+                        className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                        defaultValue="ci"
+                      >
+                        <option value="ci">Carte de identitate</option>
+                        <option value="passport">Pașaport</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-200 mb-1">Număr document</label>
+                      <input
+                        type="text"
+                        placeholder="Introdu numărul documentului"
+                        className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-200 mb-1">Față document</label>
+                      <div className="border-2 border-dashed border-gold-500/30 rounded-lg p-6 text-center">
+                        <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
+                        <input type="file" accept="image/*" className="hidden" />
+                        <button className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold">
+                          Selectează imagine
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-200 mb-1">Spate document</label>
+                      <div className="border-2 border-dashed border-gold-500/30 rounded-lg p-6 text-center">
+                        <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
+                        <input type="file" accept="image/*" className="hidden" />
+                        <button className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold">
+                          Selectează imagine
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <button className="w-full bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-3 rounded-lg font-semibold mt-4">
+                      Trimite pentru verificare
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
             <div className="flex items-start justify-between gap-4 mb-4">

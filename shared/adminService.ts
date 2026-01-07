@@ -650,6 +650,29 @@ export async function forceEndAuction(auctionId: string): Promise<{ success: boo
 }
 
 /**
+ * Get users with pending identity verification (admin only)
+ */
+export async function getUsersWithPendingVerification(): Promise<User[]> {
+  try {
+    const q = query(
+      collection(db, 'users'),
+      where('idVerificationStatus', '==', 'pending'),
+      orderBy('updatedAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+    })) as User[];
+  } catch (error) {
+    console.error('Error fetching users with pending verification:', error);
+    return [];
+  }
+}
+
+/**
  * Get rejected items for review (admin only)
  */
 export async function getRejectedProducts(): Promise<Product[]> {

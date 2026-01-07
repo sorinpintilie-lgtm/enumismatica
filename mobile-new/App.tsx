@@ -1,4 +1,5 @@
 import 'nativewind';
+import { LogBox } from 'react-native';
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -138,6 +139,12 @@ function AppNavigator() {
 }
 
 export default function App() {
+  // Log initial app state
+  console.log('App component rendered');
+  
+  // Ignore specific warnings
+  LogBox.ignoreAllLogs();
+  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>

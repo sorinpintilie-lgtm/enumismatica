@@ -6,6 +6,7 @@ import { useAuctions } from '../hooks/useAuctions';
 import { useProducts } from '../hooks/useProducts';
 import { Auction, Product } from '@shared/types';
 import { RootStackParamList } from '../navigationTypes';
+import WatchlistButton from '../components/WatchlistButton';
 
 interface FilterOptions {
   searchTerm: string;
@@ -73,18 +74,23 @@ const AuctionCard: React.FC<{ auction: Auction; product?: Product | null }> = ({
       className="bg-navy-700/80 border border-gold-500/30 rounded-2xl p-4 mb-4 mx-4 shadow-xl"
       onPress={() => navigation.navigate('AuctionDetails', { auctionId: auction.id })}
     >
-      <View className="w-full h-40 rounded-xl overflow-hidden bg-white/5 mb-3 border border-gold-500/40">
-        {product?.images && product.images.length > 0 ? (
-          <Image
-            source={{ uri: product.images[0] }}
-            resizeMode="contain"
-            className="w-full h-full"
-          />
-        ) : (
-          <View className="flex-1 items-center justify-center">
-            <Text className="text-xs text-slate-400">Fără imagine</Text>
-          </View>
-        )}
+      <View className="relative">
+        <View className="w-full h-40 rounded-xl overflow-hidden bg-white/5 mb-3 border border-gold-500/40">
+          {product?.images && product.images.length > 0 ? (
+            <Image
+              source={{ uri: product.images[0] }}
+              resizeMode="contain"
+              className="w-full h-full"
+            />
+          ) : (
+            <View className="flex-1 items-center justify-center">
+              <Text className="text-xs text-slate-400">Fără imagine</Text>
+            </View>
+          )}
+        </View>
+        <View className="absolute top-2 right-2 z-10">
+          <WatchlistButton itemType="auction" itemId={auction.id} size="small" />
+        </View>
       </View>
 
       <View className="flex-row justify-between items-start mb-2">
@@ -352,7 +358,8 @@ const AuctionListScreen: React.FC = () => {
           onPress={() => setShowFilters(true)}
         >
           <Text className="text-navy-900 text-center font-semibold">
-            Filtre avansate ({filteredAuctions.length} din {auctions.length})
+            <Text>Filtre avansate </Text>
+            <Text>({filteredAuctions.length} din {auctions.length})</Text>
           </Text>
         </TouchableOpacity>
       </View>

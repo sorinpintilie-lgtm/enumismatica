@@ -5,6 +5,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useProducts } from '../hooks/useProducts';
 import { Product } from '@shared/types';
 import { RootStackParamList } from '../navigationTypes';
+import WatchlistButton from '../components/WatchlistButton';
 
 interface FilterOptions {
   searchTerm: string;
@@ -32,18 +33,23 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       className="bg-navy-700/80 border border-gold-500/30 rounded-2xl p-4 mb-4 mx-4 shadow-xl"
       onPress={() => navigation.navigate('ProductDetails', { productId: product.id })}
     >
-      <View className="w-full h-40 rounded-xl overflow-hidden bg-white/5 mb-3 border border-gold-500/40">
-        {product.images && product.images.length > 0 ? (
-          <Image
-            source={{ uri: product.images[0] }}
-            resizeMode="contain"
-            className="w-full h-full"
-          />
-        ) : (
-          <View className="flex-1 items-center justify-center">
-            <Text className="text-xs text-slate-400">Fără imagine</Text>
-          </View>
-        )}
+      <View className="relative">
+        <View className="w-full h-40 rounded-xl overflow-hidden bg-white/5 mb-3 border border-gold-500/40">
+          {product.images && product.images.length > 0 ? (
+            <Image
+              source={{ uri: product.images[0] }}
+              resizeMode="contain"
+              className="w-full h-full"
+            />
+          ) : (
+            <View className="flex-1 items-center justify-center">
+              <Text className="text-xs text-slate-400">Fără imagine</Text>
+            </View>
+          )}
+        </View>
+        <View className="absolute top-2 right-2 z-10">
+          <WatchlistButton itemType="product" itemId={product.id} size="small" />
+        </View>
       </View>
       <Text className="text-lg font-semibold text-white mb-1" numberOfLines={1}>
         {product.name}
@@ -75,6 +81,9 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 const ProductCatalogScreen: React.FC = () => {
   const { products, loading, error } = useProducts();
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Log products data
+  console.log('Products data:', { products, loading, error });
   
   const [filters, setFilters] = useState<FilterOptions>({
     searchTerm: '',

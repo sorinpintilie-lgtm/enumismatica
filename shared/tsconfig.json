@@ -10,7 +10,7 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
-    "noEmit": true,
+    "noEmit": false,
     "incremental": true,
     "module": "esnext",
     "esModuleInterop": true,
@@ -22,11 +22,7 @@
     "paths": {
       "shared/*": ["./*"]
     },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "outDir": "dist"
   },
   "include": ["**/*.ts"]
 }
