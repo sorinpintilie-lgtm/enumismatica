@@ -235,11 +235,12 @@ function RegisterForm() {
               <p className="text-xs text-slate-300">
                 Verificare identitate (opțional) – pe platforma enumismatica.ro poți furniza datele din CI sau pașaport pentru obținerea unui cont verificat, crescând încrederea în anunțurile și ofertele tale.
               </p>
-              <div className="flex flex-col gap-3">
-                <div>
-                  <label htmlFor="cnp" className="block text-sm font-medium text-slate-200 mb-1">
-                    CNP (opțional)
-                  </label>
+              {verifyIdentity && (
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <label htmlFor="cnp" className="block text-sm font-medium text-slate-200 mb-1">
+                      CNP <span className="text-red-400">*</span>
+                    </label>
                   <input
                     id="cnp"
                     name="cnp"
@@ -264,21 +265,21 @@ function RegisterForm() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-200 mb-1">
-                    Tip document
+                    Tip document <span className="text-red-400">*</span>
                   </label>
                   <select
                     className="block w-full px-4 py-3 border border-gold-500/40 bg-navy-900/70 text-slate-50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent"
                     value={idDocumentType}
                     onChange={(e) => setIdDocumentType(e.target.value as 'ci' | 'passport' | '')}
                   >
-                    <option value="">Nu doresc să introduc acum</option>
+                    {!verifyIdentity && <option value="">Selectează tipul documentului</option>}
                     <option value="ci">Carte de identitate (CI)</option>
                     <option value="passport">Pașaport</option>
                   </select>
                 </div>
                 <div>
                   <label htmlFor="idNumber" className="block text-sm font-medium text-slate-200 mb-1">
-                    Număr document
+                    Număr document <span className="text-red-400">*</span>
                   </label>
                   <input
                     id="idNumber"
@@ -292,7 +293,7 @@ function RegisterForm() {
                 </div>
                 <div>
                   <label htmlFor="idSeries" className="block text-sm font-medium text-slate-200 mb-1">
-                    Serie document
+                    Serie document <span className="text-red-400">*</span>
                   </label>
                   <input
                     id="idSeries"
@@ -306,34 +307,33 @@ function RegisterForm() {
                 </div>
                 
                 {/* ID Document Photo Uploads */}
-                {(verifyIdentity || idDocumentNumber) && (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-200 mb-1">
-                        Fotografie față document {verifyIdentity && <span className="text-red-400">*</span>}
-                      </label>
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        className="block w-full text-sm text-slate-400"
-                        onChange={(e) => setIdDocumentFrontPhoto(e.target.files?.[0] || null)}
-                        required={verifyIdentity}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-200 mb-1">
-                        Fotografie spate document (opțional)
-                      </label>
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        className="block w-full text-sm text-slate-400"
-                        onChange={(e) => setIdDocumentBackPhoto(e.target.files?.[0] || null)}
-                      />
-                    </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-200 mb-1">
+                      Fotografie față document <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="block w-full text-sm text-slate-400"
+                      onChange={(e) => setIdDocumentFrontPhoto(e.target.files?.[0] || null)}
+                      required={verifyIdentity}
+                    />
                   </div>
-                )}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-200 mb-1">
+                      Fotografie spate document (opțional)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="block w-full text-sm text-slate-400"
+                      onChange={(e) => setIdDocumentBackPhoto(e.target.files?.[0] || null)}
+                    />
+                  </div>
+                </div>
               </div>
+              )}
             </div>
           </div>
 
