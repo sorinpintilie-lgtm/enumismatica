@@ -78,6 +78,16 @@ export default function SettingsPage() {
   // GDPR export
   const [exportLoading, setExportLoading] = useState(false);
 
+  // 2FA Backup codes
+  const [backupCodes, setBackupCodes] = useState<string[] | null>(null);
+  const [backupCodesLoading, setBackupCodesLoading] = useState(false);
+  const [backupCodesError, setBackupCodesError] = useState('');
+
+  // Trusted devices
+  const [trustedDevices, setTrustedDevices] = useState<any[]>([]);
+  const [trustedDevicesLoading, setTrustedDevicesLoading] = useState(false);
+  const [trustedDevicesError, setTrustedDevicesError] = useState('');
+
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login');
@@ -89,8 +99,110 @@ export default function SettingsPage() {
       loadUserSettings();
       loadSecurityLog();
       loadSessions();
+      loadTrustedDevices();
     }
   }, [user?.uid]);
+
+  const loadTrustedDevices = async () => {
+    if (!user) return;
+    setTrustedDevicesLoading(true);
+    setTrustedDevicesError('');
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/auth/2fa/trusted-devices/list', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Nu s-au putut încărca dispozitivele de încredere.');
+      }
+      const data = await res.json();
+      setTrustedDevices(Array.isArray(data?.devices) ? data.devices : []);
+    } catch (err: any) {
+      setTrustedDevicesError(err?.message || 'Nu s-au putut încărca dispozitivele de încredere.');
+    } finally {
+      setTrustedDevicesLoading(false);
+    }
+  };
+
+  const removeTrustedDevice = async (deviceId: string) => {
+    if (!user) return;
+    const confirmed = window.confirm('Ștergi acest dispozitiv de încredere? La următoarea autentificare va cere 2FA.');
+    if (!confirmed) return;
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/auth/2fa/trusted-devices/remove', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ deviceId }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Nu s-a putut șterge dispozitivul.');
+      }
+      await logSecurityEvent('trusted_device_removed', 'Dispozitiv de încredere șters');
+      await loadTrustedDevices();
+    } catch (err: any) {
+      alert(err?.message || 'Nu s-a putut șterge dispozitivul.');
+    }
+  };
+
+  const generateBackupCodes = async () => {
+    if (!user) return;
+    const confirmed = window.confirm(
+      'Generezi coduri noi? Codurile vechi vor deveni invalide. Salvează-le într-un loc sigur.',
+    );
+    if (!confirmed) return;
+
+    setBackupCodesLoading(true);
+    setBackupCodesError('');
+    setBackupCodes(null);
+
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/auth/2fa/backup-codes/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Nu s-au putut genera codurile.');
+      }
+
+      const data = await res.json();
+      const codes = Array.isArray(data?.codes) ? data.codes : [];
+      setBackupCodes(codes);
+      await logSecurityEvent('backup_codes_generated', 'Coduri de rezervă 2FA regenerate');
+    } catch (err: any) {
+      setBackupCodesError(err?.message || 'Nu s-au putut genera codurile.');
+    } finally {
+      setBackupCodesLoading(false);
+    }
+  };
+
+  const downloadBackupCodes = () => {
+    if (!backupCodes || backupCodes.length === 0) return;
+    const content = backupCodes.join('\n');
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'enumismatica_backup_codes.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const loadSessions = async () => {
     if (!user) return;
@@ -791,6 +903,97 @@ export default function SettingsPage() {
               <p className="text-sm text-emerald-200 border border-emerald-500/30 bg-emerald-500/10 rounded-lg px-3 py-2 mt-4">
                 {twoFactorSuccess}
               </p>
+            )}
+          </div>
+
+          {/* 2FA Backup Codes */}
+          <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Coduri de rezervă 2FA</h2>
+                <p className="text-sm text-slate-300 mt-1">
+                  Coduri one-time pentru cazurile în care nu ai acces la aplicația de autentificare.
+                </p>
+              </div>
+              <button
+                onClick={generateBackupCodes}
+                disabled={backupCodesLoading}
+                className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg font-semibold disabled:opacity-60"
+              >
+                {backupCodesLoading ? 'Se generează...' : 'Generează coduri'}
+              </button>
+            </div>
+
+            {backupCodesError && (
+              <p className="text-sm text-red-200 border border-red-500/30 bg-red-500/10 rounded-lg px-3 py-2 mb-3">
+                {backupCodesError}
+              </p>
+            )}
+
+            {backupCodes && (
+              <div className="bg-navy-900/40 rounded-lg border border-gold-500/20 p-4">
+                <p className="text-sm text-slate-200 mb-3">
+                  Salvează aceste coduri acum. Nu vor mai putea fi afișate ulterior.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {backupCodes.map((c) => (
+                    <code key={c} className="block text-center bg-navy-950 text-gold-200 px-2 py-2 rounded font-mono text-sm">
+                      {c}
+                    </code>
+                  ))}
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={downloadBackupCodes}
+                    className="bg-navy-700 hover:bg-navy-600 text-white px-4 py-2 rounded-lg font-semibold"
+                  >
+                    Descarcă .txt
+                  </button>
+                  <button
+                    onClick={() => setBackupCodes(null)}
+                    className="bg-navy-700/50 hover:bg-navy-700 text-slate-200 px-4 py-2 rounded-lg font-semibold"
+                  >
+                    Ascunde
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Trusted devices */}
+          <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+            <h2 className="text-xl font-semibold text-white mb-2">Dispozitive de încredere</h2>
+            <p className="text-sm text-slate-300 mb-4">
+              Dispozitive pe care ai ales să nu ceară 2FA pentru o perioadă limitată.
+            </p>
+
+            {trustedDevicesError && (
+              <p className="text-sm text-red-200 border border-red-500/30 bg-red-500/10 rounded-lg px-3 py-2 mb-3">
+                {trustedDevicesError}
+              </p>
+            )}
+
+            {trustedDevicesLoading ? (
+              <p className="text-sm text-slate-300">Se încarcă...</p>
+            ) : trustedDevices.length === 0 ? (
+              <p className="text-sm text-slate-300">Nu ai dispozitive de încredere salvate.</p>
+            ) : (
+              <div className="space-y-2">
+                {trustedDevices.map((d) => (
+                  <div key={d.id} className="p-3 bg-navy-900/40 rounded-lg border border-gold-500/20 flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-white">{d.label || 'Dispozitiv'}</p>
+                      <p className="text-xs text-slate-400">Expiră: {d.expiresAt ? new Date(d.expiresAt).toLocaleString('ro-RO') : '—'}</p>
+                    </div>
+                    <button
+                      onClick={() => removeTrustedDevice(d.id)}
+                      className="text-xs font-semibold px-3 py-2 rounded-lg border border-red-500/40 text-red-200 hover:bg-red-500/10"
+                    >
+                      Elimină
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 

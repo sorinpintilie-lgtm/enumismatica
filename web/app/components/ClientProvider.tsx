@@ -5,6 +5,8 @@ import { AuthProvider, useAuth } from '../context/AuthContext'
 import ToastProvider from './ToastProvider'
 import ActivityLogger from './ActivityLogger'
 import LoadingSpinner from './LoadingSpinner'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 // Create a client
 function makeQueryClient() {
@@ -37,6 +39,29 @@ function getQueryClient() {
 }
 
 function AuthWrapper({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) return;
+
+    // Enforce 2FA when enabled.
+    // Users must complete 2FA verification (stored in sessionStorage) before accessing other routes.
+    const twoFactorEnabled = !!(user as any).twoFactorEnabled;
+    if (!twoFactorEnabled) return;
+
+    // Allow login page to perform the 2FA challenge.
+    if (pathname?.startsWith('/login')) return;
+
+    const okKey = `enumismatica_2fa_ok_${user.uid}`;
+    const verified = typeof window !== 'undefined' && sessionStorage.getItem(okKey) === '1';
+    if (!verified) {
+      router.replace('/login');
+    }
+  }, [user?.uid, (user as any)?.twoFactorEnabled, loading, pathname, router]);
+
   return <>{children}</>;
 }
 

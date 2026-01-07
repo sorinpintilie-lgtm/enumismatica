@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { z } from 'zod';
@@ -31,8 +31,38 @@ export default function LoginPage() {
   const [twoFactorError, setTwoFactorError] = useState('');
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [twoFactorSecret, setTwoFactorSecret] = useState<string | null>(null);
+  const [rememberDevice, setRememberDevice] = useState(true);
+  const [useBackupCode, setUseBackupCode] = useState(false);
   
   const router = useRouter();
+
+  // If the user is already authenticated but required to complete 2FA (gate redirects here),
+  // show the 2FA prompt automatically.
+  useEffect(() => {
+    const init2FAIfNeeded = async () => {
+      try {
+        const current = auth.currentUser;
+        if (!current?.uid) return;
+
+        const okKey = `enumismatica_2fa_ok_${current.uid}`;
+        if (sessionStorage.getItem(okKey) === '1') return;
+
+        const userDoc = await getDoc(doc(db, 'users', current.uid));
+        if (!userDoc.exists()) return;
+        const data = userDoc.data() as any;
+        if (!data.twoFactorEnabled) return;
+
+        setEmail(current.email || '');
+        setPendingUserId(current.uid);
+        setTwoFactorSecret(data.twoFactorSecret || null);
+        setShow2FA(true);
+      } catch (err) {
+        console.warn('Failed to init 2FA on login page:', err);
+      }
+    };
+
+    init2FAIfNeeded();
+  }, []);
 
   const startSessionOnServer = async () => {
     try {
@@ -89,12 +119,29 @@ export default function LoginPage() {
       try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists() && userDoc.data().twoFactorEnabled) {
-          // User has 2FA enabled, show 2FA prompt
+          // Check trusted device first
+          const deviceId = localStorage.getItem('enumismatica_device_id');
+          if (deviceId) {
+            try {
+              const trustedSnap = await getDoc(doc(db, 'users', user.uid, 'trustedDevices', deviceId));
+              if (trustedSnap.exists()) {
+                const td = trustedSnap.data() as any;
+                const expiresAt = td?.expiresAt?.toDate?.() ? td.expiresAt.toDate() : null;
+                if (expiresAt && expiresAt.getTime() > Date.now()) {
+                  await startSessionOnServer();
+                  router.push('/dashboard');
+                  return;
+                }
+              }
+            } catch (err) {
+              console.warn('Failed to check trusted device:', err);
+            }
+          }
+
+          // User has 2FA enabled, show 2FA prompt (do NOT sign out; we need token for backup codes / trusted device)
           setPendingUserId(user.uid);
           setTwoFactorSecret(userDoc.data().twoFactorSecret);
           setShow2FA(true);
-          // Sign out temporarily until 2FA is verified
-          await auth.signOut();
         } else {
           // No 2FA, proceed to dashboard
           await startSessionOnServer();
@@ -120,30 +167,66 @@ export default function LoginPage() {
     }
 
     try {
-      // Verify the 2FA code
-      const res = await fetch('/api/auth/2fa/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: pendingUserId,
-          code: twoFactorCode,
-          secret: twoFactorSecret,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Cod invalid');
+      if (!auth.currentUser) {
+        throw new Error('Sesiune invalidă. Te rugăm să te autentifici din nou.');
       }
 
-      // 2FA verified, sign in again
-      const { user, error } = await signInWithEmail(email, password);
-      
-      if (error) {
-        setTwoFactorError(error);
-      } else if (user) {
-        await startSessionOnServer();
-        router.push('/dashboard');
+      if (useBackupCode) {
+        const token = await auth.currentUser.getIdToken();
+        const res = await fetch('/api/auth/2fa/backup-codes/verify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ code: twoFactorCode }),
+        });
+        if (!res.ok) throw new Error('Cod de rezervă invalid.');
+      } else {
+        // Verify TOTP code
+        const res = await fetch('/api/auth/2fa/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: pendingUserId,
+            code: twoFactorCode,
+            secret: twoFactorSecret,
+          }),
+        });
+        if (!res.ok) throw new Error('Cod invalid');
       }
+
+      // Remember device (trusted device) if enabled
+      if (rememberDevice) {
+        const token = await auth.currentUser.getIdToken();
+        let deviceId = localStorage.getItem('enumismatica_device_id');
+        if (!deviceId) {
+          deviceId =
+            typeof crypto !== 'undefined' && 'randomUUID' in crypto
+              ? (crypto as any).randomUUID()
+              : `dev_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+          localStorage.setItem('enumismatica_device_id', deviceId);
+        }
+
+        await fetch('/api/auth/2fa/trusted-devices/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            deviceId,
+            label: typeof navigator !== 'undefined' ? navigator.platform : 'web',
+            days: 30,
+          }),
+        }).catch((err) => console.warn('Failed to remember device:', err));
+      }
+
+      // Mark 2FA as verified for this browser session
+      sessionStorage.setItem(`enumismatica_2fa_ok_${pendingUserId}`, '1');
+
+      await startSessionOnServer();
+      router.push('/dashboard');
     } catch (err: any) {
       setTwoFactorError(err.message || 'Cod invalid. Te rugăm să încerci din nou.');
     } finally {
@@ -312,22 +395,65 @@ export default function LoginPage() {
           <div className="mt-6 p-6 bg-navy-800/60 rounded-2xl border border-gold-500/40">
             <h3 className="text-lg font-semibold text-white mb-2">Autentificare cu Doi Factori</h3>
             <p className="text-sm text-slate-300 mb-4">
-              Introdu codul din aplicația ta de autentificare
+              Introdu codul din aplicația ta de autentificare sau un cod de rezervă.
             </p>
             
             <form onSubmit={handleVerify2FA} className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUseBackupCode(false);
+                    setTwoFactorCode('');
+                    setTwoFactorError('');
+                  }}
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
+                    !useBackupCode
+                      ? 'bg-gold-500 text-navy-900 border-gold-400'
+                      : 'bg-navy-900/40 text-slate-200 border-gold-500/30 hover:bg-navy-900/60'
+                  }`}
+                >
+                  Cod 2FA (6 cifre)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUseBackupCode(true);
+                    setTwoFactorCode('');
+                    setTwoFactorError('');
+                  }}
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
+                    useBackupCode
+                      ? 'bg-gold-500 text-navy-900 border-gold-400'
+                      : 'bg-navy-900/40 text-slate-200 border-gold-500/30 hover:bg-navy-900/60'
+                  }`}
+                >
+                  Cod de rezervă
+                </button>
+              </div>
+
               <div>
                 <input
                   type="text"
                   value={twoFactorCode}
                   onChange={(e) => setTwoFactorCode(e.target.value)}
-                  placeholder="000000"
-                  maxLength={6}
+                  placeholder={useBackupCode ? 'ABCD-EF12' : '000000'}
+                  maxLength={useBackupCode ? 9 : 6}
                   className="appearance-none relative block w-full px-4 py-3 border border-gold-500/40 placeholder-slate-400 text-slate-50 rounded-xl bg-navy-900/70 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent text-center text-2xl tracking-widest"
                   required
                   autoFocus
                 />
               </div>
+
+              <label className="flex items-center gap-2 text-sm text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={rememberDevice}
+                  onChange={(e) => setRememberDevice(e.target.checked)}
+                  className="w-4 h-4 accent-gold-500"
+                />
+                Ține minte acest dispozitiv (30 zile)
+              </label>
 
               {twoFactorError && (
                 <div className="bg-red-900/40 border border-red-500/60 text-red-100 px-4 py-3 rounded-xl text-sm text-center">
@@ -337,7 +463,12 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                disabled={loading || twoFactorCode.length !== 6}
+                disabled={
+                  loading ||
+                  (useBackupCode
+                    ? twoFactorCode.trim().length < 8
+                    : twoFactorCode.trim().length !== 6)
+                }
                 className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-[#000940] bg-[#e7b73c] hover:bg-[#f0c955] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 shadow-lg shadow-[0_0_24px_rgba(231,183,60,0.75)] transition-all duration-200"
               >
                 {loading ? 'Se verifică...' : 'Verifică Codul'}

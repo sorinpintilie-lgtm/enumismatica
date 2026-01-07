@@ -15,6 +15,7 @@ interface ExtendedUser extends FirebaseUser {
   idDocumentType?: 'ci' | 'passport';
   idDocumentNumber?: string;
   idDocumentPhotos?: string[];
+  twoFactorEnabled?: boolean;
 }
 
 interface AuthContextType {
@@ -61,6 +62,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
            const idDocumentType = userData?.idDocumentType;
            const idDocumentNumber = userData?.idDocumentNumber;
            const idDocumentPhotos = userData?.idDocumentPhotos;
+           const twoFactorEnabled = userData?.twoFactorEnabled || false;
 
            if (mounted) {
              const extendedUser = {
@@ -73,7 +75,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                idDocumentType,
                idDocumentNumber,
                idDocumentPhotos,
-             } as ExtendedUser;
+               twoFactorEnabled,
+              } as ExtendedUser;
 
                setUser(extendedUser);
               setLoading(false);
