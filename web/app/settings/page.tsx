@@ -1201,7 +1201,7 @@ export default function SettingsPage() {
             {sessionsLoading ? (
               <p className="text-sm text-slate-300">Se încarcă...</p>
             ) : sessions.length === 0 ? (
-              <p className="text-sm text-slate-300">Nu există sesiuni înregistrate încă.</p>
+              <p className="text-sm text-slate-300">Nu există sesiuni înregistrate încă. Autentifică-te pentru a crea o sesiune.</p>
             ) : (
               <div className="space-y-2">
                 {sessions.map((s) => {
