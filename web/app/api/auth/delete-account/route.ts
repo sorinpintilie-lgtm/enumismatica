@@ -12,6 +12,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if Firebase Admin is initialized
+    if (!adminDb || !adminAuth) {
+      return NextResponse.json(
+        { error: 'Firebase Admin SDK is not configured. Please contact support.' },
+        { status: 503 }
+      );
+    }
+
     // Delete user data from Firestore
     const batch = adminDb.batch();
 
