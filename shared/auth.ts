@@ -10,7 +10,7 @@ import {
 } from 'firebase/auth';
 import { createUserProfileAfterSignup } from './creditService';
 import { logActivity } from './activityLogService';
-import { sendWelcomeEmail, sendLoginAttemptEmail, sendLoginSuccessEmail } from './emailService';
+import { sendWelcomeEmail } from './emailService';
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -30,23 +30,9 @@ export const signInWithEmail = async (email: string, password: string) => {
     }
 
     const userCredential = await signInWithEmailAndPassword(auth, sanitizedEmail, sanitizedPassword);
-  
+   
       // Ensure Firestore user profile exists (idempotent, no referral on login)
       await createUserProfileAfterSignup(userCredential.user, null);
-  
-      // Send login success email (non-blocking)
-      try {
-        const userEmail = userCredential.user.email || sanitizedEmail;
-        const userName = userCredential.user.displayName || 'Utilizator';
-        const location = 'Unknown location';
-        const dateTime = new Date().toISOString();
-        const device = typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown device';
-        const actionLink = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://enumismatica.ro'}/settings`;
-        
-        await sendLoginSuccessEmail(userEmail, location, dateTime, device, actionLink);
-      } catch (emailError) {
-        console.warn('Failed to send login success email:', emailError);
-      }
   
       // Log the login (non-blocking)
       try {

@@ -9,6 +9,7 @@ import { auth } from '../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import LoginStepper from '../components/LoginStepper';
+import { sendLoginSuccessEmail, sendLoginAttemptEmail } from 'shared/emailService';
 
 const loginSchema = z.object({
   email: z.string().email('Adresă de email invalidă'),
@@ -66,6 +67,32 @@ export default function LoginPage() {
 
     init2FAIfNeeded();
   }, []);
+
+  const sendLoginSuccessNotification = async (email: string) => {
+    try {
+      const location = 'Unknown location';
+      const dateTime = new Date().toISOString();
+      const device = typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown device';
+      const actionLink = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://enumismatica.ro'}/settings`;
+      
+      await sendLoginSuccessEmail(email, location, dateTime, device, actionLink);
+    } catch (emailError) {
+      console.warn('Failed to send login success email:', emailError);
+    }
+  };
+
+  const sendLoginAttemptNotification = async (email: string) => {
+    try {
+      const location = 'Unknown location';
+      const dateTime = new Date().toISOString();
+      const device = typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown device';
+      const actionLink = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://enumismatica.ro'}/settings`;
+      
+      await sendLoginAttemptEmail(email, location, dateTime, device, actionLink);
+    } catch (emailError) {
+      console.warn('Failed to send login attempt email:', emailError);
+    }
+  };
 
   const startSessionOnServer = async () => {
     try {
@@ -131,6 +158,8 @@ export default function LoginPage() {
                 const td = trustedSnap.data() as any;
                 const expiresAt = td?.expiresAt?.toDate?.() ? td.expiresAt.toDate() : null;
                 if (expiresAt && expiresAt.getTime() > Date.now()) {
+                  // Send login success email for trusted device
+                  await sendLoginSuccessNotification(user.email || email);
                   await startSessionOnServer();
                   router.push('/dashboard');
                   return;
@@ -140,13 +169,15 @@ export default function LoginPage() {
               console.warn('Failed to check trusted device:', err);
             }
           }
-
-          // User has 2FA enabled, show stepper and move to 2FA step
+ 
+          // User has 2FA enabled, send login attempt notification and show stepper
+          await sendLoginAttemptNotification(user.email || email);
           setShowStepper(true);
           setPendingUserId(user.uid);
           setCurrentStep(1);
         } else {
-          // No 2FA, proceed to dashboard without showing stepper
+          // No 2FA, send login success email and proceed to dashboard
+          await sendLoginSuccessNotification(user.email || email);
           await startSessionOnServer();
           router.push('/dashboard');
         }
@@ -217,16 +248,32 @@ export default function LoginPage() {
       // Mark 2FA as verified for this browser session
       sessionStorage.setItem(`enumismatica_2fa_ok_${pendingUserId}`, '1');
 
+      // Send login success email after successful 2FA
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        await sendLoginSuccessNotification(currentUser.email || '');
+      }
+
       await startSessionOnServer();
       router.push('/dashboard');
     } catch (err: any) {
       setTwoFactorError(err.message || 'Cod invalid. Te rugăm să încerci din nou.');
+      // Send login attempt notification on failed 2FA
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        await sendLoginAttemptNotification(currentUser.email || '');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBackToLogin = () => {
+  const handleBackToLogin = async () => {
+    // Send login attempt notification when user goes back from 2FA
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      await sendLoginAttemptNotification(currentUser.email || '');
+    }
     setCurrentStep(0);
     setTwoFactorCode('');
     setTwoFactorError('');
