@@ -133,6 +133,24 @@ service cloud.firestore {
         allow update: if isOwner(userId) || isAdmin();
         allow delete: if isOwner(userId) || isAdmin();
       }
+
+      // Trusted devices for 2FA ("remember this device")
+      match /trustedDevices/{deviceId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update, delete: if isOwner(userId) || isAdmin();
+      }
+
+      // 2FA backup codes (hashed). These should NOT be readable by normal users.
+      match /backupCodes/{codeHash} {
+        allow read: if isAdmin();
+        allow create, update, delete: if isAdmin();
+      }
+    }
+
+    // User sessions tracking (server-managed). Users can read their own sessions.
+    match /userSessions/{sessionId} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+      allow create, update, delete: if isAdmin();
     }
 
     // Products collection: Anyone can read approved products, authenticated users can read their own, admins can read all

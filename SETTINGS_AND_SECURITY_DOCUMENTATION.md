@@ -294,6 +294,77 @@ FIREBASE_CLIENT_EMAIL=your-client-email
 FIREBASE_PRIVATE_KEY=your-private-key
 ```
 
+### Alternative (recommended for Netlify)
+Instead of split vars, you can set a single env var:
+
+```env
+FIREBASE_SERVICE_ACCOUNT_JSON={...full service account json...}
+```
+
+or base64:
+
+```env
+FIREBASE_SERVICE_ACCOUNT_BASE64=...
+```
+
+Implementation: [`loadServiceAccountFromEnv()`](web/app/lib/firebaseAdmin.ts:12)
+
+## Additional Account Settings (Implemented)
+
+### A) Sessions / Devices
+
+Backend endpoints:
+- Start session: [`POST /api/auth/sessions/start`](web/app/api/auth/sessions/start/route.ts:1)
+- Ping session: [`POST /api/auth/sessions/ping`](web/app/api/auth/sessions/ping/route.ts:1)
+- List sessions: [`GET /api/auth/sessions/list`](web/app/api/auth/sessions/list/route.ts:1)
+- Revoke other sessions: [`POST /api/auth/sessions/revoke-others`](web/app/api/auth/sessions/revoke-others/route.ts:1)
+
+Frontend:
+- Sessions UI: [`SettingsPage`](web/app/settings/page.tsx:1)
+
+### B) Email Verification + Change Email
+
+Frontend (Firebase Auth):
+- Resend verification email: [`sendEmailVerification()`](web/app/settings/page.tsx:1)
+- Change email with confirmation to new address: [`verifyBeforeUpdateEmail()`](web/app/settings/page.tsx:1)
+
+### C) 2FA Backup Codes
+
+Backend:
+- Generate (regenerates and invalidates old): [`POST /api/auth/2fa/backup-codes/generate`](web/app/api/auth/2fa/backup-codes/generate/route.ts:1)
+- Verify one-time backup code: [`POST /api/auth/2fa/backup-codes/verify`](web/app/api/auth/2fa/backup-codes/verify/route.ts:1)
+
+Notes:
+- Stored as SHA-256 hashes in Firestore under `users/{uid}/backupCodes/{hash}`.
+- Backup code docs are admin-only readable via rules: [`firestore.rules`](firestore.rules:1)
+
+### D) Trusted Devices ("Remember this device")
+
+Backend:
+- Add: [`POST /api/auth/2fa/trusted-devices/add`](web/app/api/auth/2fa/trusted-devices/add/route.ts:1)
+- List: [`GET /api/auth/2fa/trusted-devices/list`](web/app/api/auth/2fa/trusted-devices/list/route.ts:1)
+- Remove: [`POST /api/auth/2fa/trusted-devices/remove`](web/app/api/auth/2fa/trusted-devices/remove/route.ts:1)
+
+Login integration:
+- Login page checks `users/{uid}/trustedDevices/{deviceId}` before prompting 2FA: [`LoginPage`](web/app/login/page.tsx:1)
+
+### E) GDPR Export
+
+Backend:
+- Download JSON export: [`GET /api/account/export`](web/app/api/account/export/route.ts:1)
+
+Frontend:
+- Export UI: [`SettingsPage`](web/app/settings/page.tsx:1)
+
+## Firestore Rules Updates
+
+Added explicit rules for:
+- `users/{uid}/trustedDevices/*`
+- `users/{uid}/backupCodes/*` (admin-only)
+- `userSessions/*`
+
+See: [`firestore.rules`](firestore.rules:1)
+
 **Usage**:
 ```typescript
 import { adminDb, adminAuth } from '@/lib/firebaseAdmin';
