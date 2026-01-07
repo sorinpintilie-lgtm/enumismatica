@@ -367,3 +367,15 @@ export async function sendPasswordChangedEmail(email: string): Promise<void> {
   });
 }
 
+export async function sendEmailVerificationEmail(email: string, verificationLink: string): Promise<void> {
+  return sendTemplateEmail({
+    to: email,
+    templateKey: 'account_email_verification',
+    vars: {
+      user_name: 'Utilizator',
+      verification_link: verificationLink,
+    },
+    fallbackKey: 'fallback_default',
+  });
+}
+

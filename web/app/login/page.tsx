@@ -34,8 +34,9 @@ export default function LoginPage() {
   const [rememberDevice, setRememberDevice] = useState(true);
   const [useBackupCode, setUseBackupCode] = useState(false);
   
-  // Stepper state
+  // Stepper state - we'll manage this differently now
   const [currentStep, setCurrentStep] = useState(0);
+  const [showStepper, setShowStepper] = useState(false);
   
   const router = useRouter();
 
@@ -140,11 +141,12 @@ export default function LoginPage() {
             }
           }
 
-          // User has 2FA enabled, move to 2FA step
+          // User has 2FA enabled, show stepper and move to 2FA step
+          setShowStepper(true);
           setPendingUserId(user.uid);
           setCurrentStep(1);
         } else {
-          // No 2FA, proceed to dashboard
+          // No 2FA, proceed to dashboard without showing stepper
           await startSessionOnServer();
           router.push('/dashboard');
         }
@@ -483,11 +485,93 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <LoginStepper
-          steps={steps}
-          currentStep={currentStep}
-          onBack={currentStep > 0 ? handleBackToLogin : undefined}
-        />
+        {showStepper ? (
+          <LoginStepper
+            steps={steps}
+            currentStep={currentStep}
+            onBack={currentStep > 0 ? handleBackToLogin : undefined}
+          />
+        ) : (
+          <div className="mt-8 space-y-6">
+            <form className="mt-8 space-y-6" onSubmit={handleEmailLogin}>
+              <div className="rounded-xl space-y-4">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-slate-200 mb-1">
+                    Adresă de email
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    className="appearance-none relative block w-full px-4 py-3 border border-gold-500/40 placeholder-slate-400 text-slate-50 rounded-xl bg-navy-900/70 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent focus:z-10 sm:text-sm"
+                    placeholder="nume@exemplu.ro"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-1">
+                    Parolă
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    className="appearance-none relative block w-full px-4 py-3 border border-gold-500/40 placeholder-slate-400 text-slate-50 rounded-xl bg-navy-900/70 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent focus:z-10 sm:text-sm"
+                    placeholder="Parola ta"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="bg-red-900/40 border border-red-500/60 text-red-100 px-4 py-3 rounded-xl text-sm text-center">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-[#000940] bg-[#e7b73c] hover:bg-[#f0c955] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 shadow-lg shadow-[0_0_24px_rgba(231,183,60,0.75)] transition-all duration-200"
+                >
+                  {loading ? 'Se autentifică...' : 'Autentificare'}
+                </button>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                  className="group relative w-full flex justify-center py-3 px-4 border border-gold-500/60 text-sm font-semibold rounded-xl text-gold-200 bg-navy-900/70 hover:bg-gold-500/10 hover:border-gold-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 transition-all duration-200"
+                >
+                  Autentificare cu Google
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  onClick={() => setShowResetPassword(true)}
+                  className="font-medium text-gold-400 hover:text-gold-300 transition-colors"
+                >
+                  Ai uitat parola?
+                </button>
+                <Link
+                  href="/register"
+                  className="font-medium text-gold-400 hover:text-gold-300 transition-colors"
+                >
+                  Înregistrează-te
+                </Link>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Password Reset Modal */}
