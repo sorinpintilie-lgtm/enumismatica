@@ -46,7 +46,27 @@ export function useActivityLogger() {
       }
     };
 
+    const pingSession = async () => {
+      try {
+        const sessionId = localStorage.getItem('enumismatica_session_id');
+        if (!sessionId) return;
+        const token = await user.getIdToken();
+        await fetch('/api/auth/sessions/ping', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ sessionId }),
+        });
+      } catch (err) {
+        // Never block navigation.
+        console.warn('Failed to ping session:', err);
+      }
+    };
+
     logPageView();
+    pingSession();
 
     // Log page leave on unmount
     return () => {

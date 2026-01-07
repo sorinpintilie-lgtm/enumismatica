@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  updatePassword,
+import { 
+  updatePassword, 
   sendPasswordResetEmail as firebaseSendPasswordReset,
+  sendEmailVerification,
+  verifyBeforeUpdateEmail,
   EmailAuthProvider,
   reauthenticateWithCredential
 } from 'firebase/auth';
@@ -50,14 +52,31 @@ export default function SettingsPage() {
   const [emailPrefsLoading, setEmailPrefsLoading] = useState(false);
   const [emailPrefsSuccess, setEmailPrefsSuccess] = useState('');
 
+  // Email verification / change email
+  const [emailVerifyLoading, setEmailVerifyLoading] = useState(false);
+  const [emailVerifyMessage, setEmailVerifyMessage] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [emailChangePassword, setEmailChangePassword] = useState('');
+  const [emailChangeLoading, setEmailChangeLoading] = useState(false);
+  const [emailChangeError, setEmailChangeError] = useState('');
+  const [emailChangeSuccess, setEmailChangeSuccess] = useState('');
+
   // Security log
   const [securityLog, setSecurityLog] = useState<any[]>([]);
   const [securityLogLoading, setSecurityLogLoading] = useState(false);
+
+  // Sessions / devices
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [sessionsError, setSessionsError] = useState<string>('');
 
   // Account deletion
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // GDPR export
+  const [exportLoading, setExportLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -69,8 +88,70 @@ export default function SettingsPage() {
     if (user?.uid) {
       loadUserSettings();
       loadSecurityLog();
+      loadSessions();
     }
   }, [user?.uid]);
+
+  const loadSessions = async () => {
+    if (!user) return;
+    setSessionsLoading(true);
+    setSessionsError('');
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/auth/sessions/list', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Nu s-au putut încărca sesiunile.');
+      }
+
+      const data = await res.json();
+      setSessions(Array.isArray(data?.sessions) ? data.sessions : []);
+    } catch (err: any) {
+      console.error('Failed to load sessions', err);
+      setSessionsError(err?.message || 'Nu s-au putut încărca sesiunile.');
+    } finally {
+      setSessionsLoading(false);
+    }
+  };
+
+  const revokeOtherSessions = async () => {
+    if (!user) return;
+
+    const confirmed = window.confirm(
+      'Vrei să deloghezi celelalte dispozitive? (Poate fi necesar să te reautentifici ulterior pe acest dispozitiv.)',
+    );
+    if (!confirmed) return;
+
+    try {
+      const token = await user.getIdToken();
+      const currentSessionId = localStorage.getItem('enumismatica_session_id');
+      const res = await fetch('/api/auth/sessions/revoke-others', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentSessionId }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Nu s-au putut revoca sesiunile.');
+      }
+
+      await logSecurityEvent('sessions_revoked', 'Au fost revocate sesiunile de pe alte dispozitive');
+      await loadSessions();
+      alert('Sesiunile de pe alte dispozitive au fost revocate.');
+    } catch (err: any) {
+      alert(err?.message || 'Nu s-au putut revoca sesiunile.');
+    }
+  };
 
   const loadUserSettings = async () => {
     if (!user?.uid) return;
@@ -173,6 +254,73 @@ export default function SettingsPage() {
       }
     } finally {
       setPasswordLoading(false);
+    }
+  };
+
+  const handleSendVerificationEmail = async () => {
+    if (!auth.currentUser) return;
+    setEmailVerifyLoading(true);
+    setEmailVerifyMessage('');
+    try {
+      await sendEmailVerification(auth.currentUser, {
+        url: `${window.location.origin}/settings`,
+      });
+      setEmailVerifyMessage('Emailul de verificare a fost trimis. Verifică inbox-ul (și Spam).');
+    } catch (err: any) {
+      console.error('Failed to send verification email', err);
+      setEmailVerifyMessage(err?.message || 'Nu s-a putut trimite emailul de verificare.');
+    } finally {
+      setEmailVerifyLoading(false);
+    }
+  };
+
+  const handleChangeEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailChangeError('');
+    setEmailChangeSuccess('');
+
+    if (!user || !auth.currentUser) {
+      setEmailChangeError('Nu ești autentificat.');
+      return;
+    }
+
+    const sanitized = newEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitized)) {
+      setEmailChangeError('Adresă de email invalidă.');
+      return;
+    }
+
+    if (!emailChangePassword) {
+      setEmailChangeError('Introdu parola curentă pentru confirmare.');
+      return;
+    }
+
+    setEmailChangeLoading(true);
+    try {
+      const credential = EmailAuthProvider.credential(user.email!, emailChangePassword);
+      await reauthenticateWithCredential(auth.currentUser, credential);
+
+      await verifyBeforeUpdateEmail(auth.currentUser, sanitized, {
+        url: `${window.location.origin}/settings`,
+      });
+
+      setEmailChangeSuccess(
+        'Am trimis un email de confirmare la noua adresă. Deschide link-ul din email pentru a finaliza schimbarea.',
+      );
+      setNewEmail('');
+      setEmailChangePassword('');
+      await logSecurityEvent('email_change_requested', 'A fost inițiată schimbarea adresei de email');
+    } catch (err: any) {
+      console.error('Email change error:', err);
+      if (err.code === 'auth/wrong-password') {
+        setEmailChangeError('Parola curentă este incorectă.');
+      } else if (err.code === 'auth/requires-recent-login') {
+        setEmailChangeError('Este necesară reautentificarea. Te rugăm să te deconectezi și să te autentifici din nou.');
+      } else {
+        setEmailChangeError(err?.message || 'Nu s-a putut iniția schimbarea emailului.');
+      }
+    } finally {
+      setEmailChangeLoading(false);
     }
   };
 
@@ -347,6 +495,40 @@ export default function SettingsPage() {
     }
   };
 
+  const handleExportData = async () => {
+    if (!user) return;
+    setExportLoading(true);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/account/export', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Exportul nu a putut fi generat.');
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `enumismatica_export_${user.uid}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      await logSecurityEvent('gdpr_export', 'Export date cont (GDPR)');
+    } catch (err: any) {
+      alert(err?.message || 'Exportul nu a putut fi generat.');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -374,6 +556,87 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-6">
+          {/* Email verification & Change email */}
+          <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Email & Verificare</h2>
+                <p className="text-sm text-slate-300 mt-1">
+                  Email curent: <span className="font-semibold text-gold-200">{user.email}</span>
+                </p>
+              </div>
+              {user.emailVerified ? (
+                <span className="px-3 py-1 text-xs rounded-full font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-500/40">
+                  VERIFICAT
+                </span>
+              ) : (
+                <span className="px-3 py-1 text-xs rounded-full font-semibold bg-yellow-500/20 text-yellow-200 border border-yellow-500/40">
+                  NEVERIFICAT
+                </span>
+              )}
+            </div>
+
+            {!user.emailVerified && (
+              <div className="mb-6">
+                <button
+                  onClick={handleSendVerificationEmail}
+                  disabled={emailVerifyLoading}
+                  className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-6 py-2 rounded-lg font-semibold disabled:opacity-60"
+                >
+                  {emailVerifyLoading ? 'Se trimite...' : 'Trimite email de verificare'}
+                </button>
+                {emailVerifyMessage && (
+                  <p className="text-sm text-slate-200 mt-2">{emailVerifyMessage}</p>
+                )}
+              </div>
+            )}
+
+            <div className="border-t border-gold-500/20 pt-4">
+              <h3 className="text-base font-semibold text-white mb-3">Schimbă adresa de email</h3>
+              <form onSubmit={handleChangeEmail} className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">Email nou</label>
+                  <input
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                    placeholder="nume@exemplu.ro"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-1">Parola curentă</label>
+                  <input
+                    type="password"
+                    value={emailChangePassword}
+                    onChange={(e) => setEmailChangePassword(e.target.value)}
+                    className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                    placeholder="Parola ta"
+                  />
+                </div>
+
+                {emailChangeError && (
+                  <p className="text-sm text-red-200 border border-red-500/30 bg-red-500/10 rounded-lg px-3 py-2">
+                    {emailChangeError}
+                  </p>
+                )}
+                {emailChangeSuccess && (
+                  <p className="text-sm text-emerald-200 border border-emerald-500/30 bg-emerald-500/10 rounded-lg px-3 py-2">
+                    {emailChangeSuccess}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={emailChangeLoading}
+                  className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-6 py-2 rounded-lg font-semibold disabled:opacity-60"
+                >
+                  {emailChangeLoading ? 'Se trimite...' : 'Trimite confirmare schimbare email'}
+                </button>
+              </form>
+            </div>
+          </div>
+
           {/* Password Change Section */}
           <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
             <h2 className="text-xl font-semibold text-white mb-4">Schimbă Parola</h2>
@@ -603,6 +866,75 @@ export default function SettingsPage() {
           </div>
 
           {/* Security Log */}
+          {/* Sessions / Devices */}
+          <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Sesiuni & Dispozitive</h2>
+                <p className="text-sm text-slate-300 mt-1">
+                  Vezi unde ești autentificat și deloghează celelalte dispozitive.
+                </p>
+              </div>
+              <button
+                onClick={revokeOtherSessions}
+                className="bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-500/40 px-4 py-2 rounded-lg font-semibold"
+              >
+                Deloghează celelalte
+              </button>
+            </div>
+
+            {sessionsError && (
+              <p className="text-sm text-red-200 border border-red-500/30 bg-red-500/10 rounded-lg px-3 py-2 mb-3">
+                {sessionsError}
+              </p>
+            )}
+
+            {sessionsLoading ? (
+              <p className="text-sm text-slate-300">Se încarcă...</p>
+            ) : sessions.length === 0 ? (
+              <p className="text-sm text-slate-300">Nu există sesiuni înregistrate încă.</p>
+            ) : (
+              <div className="space-y-2">
+                {sessions.map((s) => {
+                  const isCurrent =
+                    typeof window !== 'undefined' &&
+                    localStorage.getItem('enumismatica_session_id') === s.id;
+                  return (
+                    <div key={s.id} className="p-3 bg-navy-900/40 rounded-lg border border-gold-500/20">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-medium text-white">
+                            {s.deviceLabel || 'Dispozitiv'}{' '}
+                            {isCurrent && (
+                              <span className="ml-2 text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-500/40">
+                                ACUM
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-xs text-slate-400 mt-1">
+                            Creat: {s.createdAt ? new Date(s.createdAt).toLocaleString('ro-RO') : '—'}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            Ultima activitate: {s.lastSeenAt ? new Date(s.lastSeenAt).toLocaleString('ro-RO') : '—'}
+                          </p>
+                          <p className="text-xs text-slate-500 break-all">IP: {s.ipAddress || '—'}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gold-300 font-mono">{String(s.id).slice(-10)}</p>
+                          {s.revokedAt ? (
+                            <p className="text-xs text-red-300 mt-1">Revocat</p>
+                          ) : (
+                            <p className="text-xs text-emerald-300 mt-1">Activ</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
             <h2 className="text-xl font-semibold text-white mb-4">Activitate Securitate</h2>
             
@@ -630,6 +962,21 @@ export default function SettingsPage() {
           </div>
 
           {/* Danger Zone */}
+          {/* GDPR Export */}
+          <div className="bg-gradient-to-br from-navy-600 to-navy-800 backdrop-blur-sm p-6 rounded-2xl border border-gold-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+            <h2 className="text-xl font-semibold text-white mb-2">Export date (GDPR)</h2>
+            <p className="text-sm text-slate-300 mb-4">
+              Descarcă un fișier JSON cu datele contului tău (profil, produse, licitații, comenzi, conversații, sesiuni etc.).
+            </p>
+            <button
+              onClick={handleExportData}
+              disabled={exportLoading}
+              className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-6 py-2 rounded-lg font-semibold disabled:opacity-60"
+            >
+              {exportLoading ? 'Se generează...' : 'Descarcă export'}
+            </button>
+          </div>
+
           <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 backdrop-blur-sm p-6 rounded-2xl border border-red-500/40 shadow-[0_12px_40px_rgba(220,38,38,0.3)]">
             <h2 className="text-xl font-semibold text-red-200 mb-4">Zonă Periculoasă</h2>
             

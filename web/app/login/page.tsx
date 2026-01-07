@@ -34,6 +34,33 @@ export default function LoginPage() {
   
   const router = useRouter();
 
+  const startSessionOnServer = async () => {
+    try {
+      const current = auth.currentUser;
+      if (!current) return;
+      const token = await current.getIdToken();
+
+      const res = await fetch('/api/auth/sessions/start', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          deviceLabel: typeof navigator !== 'undefined' ? navigator.platform : 'web',
+        }),
+      });
+
+      if (!res.ok) return;
+      const data = await res.json().catch(() => null);
+      if (data?.sessionId) {
+        localStorage.setItem('enumismatica_session_id', String(data.sessionId));
+      }
+    } catch (err) {
+      console.warn('Failed to start session on server:', err);
+    }
+  };
+
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -70,10 +97,12 @@ export default function LoginPage() {
           await auth.signOut();
         } else {
           // No 2FA, proceed to dashboard
+          await startSessionOnServer();
           router.push('/dashboard');
         }
       } catch (err) {
         console.error('Error checking 2FA status:', err);
+        await startSessionOnServer();
         router.push('/dashboard');
       }
     }
@@ -112,6 +141,7 @@ export default function LoginPage() {
       if (error) {
         setTwoFactorError(error);
       } else if (user) {
+        await startSessionOnServer();
         router.push('/dashboard');
       }
     } catch (err: any) {
