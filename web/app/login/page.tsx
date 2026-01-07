@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { z } from 'zod';
 import { signInWithEmail, signInWithGoogle } from 'shared/auth';
-import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -153,8 +152,21 @@ export default function LoginPage() {
     setResetLoading(true);
 
     try {
-      await sendPasswordResetEmail(auth, resetEmail);
-      setResetSuccess('Un email cu instrucțiuni pentru resetarea parolei a fost trimis la adresa ta de email.');
+      const res = await fetch('/api/auth/password-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+
+      // For security we treat 200 as success even if the user doesn't exist.
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Nu s-a putut trimite emailul de resetare.');
+      }
+
+      setResetSuccess(
+        'Dacă există un cont cu această adresă de email, vei primi un email cu instrucțiuni pentru resetarea parolei.',
+      );
       setResetEmail('');
       
       // Close modal after 3 seconds
