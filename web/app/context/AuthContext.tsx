@@ -29,7 +29,6 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authKey, setAuthKey] = useState(0); // Force re-render key
 
   useEffect(() => {
     let mounted = true;
@@ -76,8 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                idDocumentPhotos,
              } as ExtendedUser;
 
-              setUser(extendedUser);
-              setAuthKey((prev) => prev + 1); // Force re-render
+               setUser(extendedUser);
               setLoading(false);
             }
           },
@@ -92,7 +90,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               } as ExtendedUser;
 
               setUser(extendedUser);
-              setAuthKey((prev) => prev + 1);
               setLoading(false);
             }
           },
@@ -100,7 +97,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         if (mounted) {
           setUser(null);
-          setAuthKey(prev => prev + 1); // Force re-render
           setLoading(false);
         }
       }
@@ -120,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider key={authKey} value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading }}>
       {children}
     </AuthContext.Provider>
   );
