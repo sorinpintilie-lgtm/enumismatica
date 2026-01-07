@@ -379,3 +379,45 @@ export async function sendEmailVerificationEmail(email: string, verificationLink
   });
 }
 
+export async function sendLoginAttemptEmail(
+  email: string,
+  location: string,
+  dateTime: string,
+  device: string,
+  actionLink: string
+): Promise<void> {
+  return sendTemplateEmail({
+    to: email,
+    templateKey: 'security_login_attempt',
+    vars: {
+      user_name: email.split('@')[0],
+      location: location,
+      date_time: dateTime,
+      device: device,
+      action_link: actionLink,
+    },
+    fallbackKey: 'fallback_security',
+  });
+}
+
+export async function sendLoginSuccessEmail(
+  email: string,
+  location: string,
+  dateTime: string,
+  device: string,
+  actionLink: string
+): Promise<void> {
+  return sendTemplateEmail({
+    to: email,
+    templateKey: 'security_login_success',
+    vars: {
+      user_name: email.split('@')[0],
+      location: location,
+      date_time: dateTime,
+      device: device,
+      action_link: actionLink,
+    },
+    fallbackKey: 'fallback_security',
+  });
+}
+
