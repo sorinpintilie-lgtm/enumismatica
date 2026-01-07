@@ -57,6 +57,17 @@ export default function Dashboard() {
     billingCountry: 'România',
     bankAccount: '',
   });
+  
+  // Identity verification state
+  const [idDocumentType, setIdDocumentType] = useState<'ci' | 'passport'>('ci');
+  const [idDocumentNumber, setIdDocumentNumber] = useState('');
+  const [frontPhoto, setFrontPhoto] = useState<File | null>(null);
+  const [backPhoto, setBackPhoto] = useState<File | null>(null);
+  const [frontPhotoPreview, setFrontPhotoPreview] = useState<string | null>(null);
+  const [backPhotoPreview, setBackPhotoPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   useEffect(() => {
     // Diagnostic logging for "stuck on loading" / unauthenticated dashboard.
@@ -334,6 +345,90 @@ export default function Dashboard() {
   const handleLogout = async () => {
     await logout();
     router.push('/login');
+  };
+
+  // Identity verification file upload handlers
+  const handleFrontPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFrontPhoto(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setFrontPhotoPreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBackPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setBackPhoto(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setBackPhotoPreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmitVerification = async () => {
+    if (!user?.uid) return;
+    
+    // Validate inputs
+    if (!idDocumentNumber.trim()) {
+      setUploadError('Te rugăm să introduci numărul documentului.');
+      return;
+    }
+    
+    if (!frontPhoto) {
+      setUploadError('Te rugăm să încarci fotografia feței documentului.');
+      return;
+    }
+    
+    if (!backPhoto) {
+      setUploadError('Te rugăm să încarci fotografia spate documentului.');
+      return;
+    }
+    
+    try {
+      setUploading(true);
+      setUploadError(null);
+      setUploadSuccess(false);
+      
+      // Import the storage service
+      const { uploadIdDocumentPhoto } = await import('shared/storageService');
+      const { doc, updateDoc, serverTimestamp } = await import('firebase/firestore');
+      
+      // Upload both photos
+      const frontPhotoUrl = await uploadIdDocumentPhoto(frontPhoto, user.uid, idDocumentType);
+      const backPhotoUrl = await uploadIdDocumentPhoto(backPhoto, user.uid, idDocumentType);
+      
+      // Update user document with verification data
+      await updateDoc(doc(db, 'users', user.uid), {
+        idDocumentType,
+        idDocumentNumber: idDocumentNumber.trim(),
+        idDocumentPhotos: [frontPhotoUrl, backPhotoUrl],
+        idVerificationStatus: 'pending',
+        updatedAt: serverTimestamp()
+      });
+      
+      setUploadSuccess(true);
+      setFrontPhoto(null);
+      setBackPhoto(null);
+      setFrontPhotoPreview(null);
+      setBackPhotoPreview(null);
+      
+    } catch (err: any) {
+      console.error('Failed to submit verification', err);
+      setUploadError(err?.message || 'Nu s-a putut trimite cererea de verificare.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (loading) {
@@ -816,12 +911,24 @@ export default function Dashboard() {
                   <div className="bg-navy-900/40 rounded-lg border border-gold-500/20 p-4 mt-4">
                     <h3 className="text-base font-semibold text-white mb-3">Reîncarcă documentul de identitate</h3>
                     
+                    {uploadError && (
+                      <p className="text-sm text-red-200 border border-red-500/30 bg-red-500/10 rounded-lg px-3 py-2 mb-3">
+                        {uploadError}
+                      </p>
+                    )}
+                    {uploadSuccess && (
+                      <p className="text-sm text-emerald-200 border border-emerald-500/30 bg-emerald-500/10 rounded-lg px-3 py-2 mb-3">
+                        Cererea de verificare a fost trimisă cu succes! Statusul tău este acum "În așteptare".
+                      </p>
+                    )}
+                    
                     <div className="space-y-3">
                       <div>
                         <label className="block text-sm font-medium text-slate-200 mb-1">Tip document</label>
                         <select
+                          value={idDocumentType}
+                          onChange={(e) => setIdDocumentType(e.target.value as 'ci' | 'passport')}
                           className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                          defaultValue="ci"
                         >
                           <option value="ci">Carte de identitate</option>
                           <option value="passport">Pașaport</option>
@@ -832,6 +939,8 @@ export default function Dashboard() {
                         <label className="block text-sm font-medium text-slate-200 mb-1">CNP (Cod Numeric Personal)</label>
                         <input
                           type="text"
+                          value={idDocumentNumber}
+                          onChange={(e) => setIdDocumentNumber(e.target.value)}
                           placeholder="Introdu CNP-ul (13 cifre)"
                           className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
                         />
@@ -840,27 +949,75 @@ export default function Dashboard() {
                       <div>
                         <label className="block text-sm font-medium text-slate-200 mb-1">Față document</label>
                         <div className="border-2 border-dashed border-gold-500/30 rounded-lg p-6 text-center">
-                          <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
-                          <input type="file" accept="image/*" id="front-upload" className="hidden" />
-                          <label htmlFor="front-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
-                            Selectează imagine
-                          </label>
+                          {frontPhotoPreview ? (
+                            <div className="mb-3">
+                              <img
+                                src={frontPhotoPreview}
+                                alt="Preview față document"
+                                className="w-full h-32 object-contain rounded-lg mb-2"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFrontPhoto(null);
+                                  setFrontPhotoPreview(null);
+                                }}
+                                className="text-xs text-red-300 hover:text-red-200 underline"
+                              >
+                                Elimină
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
+                              <input type="file" accept="image/*" id="front-upload" className="hidden" onChange={handleFrontPhotoChange} />
+                              <label htmlFor="front-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
+                                Selectează imagine
+                              </label>
+                            </>
+                          )}
                         </div>
                       </div>
                       
                       <div>
                         <label className="block text-sm font-medium text-slate-200 mb-1">Spate document</label>
                         <div className="border-2 border-dashed border-gold-500/30 rounded-lg p-6 text-center">
-                          <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
-                          <input type="file" accept="image/*" id="back-upload" className="hidden" />
-                          <label htmlFor="back-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
-                            Selectează imagine
-                          </label>
+                          {backPhotoPreview ? (
+                            <div className="mb-3">
+                              <img
+                                src={backPhotoPreview}
+                                alt="Preview spate document"
+                                className="w-full h-32 object-contain rounded-lg mb-2"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setBackPhoto(null);
+                                  setBackPhotoPreview(null);
+                                }}
+                                className="text-xs text-red-300 hover:text-red-200 underline"
+                              >
+                                Elimină
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
+                              <input type="file" accept="image/*" id="back-upload" className="hidden" onChange={handleBackPhotoChange} />
+                              <label htmlFor="back-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
+                                Selectează imagine
+                              </label>
+                            </>
+                          )}
                         </div>
                       </div>
                       
-                      <button className="w-full bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-3 rounded-lg font-semibold mt-4">
-                        Trimite pentru verificare
+                      <button
+                        onClick={handleSubmitVerification}
+                        disabled={uploading}
+                        className="w-full bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-3 rounded-lg font-semibold mt-4 disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {uploading ? 'Se încarcă...' : 'Trimite pentru verificare'}
                       </button>
                     </div>
                   </div>
@@ -875,12 +1032,24 @@ export default function Dashboard() {
                 <div className="bg-navy-900/40 rounded-lg border border-gold-500/20 p-4">
                   <h3 className="text-base font-semibold text-white mb-3">Încarcă documentul de identitate</h3>
                   
+                  {uploadError && (
+                    <p className="text-sm text-red-200 border border-red-500/30 bg-red-500/10 rounded-lg px-3 py-2 mb-3">
+                      {uploadError}
+                    </p>
+                  )}
+                  {uploadSuccess && (
+                    <p className="text-sm text-emerald-200 border border-emerald-500/30 bg-emerald-500/10 rounded-lg px-3 py-2 mb-3">
+                      Cererea de verificare a fost trimisă cu succes! Statusul tău este acum "În așteptare".
+                    </p>
+                  )}
+                  
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-slate-200 mb-1">Tip document</label>
                       <select
+                        value={idDocumentType}
+                        onChange={(e) => setIdDocumentType(e.target.value as 'ci' | 'passport')}
                         className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                        defaultValue="ci"
                       >
                         <option value="ci">Carte de identitate</option>
                         <option value="passport">Pașaport</option>
@@ -891,6 +1060,8 @@ export default function Dashboard() {
                       <label className="block text-sm font-medium text-slate-200 mb-1">CNP (Cod Numeric Personal)</label>
                       <input
                         type="text"
+                        value={idDocumentNumber}
+                        onChange={(e) => setIdDocumentNumber(e.target.value)}
                         placeholder="Introdu CNP-ul (13 cifre)"
                         className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
                       />
@@ -899,27 +1070,75 @@ export default function Dashboard() {
                     <div>
                       <label className="block text-sm font-medium text-slate-200 mb-1">Față document</label>
                       <div className="border-2 border-dashed border-gold-500/30 rounded-lg p-6 text-center">
-                        <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
-                        <input type="file" accept="image/*" id="front-upload" className="hidden" />
-                        <label htmlFor="front-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
-                          Selectează imagine
-                        </label>
+                        {frontPhotoPreview ? (
+                          <div className="mb-3">
+                            <img
+                              src={frontPhotoPreview}
+                              alt="Preview față document"
+                              className="w-full h-32 object-contain rounded-lg mb-2"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFrontPhoto(null);
+                                setFrontPhotoPreview(null);
+                              }}
+                              className="text-xs text-red-300 hover:text-red-200 underline"
+                            >
+                              Elimină
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
+                            <input type="file" accept="image/*" id="front-upload" className="hidden" onChange={handleFrontPhotoChange} />
+                            <label htmlFor="front-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
+                              Selectează imagine
+                            </label>
+                          </>
+                        )}
                       </div>
                     </div>
                      
                     <div>
                       <label className="block text-sm font-medium text-slate-200 mb-1">Spate document</label>
                       <div className="border-2 border-dashed border-gold-500/30 rounded-lg p-6 text-center">
-                        <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
-                        <input type="file" accept="image/*" id="back-upload" className="hidden" />
-                        <label htmlFor="back-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
-                          Selectează imagine
-                        </label>
+                        {backPhotoPreview ? (
+                          <div className="mb-3">
+                            <img
+                              src={backPhotoPreview}
+                              alt="Preview spate document"
+                              className="w-full h-32 object-contain rounded-lg mb-2"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setBackPhoto(null);
+                                setBackPhotoPreview(null);
+                              }}
+                              className="text-xs text-red-300 hover:text-red-200 underline"
+                            >
+                              Elimină
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
+                            <input type="file" accept="image/*" id="back-upload" className="hidden" onChange={handleBackPhotoChange} />
+                            <label htmlFor="back-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
+                              Selectează imagine
+                            </label>
+                          </>
+                        )}
                       </div>
                     </div>
                     
-                    <button className="w-full bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-3 rounded-lg font-semibold mt-4">
-                      Trimite pentru verificare
+                    <button
+                      onClick={handleSubmitVerification}
+                      disabled={uploading}
+                      className="w-full bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-3 rounded-lg font-semibold mt-4 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {uploading ? 'Se încarcă...' : 'Trimite pentru verificare'}
                     </button>
                   </div>
                 </div>
