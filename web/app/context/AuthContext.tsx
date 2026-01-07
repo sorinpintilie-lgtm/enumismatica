@@ -61,14 +61,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const role = userData?.role || 'user';
             const accountStatus = (userData?.accountStatus || 'active') as any;
             const idVerificationStatus = userData?.idVerificationStatus;
-           const idDocumentType = userData?.idDocumentType;
-           const idDocumentNumber = userData?.idDocumentNumber;
-           const idDocumentPhotos = userData?.idDocumentPhotos;
+            const idDocumentType = userData?.idDocumentType;
+            const idDocumentNumber = userData?.idDocumentNumber;
+            const idDocumentPhotos = userData?.idDocumentPhotos;
             const twoFactorEnabled = userData?.twoFactorEnabled || false;
 
             if (mounted) {
-              const extendedUser = {
-                ...firebaseUser,
+              // IMPORTANT: keep the real FirebaseUser instance so methods like getIdToken() exist.
+              // Do NOT spread `firebaseUser` into a plain object.
+              const extendedUser = Object.assign(firebaseUser, {
                 role,
                 isAdmin: role === 'admin' || role === 'superadmin',
                 isSuperAdmin: role === 'superadmin',
@@ -79,9 +80,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 idDocumentNumber,
                 idDocumentPhotos,
                 twoFactorEnabled,
-               } as ExtendedUser;
+              }) as ExtendedUser;
 
-               setUser(extendedUser);
+                setUser(extendedUser);
               setLoading(false);
             }
           },
