@@ -271,7 +271,9 @@ export async function logActivity(
     return docRef.id;
   } catch (error) {
     console.error('Failed to log activity:', error);
-    throw error;
+    // Activity logging must never block the primary user flow (login, navigation, etc.).
+    // Returning a synthetic id keeps call sites simple while avoiding runtime breakage.
+    return `failed_${Date.now()}`;
   }
 }
 
