@@ -246,22 +246,77 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <div className="flex items-center justify-between text-sm">
-            <button
-              type="button"
-              onClick={() => setShowResetPassword(true)}
-              className="font-medium text-gold-400 hover:text-gold-300 transition-colors"
-            >
-              Ai uitat parola?
-            </button>
-            <Link
-              href="/register"
-              className="font-medium text-gold-400 hover:text-gold-300 transition-colors"
-            >
-              Înregistrează-te
-            </Link>
-          </div>
+          {!show2FA && (
+            <div className="flex items-center justify-between text-sm">
+              <button
+                type="button"
+                onClick={() => setShowResetPassword(true)}
+                className="font-medium text-gold-400 hover:text-gold-300 transition-colors"
+              >
+                Ai uitat parola?
+              </button>
+              <Link
+                href="/register"
+                className="font-medium text-gold-400 hover:text-gold-300 transition-colors"
+              >
+                Înregistrează-te
+              </Link>
+            </div>
+          )}
         </form>
+
+        {/* 2FA Verification */}
+        {show2FA && (
+          <div className="mt-6 p-6 bg-navy-800/60 rounded-2xl border border-gold-500/40">
+            <h3 className="text-lg font-semibold text-white mb-2">Autentificare cu Doi Factori</h3>
+            <p className="text-sm text-slate-300 mb-4">
+              Introdu codul din aplicația ta de autentificare
+            </p>
+            
+            <form onSubmit={handleVerify2FA} className="space-y-4">
+              <div>
+                <input
+                  type="text"
+                  value={twoFactorCode}
+                  onChange={(e) => setTwoFactorCode(e.target.value)}
+                  placeholder="000000"
+                  maxLength={6}
+                  className="appearance-none relative block w-full px-4 py-3 border border-gold-500/40 placeholder-slate-400 text-slate-50 rounded-xl bg-navy-900/70 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent text-center text-2xl tracking-widest"
+                  required
+                  autoFocus
+                />
+              </div>
+
+              {twoFactorError && (
+                <div className="bg-red-900/40 border border-red-500/60 text-red-100 px-4 py-3 rounded-xl text-sm text-center">
+                  {twoFactorError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading || twoFactorCode.length !== 6}
+                className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-[#000940] bg-[#e7b73c] hover:bg-[#f0c955] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 shadow-lg shadow-[0_0_24px_rgba(231,183,60,0.75)] transition-all duration-200"
+              >
+                {loading ? 'Se verifică...' : 'Verifică Codul'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShow2FA(false);
+                  setTwoFactorCode('');
+                  setTwoFactorError('');
+                  setPendingUserId(null);
+                  setTwoFactorSecret(null);
+                }}
+                className="w-full text-sm text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                Anulează
+              </button>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Password Reset Modal */}
