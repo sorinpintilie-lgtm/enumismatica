@@ -325,3 +325,45 @@ export default {
   sendAuctionRejectedEmail,
 };
 
+export async function send2FAEnabledEmail(email: string): Promise<void> {
+  return sendTemplateEmail({
+    to: email,
+    templateKey: 'account_2fa_enabled',
+    vars: {
+      user_name: 'Utilizator',
+      event_title: 'Autentificare cu doi factori activată',
+      event_message: 'Autentificarea cu doi factori a fost activată cu succes pentru contul tău. Acum vei avea nevoie de un cod de verificare la fiecare autentificare.',
+      action_link: `${DEFAULT_SITE_URL}/settings`,
+    },
+    fallbackKey: 'fallback_security',
+  });
+}
+
+export async function send2FADisabledEmail(email: string): Promise<void> {
+  return sendTemplateEmail({
+    to: email,
+    templateKey: 'account_2fa_disabled',
+    vars: {
+      user_name: 'Utilizator',
+      event_title: 'Autentificare cu doi factori dezactivată',
+      event_message: 'Autentificarea cu doi factori a fost dezactivată pentru contul tău. Dacă nu ai făcut tu această modificare, te rugăm să ne contactezi imediat.',
+      action_link: `${DEFAULT_SITE_URL}/contact`,
+    },
+    fallbackKey: 'fallback_security',
+  });
+}
+
+export async function sendPasswordChangedEmail(email: string): Promise<void> {
+  return sendTemplateEmail({
+    to: email,
+    templateKey: 'account_password_changed',
+    vars: {
+      user_name: 'Utilizator',
+      event_title: 'Parolă schimbată',
+      event_message: 'Parola contului tău a fost schimbată cu succes. Dacă nu ai făcut tu această modificare, te rugăm să ne contactezi imediat.',
+      action_link: `${DEFAULT_SITE_URL}/contact`,
+    },
+    fallbackKey: 'fallback_security',
+  });
+}
+

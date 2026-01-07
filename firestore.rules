@@ -407,6 +407,15 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Security Logs collection: Users can read their own logs, admins can read all
+    match /securityLogs/{logId} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+      allow create: if isAuthenticated() &&
+                    hasRequiredFields(request.resource.data, ['userId', 'action', 'description']) &&
+                    (isOwner(request.resource.data.userId) || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+
     // Fallback rule: allow authenticated users to read/write any other
     // documents that are not covered by the more specific admin rules above.
     //

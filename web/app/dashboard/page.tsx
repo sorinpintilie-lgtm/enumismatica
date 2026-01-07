@@ -584,7 +584,7 @@ export default function Dashboard() {
         {/* Quick Actions */}
       <div className="bg-gradient-to-r from-gold-500 to-gold-600 rounded-2xl shadow-[0_20px_60px_rgba(231,183,60,0.3)] p-6 mb-8 border border-gold-400">
         <h2 className="text-xl font-semibold text-navy-900 mb-4">Acțiuni Rapide</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           <Link
             href="/collection"
             className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.5)]"
@@ -619,6 +619,12 @@ export default function Dashboard() {
             className="bg-[#e7b73c] hover:bg-[#f0c955] text-white px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.5)]"
           >
             Câștigate
+          </Link>
+          <Link
+            href="/settings"
+            className="bg-navy-900 hover:bg-navy-800 text-gold-300 border-2 border-gold-400 px-4 py-3 rounded-xl text-center font-semibold transition-all shadow-lg shadow-[0_0_25px_rgba(231,183,60,0.3)]"
+          >
+            ⚙️ Setări
           </Link>
         </div>
       </div>
