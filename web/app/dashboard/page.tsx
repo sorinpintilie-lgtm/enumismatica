@@ -841,25 +841,35 @@ export default function Dashboard() {
                       />
                     </div>
                     
+                    {/* CNP Field for Carte Identitate */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-200 mb-1">CNP (Cod Numeric Personal)</label>
+                      <input
+                        type="text"
+                        placeholder="Introdu CNP-ul (13 cifre)"
+                        className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                      />
+                    </div>
+                    
                     <div>
                       <label className="block text-sm font-medium text-slate-200 mb-1">Față document</label>
                       <div className="border-2 border-dashed border-gold-500/30 rounded-lg p-6 text-center">
                         <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
-                        <input type="file" accept="image/*" className="hidden" />
-                        <button className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold">
+                        <input type="file" accept="image/*" id="front-upload" className="hidden" />
+                        <label htmlFor="front-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
                           Selectează imagine
-                        </button>
+                        </label>
                       </div>
                     </div>
-                    
+                     
                     <div>
                       <label className="block text-sm font-medium text-slate-200 mb-1">Spate document</label>
                       <div className="border-2 border-dashed border-gold-500/30 rounded-lg p-6 text-center">
                         <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
-                        <input type="file" accept="image/*" className="hidden" />
-                        <button className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold">
+                        <input type="file" accept="image/*" id="back-upload" className="hidden" />
+                        <label htmlFor="back-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
                           Selectează imagine
-                        </button>
+                        </label>
                       </div>
                     </div>
                     
