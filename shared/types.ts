@@ -21,11 +21,13 @@ export interface User {
   * Identity verification fields (Romania CI / Passport).
   *
   * - idDocumentType / idDocumentNumber: raw document metadata provided at signup
+  * - idDocumentSeries: document series for verification
   * - idVerificationStatus: manual verification state controlled by admins
   * - idVerifiedAt / idVerifiedBy: audit trail for who verified and when
   * - idDocumentPhotos: URLs of uploaded ID document photos (front and back)
   */
   idDocumentType?: 'ci' | 'passport';
+  idDocumentSeries?: string;
   idDocumentNumber?: string;
   idVerificationStatus?: 'not_provided' | 'pending' | 'verified' | 'rejected';
   idVerifiedAt?: Date;

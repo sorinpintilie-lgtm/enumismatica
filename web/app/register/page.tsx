@@ -23,6 +23,8 @@ const registerSchema = z.object({
     }),
   idDocumentType: z.enum(['ci', 'passport']).optional(),
   idDocumentNumber: z.string().optional(),
+  idDocumentSeries: z.string().optional(),
+  verifyIdentity: z.boolean().optional(),
   acceptTerms: z.boolean().refine((val) => val === true, {
     message: 'Trebuie să accepți Termenii și Condițiile',
   }),
@@ -37,6 +39,18 @@ const registerSchema = z.object({
       message: 'Selectează tipul documentului pentru numărul introdus',
       path: ['idDocumentType'],
     },
+  )
+  .refine(
+    (data) => {
+      if (data.verifyIdentity) {
+        return !!data.cnp && !!data.idDocumentType && !!data.idDocumentNumber && !!data.idDocumentSeries;
+      }
+      return true;
+    },
+    {
+      message: 'CNP, tip document, număr document și serie document sunt obligatorii pentru verificare identitate',
+      path: ['verifyIdentity'],
+    },
   );
 
 function RegisterForm() {
@@ -50,8 +64,10 @@ function RegisterForm() {
   const [cnp, setCnp] = useState('');
   const [idDocumentType, setIdDocumentType] = useState<'ci' | 'passport' | ''>('');
   const [idDocumentNumber, setIdDocumentNumber] = useState('');
+  const [idDocumentSeries, setIdDocumentSeries] = useState('');
   const [idDocumentFrontPhoto, setIdDocumentFrontPhoto] = useState<File | null>(null);
   const [idDocumentBackPhoto, setIdDocumentBackPhoto] = useState<File | null>(null);
+  const [verifyIdentity, setVerifyIdentity] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -70,6 +86,8 @@ function RegisterForm() {
         cnp: cnp || undefined,
         idDocumentType: idDocumentType || undefined,
         idDocumentNumber: idDocumentNumber || undefined,
+        idDocumentSeries: idDocumentSeries || undefined,
+        verifyIdentity,
         acceptTerms,
       });
     } catch (validationError) {
@@ -80,9 +98,17 @@ function RegisterForm() {
       return;
     }
 
-    const idDocumentPayload = idDocumentNumber
+    // Validate photo uploads if identity verification is requested
+    if (verifyIdentity && !idDocumentFrontPhoto) {
+      setError('Fotografia față document este obligatorie pentru verificare identitate');
+      setLoading(false);
+      return;
+    }
+
+    const idDocumentPayload = verifyIdentity
       ? {
           type: (idDocumentType || 'ci') as 'ci' | 'passport',
+          series: idDocumentSeries,
           number: idDocumentNumber,
           frontPhoto: idDocumentFrontPhoto,
           backPhoto: idDocumentBackPhoto,
@@ -189,6 +215,23 @@ function RegisterForm() {
               />
             </div>
             <div className="pt-2 border-t border-gold-500/30 mt-2 space-y-3">
+              <div className="flex items-start">
+                <div className="flex items-center h-5">
+                  <input
+                    id="verifyIdentity"
+                    name="verifyIdentity"
+                    type="checkbox"
+                    checked={verifyIdentity}
+                    onChange={(e) => setVerifyIdentity(e.target.checked)}
+                    className="w-4 h-4 border border-gold-500/40 rounded bg-navy-900/70 text-gold-500 focus:ring-2 focus:ring-gold-500 focus:ring-offset-0"
+                  />
+                </div>
+                <div className="ml-3 text-sm">
+                  <label htmlFor="verifyIdentity" className="text-slate-300">
+                    Doresc să verific identitatea pentru a obține un cont verificat
+                  </label>
+                </div>
+              </div>
               <p className="text-xs text-slate-300">
                 Verificare identitate (opțional) – pe platforma enumismatica.ro poți furniza datele din CI sau pașaport pentru obținerea unui cont verificat, crescând încrederea în anunțurile și ofertele tale.
               </p>
@@ -247,19 +290,34 @@ function RegisterForm() {
                     onChange={(e) => setIdDocumentNumber(e.target.value)}
                   />
                 </div>
+                <div>
+                  <label htmlFor="idSeries" className="block text-sm font-medium text-slate-200 mb-1">
+                    Serie document
+                  </label>
+                  <input
+                    id="idSeries"
+                    name="idSeries"
+                    type="text"
+                    className="appearance-none relative block w-full px-4 py-3 border border-gold-500/40 placeholder-slate-400 text-slate-50 rounded-xl bg-navy-900/70 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent focus:z-10 sm:text-sm"
+                    placeholder="Ex: RX / AB / C"
+                    value={idDocumentSeries}
+                    onChange={(e) => setIdDocumentSeries(e.target.value)}
+                  />
+                </div>
                 
                 {/* ID Document Photo Uploads */}
-                {idDocumentNumber && (
+                {(verifyIdentity || idDocumentNumber) && (
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-slate-200 mb-1">
-                        Fotografie față document
+                        Fotografie față document {verifyIdentity && <span className="text-red-400">*</span>}
                       </label>
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
                         className="block w-full text-sm text-slate-400"
                         onChange={(e) => setIdDocumentFrontPhoto(e.target.files?.[0] || null)}
+                        required={verifyIdentity}
                       />
                     </div>
                     <div>

@@ -59,6 +59,7 @@ export const signUpWithEmail = async (
   referralCode?: string,
   idDocumentData?: {
     type?: 'ci' | 'passport';
+    series?: string;
     number?: string;
     frontPhoto?: File;
     backPhoto?: File;
@@ -93,6 +94,9 @@ export const signUpWithEmail = async (
     if (documentNumber) {
       extraProfileData.idDocumentType = idDocumentData?.type || 'ci';
       extraProfileData.idDocumentNumber = documentNumber;
+      if (idDocumentData?.series) {
+        extraProfileData.idDocumentSeries = idDocumentData.series;
+      }
       extraProfileData.idVerificationStatus = 'pending' as const;
     }
 

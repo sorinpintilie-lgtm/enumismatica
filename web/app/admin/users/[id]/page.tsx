@@ -566,6 +566,10 @@ export default function AdminUserDetail() {
                       <span className="font-semibold text-gold-300">{documentTypeLabel}</span>
                     </p>
                     <p className="text-slate-300">
+                      Serie document:{' '}
+                      <span className="font-mono text-gold-200">{user.idDocumentSeries || 'N/A'}</span>
+                    </p>
+                    <p className="text-slate-300">
                       Număr document:{' '}
                       <span className="font-mono text-gold-200">{documentNumber}</span>
                     </p>
