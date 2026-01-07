@@ -810,6 +810,61 @@ export default function Dashboard() {
                     user.idVerificationStatus === 'pending' ? 'Documentul tău este în curs de verificare de către administratori' :
                     'Documentul tău a fost respins. Te rugăm să încarci documente valide.'}</p>
                 </div>
+                
+                {/* Show resubmission option only if declined */}
+                {user.idVerificationStatus === 'rejected' && (
+                  <div className="bg-navy-900/40 rounded-lg border border-gold-500/20 p-4 mt-4">
+                    <h3 className="text-base font-semibold text-white mb-3">Reîncarcă documentul de identitate</h3>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-200 mb-1">Tip document</label>
+                        <select
+                          className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                          defaultValue="ci"
+                        >
+                          <option value="ci">Carte de identitate</option>
+                          <option value="passport">Pașaport</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-slate-200 mb-1">CNP (Cod Numeric Personal)</label>
+                        <input
+                          type="text"
+                          placeholder="Introdu CNP-ul (13 cifre)"
+                          className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-slate-200 mb-1">Față document</label>
+                        <div className="border-2 border-dashed border-gold-500/30 rounded-lg p-6 text-center">
+                          <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
+                          <input type="file" accept="image/*" id="front-upload" className="hidden" />
+                          <label htmlFor="front-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
+                            Selectează imagine
+                          </label>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-slate-200 mb-1">Spate document</label>
+                        <div className="border-2 border-dashed border-gold-500/30 rounded-lg p-6 text-center">
+                          <p className="text-sm text-slate-400 mb-2">Apasă pentru a încărca</p>
+                          <input type="file" accept="image/*" id="back-upload" className="hidden" />
+                          <label htmlFor="back-upload" className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer">
+                            Selectează imagine
+                          </label>
+                        </div>
+                      </div>
+                      
+                      <button className="w-full bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-3 rounded-lg font-semibold mt-4">
+                        Trimite pentru verificare
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
