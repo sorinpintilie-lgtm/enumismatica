@@ -833,16 +833,6 @@ export default function Dashboard() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-slate-200 mb-1">Număr document</label>
-                      <input
-                        type="text"
-                        placeholder="Introdu numărul documentului"
-                        className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                      />
-                    </div>
-                    
-                    {/* CNP Field for Carte Identitate */}
-                    <div>
                       <label className="block text-sm font-medium text-slate-200 mb-1">CNP (Cod Numeric Personal)</label>
                       <input
                         type="text"
