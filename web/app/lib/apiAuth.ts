@@ -45,6 +45,28 @@ export async function requireVerifiedUser(req: NextRequest): Promise<VerifiedUse
   }
 }
 
+/**
+ * Returns the full decoded Firebase ID token for server-side security checks.
+ * Use this when you need fields like `auth_time` for step-up verification.
+ */
+export async function requireDecodedIdToken(req: NextRequest): Promise<any> {
+  if (!adminAuth) {
+    throw new AuthError(
+      'Server auth is not configured (missing Firebase Admin credentials).',
+      503,
+    );
+  }
+
+  const token = getBearerToken(req);
+  if (!token) throw new AuthError('Missing Authorization: Bearer <token>', 401);
+
+  try {
+    return await adminAuth.verifyIdToken(token);
+  } catch {
+    throw new AuthError('Invalid or expired auth token', 401);
+  }
+}
+
 export function getRequestIp(req: NextRequest): string | null {
   // Netlify / proxies typically set x-forwarded-for
   const xff = req.headers.get('x-forwarded-for');

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { auth, db } from '../lib/firebase';
 import { formatRON } from '../utils/currency';
 import { createOrGetConversation } from 'shared/chatService';
 import { useRouter } from 'next/navigation';
@@ -24,7 +24,6 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<any>(null);
   const [product, setProduct] = useState<any>(null);
-  const [counterparty, setCounterparty] = useState<any>(null);
   const [openingChat, setOpeningChat] = useState(false);
 
   const [paymentDate, setPaymentDate] = useState<string>('');
@@ -39,6 +38,17 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
 
   const [showBankingDetails, setShowBankingDetails] = useState(false);
   const [showShippingAddress, setShowShippingAddress] = useState(false);
+
+  const [bankingDetails, setBankingDetails] = useState<{ bankAccount: string; accountName: string | null } | null>(null);
+  const [bankingLoading, setBankingLoading] = useState(false);
+  const [bankingError, setBankingError] = useState<string>('');
+
+  const [shippingDetails, setShippingDetails] = useState<any>(null);
+  const [shippingLoading, setShippingLoading] = useState(false);
+  const [shippingError, setShippingError] = useState<string>('');
+
+  const [shareShippingLoading, setShareShippingLoading] = useState(false);
+  const [shareShippingMessage, setShareShippingMessage] = useState<string>('');
 
   const counterpartyId = useMemo(() => {
     if (!order) return null;
@@ -97,6 +107,8 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
           courierName: orderData.courierName || null,
           sellerConfirmedPayment: orderData.sellerConfirmedPayment || false,
           paymentConfirmationDate: orderData.paymentConfirmationDate?.toDate ? orderData.paymentConfirmationDate.toDate() : null,
+          shippingAddressShared: !!orderData.shippingAddressShared,
+          shippingAddressSharedAt: orderData.shippingAddressSharedAt?.toDate ? orderData.shippingAddressSharedAt.toDate() : null,
         };
 
         // Load product
@@ -111,23 +123,15 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
           }
         }
 
-        // Load counterparty details
-        let counterpartyData = null;
-        if (counterpartyId) {
-          const userSnap = await getDoc(doc(db, 'users', counterpartyId));
-          if (userSnap.exists()) {
-            counterpartyData = {
-              id: userSnap.id,
-              ...userSnap.data(),
-            };
-          }
-        }
-
         if (cancelled) return;
 
         setOrder(mappedOrder);
         setProduct(productData);
-        setCounterparty(counterpartyData);
+        setBankingDetails(null);
+        setBankingError('');
+        setShippingDetails(null);
+        setShippingError('');
+        setShareShippingMessage('');
 
         // Set default payment date to today
         const today = new Date().toISOString().split('T')[0];
@@ -163,6 +167,85 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
       cancelled = true;
     };
   }, [open, orderId, currentUserId, isBuyer, isSeller, counterpartyId]);
+
+  const fetchBankingDetails = async () => {
+    if (!orderId) return;
+    if (!auth.currentUser) return;
+    setBankingLoading(true);
+    setBankingError('');
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch(`/api/orders/banking-details?orderId=${encodeURIComponent(orderId)}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Nu s-au putut încărca detaliile bancare.');
+      }
+      const data = await res.json();
+      setBankingDetails({
+        bankAccount: String(data.bankAccount),
+        accountName: data.accountName ? String(data.accountName) : null,
+      });
+    } catch (e: any) {
+      setBankingError(e?.message || 'Nu s-au putut încărca detaliile bancare.');
+    } finally {
+      setBankingLoading(false);
+    }
+  };
+
+  const fetchShippingDetails = async () => {
+    if (!orderId) return;
+    if (!auth.currentUser) return;
+    setShippingLoading(true);
+    setShippingError('');
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch(`/api/orders/shipping-address?orderId=${encodeURIComponent(orderId)}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Adresa nu este disponibilă încă.');
+      }
+      const data = await res.json();
+      setShippingDetails(data.shippingAddress || null);
+    } catch (e: any) {
+      setShippingError(e?.message || 'Adresa nu este disponibilă încă.');
+    } finally {
+      setShippingLoading(false);
+    }
+  };
+
+  const shareShippingAddress = async () => {
+    if (!orderId) return;
+    if (!auth.currentUser) return;
+    setShareShippingLoading(true);
+    setShareShippingMessage('');
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch('/api/orders/share-shipping-address', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ orderId }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Nu s-a putut partaja adresa.');
+      }
+      setShareShippingMessage('Adresa a fost partajată către vânzător.');
+      setOrder((prev: any) => (prev ? { ...prev, shippingAddressShared: true, shippingAddressSharedAt: new Date() } : prev));
+    } catch (e: any) {
+      setShareShippingMessage(e?.message || 'Nu s-a putut partaja adresa.');
+    } finally {
+      setShareShippingLoading(false);
+    }
+  };
 
   const handleOpenChat = async () => {
     if (!order || !counterpartyId) {
@@ -455,20 +538,6 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
                   <p className="text-xs text-slate-400">Nume</p>
                   <p className="text-sm font-semibold text-slate-100">{counterpartyLabel}</p>
                 </div>
-                {counterparty && (
-                  <>
-                    <div>
-                      <p className="text-xs text-slate-400">Email</p>
-                      <p className="text-sm text-gold-300 break-all">{counterparty.email}</p>
-                    </div>
-                    {counterparty.personalDetails?.phone && (
-                      <div>
-                        <p className="text-xs text-slate-400">Telefon</p>
-                        <p className="text-sm text-gold-300">{counterparty.personalDetails.phone}</p>
-                      </div>
-                    )}
-                  </>
-                )}
               </div>
 
               {/* Action Buttons */}
@@ -485,17 +554,40 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
                 {isBuyer && counterpartyId !== 'monetaria-statului' && (
                   <button
                     type="button"
-                    onClick={() => setShowBankingDetails(!showBankingDetails)}
+                    onClick={async () => {
+                      const next = !showBankingDetails;
+                      setShowBankingDetails(next);
+                      if (next && !bankingDetails && !bankingLoading) {
+                        await fetchBankingDetails();
+                      }
+                    }}
                     className="inline-flex items-center justify-center rounded-full border border-gold-500/40 px-4 py-2 text-sm font-semibold text-gold-200 hover:bg-navy-950/40 transition-colors"
                   >
                     {showBankingDetails ? 'Ascunde' : 'Detalii bancare'}
                   </button>
                 )}
 
+                {isBuyer && counterpartyId !== 'monetaria-statului' && !order.shippingAddressShared && (
+                  <button
+                    type="button"
+                    onClick={shareShippingAddress}
+                    disabled={shareShippingLoading}
+                    className="inline-flex items-center justify-center rounded-full border border-emerald-500/40 px-4 py-2 text-sm font-semibold text-emerald-200 hover:bg-emerald-500/10 transition-colors disabled:opacity-60"
+                  >
+                    {shareShippingLoading ? 'Se trimite...' : 'Partajează adresa'}
+                  </button>
+                )}
+
                 {isSeller && counterpartyId !== 'monetaria-statului' && (
                   <button
                     type="button"
-                    onClick={() => setShowShippingAddress(!showShippingAddress)}
+                    onClick={async () => {
+                      const next = !showShippingAddress;
+                      setShowShippingAddress(next);
+                      if (next && !shippingDetails && !shippingLoading) {
+                        await fetchShippingDetails();
+                      }
+                    }}
                     className="inline-flex items-center justify-center rounded-full border border-gold-500/40 px-4 py-2 text-sm font-semibold text-gold-200 hover:bg-navy-950/40 transition-colors"
                   >
                     {showShippingAddress ? 'Ascunde' : 'Adresă expediere'}
@@ -503,57 +595,83 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
                 )}
               </div>
 
+              {shareShippingMessage && (
+                <p className="mt-3 text-xs text-slate-200 border border-gold-500/20 bg-navy-900/30 rounded-lg px-3 py-2">
+                  {shareShippingMessage}
+                </p>
+              )}
+
               {/* Banking Details Section */}
-              {showBankingDetails && counterparty?.personalDetails?.bankAccount && (
+              {showBankingDetails && (
                 <div className="mt-4 pt-4 border-t border-gold-500/20">
                   <h5 className="text-sm font-semibold text-gold-400 mb-2">Detalii bancare</h5>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-xs text-slate-400">Cont bancar (IBAN)</p>
-                      <p className="text-sm font-mono text-slate-100 break-all">
-                        {counterparty.personalDetails.bankAccount}
-                      </p>
-                    </div>
-                    {counterparty.personalDetails.firstName && counterparty.personalDetails.lastName && (
+                  {bankingLoading ? (
+                    <p className="text-sm text-slate-300">Se încarcă...</p>
+                  ) : bankingError ? (
+                    <p className="text-sm text-red-200">{bankingError}</p>
+                  ) : bankingDetails ? (
+                    <div className="space-y-2">
                       <div>
-                        <p className="text-xs text-slate-400">Nume complet</p>
-                        <p className="text-sm text-slate-100">
-                          {counterparty.personalDetails.firstName} {counterparty.personalDetails.lastName}
-                        </p>
+                        <p className="text-xs text-slate-400">Cont bancar (IBAN)</p>
+                        <p className="text-sm font-mono text-slate-100 break-all">{bankingDetails.bankAccount}</p>
                       </div>
-                    )}
-                  </div>
+                      {bankingDetails.accountName && (
+                        <div>
+                          <p className="text-xs text-slate-400">Nume complet</p>
+                          <p className="text-sm text-slate-100">{bankingDetails.accountName}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-300">Nu sunt disponibile detalii bancare.</p>
+                  )}
                 </div>
               )}
 
               {/* Shipping Address Section */}
-              {showShippingAddress && counterparty?.personalDetails?.address && (
+              {showShippingAddress && (
                 <div className="mt-4 pt-4 border-t border-gold-500/20">
                   <h5 className="text-sm font-semibold text-gold-400 mb-2">Adresă expediere</h5>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-xs text-slate-400">Adresă</p>
-                      <p className="text-sm text-slate-100">{counterparty.personalDetails.address}</p>
+                  {shippingLoading ? (
+                    <p className="text-sm text-slate-300">Se încarcă...</p>
+                  ) : shippingError ? (
+                    <p className="text-sm text-red-200">{shippingError}</p>
+                  ) : shippingDetails ? (
+                    <div className="space-y-2">
+                      {shippingDetails.address && (
+                        <div>
+                          <p className="text-xs text-slate-400">Adresă</p>
+                          <p className="text-sm text-slate-100">{shippingDetails.address}</p>
+                        </div>
+                      )}
+                      {shippingDetails.county && (
+                        <div>
+                          <p className="text-xs text-slate-400">Județ</p>
+                          <p className="text-sm text-slate-100">{shippingDetails.county}</p>
+                        </div>
+                      )}
+                      {shippingDetails.postalCode && (
+                        <div>
+                          <p className="text-xs text-slate-400">Cod poștal</p>
+                          <p className="text-sm text-slate-100">{shippingDetails.postalCode}</p>
+                        </div>
+                      )}
+                      {shippingDetails.country && (
+                        <div>
+                          <p className="text-xs text-slate-400">Țară</p>
+                          <p className="text-sm text-slate-100">{shippingDetails.country}</p>
+                        </div>
+                      )}
+                      {shippingDetails.phone && (
+                        <div>
+                          <p className="text-xs text-slate-400">Telefon</p>
+                          <p className="text-sm text-slate-100">{shippingDetails.phone}</p>
+                        </div>
+                      )}
                     </div>
-                    {counterparty.personalDetails.county && (
-                      <div>
-                        <p className="text-xs text-slate-400">Județ</p>
-                        <p className="text-sm text-slate-100">{counterparty.personalDetails.county}</p>
-                      </div>
-                    )}
-                    {counterparty.personalDetails.postalCode && (
-                      <div>
-                        <p className="text-xs text-slate-400">Cod poștal</p>
-                        <p className="text-sm text-slate-100">{counterparty.personalDetails.postalCode}</p>
-                      </div>
-                    )}
-                    {counterparty.personalDetails.country && (
-                      <div>
-                        <p className="text-xs text-slate-400">Țară</p>
-                        <p className="text-sm text-slate-100">{counterparty.personalDetails.country}</p>
-                      </div>
-                    )}
-                  </div>
+                  ) : (
+                    <p className="text-sm text-slate-300">Cumpărătorul nu a partajat încă adresa.</p>
+                  )}
                 </div>
               )}
             </div>

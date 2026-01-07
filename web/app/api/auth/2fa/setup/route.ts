@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
+import { AuthError, requireVerifiedUser } from '../../../../lib/apiAuth';
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await request.json();
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
+    const user = await requireVerifiedUser(request);
 
     // Generate a secret for the user
     const secret = speakeasy.generateSecret({
-      name: `eNumismatica (${userId.slice(0, 8)})`,
+      name: `eNumismatica (${user.uid.slice(0, 8)})`,
       issuer: 'eNumismatica.ro',
       length: 32,
     });
@@ -28,6 +22,9 @@ export async function POST(request: NextRequest) {
       qrCode: qrCodeDataURL,
     });
   } catch (error: any) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('2FA setup error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to setup 2FA' },

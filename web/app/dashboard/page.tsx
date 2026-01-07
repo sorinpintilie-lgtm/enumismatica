@@ -87,6 +87,12 @@ export default function Dashboard() {
     }
   }, [loading, user, router]);
 
+  useEffect(() => {
+    if (!loading && user?.accountStatus === 'deactivated') {
+      router.replace('/settings');
+    }
+  }, [loading, user?.accountStatus, router]);
+
   // Funcție pentru copierea adresei de livrare la adresa de facturare
   const copyDeliveryToBilling = () => {
     setPersonalDetails((p) => ({

@@ -30,7 +30,6 @@ export default function LoginPage() {
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [twoFactorError, setTwoFactorError] = useState('');
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
-  const [twoFactorSecret, setTwoFactorSecret] = useState<string | null>(null);
   const [rememberDevice, setRememberDevice] = useState(true);
   const [useBackupCode, setUseBackupCode] = useState(false);
   
@@ -54,7 +53,6 @@ export default function LoginPage() {
 
         setEmail(current.email || '');
         setPendingUserId(current.uid);
-        setTwoFactorSecret(data.twoFactorSecret || null);
         setShow2FA(true);
       } catch (err) {
         console.warn('Failed to init 2FA on login page:', err);
@@ -140,7 +138,6 @@ export default function LoginPage() {
 
           // User has 2FA enabled, show 2FA prompt (do NOT sign out; we need token for backup codes / trusted device)
           setPendingUserId(user.uid);
-          setTwoFactorSecret(userDoc.data().twoFactorSecret);
           setShow2FA(true);
         } else {
           // No 2FA, proceed to dashboard
@@ -160,7 +157,7 @@ export default function LoginPage() {
     setLoading(true);
     setTwoFactorError('');
 
-    if (!pendingUserId || !twoFactorSecret || !twoFactorCode) {
+    if (!pendingUserId || !twoFactorCode) {
       setTwoFactorError('Cod invalid');
       setLoading(false);
       return;
@@ -171,30 +168,19 @@ export default function LoginPage() {
         throw new Error('Sesiune invalidă. Te rugăm să te autentifici din nou.');
       }
 
-      if (useBackupCode) {
-        const token = await auth.currentUser.getIdToken();
-        const res = await fetch('/api/auth/2fa/backup-codes/verify', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ code: twoFactorCode }),
-        });
-        if (!res.ok) throw new Error('Cod de rezervă invalid.');
-      } else {
-        // Verify TOTP code
-        const res = await fetch('/api/auth/2fa/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: pendingUserId,
-            code: twoFactorCode,
-            secret: twoFactorSecret,
-          }),
-        });
-        if (!res.ok) throw new Error('Cod invalid');
-      }
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch('/api/auth/2fa/verify-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          method: useBackupCode ? 'backup' : 'totp',
+          code: twoFactorCode,
+        }),
+      });
+      if (!res.ok) throw new Error(useBackupCode ? 'Cod de rezervă invalid.' : 'Cod invalid');
 
       // Remember device (trusted device) if enabled
       if (rememberDevice) {
@@ -481,7 +467,6 @@ export default function LoginPage() {
                   setTwoFactorCode('');
                   setTwoFactorError('');
                   setPendingUserId(null);
-                  setTwoFactorSecret(null);
                 }}
                 className="w-full text-sm text-slate-400 hover:text-slate-200 transition-colors"
               >

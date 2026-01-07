@@ -6,9 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
   updatePassword, 
-  sendPasswordResetEmail as firebaseSendPasswordReset,
   sendEmailVerification,
-  verifyBeforeUpdateEmail,
   EmailAuthProvider,
   reauthenticateWithCredential
 } from 'firebase/auth';
@@ -17,8 +15,9 @@ import {
   send2FAEnabledEmail,
   send2FADisabledEmail
 } from 'shared/emailService';
-import { doc, updateDoc, getDoc, serverTimestamp, collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, serverTimestamp, collection, query, where, orderBy, limit, getDocs, addDoc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
+import { StepUpModal } from '../components/StepUpModal';
 
 export default function SettingsPage() {
   const { user, loading } = useAuth();
@@ -56,7 +55,6 @@ export default function SettingsPage() {
   const [emailVerifyLoading, setEmailVerifyLoading] = useState(false);
   const [emailVerifyMessage, setEmailVerifyMessage] = useState('');
   const [newEmail, setNewEmail] = useState('');
-  const [emailChangePassword, setEmailChangePassword] = useState('');
   const [emailChangeLoading, setEmailChangeLoading] = useState(false);
   const [emailChangeError, setEmailChangeError] = useState('');
   const [emailChangeSuccess, setEmailChangeSuccess] = useState('');
@@ -75,8 +73,19 @@ export default function SettingsPage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  // Account deactivation (soft)
+  const [deactivateLoading, setDeactivateLoading] = useState(false);
+  const [deactivateMessage, setDeactivateMessage] = useState('');
+
   // GDPR export
   const [exportLoading, setExportLoading] = useState(false);
+
+  // Step-up modal
+  const [stepUpOpen, setStepUpOpen] = useState(false);
+  const [stepUpActions, setStepUpActions] = useState<string[]>([]);
+  const [stepUpTitle, setStepUpTitle] = useState<string>('Confirmare securitate');
+  const [stepUpDescription, setStepUpDescription] = useState<string>('');
+  const [stepUpRunner, setStepUpRunner] = useState<null | ((token: string) => Promise<void>)>(null);
 
   // 2FA Backup codes
   const [backupCodes, setBackupCodes] = useState<string[] | null>(null);
@@ -402,38 +411,39 @@ export default function SettingsPage() {
       return;
     }
 
-    if (!emailChangePassword) {
-      setEmailChangeError('Introdu parola curentă pentru confirmare.');
-      return;
-    }
+    // Server-side email change flow with step-up security.
+    setStepUpActions(['email_change']);
+    setStepUpTitle('Schimbă adresa de email');
+    setStepUpDescription('Confirmă parola + 2FA pentru a trimite emailul de confirmare către noua adresă.');
+    setStepUpRunner(() => async (stepUpToken: string) => {
+      setEmailChangeLoading(true);
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/account/email-change/request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            'X-Step-Up-Token': stepUpToken,
+          },
+          body: JSON.stringify({ newEmail: sanitized }),
+        });
 
-    setEmailChangeLoading(true);
-    try {
-      const credential = EmailAuthProvider.credential(user.email!, emailChangePassword);
-      await reauthenticateWithCredential(auth.currentUser, credential);
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || 'Nu s-a putut iniția schimbarea emailului.');
+        }
 
-      await verifyBeforeUpdateEmail(auth.currentUser, sanitized, {
-        url: `${window.location.origin}/settings`,
-      });
-
-      setEmailChangeSuccess(
-        'Am trimis un email de confirmare la noua adresă. Deschide link-ul din email pentru a finaliza schimbarea.',
-      );
-      setNewEmail('');
-      setEmailChangePassword('');
-      await logSecurityEvent('email_change_requested', 'A fost inițiată schimbarea adresei de email');
-    } catch (err: any) {
-      console.error('Email change error:', err);
-      if (err.code === 'auth/wrong-password') {
-        setEmailChangeError('Parola curentă este incorectă.');
-      } else if (err.code === 'auth/requires-recent-login') {
-        setEmailChangeError('Este necesară reautentificarea. Te rugăm să te deconectezi și să te autentifici din nou.');
-      } else {
-        setEmailChangeError(err?.message || 'Nu s-a putut iniția schimbarea emailului.');
+        setEmailChangeSuccess(
+          'Am trimis un email de confirmare către noua adresă. Deschide link-ul din email pentru a finaliza schimbarea.',
+        );
+        setNewEmail('');
+        await logSecurityEvent('email_change_requested', 'A fost inițiată schimbarea adresei de email');
+      } finally {
+        setEmailChangeLoading(false);
       }
-    } finally {
-      setEmailChangeLoading(false);
-    }
+    });
+    setStepUpOpen(true);
   };
 
   const handleEnable2FA = async () => {
@@ -442,11 +452,15 @@ export default function SettingsPage() {
     setTwoFactorError('');
 
     try {
+      const token = await user.getIdToken();
       // Call API to generate 2FA secret
       const res = await fetch('/api/auth/2fa/setup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.uid }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({}),
       });
 
       if (!res.ok) {
@@ -469,27 +483,23 @@ export default function SettingsPage() {
     setTwoFactorError('');
 
     try {
-      // Verify the code
-      const res = await fetch('/api/auth/2fa/verify', {
+      const token = await user.getIdToken();
+      // Enable 2FA (server verifies code + stores secret privately)
+      const res = await fetch('/api/auth/2fa/enable', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ 
-          userId: user.uid, 
           code: twoFactorCode,
-          secret: twoFactorSecret 
+          secret: twoFactorSecret,
         }),
       });
 
       if (!res.ok) {
         throw new Error('Cod invalid');
       }
-
-      // Enable 2FA in user document
-      await updateDoc(doc(db, 'users', user.uid), {
-        twoFactorEnabled: true,
-        twoFactorSecret: twoFactorSecret,
-        updatedAt: serverTimestamp(),
-      });
 
       await logSecurityEvent('2fa_enabled', 'Autentificare cu doi factori activată');
 
@@ -517,30 +527,40 @@ export default function SettingsPage() {
     const confirmed = window.confirm('Ești sigur că vrei să dezactivezi autentificarea cu doi factori?');
     if (!confirmed) return;
 
-    setTwoFactorLoading(true);
-    try {
-      await updateDoc(doc(db, 'users', user.uid), {
-        twoFactorEnabled: false,
-        twoFactorSecret: null,
-        updatedAt: serverTimestamp(),
-      });
-
-      await logSecurityEvent('2fa_disabled', 'Autentificare cu doi factori dezactivată');
-
-      // Send email notification
+    // Require step-up for disabling 2FA.
+    setStepUpActions(['2fa_disable']);
+    setStepUpTitle('Dezactivează 2FA');
+    setStepUpDescription('Confirmă parola + 2FA pentru a dezactiva 2FA.');
+    setStepUpRunner(() => async (stepUpToken: string) => {
+      setTwoFactorLoading(true);
       try {
-        await send2FADisabledEmail(user.email!);
-      } catch (emailErr) {
-        console.error('Failed to send 2FA disabled email:', emailErr);
-      }
+        const token = await user.getIdToken();
+        const res = await fetch('/api/auth/2fa/disable', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'X-Step-Up-Token': stepUpToken,
+          },
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || 'Nu s-a putut dezactiva 2FA.');
+        }
 
-      setTwoFactorEnabled(false);
-      setTwoFactorSuccess('Autentificarea cu doi factori a fost dezactivată.');
-    } catch (err: any) {
-      setTwoFactorError(err.message || 'Nu s-a putut dezactiva 2FA.');
-    } finally {
-      setTwoFactorLoading(false);
-    }
+        await logSecurityEvent('2fa_disabled', 'Autentificare cu doi factori dezactivată');
+        try {
+          await send2FADisabledEmail(user.email!);
+        } catch (emailErr) {
+          console.error('Failed to send 2FA disabled email:', emailErr);
+        }
+
+        setTwoFactorEnabled(false);
+        setTwoFactorSuccess('Autentificarea cu doi factori a fost dezactivată.');
+      } finally {
+        setTwoFactorLoading(false);
+      }
+    });
+    setStepUpOpen(true);
   };
 
   const handleSaveEmailPreferences = async () => {
@@ -567,34 +587,110 @@ export default function SettingsPage() {
       return;
     }
 
-    setDeleteLoading(true);
-    try {
-      // Call API to delete account
-      const res = await fetch('/api/auth/delete-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.uid }),
-      });
+    setStepUpActions(['account_delete']);
+    setStepUpTitle('Șterge contul');
+    setStepUpDescription('Confirmă parola + 2FA pentru a șterge contul.');
+    setStepUpRunner(() => async (stepUpToken: string) => {
+      setDeleteLoading(true);
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/auth/delete-account', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            'X-Step-Up-Token': stepUpToken,
+          },
+          body: JSON.stringify({ userId: user.uid }),
+        });
 
-      if (!res.ok) {
-        throw new Error('Failed to delete account');
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || 'Nu s-a putut șterge contul.');
+        }
+
+        await auth.signOut();
+        router.push('/');
+      } finally {
+        setDeleteLoading(false);
       }
+    });
+    setStepUpOpen(true);
+  };
 
-      // Sign out and redirect
-      await auth.signOut();
-      router.push('/');
-    } catch (err: any) {
-      alert(err.message || 'Nu s-a putut șterge contul.');
-    } finally {
-      setDeleteLoading(false);
-    }
+  const handleDeactivateAccount = async () => {
+    if (!user) return;
+    const confirmed = window.confirm(
+      'Dezactivezi contul? Listările tale vor fi ascunse (status = disabled/cancelled). Poți reactiva ulterior din Setări.',
+    );
+    if (!confirmed) return;
+
+    setDeactivateMessage('');
+    setStepUpActions(['account_deactivate']);
+    setStepUpTitle('Dezactivează contul');
+    setStepUpDescription('Confirmă parola + 2FA pentru a dezactiva contul.');
+    setStepUpRunner(() => async (stepUpToken: string) => {
+      setDeactivateLoading(true);
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/account/deactivate', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'X-Step-Up-Token': stepUpToken,
+          },
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || 'Nu s-a putut dezactiva contul.');
+        }
+        setDeactivateMessage('Contul a fost dezactivat. Poți reactiva ulterior din această pagină.');
+        await logSecurityEvent('account_deactivated', 'Cont dezactivat (soft)');
+      } finally {
+        setDeactivateLoading(false);
+      }
+    });
+    setStepUpOpen(true);
+  };
+
+  const handleReactivateAccount = async () => {
+    if (!user) return;
+    const confirmed = window.confirm('Reactivezi contul?');
+    if (!confirmed) return;
+
+    setDeactivateMessage('');
+    setStepUpActions(['account_reactivate']);
+    setStepUpTitle('Reactivează contul');
+    setStepUpDescription('Confirmă parola + 2FA pentru a reactiva contul.');
+    setStepUpRunner(() => async (stepUpToken: string) => {
+      setDeactivateLoading(true);
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/account/reactivate', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'X-Step-Up-Token': stepUpToken,
+          },
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || 'Nu s-a putut reactiva contul.');
+        }
+        setDeactivateMessage('Contul a fost reactivat.');
+        await logSecurityEvent('account_reactivated', 'Cont reactivat');
+      } finally {
+        setDeactivateLoading(false);
+      }
+    });
+    setStepUpOpen(true);
   };
 
   const logSecurityEvent = async (action: string, description: string) => {
     if (!user?.uid) return;
     try {
       const logRef = collection(db, 'securityLogs');
-      await updateDoc(doc(logRef), {
+      await addDoc(logRef, {
         userId: user.uid,
         action,
         description,
@@ -609,36 +705,42 @@ export default function SettingsPage() {
 
   const handleExportData = async () => {
     if (!user) return;
-    setExportLoading(true);
-    try {
-      const token = await user.getIdToken();
-      const res = await fetch('/api/account/export', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || 'Exportul nu a putut fi generat.');
+    setStepUpActions(['account_export']);
+    setStepUpTitle('Export date (GDPR)');
+    setStepUpDescription('Confirmă parola + 2FA pentru a genera exportul.');
+    setStepUpRunner(() => async (stepUpToken: string) => {
+      setExportLoading(true);
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/account/export', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'X-Step-Up-Token': stepUpToken,
+          },
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || 'Exportul nu a putut fi generat.');
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `enumismatica_export_${user.uid}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        await logSecurityEvent('gdpr_export', 'Export date cont (GDPR)');
+      } finally {
+        setExportLoading(false);
       }
-
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `enumismatica_export_${user.uid}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-      await logSecurityEvent('gdpr_export', 'Export date cont (GDPR)');
-    } catch (err: any) {
-      alert(err?.message || 'Exportul nu a putut fi generat.');
-    } finally {
-      setExportLoading(false);
-    }
+    });
+    setStepUpOpen(true);
   };
 
   if (loading) {
@@ -657,6 +759,20 @@ export default function SettingsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <StepUpModal
+        open={stepUpOpen}
+        onClose={() => {
+          setStepUpOpen(false);
+          setStepUpRunner(null);
+        }}
+        actions={stepUpActions}
+        title={stepUpTitle}
+        description={stepUpDescription}
+        onVerified={async (token) => {
+          if (!stepUpRunner) return;
+          await stepUpRunner(token);
+        }}
+      />
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -714,16 +830,6 @@ export default function SettingsPage() {
                     onChange={(e) => setNewEmail(e.target.value)}
                     className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
                     placeholder="nume@exemplu.ro"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-200 mb-1">Parola curentă</label>
-                  <input
-                    type="password"
-                    value={emailChangePassword}
-                    onChange={(e) => setEmailChangePassword(e.target.value)}
-                    className="w-full rounded-lg border border-gold-500/30 bg-navy-900/50 px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"
-                    placeholder="Parola ta"
                   />
                 </div>
 
@@ -1182,7 +1288,38 @@ export default function SettingsPage() {
 
           <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 backdrop-blur-sm p-6 rounded-2xl border border-red-500/40 shadow-[0_12px_40px_rgba(220,38,38,0.3)]">
             <h2 className="text-xl font-semibold text-red-200 mb-4">Zonă Periculoasă</h2>
-            
+
+            <div className="mb-6 rounded-xl border border-red-500/20 bg-navy-950/30 p-4">
+              <h3 className="text-sm font-semibold text-white mb-2">Dezactivare cont (reversibil)</h3>
+              <p className="text-xs text-slate-300 mb-3">
+                Dezactivarea ascunde listările tale (produse = <span className="font-mono">disabled</span>, licitații = <span className="font-mono">cancelled</span>).
+              </p>
+
+              {deactivateMessage && (
+                <p className="text-sm text-emerald-200 border border-emerald-500/30 bg-emerald-500/10 rounded-lg px-3 py-2 mb-3">
+                  {deactivateMessage}
+                </p>
+              )}
+
+              {user?.accountStatus === 'deactivated' ? (
+                <button
+                  onClick={handleReactivateAccount}
+                  disabled={deactivateLoading}
+                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-500/40 px-6 py-2 rounded-lg font-semibold disabled:opacity-60"
+                >
+                  {deactivateLoading ? 'Se reactivează...' : 'Reactivează contul'}
+                </button>
+              ) : (
+                <button
+                  onClick={handleDeactivateAccount}
+                  disabled={deactivateLoading}
+                  className="bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-500/40 px-6 py-2 rounded-lg font-semibold disabled:opacity-60"
+                >
+                  {deactivateLoading ? 'Se dezactivează...' : 'Dezactivează contul'}
+                </button>
+              )}
+            </div>
+             
             {!showDeleteConfirm ? (
               <button
                 onClick={() => setShowDeleteConfirm(true)}

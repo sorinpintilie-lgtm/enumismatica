@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '../../../lib/firebaseAdmin';
 import { AuthError, requireVerifiedUser } from '../../../lib/apiAuth';
+import { requireStepUp } from '../../../lib/stepUp';
 
 async function safeQuery(q: Promise<FirebaseFirestore.QuerySnapshot>): Promise<any[]> {
   try {
@@ -15,33 +16,53 @@ async function safeQuery(q: Promise<FirebaseFirestore.QuerySnapshot>): Promise<a
 export async function GET(req: NextRequest) {
   try {
     const user = await requireVerifiedUser(req);
+    await requireStepUp(req, 'account_export');
     if (!adminDb) {
       return NextResponse.json({ error: 'Server database is not configured.' }, { status: 503 });
     }
 
+    // Optional selection: /api/account/export?include=profile,products,auctions,orders,conversations,sessions,collection,watchlist
+    // Default: everything.
+    const includeParam = req.nextUrl.searchParams.get('include');
+    const requested = includeParam
+      ? includeParam
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : null;
+    const wants = (key: string) => !requested || requested.includes(key);
+
     const userDoc = await adminDb.collection('users').doc(user.uid).get();
     const userProfile = userDoc.exists ? { id: userDoc.id, ...userDoc.data() } : null;
 
-    const [
-      products,
-      auctions,
-      ordersAsBuyer,
-      ordersAsSeller,
-      conversations,
-      sessions,
-      collectionItems,
-      watchlistItems,
-    ] = await Promise.all([
-      safeQuery(adminDb.collection('products').where('ownerId', '==', user.uid).get()),
-      safeQuery(adminDb.collection('auctions').where('ownerId', '==', user.uid).get()),
-      safeQuery(adminDb.collection('orders').where('buyerId', '==', user.uid).get()),
-      safeQuery(adminDb.collection('orders').where('sellerId', '==', user.uid).get()),
-      // Conversations: if participants is an array
-      safeQuery(adminDb.collection('conversations').where('participants', 'array-contains', user.uid).get()),
-      safeQuery(adminDb.collection('userSessions').where('userId', '==', user.uid).get()),
-      safeQuery(adminDb.collection('users').doc(user.uid).collection('collection').get()),
-      safeQuery(adminDb.collection('users').doc(user.uid).collection('watchlist').get()),
-    ]);
+    const [products, auctions, ordersAsBuyer, ordersAsSeller, conversations, sessions, collectionItems, watchlistItems] =
+      await Promise.all([
+        wants('products')
+          ? safeQuery(adminDb.collection('products').where('ownerId', '==', user.uid).get())
+          : Promise.resolve([]),
+        wants('auctions')
+          ? safeQuery(adminDb.collection('auctions').where('ownerId', '==', user.uid).get())
+          : Promise.resolve([]),
+        wants('orders')
+          ? safeQuery(adminDb.collection('orders').where('buyerId', '==', user.uid).get())
+          : Promise.resolve([]),
+        wants('orders')
+          ? safeQuery(adminDb.collection('orders').where('sellerId', '==', user.uid).get())
+          : Promise.resolve([]),
+        wants('conversations')
+          ? // Conversations: if participants is an array
+            safeQuery(adminDb.collection('conversations').where('participants', 'array-contains', user.uid).get())
+          : Promise.resolve([]),
+        wants('sessions')
+          ? safeQuery(adminDb.collection('userSessions').where('userId', '==', user.uid).get())
+          : Promise.resolve([]),
+        wants('collection')
+          ? safeQuery(adminDb.collection('users').doc(user.uid).collection('collection').get())
+          : Promise.resolve([]),
+        wants('watchlist')
+          ? safeQuery(adminDb.collection('users').doc(user.uid).collection('watchlist').get())
+          : Promise.resolve([]),
+      ]);
 
     const payload = {
       exportedAt: new Date().toISOString(),
@@ -49,17 +70,19 @@ export async function GET(req: NextRequest) {
         uid: user.uid,
         email: user.email || null,
       },
-      profile: userProfile,
-      products,
-      auctions,
-      orders: {
-        asBuyer: ordersAsBuyer,
-        asSeller: ordersAsSeller,
-      },
-      conversations,
-      sessions,
-      collection: collectionItems,
-      watchlist: watchlistItems,
+      profile: wants('profile') ? userProfile : null,
+      products: wants('products') ? products : [],
+      auctions: wants('auctions') ? auctions : [],
+      orders: wants('orders')
+        ? {
+            asBuyer: ordersAsBuyer,
+            asSeller: ordersAsSeller,
+          }
+        : { asBuyer: [], asSeller: [] },
+      conversations: wants('conversations') ? conversations : [],
+      sessions: wants('sessions') ? sessions : [],
+      collection: wants('collection') ? collectionItems : [],
+      watchlist: wants('watchlist') ? watchlistItems : [],
     };
 
     const json = JSON.stringify(payload, null, 2);

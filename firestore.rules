@@ -140,11 +140,27 @@ service cloud.firestore {
         allow create, update, delete: if isOwner(userId) || isAdmin();
       }
 
+      // Private auth/security data (server-managed): TOTP secret, email-change state, etc.
+      // MUST NOT be readable/writable by normal users.
+      match /privateAuth/{docId} {
+        allow read, write: if isAdmin();
+      }
+
       // 2FA backup codes (hashed). These should NOT be readable by normal users.
       match /backupCodes/{codeHash} {
         allow read: if isAdmin();
         allow create, update, delete: if isAdmin();
       }
+    }
+
+    // Step-up verification tokens are server-managed and should never be accessible to clients.
+    match /stepUpTokens/{tokenId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Pending email-change requests (server-managed, contain sensitive metadata).
+    match /emailChangeRequests/{token} {
+      allow read, write: if isAdmin();
     }
 
     // User sessions tracking (server-managed). Users can read their own sessions.

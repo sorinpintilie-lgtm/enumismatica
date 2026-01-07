@@ -16,6 +16,7 @@ interface ExtendedUser extends FirebaseUser {
   idDocumentNumber?: string;
   idDocumentPhotos?: string[];
   twoFactorEnabled?: boolean;
+  accountStatus?: 'active' | 'deactivated';
 }
 
 interface AuthContextType {
@@ -57,26 +58,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           doc(db, 'users', firebaseUser.uid),
           (userDoc) => {
            const userData = userDoc.data();
-           const role = userData?.role || 'user';
-           const idVerificationStatus = userData?.idVerificationStatus;
+            const role = userData?.role || 'user';
+            const accountStatus = (userData?.accountStatus || 'active') as any;
+            const idVerificationStatus = userData?.idVerificationStatus;
            const idDocumentType = userData?.idDocumentType;
            const idDocumentNumber = userData?.idDocumentNumber;
            const idDocumentPhotos = userData?.idDocumentPhotos;
-           const twoFactorEnabled = userData?.twoFactorEnabled || false;
+            const twoFactorEnabled = userData?.twoFactorEnabled || false;
 
-           if (mounted) {
-             const extendedUser = {
-               ...firebaseUser,
-               role,
-               isAdmin: role === 'admin' || role === 'superadmin',
-               isSuperAdmin: role === 'superadmin',
-               displayName: userData?.displayName || firebaseUser.displayName || firebaseUser.email || 'User',
-               idVerificationStatus,
-               idDocumentType,
-               idDocumentNumber,
-               idDocumentPhotos,
-               twoFactorEnabled,
-              } as ExtendedUser;
+            if (mounted) {
+              const extendedUser = {
+                ...firebaseUser,
+                role,
+                isAdmin: role === 'admin' || role === 'superadmin',
+                isSuperAdmin: role === 'superadmin',
+                displayName: userData?.displayName || firebaseUser.displayName || firebaseUser.email || 'User',
+                accountStatus,
+                idVerificationStatus,
+                idDocumentType,
+                idDocumentNumber,
+                idDocumentPhotos,
+                twoFactorEnabled,
+               } as ExtendedUser;
 
                setUser(extendedUser);
               setLoading(false);
