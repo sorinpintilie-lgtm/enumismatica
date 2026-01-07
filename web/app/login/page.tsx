@@ -8,6 +8,7 @@ import { signInWithEmail, signInWithGoogle } from 'shared/auth';
 import { auth } from '../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import LoginStepper from '../components/LoginStepper';
 
 const loginSchema = z.object({
   email: z.string().email('Adresă de email invalidă'),
@@ -32,6 +33,9 @@ export default function LoginPage() {
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [rememberDevice, setRememberDevice] = useState(true);
   const [useBackupCode, setUseBackupCode] = useState(false);
+  
+  // Stepper state
+  const [currentStep, setCurrentStep] = useState(0);
   
   const router = useRouter();
 
@@ -136,9 +140,9 @@ export default function LoginPage() {
             }
           }
 
-          // User has 2FA enabled, show 2FA prompt (do NOT sign out; we need token for backup codes / trusted device)
+          // User has 2FA enabled, move to 2FA step
           setPendingUserId(user.uid);
-          setShow2FA(true);
+          setCurrentStep(1);
         } else {
           // No 2FA, proceed to dashboard
           await startSessionOnServer();
@@ -220,6 +224,13 @@ export default function LoginPage() {
     }
   };
 
+  const handleBackToLogin = () => {
+    setCurrentStep(0);
+    setTwoFactorCode('');
+    setTwoFactorError('');
+    setPendingUserId(null);
+  };
+
   const handleGoogleLogin = async () => {
     setLoading(true);
     const { user, error } = await signInWithGoogle();
@@ -285,17 +296,12 @@ export default function LoginPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-navy-500 via-navy-600 to-navy-900 py-12 px-4">
-      <div className="max-w-md w-full space-y-8 bg-navy-900/85 backdrop-blur-sm rounded-3xl border border-gold-500/40 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.85)]">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-            Autentificare
-          </h2>
-          <p className="mt-2 text-center text-sm text-slate-300">
-            Conectează-te la contul tău eNumismatica
-          </p>
-        </div>
+  // Define steps for the stepper
+  const steps = [
+    {
+      id: 'login',
+      title: 'Autentificare',
+      content: (
         <form className="mt-8 space-y-6" onSubmit={handleEmailLogin}>
           <div className="rounded-xl space-y-4">
             <div>
@@ -357,124 +363,131 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {!show2FA && (
-            <div className="flex items-center justify-between text-sm">
-              <button
-                type="button"
-                onClick={() => setShowResetPassword(true)}
-                className="font-medium text-gold-400 hover:text-gold-300 transition-colors"
-              >
-                Ai uitat parola?
-              </button>
-              <Link
-                href="/register"
-                className="font-medium text-gold-400 hover:text-gold-300 transition-colors"
-              >
-                Înregistrează-te
-              </Link>
-            </div>
-          )}
+          <div className="flex items-center justify-between text-sm">
+            <button
+              type="button"
+              onClick={() => setShowResetPassword(true)}
+              className="font-medium text-gold-400 hover:text-gold-300 transition-colors"
+            >
+              Ai uitat parola?
+            </button>
+            <Link
+              href="/register"
+              className="font-medium text-gold-400 hover:text-gold-300 transition-colors"
+            >
+              Înregistrează-te
+            </Link>
+          </div>
         </form>
-
-        {/* 2FA Verification */}
-        {show2FA && (
-          <div className="mt-6 p-6 bg-navy-800/60 rounded-2xl border border-gold-500/40">
-            <h3 className="text-lg font-semibold text-white mb-2">Autentificare cu Doi Factori</h3>
-            <p className="text-sm text-slate-300 mb-4">
-              Introdu codul din aplicația ta de autentificare sau un cod de rezervă.
-            </p>
-            
-            <form onSubmit={handleVerify2FA} className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUseBackupCode(false);
-                    setTwoFactorCode('');
-                    setTwoFactorError('');
-                  }}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
-                    !useBackupCode
-                      ? 'bg-gold-500 text-navy-900 border-gold-400'
-                      : 'bg-navy-900/40 text-slate-200 border-gold-500/30 hover:bg-navy-900/60'
-                  }`}
-                >
-                  Cod 2FA (6 cifre)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUseBackupCode(true);
-                    setTwoFactorCode('');
-                    setTwoFactorError('');
-                  }}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
-                    useBackupCode
-                      ? 'bg-gold-500 text-navy-900 border-gold-400'
-                      : 'bg-navy-900/40 text-slate-200 border-gold-500/30 hover:bg-navy-900/60'
-                  }`}
-                >
-                  Cod de rezervă
-                </button>
-              </div>
-
-              <div>
-                <input
-                  type="text"
-                  value={twoFactorCode}
-                  onChange={(e) => setTwoFactorCode(e.target.value)}
-                  placeholder={useBackupCode ? 'ABCD-EF12' : '000000'}
-                  maxLength={useBackupCode ? 9 : 6}
-                  className="appearance-none relative block w-full px-4 py-3 border border-gold-500/40 placeholder-slate-400 text-slate-50 rounded-xl bg-navy-900/70 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent text-center text-2xl tracking-widest"
-                  required
-                  autoFocus
-                />
-              </div>
-
-              <label className="flex items-center gap-2 text-sm text-slate-200">
-                <input
-                  type="checkbox"
-                  checked={rememberDevice}
-                  onChange={(e) => setRememberDevice(e.target.checked)}
-                  className="w-4 h-4 accent-gold-500"
-                />
-                Ține minte acest dispozitiv (30 zile)
-              </label>
-
-              {twoFactorError && (
-                <div className="bg-red-900/40 border border-red-500/60 text-red-100 px-4 py-3 rounded-xl text-sm text-center">
-                  {twoFactorError}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={
-                  loading ||
-                  (useBackupCode
-                    ? twoFactorCode.trim().length < 8
-                    : twoFactorCode.trim().length !== 6)
-                }
-                className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-[#000940] bg-[#e7b73c] hover:bg-[#f0c955] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 shadow-lg shadow-[0_0_24px_rgba(231,183,60,0.75)] transition-all duration-200"
-              >
-                {loading ? 'Se verifică...' : 'Verifică Codul'}
-              </button>
-
+      ),
+    },
+    {
+      id: '2fa',
+      title: 'Autentificare cu Doi Factori',
+      content: (
+        <div className="mt-6 p-6 bg-navy-800/60 rounded-2xl border border-gold-500/40">
+          <p className="text-sm text-slate-300 mb-4">
+            Introdu codul din aplicația ta de autentificare sau un cod de rezervă.
+          </p>
+          
+          <form onSubmit={handleVerify2FA} className="space-y-4">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => {
-                  setShow2FA(false);
+                  setUseBackupCode(false);
                   setTwoFactorCode('');
                   setTwoFactorError('');
-                  setPendingUserId(null);
                 }}
-                className="w-full text-sm text-slate-400 hover:text-slate-200 transition-colors"
+                className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
+                  !useBackupCode
+                    ? 'bg-gold-500 text-navy-900 border-gold-400'
+                    : 'bg-navy-900/40 text-slate-200 border-gold-500/30 hover:bg-navy-900/60'
+                }`}
               >
-                Anulează
+                Cod 2FA (6 cifre)
               </button>
-            </form>
-          </div>
-        )}
+              <button
+                type="button"
+                onClick={() => {
+                  setUseBackupCode(true);
+                  setTwoFactorCode('');
+                  setTwoFactorError('');
+                }}
+                className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
+                  useBackupCode
+                    ? 'bg-gold-500 text-navy-900 border-gold-400'
+                    : 'bg-navy-900/40 text-slate-200 border-gold-500/30 hover:bg-navy-900/60'
+                }`}
+              >
+                Cod de rezervă
+              </button>
+            </div>
+
+            <div>
+              <input
+                type="text"
+                value={twoFactorCode}
+                onChange={(e) => setTwoFactorCode(e.target.value)}
+                placeholder={useBackupCode ? 'ABCD-EF12' : '000000'}
+                maxLength={useBackupCode ? 9 : 6}
+                className="appearance-none relative block w-full px-4 py-3 border border-gold-500/40 placeholder-slate-400 text-slate-50 rounded-xl bg-navy-900/70 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent text-center text-2xl tracking-widest"
+                required
+                autoFocus
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-sm text-slate-200">
+              <input
+                type="checkbox"
+                checked={rememberDevice}
+                onChange={(e) => setRememberDevice(e.target.checked)}
+                className="w-4 h-4 accent-gold-500"
+              />
+              Ține minte acest dispozitiv (30 zile)
+            </label>
+
+            {twoFactorError && (
+              <div className="bg-red-900/40 border border-red-500/60 text-red-100 px-4 py-3 rounded-xl text-sm text-center">
+                {twoFactorError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={
+                loading ||
+                (useBackupCode
+                  ? twoFactorCode.trim().length < 8
+                  : twoFactorCode.trim().length !== 6)
+              }
+              className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-[#000940] bg-[#e7b73c] hover:bg-[#f0c955] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 shadow-lg shadow-[0_0_24px_rgba(231,183,60,0.75)] transition-all duration-200"
+            >
+              {loading ? 'Se verifică...' : 'Verifică Codul'}
+            </button>
+          </form>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-navy-500 via-navy-600 to-navy-900 py-12 px-4">
+      <div className="max-w-md w-full space-y-8 bg-navy-900/85 backdrop-blur-sm rounded-3xl border border-gold-500/40 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.85)]">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+            Autentificare
+          </h2>
+          <p className="mt-2 text-center text-sm text-slate-300">
+            Conectează-te la contul tău eNumismatica
+          </p>
+        </div>
+
+        <LoginStepper
+          steps={steps}
+          currentStep={currentStep}
+          onBack={currentStep > 0 ? handleBackToLogin : undefined}
+        />
       </div>
 
       {/* Password Reset Modal */}
