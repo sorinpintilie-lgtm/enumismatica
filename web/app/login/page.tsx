@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { signInWithEmail, signInWithGoogle } from 'shared/auth';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const loginSchema = z.object({
   email: z.string().email('Adresă de email invalidă'),
@@ -23,6 +25,14 @@ export default function LoginPage() {
   const [resetSuccess, setResetSuccess] = useState('');
   const [resetError, setResetError] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
+  
+  // 2FA state
+  const [show2FA, setShow2FA] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [twoFactorError, setTwoFactorError] = useState('');
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [twoFactorSecret, setTwoFactorSecret] = useState<string | null>(null);
+  
   const router = useRouter();
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -42,10 +52,73 @@ export default function LoginPage() {
 
     const { user, error } = await signInWithEmail(email, password);
     setLoading(false);
+    
     if (error) {
       setError(error);
-    } else if (user) {
-      router.push('/dashboard');
+      return;
+    }
+    
+    if (user) {
+      // Check if user has 2FA enabled
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists() && userDoc.data().twoFactorEnabled) {
+          // User has 2FA enabled, show 2FA prompt
+          setPendingUserId(user.uid);
+          setTwoFactorSecret(userDoc.data().twoFactorSecret);
+          setShow2FA(true);
+          // Sign out temporarily until 2FA is verified
+          await auth.signOut();
+        } else {
+          // No 2FA, proceed to dashboard
+          router.push('/dashboard');
+        }
+      } catch (err) {
+        console.error('Error checking 2FA status:', err);
+        router.push('/dashboard');
+      }
+    }
+  };
+
+  const handleVerify2FA = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setTwoFactorError('');
+
+    if (!pendingUserId || !twoFactorSecret || !twoFactorCode) {
+      setTwoFactorError('Cod invalid');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Verify the 2FA code
+      const res = await fetch('/api/auth/2fa/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: pendingUserId,
+          code: twoFactorCode,
+          secret: twoFactorSecret,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Cod invalid');
+      }
+
+      // 2FA verified, sign in again
+      const { user, error } = await signInWithEmail(email, password);
+      
+      if (error) {
+        setTwoFactorError(error);
+      } else if (user) {
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      setTwoFactorError(err.message || 'Cod invalid. Te rugăm să încerci din nou.');
+    } finally {
+      setLoading(false);
     }
   };
 
