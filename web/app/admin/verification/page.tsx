@@ -212,7 +212,7 @@ export default function AdminVerification() {
                             <p className="text-slate-400">Document</p>
                             <p className="text-white font-medium">
                               {u.idDocumentType === 'passport' ? 'Pașaport' : u.idDocumentType === 'ci' ? 'Carte de identitate' : 'Document'}
-                              {u.idDocumentNumber && ` ••••${u.idDocumentNumber.slice(-4)}`}
+                              {u.idDocumentNumber && ` • ${u.idDocumentNumber}`}
                             </p>
                           </div>
                           <div>

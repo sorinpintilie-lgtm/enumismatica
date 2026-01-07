@@ -405,9 +405,7 @@ export default function AdminUserDetail() {
       : user.idDocumentType === 'ci'
       ? 'Carte de identitate'
       : 'Document';
-  const maskedDocumentNumber = user.idDocumentNumber
-    ? String(user.idDocumentNumber).replace(/.(?=.{4})/g, '•')
-    : '';
+  const documentNumber = user.idDocumentNumber || '';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -569,7 +567,7 @@ export default function AdminUserDetail() {
                     </p>
                     <p className="text-slate-300">
                       Număr document:{' '}
-                      <span className="font-mono text-gold-200">{maskedDocumentNumber}</span>
+                      <span className="font-mono text-gold-200">{documentNumber}</span>
                     </p>
                     <p className="text-slate-300">
                       Status:{' '}
