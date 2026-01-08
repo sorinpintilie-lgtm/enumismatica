@@ -639,41 +639,9 @@ function NewProductPageContent() {
         }
       }
 
+      // Remove automatic collection addition - users should explicitly choose to add to collection
       // Only add to collection if not from existing collection item and not editing
-      if (!collectionItem && !editingProduct) {
-        try {
-          // For the personal collection entry, use raw URLs if we have them.
-          const productSnap = await getDoc(doc(db, 'products', productRef.id));
-          const productData = productSnap.data() as any;
-          const collectionImages: string[] = Array.isArray(productData?.images) ? productData.images : [];
-
-          await addCollectionItem(user.uid, {
-            name: name.trim(),
-            description: description.trim(),
-            images: collectionImages,
-            video: videoUrl,
-            category: category || undefined,
-            country: country || undefined,
-            year: year ? Number(year) : undefined,
-            era: era || undefined,
-            metal: metal || undefined,
-            denomination: denomination || undefined,
-            rarity: rarity || undefined,
-            grade: grade || undefined,
-            // Certification fields
-            hasCertification: hasCertification || false,
-            certificationCompany: hasCertification ? certificationCompany as 'NGC' | 'PCGS' : undefined,
-            certificationCode: hasCertification ? certificationCode.trim() : undefined,
-            certificationGrade: hasCertification ? certificationGrade : undefined,
-            acquisitionPrice: productPrice,
-            currentValue: productPrice,
-            notes: 'Piesă creată în magazin',
-            tags: ['listare-magazin'],
-          });
-        } catch (err) {
-          console.error('Failed to add product to collection', err);
-        }
-      }
+      // This section has been intentionally removed to prevent automatic collection addition
   
       // Validate certification fields
       if (hasCertification) {

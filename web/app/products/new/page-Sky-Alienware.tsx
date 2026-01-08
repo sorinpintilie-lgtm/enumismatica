@@ -263,26 +263,8 @@ export default function NewProductPage() {
         updatedAt: serverTimestamp(),
       });
 
-      try {
-        await addCollectionItem(user.uid, {
-          name: name.trim(),
-          description: description.trim(),
-          images: imageUrls,
-          country: country || undefined,
-          year: year ? Number(year) : undefined,
-          era: era || undefined,
-          metal: metal || undefined,
-          denomination: denomination || undefined,
-          rarity: rarity || undefined,
-          grade: grade || undefined,
-          acquisitionPrice: numericPrice,
-          currentValue: numericPrice,
-          notes: 'Piesă creată în magazin',
-          tags: ['listare-magazin'],
-        });
-      } catch (err) {
-        console.error('Failed to add product to collection', err);
-      }
+      // Remove automatic collection addition - users should explicitly choose to add to collection
+      // This section has been intentionally removed to prevent automatic collection addition
 
       if (listingType === 'auction') {
         const reserve = reservePrice ? Number(reservePrice) : numericPrice;
