@@ -376,7 +376,8 @@ export default function AuctionDetailPage() {
     auction.status === 'active' &&
     typeof auction.buyNowPrice === 'number' &&
     auction.buyNowPrice > 0 &&
-    !auction.buyNowUsed;
+    !auction.buyNowUsed &&
+    (!auction.ownerId || auction.ownerId !== user?.uid);
 
   const isUserHighestBidder = !!user && !!auction && auction.currentBidderId === user.uid;
 

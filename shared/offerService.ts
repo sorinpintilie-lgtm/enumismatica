@@ -204,6 +204,9 @@ export async function acceptOffer(offerId: string): Promise<void> {
   // Capture values for post-transaction cleanup.
   let acceptedItemType: 'product' | 'auction' | null = null;
   let acceptedItemId: string | null = null;
+  let buyerId: string | null = null;
+  let sellerId: string | null = null;
+  let offerAmount: number | null = null;
 
   await runTransaction(db, async (tx) => {
     // READ PHASE – all reads must happen before any writes
@@ -211,51 +214,78 @@ export async function acceptOffer(offerId: string): Promise<void> {
     if (!offerSnap.exists()) {
       throw new Error('Oferta nu există.');
     }
- 
+
     const offer = offerSnap.data() as any;
     const itemType: 'product' | 'auction' = offer.itemType;
     const itemId: string = offer.itemId;
-    const buyerId: string = offer.buyerId;
-    const sellerId: string = offer.sellerId;
- 
+    buyerId = offer.buyerId;
+    sellerId = offer.sellerId;
+    offerAmount = offer.offerAmount;
+
     acceptedItemType = itemType;
     acceptedItemId = itemId;
- 
+
     if (offer.status && offer.status !== 'pending') {
       throw new Error('Oferta nu mai este în așteptare.');
     }
- 
+
     let productRef: ReturnType<typeof doc> | null = null;
     let product: any = null;
- 
+    let auctionRef: ReturnType<typeof doc> | null = null;
+    let auction: any = null;
+
     if (itemType === 'product') {
       productRef = doc(db, 'products', itemId);
       const productSnap = await tx.get(productRef);
       if (!productSnap.exists()) {
         throw new Error('Produsul nu există.');
       }
- 
+
       product = productSnap.data() as any;
       if (product.ownerId && sellerId && product.ownerId !== sellerId) {
         throw new Error('Oferta nu aparține acestui vânzător.');
       }
- 
+
       if (product.isSold) {
         throw new Error('Produsul a fost deja vândut.');
       }
+    } else if (itemType === 'auction') {
+      auctionRef = doc(db, 'auctions', itemId);
+      const auctionSnap = await tx.get(auctionRef);
+      if (!auctionSnap.exists()) {
+        throw new Error('Licitația nu există.');
+      }
+
+      auction = auctionSnap.data() as any;
+      if (auction.ownerId && sellerId && auction.ownerId !== sellerId) {
+        throw new Error('Oferta nu aparține acestui vânzător.');
+      }
+
+      if (auction.status !== 'active') {
+        throw new Error('Licitația nu este activă.');
+      }
     }
- 
+
     // WRITE PHASE – all updates after reads
     tx.update(offerRef, {
       status: 'accepted',
       updatedAt: serverTimestamp(),
     });
- 
+
     if (itemType === 'product' && productRef) {
       tx.update(productRef, {
         isSold: true,
         soldAt: serverTimestamp(),
         buyerId,
+        updatedAt: serverTimestamp(),
+      });
+    } else if (itemType === 'auction' && auctionRef) {
+      tx.update(auctionRef, {
+        status: 'ended',
+        winnerId: buyerId,
+        didMeetMinimum: true,
+        currentBid: offerAmount,
+        currentBidderId: buyerId,
         updatedAt: serverTimestamp(),
       });
     }

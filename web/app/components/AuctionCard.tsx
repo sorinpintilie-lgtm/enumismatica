@@ -95,7 +95,8 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
     auction.status === 'active' &&
     typeof auction.buyNowPrice === 'number' &&
     auction.buyNowPrice > 0 &&
-    !auction.buyNowUsed;
+    !auction.buyNowUsed &&
+    (!auction.ownerId || auction.ownerId !== user?.uid);
 
   const handleBid = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();

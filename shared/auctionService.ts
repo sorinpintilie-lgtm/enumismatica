@@ -47,6 +47,10 @@ export function validateBid(auction: Auction, bidAmount: number, userId: string)
     return { valid: false, error: 'Auction has ended' };
   }
 
+  if (auction.ownerId && auction.ownerId === userId) {
+    return { valid: false, error: 'Nu poți licita pe propria ta licitație.' };
+  }
+
   if (userId === auction.currentBidderId) {
     return { valid: false, error: 'You are already the highest bidder' };
   }
