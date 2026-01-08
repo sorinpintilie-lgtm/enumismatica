@@ -206,47 +206,52 @@ export async function acceptOffer(offerId: string): Promise<void> {
   let acceptedItemId: string | null = null;
 
   await runTransaction(db, async (tx) => {
+    // READ PHASE – all reads must happen before any writes
     const offerSnap = await tx.get(offerRef);
     if (!offerSnap.exists()) {
       throw new Error('Oferta nu există.');
     }
-
+ 
     const offer = offerSnap.data() as any;
     const itemType: 'product' | 'auction' = offer.itemType;
     const itemId: string = offer.itemId;
     const buyerId: string = offer.buyerId;
     const sellerId: string = offer.sellerId;
-
+ 
     acceptedItemType = itemType;
     acceptedItemId = itemId;
-
+ 
     if (offer.status && offer.status !== 'pending') {
       throw new Error('Oferta nu mai este în așteptare.');
     }
-
-    // Mark offer accepted.
-    tx.update(offerRef, {
-      status: 'accepted',
-      updatedAt: serverTimestamp(),
-    });
-
-    // When accepting a product offer, we must immediately mark the product as sold.
+ 
+    let productRef: ReturnType<typeof doc> | null = null;
+    let product: any = null;
+ 
     if (itemType === 'product') {
-      const productRef = doc(db, 'products', itemId);
+      productRef = doc(db, 'products', itemId);
       const productSnap = await tx.get(productRef);
       if (!productSnap.exists()) {
         throw new Error('Produsul nu există.');
       }
-
-      const product = productSnap.data() as any;
+ 
+      product = productSnap.data() as any;
       if (product.ownerId && sellerId && product.ownerId !== sellerId) {
         throw new Error('Oferta nu aparține acestui vânzător.');
       }
-
+ 
       if (product.isSold) {
         throw new Error('Produsul a fost deja vândut.');
       }
-
+    }
+ 
+    // WRITE PHASE – all updates after reads
+    tx.update(offerRef, {
+      status: 'accepted',
+      updatedAt: serverTimestamp(),
+    });
+ 
+    if (itemType === 'product' && productRef) {
       tx.update(productRef, {
         isSold: true,
         soldAt: serverTimestamp(),

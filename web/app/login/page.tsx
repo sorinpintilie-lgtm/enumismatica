@@ -28,14 +28,13 @@ export default function LoginPage() {
   const [resetLoading, setResetLoading] = useState(false);
   
   // 2FA state
-  const [show2FA, setShow2FA] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [twoFactorError, setTwoFactorError] = useState('');
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [rememberDevice, setRememberDevice] = useState(true);
   const [useBackupCode, setUseBackupCode] = useState(false);
-  
-  // Stepper state - we'll manage this differently now
+
+  // Stepper state
   const [currentStep, setCurrentStep] = useState(0);
   const [showStepper, setShowStepper] = useState(false);
   
@@ -59,7 +58,8 @@ export default function LoginPage() {
 
         setEmail(current.email || '');
         setPendingUserId(current.uid);
-        setShow2FA(true);
+        setShowStepper(true);
+        setCurrentStep(1);
       } catch (err) {
         console.warn('Failed to init 2FA on login page:', err);
       }
@@ -170,9 +170,10 @@ export default function LoginPage() {
             }
           }
 
-          // User has 2FA enabled but not on a trusted device, show 2FA directly without stepper
+          // User has 2FA enabled but not on a trusted device, show 2FA step
           await sendLoginAttemptNotification(user.email || email);
-          setShow2FA(true);
+          setShowStepper(true);
+          setCurrentStep(1);
           setPendingUserId(user.uid);
         } else {
           // No 2FA, send login success email and proceed to dashboard
@@ -273,6 +274,7 @@ export default function LoginPage() {
     if (currentUser) {
       await sendLoginAttemptNotification(currentUser.email || '');
     }
+    setShowStepper(false);
     setCurrentStep(0);
     setTwoFactorCode('');
     setTwoFactorError('');
