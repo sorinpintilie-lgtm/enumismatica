@@ -59,7 +59,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
 
 	const displayImages = getDisplayProductImages(product);
 
-  const [sellerName, setSellerName] = useState<string | null>(null);
+	 const [sellerName, setSellerName] = useState<string | null>(null);
   const [sellerVerified, setSellerVerified] = useState(false);
 
   useEffect(() => {

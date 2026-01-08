@@ -148,7 +148,7 @@ export function getAllDisplayImages(product: Partial<Product> & { mintLocation?:
   for (let i = 0; i < maxLength; i++) {
     const primary = normalized.images?.[i];
     const fallback = normalized.imagesRaw?.[i];
-    
+
     // Use primary if valid, otherwise use fallback
     if (isValidImageUrl(primary)) {
       allImages.push(primary.trim());

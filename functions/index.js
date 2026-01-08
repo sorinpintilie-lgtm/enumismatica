@@ -673,20 +673,41 @@ exports.onProductImageUploaded = fn
     const filePath = object.name;
     const contentType = object.contentType || '';
 
-    if (!filePath) return null;
-    if (!contentType.startsWith('image/')) return null;
+    console.log('[imageCompression] Triggered for', filePath, 'contentType:', contentType);
+
+    if (!filePath) {
+      console.log('[imageCompression] No filePath, skipping');
+      return null;
+    }
+    if (!contentType.startsWith('image/')) {
+      console.log('[imageCompression] Not an image, skipping');
+      return null;
+    }
 
     const meta = object.metadata || {};
-    if (meta.needsOptimization !== 'true') return null;
-    if (meta.optimized === 'true') return null;
+    console.log('[imageCompression] Metadata:', meta);
+
+    if (meta.needsOptimization !== 'true') {
+      console.log('[imageCompression] needsOptimization not true, skipping');
+      return null;
+    }
+    if (meta.optimized === 'true') {
+      console.log('[imageCompression] Already optimized, skipping');
+      return null;
+    }
 
     // Avoid loops if someone uploads an optimized file with the same metadata.
-    if (filePath.includes('__optimized')) return null;
+    if (filePath.includes('__optimized')) {
+      console.log('[imageCompression] Optimized file, skipping');
+      return null;
+    }
 
     const ownerId = meta.ownerId;
     const productId = meta.productId;
     const indexRaw = meta.index;
     const index = Number(indexRaw);
+
+    console.log('[imageCompression] Parsed metadata:', { ownerId, productId, indexRaw, index });
 
     if (!ownerId || !productId || !Number.isFinite(index) || index < 0) {
       console.warn('[imageCompression] Missing/invalid metadata', {
