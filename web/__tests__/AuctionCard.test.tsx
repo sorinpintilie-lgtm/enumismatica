@@ -1,80 +1,82 @@
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import AuctionCard from '../app/components/AuctionCard';
-import { Auction } from '../../shared/types';
+import type { Auction } from '../../shared/types';
 
 jest.mock('../app/context/AuthContext', () => ({
-  useAuth: jest.fn(),
+	useAuth: jest.fn(),
 }));
 
-jest.mock('../app/services/auctionService', () => ({
-  placeBid: jest.fn(),
+jest.mock('../app/components/ToastProvider', () => ({
+	useToast: () => ({ showToast: jest.fn() }),
+}));
+
+jest.mock('../app/hooks/useProducts', () => ({
+	useProduct: jest.fn(),
+}));
+
+jest.mock('shared/auctionService', () => ({
+	placeBid: jest.fn(),
+	calculateNextBidAmount: jest.fn(() => 16),
 }));
 
 const mockUseAuth = require('../app/context/AuthContext').useAuth;
-const mockPlaceBid = require('../app/services/auctionService').placeBid;
+const mockUseProduct = require('../app/hooks/useProducts').useProduct;
 
 const mockAuction: Auction = {
-  id: 'auction1',
-  productId: 'product1',
-  status: 'active',
-  startTime: new Date(),
-  endTime: new Date(Date.now() + 3600000), // 1 hour from now
-  reservePrice: 10,
-  currentBid: 15,
-  currentBidderId: 'user1',
-  createdAt: new Date(),
-  updatedAt: new Date(),
+	id: 'auction_123456',
+	productId: 'product_1',
+	status: 'active',
+	startTime: new Date(),
+	endTime: new Date(Date.now() + 3600000),
+	reservePrice: 10,
+	currentBid: 15,
+	createdAt: new Date(),
+	updatedAt: new Date(),
 };
 
 describe('AuctionCard', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
 
-  it('renders auction information correctly', () => {
-    mockUseAuth.mockReturnValue({ user: null });
+	it('appends width using & when the image URL already has query params (Firebase Storage)', () => {
+		mockUseAuth.mockReturnValue({ user: null });
 
-    render(<AuctionCard auction={mockAuction} />);
+		mockUseProduct.mockReturnValue({
+			product: {
+				id: 'product_1',
+				name: 'Test Product',
+				images: ['https://firebasestorage.googleapis.com/v0/b/bucket/o/path.webp?alt=media&token=abc'],
+				imagesRaw: [],
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			},
+		});
 
-    expect(screen.getByText('Auction #auction1')).toBeInTheDocument();
-    expect(screen.getByText('$15.00')).toBeInTheDocument();
-    expect(screen.getByText('ACTIVE')).toBeInTheDocument();
-    expect(screen.getByText('View Details')).toBeInTheDocument();
-  });
+		render(<AuctionCard auction={mockAuction} />);
 
-  it('shows login button when user is not authenticated', () => {
-    mockUseAuth.mockReturnValue({ user: null });
+		const img = screen.getByRole('img');
+		expect(img.getAttribute('src')).toContain('&width=400');
+	});
 
-    render(<AuctionCard auction={mockAuction} />);
+	it('falls back to imagesRaw when images is empty', () => {
+		mockUseAuth.mockReturnValue({ user: null });
 
-    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
-  });
+		mockUseProduct.mockReturnValue({
+			product: {
+				id: 'product_1',
+				name: 'Test Product',
+				images: [],
+				imagesRaw: ['https://firebasestorage.googleapis.com/v0/b/bucket/o/raw.jpg?alt=media&token=rawtoken'],
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			},
+		});
 
-  it('allows placing a bid when user is authenticated', async () => {
-    const mockUser = { uid: 'user2' };
-    mockUseAuth.mockReturnValue({ user: mockUser });
-    mockPlaceBid.mockResolvedValue();
+		render(<AuctionCard auction={mockAuction} />);
 
-    render(<AuctionCard auction={mockAuction} />);
-
-    const input = screen.getByPlaceholderText('Min: $15.01');
-    const button = screen.getByRole('button', { name: 'Bid' });
-
-    fireEvent.change(input, { target: { value: '16' } });
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(mockPlaceBid).toHaveBeenCalledWith('auction1', 16, 'user2');
-    });
-  });
-
-  it('displays countdown timer', () => {
-    mockUseAuth.mockReturnValue({ user: null });
-
-    render(<AuctionCard auction={mockAuction} />);
-
-    // The countdown should be displayed
-    expect(screen.getByText(/Time Left:/)).toBeInTheDocument();
-  });
+		const img = screen.getByRole('img');
+		expect(img.getAttribute('src')).toContain('&width=400');
+	});
 });

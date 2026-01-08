@@ -22,6 +22,7 @@ import OfferManagement from '../../components/OfferManagement';
 import ProductCard from '../../components/ProductCard';
 import { createOrGetConversation } from 'shared/chatService';
 import { useRouter } from 'next/navigation';
+import { buildImageUrlWithWidth, getDisplayProductImages } from '../../utils/imageUrls';
 
 const bidSchema = z.object({
   amount: z.number().positive('Bid amount must be positive'),
@@ -114,7 +115,7 @@ export default function AuctionDetailPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [heroIndex, setHeroIndex] = useState(0);
-  const images = product?.images ?? [];
+  const images = getDisplayProductImages(product);
 
   const openLightboxAt = (index: number) => {
     if (!images.length) return;
@@ -627,7 +628,7 @@ export default function AuctionDetailPage() {
                   onClick={() => openLightboxAt(heroIndex)}
                 >
                   <img
-                    src={`${(images[heroIndex] || images[0])}?width=800`}
+                    src={buildImageUrlWithWidth(images[heroIndex] || images[0], 800)}
                     alt={product?.name || 'Piesă Licitație'}
                     className="w-full h-full object-contain bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950"
                   />
@@ -646,7 +647,7 @@ export default function AuctionDetailPage() {
                         }`}
                       >
                           <img
-                            src={`${image}?width=200`}
+                            src={buildImageUrlWithWidth(image, 200)}
                             alt={`${product?.name || 'Piesă Licitație'} ${index + 2}`}
                             className="w-full h-full object-contain bg-navy-950"
                           />
@@ -1282,7 +1283,7 @@ export default function AuctionDetailPage() {
 
         <div className="max-w-3xl max-h-[80vh] flex items-center justify-center">
           <img
-            src={`${images[lightboxIndex]}?width=1200`}
+            src={buildImageUrlWithWidth(images[lightboxIndex], 1200)}
             alt={product?.name || 'Imagine licitație'}
             className="max-h-[80vh] max-w-full object-contain rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.9)]"
           />

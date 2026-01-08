@@ -2,7 +2,7 @@
 
 import { useState, useEffect, memo, useCallback } from 'react';
 import Link from 'next/link';
-import { Auction, Product } from 'shared/types';
+import { Auction } from 'shared/types';
 import { placeBid, calculateNextBidAmount } from 'shared/auctionService';
 import { useAuth } from '../context/AuthContext';
 import { useProduct } from '../hooks/useProducts';
@@ -13,6 +13,7 @@ import { logEvent } from '../hooks/useActivityLogger';
 import OfferModal from './OfferModal';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { buildImageUrlWithWidth, getDisplayProductImages } from '../utils/imageUrls';
 
 interface AuctionCardProps {
   auction: Auction;
@@ -55,6 +56,8 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
   const [showOfferModal, setShowOfferModal] = useState(false);
   const { product } = useProduct(auction.productId);
   const { showToast } = useToast();
+
+	const displayImages = getDisplayProductImages(product);
 
   const [sellerName, setSellerName] = useState<string | null>(null);
   const [sellerVerified, setSellerVerified] = useState(false);
@@ -145,10 +148,10 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
         {/* Image */}
         <div className="relative w-32 h-24 flex-shrink-0">
           <Link href={`/auctions/${auction.id}`} className="block w-full h-full bg-white rounded-lg overflow-hidden">
-            {product && product.images && product.images.length > 0 ? (
+            {displayImages.length > 0 ? (
               <img
-                src={`${product.images[0]}?width=200`}
-                alt={product.name || 'Piesă Licitație'}
+                src={buildImageUrlWithWidth(displayImages[0], 200)}
+                alt={product?.name || 'Piesă Licitație'}
                 className="w-full h-full object-contain"
               />
             ) : (
@@ -156,7 +159,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
                 <span className="text-slate-400 text-xs">Se încarcă...</span>
               </div>
             )}
-            {product && product.images && product.images.length > 1 && (
+            {displayImages.length > 1 && (
               <span className="absolute bottom-1 left-1 z-10 rounded-full bg-navy-950/80 px-2 py-0.5 text-[10px] font-semibold text-slate-100 border border-gold-500/30">
                 Alte poze
               </span>
@@ -265,10 +268,10 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
       }`}
     >
       <Link href={`/auctions/${auction.id}`} className="relative aspect-[4/3] bg-white">
-        {product && product.images && product.images.length > 0 ? (
+        {displayImages.length > 0 ? (
             <img
-              src={`${product.images[0]}?width=400`}
-              alt={product.name || 'Piesă Licitație'}
+              src={buildImageUrlWithWidth(displayImages[0], 400)}
+              alt={product?.name || 'Piesă Licitație'}
               className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
             />
         ) : (
@@ -276,7 +279,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             <span className="text-slate-400">Se încarcă...</span>
           </div>
         )}
-        {product && product.images && product.images.length > 1 && (
+        {displayImages.length > 1 && (
           <span className="absolute bottom-2 left-2 z-10 rounded-full bg-navy-950/80 px-2.5 py-1 text-[10px] font-semibold text-slate-100 border border-gold-500/30">
             Alte poze
           </span>
