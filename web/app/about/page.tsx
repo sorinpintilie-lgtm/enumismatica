@@ -62,7 +62,7 @@ export default function AboutPage() {
             Despre eNumismatica
           </h1>
           <p className="text-xl text-slate-200 max-w-3xl mx-auto">
-            Partenerul tău de încredere în colecționarea numismatică din 2020
+            Partenerul tău de încredere în colecționarea numismatică din 2025
           </p>
         </div>
       </div>
@@ -86,7 +86,7 @@ export default function AboutPage() {
                 descoperi, să achiziționezi și să apreciezi aceste piese tangibile de istorie.
               </p>
               <p>
-                Fiecare monedă spune o poveste—despre imperii ridicate și căzute, despre revoluții economice, despre realizări
+                Fiecare monedă spune o poveste - despre imperii ridicate și căzute, despre revoluții economice, despre realizări
                 artistice și despre civilizația umană însăși. La eNumismatica, suntem dedicați să te ajutăm să
                 descoperi aceste povești și să construiești o colecție care reflectă pasiunea și interesele tale.
               </p>
@@ -104,10 +104,9 @@ export default function AboutPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Autenticitate</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Listare și administrare ușoară</h3>
               <p className="text-slate-200">
-                Fiecare piesă din colecția noastră este verificată și autentificată cu atenție de echipa noastră de experți.
-                Garantăm autenticitatea tuturor monedelor și valutelor pe care le oferim.
+                Publică rapid monedele tale, completează detaliile esențiale și gestionează totul dintr-un singur loc — de la anunțuri până la licitații.
               </p>
             </div>
 
@@ -195,10 +194,10 @@ export default function AboutPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white mb-2">Resurse educaționale</h3>
+                <h3 className="text-lg font-bold text-white mb-2">Comunitate pentru colecționari</h3>
                 <p className="text-slate-200">
-                  Accesează biblioteca noastră de piese, ghiduri și informații istorice pentru a-ți aprofunda
-                  înțelegerea numismaticii.
+                  Un spațiu dedicat numismaticii, unde găsești piese verificate, licitații organizate și o
+                  experiență simplă de cumpărare și vânzare, fără complicații.
                 </p>
               </div>
             </div>
@@ -219,11 +218,11 @@ export default function AboutPage() {
               </div>
               <div>
                 <div className="text-4xl font-extrabold mb-2">{stats.totalUsers.toLocaleString()}</div>
-                <div className="text-[#3b2b05]/80">Colecționari fericiți</div>
+                <div className="text-[#3b2b05]/80">Colecționari mulțumiți</div>
               </div>
               <div>
-                <div className="text-4xl font-extrabold mb-2">{stats.totalCountries}+</div>
-                <div className="text-[#3b2b05]/80">Țări</div>
+                <div className="text-4xl font-extrabold mb-2">{stats.totalCountries.toLocaleString()}</div>
+                <div className="text-[#3b2b05]/80">Licitații și cumpărare directă</div>
               </div>
               <div>
                 <div className="text-4xl font-extrabold mb-2">{stats.authenticated}%</div>
@@ -235,10 +234,10 @@ export default function AboutPage() {
 
         {/* Call to Action */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Gata să începi colecția ta?</h2>
+          <h2 className="text-3xl font-bold text-white mb-4">Gata să-ți începi colecția?</h2>
           <p className="text-lg text-slate-200 mb-8 max-w-2xl mx-auto">
-            Alătură-te miilor de colecționari care au încredere în eNumismatica pentru nevoile lor numismatice.
-            Răsfoiește colecția noastră sau participă la următoarea noastră licitație.
+            Alătură-te comunității de colecționari care aleg eNumismatica pentru piese verificate și tranzacții sigure.
+            Răsfoiește selecția noastră sau intră în următoarea licitație.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
