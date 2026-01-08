@@ -38,6 +38,7 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
   const [messageText, setMessageText] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [conversationMeta, setConversationMeta] = useState<{
@@ -125,6 +126,13 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
+  // Ensure the input is focused when a conversation is opened or changed
+  useEffect(() => {
+    if (conversationId && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [conversationId]);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!messageText.trim() || !user) return;
@@ -132,6 +140,10 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
     try {
       await sendMessage(messageText);
       setMessageText('');
+      // Re-focus the input after sending so user can continue typing quickly
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     } catch (err) {
       console.error('Failed to send message:', err);
     }
@@ -368,6 +380,7 @@ export function PrivateChat({ conversationId, onClose }: PrivateChatProps) {
       <form onSubmit={handleSendMessage} className="border-t border-gold-500/20 p-4 bg-navy-900/90">
         <div className="flex gap-2">
           <input
+            ref={inputRef}
             type="text"
             value={messageText}
             onChange={handleInputChange}

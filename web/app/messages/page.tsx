@@ -44,7 +44,7 @@ function MessagesPageContent() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-120px)] flex flex-col">
+    <div className="container mx-auto px-4 py-8 h-[calc(100vh-120px)] flex flex-col">
       <div className="mb-6 rounded-3xl border border-gold-500/40 bg-gradient-to-r from-navy-700 via-navy-800 to-navy-900 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.6)]">
         <h1 className="text-3xl font-bold text-white mb-2">Mesajele Mele</h1>
         <p className="text-sm text-slate-300">

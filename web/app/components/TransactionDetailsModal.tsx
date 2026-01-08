@@ -58,8 +58,28 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
   const counterpartyLabel = useMemo(() => {
     if (!order || !counterpartyId) return null;
     if (counterpartyId === 'monetaria-statului') return 'Monetaria Statului';
-    return order.sellerName || order.buyerName || `Utilizator #${counterpartyId.slice(-6)}`;
-  }, [order, counterpartyId]);
+
+    // Show the name of the *other* party in the transaction:
+    // - if current user is buyer, show sellerName
+    // - if current user is seller, show buyerName
+    // - fallback to a generic identifier based on counterpartyId
+    if (isBuyer && typeof order.sellerName === 'string' && order.sellerName.trim()) {
+      return order.sellerName;
+    }
+    if (isSeller && typeof order.buyerName === 'string' && order.buyerName.trim()) {
+      return order.buyerName;
+    }
+
+    // Fallbacks when one of the names is missing
+    if (typeof order.sellerName === 'string' && order.sellerName.trim()) {
+      return order.sellerName;
+    }
+    if (typeof order.buyerName === 'string' && order.buyerName.trim()) {
+      return order.buyerName;
+    }
+
+    return `Utilizator #${counterpartyId.slice(-6)}`;
+  }, [order, counterpartyId, isBuyer, isSeller]);
 
   useEffect(() => {
     if (!open || !orderId || !currentUserId) return;
