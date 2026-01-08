@@ -159,7 +159,7 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
 
         // Load existing payment and shipping info if available
         if (mappedOrder.paymentDate) {
-          setPaymentDate(mappedOrder.paymentDate.split('T')[0]);
+          setPaymentDate(mappedOrder.paymentDate.toISOString().split('T')[0]);
         }
         if (mappedOrder.paymentProofUrl) {
           setPaymentProofUrl(mappedOrder.paymentProofUrl);
@@ -168,7 +168,7 @@ export function TransactionDetailsModal(props: TransactionDetailsModalProps) {
           setAwbNumber(mappedOrder.awbNumber);
         }
         if (mappedOrder.shippingDate) {
-          setShippingDate(mappedOrder.shippingDate.split('T')[0]);
+          setShippingDate(mappedOrder.shippingDate.toISOString().split('T')[0]);
         }
         if (mappedOrder.courierName) {
           setCourierName(mappedOrder.courierName);
