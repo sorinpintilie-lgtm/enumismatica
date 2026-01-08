@@ -14,6 +14,7 @@ import OfferModal from './OfferModal';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { buildImageUrlWithWidth, getDisplayProductImages } from '../utils/imageUrls';
+import { PullbackStatusIndicator } from './PullbackStatusIndicator';
 
 interface AuctionCardProps {
   auction: Auction;
@@ -89,6 +90,9 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
   const isUserHighestBidder = !!user && auction.currentBidderId === user.uid;
   const isEnded = new Date() > auction.endTime;
   const currentBid = auction.currentBid || auction.reservePrice;
+
+  // Check if auction is pulled back
+  const isPulledBack = auction.isPulledBack || false;
 
   const canBuyNow =
     !isEnded &&
@@ -176,6 +180,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             >
               {auction.status.toUpperCase()}
             </span>
+            <PullbackStatusIndicator isPulledBack={isPulledBack} className="absolute top-1 right-1 z-10" />
           </Link>
 
           {/* Watchlist overlay (mobile-friendly for list layout) */}
@@ -285,6 +290,7 @@ function AuctionCard({ auction, showWatchlistButton = true, variant = 'grid' }: 
             Alte poze
           </span>
         )}
+        <PullbackStatusIndicator isPulledBack={isPulledBack} className="absolute top-2 right-2 z-10" />
       </Link>
       <div className="p-4 flex flex-col gap-3">
         <div className="flex justify-between items-start mb-1">

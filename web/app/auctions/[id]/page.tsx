@@ -23,6 +23,7 @@ import ProductCard from '../../components/ProductCard';
 import { createOrGetConversation } from 'shared/chatService';
 import { useRouter } from 'next/navigation';
 import { buildImageUrlWithWidth, getDisplayProductImages } from '../../utils/imageUrls';
+import { PullbackButton } from '../../components/PullbackButton';
 
 const bidSchema = z.object({
   amount: z.number().positive('Bid amount must be positive'),
@@ -615,6 +616,19 @@ export default function AuctionDetailPage() {
                 </svg>
                 Modifică Licitație
               </button>
+            </div>
+          )}
+          {isOwner && (
+            <div className="ml-4">
+              <PullbackButton
+                itemId={id}
+                itemType="auction"
+                onPullbackSuccess={() => {
+                  // Refresh the page or update state as needed
+                  window.location.reload();
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors text-sm"
+              />
             </div>
           )}
         </div>

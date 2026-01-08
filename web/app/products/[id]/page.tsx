@@ -74,6 +74,7 @@ export default function ProductDetailPage() {
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [showOfferManagement, setShowOfferManagement] = useState(false);
   const [isAdminUser, setIsAdminUser] = useState(false);
+  const [viewModeSet, setViewModeSet] = useState(false);
 
   const images = product?.images ?? [];
   const isOwner = user && product && user.uid === product.ownerId;
@@ -83,12 +84,13 @@ export default function ProductDetailPage() {
   const [sellerVerified, setSellerVerified] = useState(false);
   const [sellerUsername, setSellerUsername] = useState<string | null>(null);
 
-  // Set default view mode for owners
+  // Set default view mode for owners to 'owner' on first load
   useEffect(() => {
-    if (isOwner && viewMode === 'preview') {
+    if (isOwner && !viewModeSet) {
       setViewMode('owner');
+      setViewModeSet(true);
     }
-  }, [isOwner, viewMode]);
+  }, [isOwner, viewModeSet]);
 
   // Check if user is admin
   useEffect(() => {
