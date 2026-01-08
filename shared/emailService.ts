@@ -421,3 +421,71 @@ export async function sendLoginSuccessEmail(
   });
 }
 
+export async function sendPullbackRequestEmail(
+  itemId: string,
+  userId: string,
+  itemType: 'product' | 'auction',
+  reason?: string
+): Promise<void> {
+  // In a real implementation, you would fetch the admin email and user email
+  // For now, we'll use a placeholder admin email
+  const adminEmail = 'admin@enumismatica.ro';
+  
+  return sendTemplateEmail({
+    to: adminEmail,
+    templateKey: 'pullback_request_admin',
+    vars: {
+      item_id: itemId,
+      item_type: itemType,
+      user_id: userId,
+      reason: reason || 'No reason provided',
+      admin_link: `${DEFAULT_SITE_URL}/admin/pullback-requests`,
+    },
+    fallbackKey: 'fallback_admin',
+  });
+}
+
+export async function sendPullbackApprovalEmail(
+  itemId: string,
+  userId: string,
+  itemType: 'product' | 'auction',
+  adminId: string
+): Promise<void> {
+  // In a real implementation, you would fetch the user email
+  // For now, we'll use a placeholder user email
+  const userEmail = 'user@enumismatica.ro';
+  
+  return sendTemplateEmail({
+    to: userEmail,
+    templateKey: 'pullback_approved_user',
+    vars: {
+      item_id: itemId,
+      item_type: itemType,
+      admin_id: adminId,
+      user_link: `${DEFAULT_SITE_URL}/dashboard`,
+    },
+    fallbackKey: 'fallback_default',
+  });
+}
+
+export async function sendPullbackConfirmationEmail(
+  itemId: string,
+  userId: string,
+  itemType: 'product' | 'auction'
+): Promise<void> {
+  // In a real implementation, you would fetch the user email
+  // For now, we'll use a placeholder user email
+  const userEmail = 'user@enumismatica.ro';
+  
+  return sendTemplateEmail({
+    to: userEmail,
+    templateKey: 'pullback_confirmation',
+    vars: {
+      item_id: itemId,
+      item_type: itemType,
+      user_link: `${DEFAULT_SITE_URL}/dashboard`,
+    },
+    fallbackKey: 'fallback_default',
+  });
+}
+

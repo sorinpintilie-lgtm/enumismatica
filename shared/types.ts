@@ -94,29 +94,37 @@ export interface UserHelpPreferences {
  * Stored in 'products' collection.
  */
 export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  images: string[]; // Array of image URLs
-  /**
-   * Raw/original image URLs (optional).
-   * When using async/background compression, uploads may land here first.
-   */
-  imagesRaw?: string[];
+id: string;
+name: string;
+description: string;
+images: string[]; // Array of image URLs
+/**
+ * Raw/original image URLs (optional).
+ * When using async/background compression, uploads may land here first.
+ */
+imagesRaw?: string[];
 
-  /**
-   * Async image processing status (optional).
-   * Used when images are uploaded first and optimized later.
-   */
-  imageProcessingStatus?: 'processing' | 'done' | 'error';
-  imageProcessingTotal?: number;
-  imageProcessingDone?: number;
-  imageProcessingError?: string;
-  video?: string; // Optional video URL for demonstration
-  price: number; // Base price in the platform's currency
-  ownerId: string; // Reference to the user who owns this product
-  status: 'pending' | 'approved' | 'rejected'; // Approval status
-  listingType?: 'direct' | 'auction'; // Type of listing
+/**
+ * Async image processing status (optional).
+ * Used when images are uploaded first and optimized later.
+ */
+imageProcessingStatus?: 'processing' | 'done' | 'error';
+imageProcessingTotal?: number;
+imageProcessingDone?: number;
+imageProcessingError?: string;
+video?: string; // Optional video URL for demonstration
+price: number; // Base price in the platform's currency
+ownerId: string; // Reference to the user who owns this product
+status: 'pending' | 'approved' | 'rejected'; // Approval status
+listingType?: 'direct' | 'auction'; // Type of listing
+
+/**
+ * Pullback feature fields
+ * Used to track the original collection ID and pullback status
+ */
+originalCollectionId?: string; // ID of the collection item this product was created from
+isPulledBack?: boolean; // Whether the item has been pulled back to collection
+pulledBackAt?: Date; // When the item was pulled back
 
   // Coin-specific metadata for categorization and filtering
   country?: string; // Country of origin (e.g., "Russia", "USA", "Germany")
@@ -251,6 +259,14 @@ export interface Auction {
   isPromoted?: boolean;
   promotedAt?: Date;
   promotionExpiresAt?: Date;
+
+  /**
+   * Pullback feature fields
+   * Used to track the original collection ID and pullback status
+   */
+  originalCollectionId?: string; // ID of the collection item this auction was created from
+  isPulledBack?: boolean; // Whether the item has been pulled back to collection
+  pulledBackAt?: Date; // When the item was pulled back
 
   status: 'pending' | 'active' | 'ended' | 'cancelled' | 'rejected'; // Approval and activity status
   createdAt: Date;
@@ -665,3 +681,4 @@ export interface Offer {
   updatedAt: Date;
   expiresAt?: Date; // Optional expiration date
 }
+
