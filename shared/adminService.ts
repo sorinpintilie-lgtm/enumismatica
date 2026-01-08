@@ -21,6 +21,7 @@ import {
   sendAuctionApprovedEmail,
   sendAuctionRejectedEmail,
 } from './emailService';
+import { endAuction } from './auctionService';
 
 /**
  * Admin UID - hardcoded for security
@@ -639,10 +640,17 @@ export async function getPendingAuctions(): Promise<Auction[]> {
  */
 export async function forceEndAuction(auctionId: string): Promise<{ success: boolean; error?: string }> {
   try {
+    // Set the auction time to 0 when ended by admins
+    const now = new Date();
     await updateDoc(doc(db, 'auctions', auctionId), {
       status: 'ended',
-      updatedAt: Timestamp.fromDate(new Date()),
+      endTime: Timestamp.fromDate(now),
+      updatedAt: Timestamp.fromDate(now),
     });
+    
+    // Call the endAuction function to handle winner determination logic
+    await endAuction(auctionId);
+    
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
