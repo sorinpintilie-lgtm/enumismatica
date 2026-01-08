@@ -256,11 +256,11 @@ export default function MonetariaStatuluiPage() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex justify-center gap-2">
+          <div className="flex flex-wrap justify-center gap-2 overflow-x-auto max-w-full pb-2">
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 bg-navy-800 text-white rounded disabled:opacity-50"
+              className="px-4 py-2 bg-navy-800 text-white rounded disabled:opacity-50 whitespace-nowrap"
             >
               Previous
             </button>
@@ -268,7 +268,7 @@ export default function MonetariaStatuluiPage() {
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`px-4 py-2 rounded ${page === currentPage ? 'bg-gold-500 text-navy-900' : 'bg-navy-800 text-white'}`}
+                className={`px-4 py-2 rounded whitespace-nowrap ${page === currentPage ? 'bg-gold-500 text-navy-900' : 'bg-navy-800 text-white'}`}
               >
                 {page}
               </button>
@@ -276,7 +276,7 @@ export default function MonetariaStatuluiPage() {
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-navy-800 text-white rounded disabled:opacity-50"
+              className="px-4 py-2 bg-navy-800 text-white rounded disabled:opacity-50 whitespace-nowrap"
             >
               Next
             </button>
