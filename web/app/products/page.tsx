@@ -9,9 +9,7 @@ import FilterBar, { FilterOptions } from '../components/FilterBar';
 import ProductCardSkeleton from '../components/skeletons/ProductCardSkeleton';
 import FilterBarSkeleton from '../components/skeletons/FilterBarSkeleton';
 import { useAuth } from '../context/AuthContext';
-import { db } from '../lib/firebase';
-import { collection, query, where, getCountFromServer } from 'firebase/firestore';
-import { Product } from 'shared/types';
+import type { Product } from 'shared/types';
 
 function ProductsListContent() {
   // Fetch all fields needed for filtering and display
@@ -30,77 +28,23 @@ function ProductsListContent() {
     true, // loadAllAtOnce - load all products at once instead of pagination
   );
 
-  // State for total count (when filtering by owner)
-  const [totalCount, setTotalCount] = useState<number | null>(null);
+  // NOTE:
+  // `useProducts(..., loadAllAtOnce=true)` filters out sold products in-memory.
+  // If we used Firestore count queries here, we'd over-count (sold items) and the UI would say
+  // e.g. "Se afișează 122 din 213" even though there are no more pages.
+  //
+  // For the current load-all-at-once implementation, derive totals/counts from the loaded list.
+  const totalInCatalog = products.length;
 
-  // Fetch total count when filtering by owner
-  useEffect(() => {
-    const fetchTotalCount = async () => {
-      try {
-        let qTotal = query(
-          collection(db, 'products'),
-          where('status', '==', 'approved'),
-          where('listingType', '==', 'direct'), // Only count direct sale products
-        );
-
-        if (ownerId) {
-          qTotal = query(qTotal, where('ownerId', '==', ownerId));
-        }
-
-        const totalSnap = await getCountFromServer(qTotal);
-        setTotalCount(totalSnap.data().count);
-      } catch (err) {
-        console.error('Error fetching total count:', err);
-        // Fallback: unknown total
-        setTotalCount(null);
-      }
-    };
-
-    fetchTotalCount();
-  }, [ownerId]);
-
-  // Fetch country counts
-  const [countryCounts, setCountryCounts] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    const fetchCountryCounts = async () => {
-      const counts: Record<string, number> = {};
-      const countriesToFetch = [
-        'Rusia',
-        'SUA',
-        'Germania',
-        'Italia',
-        'Franța',
-        'Finlanda',
-        'Spania',
-        'Danemarca',
-        'Mexic',
-        'România',
-        'Austria',
-      ];
-      const promises = countriesToFetch.map(async (country) => {
-        try {
-          let q = query(
-            collection(db, 'products'),
-            where('status', '==', 'approved'),
-            where('listingType', '==', 'direct'), // Only count direct sale products
-            where('country', '==', country)
-          );
-          if (ownerId) {
-            q = query(q, where('ownerId', '==', ownerId));
-          }
-          const snap = await getCountFromServer(q);
-          counts[country] = snap.data().count;
-        } catch (error) {
-          console.error('Error fetching count for', country, error);
-          counts[country] = 0;
-        }
-      });
-      await Promise.all(promises);
-      setCountryCounts(counts);
-    };
-    fetchCountryCounts();
-  }, [ownerId]);
+  const countryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of products) {
+      const c = p.country;
+      if (!c) continue;
+      counts[c] = (counts[c] || 0) + 1;
+    }
+    return counts;
+  }, [products]);
 
   // Debug: validate that we are actually loading all seller items
   useEffect(() => {
@@ -477,8 +421,8 @@ function ProductsListContent() {
     return filtered;
   }, [products, filters]);
 
-  // Total items in catalog (server count). This is independent of how many pages we already loaded.
-  const totalInCatalog = totalCount;
+  // Total items in catalog.
+  // With loadAllAtOnce=true this is already the real, displayable total.
 
   // Calculate pagination values first
   const loadedPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
@@ -489,7 +433,6 @@ function ProductsListContent() {
   useEffect(() => {
     console.log('[ProductsPage] Pagination Debug:', {
       totalInCatalog,
-      totalCount,
       loadedProducts: products.length,
       filteredProducts: filteredProducts.length,
       hasMore,
@@ -501,7 +444,7 @@ function ProductsListContent() {
       totalPagesKnown,
       effectiveMaxPage,
     });
-  }, [totalInCatalog, totalCount, products.length, filteredProducts.length, hasMore, page, loadedPages, totalPagesKnown, effectiveMaxPage]);
+  }, [totalInCatalog, products.length, filteredProducts.length, hasMore, page, loadedPages, totalPagesKnown, effectiveMaxPage]);
 
   // Prefetch next N pages so page navigation feels instant.
   // This keeps a buffer of (current page + PREFETCH_PAGES_AHEAD) loaded.
@@ -632,20 +575,20 @@ function ProductsListContent() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-[#e7b73c] mb-2">E-shop</h1>
         <p className="text-slate-200">
-          Explorează colecția noastră de {totalInCatalog ?? '...'} piese
+          Explorează colecția noastră de {totalInCatalog} piese
         </p>
       </div>
 
       {/* Filter Bar */}
-      <FilterBar
-        filters={filters}
-        onFilterChange={(newFilters) => {
-          setFilters(newFilters);
-          updateFiltersInURL(newFilters);
-        }}
-        countryCounts={countryCounts}
-        totalCount={totalInCatalog || 0}
-      />
+        <FilterBar
+          filters={filters}
+          onFilterChange={(newFilters) => {
+            setFilters(newFilters);
+            updateFiltersInURL(newFilters);
+          }}
+          countryCounts={countryCounts}
+          totalCount={totalInCatalog}
+        />
 
       {/* Results Summary */}
       <div className="mb-6 flex items-center justify-between">
@@ -654,7 +597,7 @@ function ProductsListContent() {
           <span className="font-semibold text-gold-400">
             {requestedPage === page && pagedProducts.length === 0 ? '—' : Math.min(page * PAGE_SIZE, filteredProducts.length)}</span>{' '}
           din{' '}
-          <span className="font-semibold text-gold-400">{totalInCatalog ?? filteredProducts.length}</span>
+          <span className="font-semibold text-gold-400">{totalInCatalog}</span>
           {ownerId ? ' piese ale acestui vânzător' : ' piese'}
           {requestedPage === page && (
             <span className="ml-2 text-xs text-slate-400">(Se încarcă…)</span>

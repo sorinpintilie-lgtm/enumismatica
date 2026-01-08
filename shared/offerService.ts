@@ -1,4 +1,18 @@
-import { collection, addDoc, updateDoc, doc, getDoc, getDocs, query, where, orderBy, limit, Timestamp, serverTimestamp } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  Timestamp,
+  serverTimestamp,
+  runTransaction,
+} from 'firebase/firestore';
 import { db } from './firebaseConfig';
 import { Offer } from './types';
 
@@ -183,11 +197,90 @@ export async function getOffersByBuyer(buyerId: string, status?: Offer['status']
  * Accept an offer
  */
 export async function acceptOffer(offerId: string): Promise<void> {
+  if (!db) throw new Error('Firestore not initialized');
+
   const offerRef = doc(db, 'offers', offerId);
-  await updateDoc(offerRef, {
-    status: 'accepted',
-    updatedAt: serverTimestamp(),
+
+  // Capture values for post-transaction cleanup.
+  let acceptedItemType: 'product' | 'auction' | null = null;
+  let acceptedItemId: string | null = null;
+
+  await runTransaction(db, async (tx) => {
+    const offerSnap = await tx.get(offerRef);
+    if (!offerSnap.exists()) {
+      throw new Error('Oferta nu există.');
+    }
+
+    const offer = offerSnap.data() as any;
+    const itemType: 'product' | 'auction' = offer.itemType;
+    const itemId: string = offer.itemId;
+    const buyerId: string = offer.buyerId;
+    const sellerId: string = offer.sellerId;
+
+    acceptedItemType = itemType;
+    acceptedItemId = itemId;
+
+    if (offer.status && offer.status !== 'pending') {
+      throw new Error('Oferta nu mai este în așteptare.');
+    }
+
+    // Mark offer accepted.
+    tx.update(offerRef, {
+      status: 'accepted',
+      updatedAt: serverTimestamp(),
+    });
+
+    // When accepting a product offer, we must immediately mark the product as sold.
+    if (itemType === 'product') {
+      const productRef = doc(db, 'products', itemId);
+      const productSnap = await tx.get(productRef);
+      if (!productSnap.exists()) {
+        throw new Error('Produsul nu există.');
+      }
+
+      const product = productSnap.data() as any;
+      if (product.ownerId && sellerId && product.ownerId !== sellerId) {
+        throw new Error('Oferta nu aparține acestui vânzător.');
+      }
+
+      if (product.isSold) {
+        throw new Error('Produsul a fost deja vândut.');
+      }
+
+      tx.update(productRef, {
+        isSold: true,
+        soldAt: serverTimestamp(),
+        buyerId,
+        updatedAt: serverTimestamp(),
+      });
+    }
   });
+
+  // Best-effort: reject other pending offers for the same item.
+  // (Not part of the transaction to avoid a query inside the transaction.)
+  try {
+    if (acceptedItemType === 'product' && acceptedItemId) {
+      const q = query(
+        collection(db, 'offers'),
+        where('itemType', '==', 'product'),
+        where('itemId', '==', acceptedItemId),
+        where('status', '==', 'pending'),
+        orderBy('createdAt', 'desc'),
+        limit(50),
+      );
+      const snapshot = await getDocs(q);
+      await Promise.all(
+        snapshot.docs.map((d) =>
+          updateDoc(d.ref, {
+            status: 'rejected',
+            updatedAt: serverTimestamp(),
+          }),
+        ),
+      );
+    }
+  } catch (err) {
+    console.error('Failed to reject other pending offers after acceptOffer:', err);
+  }
 }
 
 /**

@@ -469,8 +469,8 @@ const FilterBarComponent = ({ filters, onFilterChange, showAuctionFilters = fals
               Interval Preț:{' '}
               {localFilters.minPrice || localFilters.maxPrice ? (
                 <span className="text-[#e7b73c] font-semibold">
-                  {localFilters.minPrice || 0} RON -{' '}
-                  {localFilters.maxPrice || '∞'} RON
+                  {localFilters.minPrice || 0} EUR -{' '}
+                  {localFilters.maxPrice || '∞'} EUR
                 </span>
               ) : (
                 <span className="text-slate-300 font-semibold">Fără filtru</span>

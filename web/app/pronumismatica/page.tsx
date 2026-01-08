@@ -196,10 +196,6 @@ export default function PronumismaticaPage() {
       <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold text-[#e7b73c] mb-2">Asociația Pronumismatica</h1>
-          <p className="text-slate-300 text-sm max-w-2xl">
-            Asociația Pronumismatica este o organizație dedicată promovării, conservării și
-            valorificării patrimoniului numismatic al României.
-          </p>
         </div>
         <Link
           href="/"

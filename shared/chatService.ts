@@ -285,6 +285,13 @@ export async function createOrGetConversation(
 ): Promise<string> {
   if (!db) throw new Error('Firestore not initialized');
 
+  const setIfNonEmptyString = (target: Record<string, any>, key: string, value: unknown) => {
+    if (typeof value !== 'string') return;
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    target[key] = trimmed;
+  };
+
   // Check if conversation already exists
   const conversationsRef = collection(db, 'conversations');
   let q;
@@ -334,24 +341,25 @@ export async function createOrGetConversation(
           getDoc(doc(db, 'users', sellerId)),
         ]);
 
-        const patch: any = {
-          updatedAt: serverTimestamp(),
-        };
+        const patch: any = { updatedAt: serverTimestamp() };
 
         if (buyerDoc.exists()) {
           const d = buyerDoc.data() as any;
-          patch.buyerName = d.displayName || d.name || d.email || data.buyerName;
-          patch.buyerEmail = d.email || data.buyerEmail;
-          patch.buyerPhone = d.personalDetails?.phone || data.buyerPhone;
+          setIfNonEmptyString(patch, 'buyerName', d.displayName || d.name || d.email || data.buyerName);
+          setIfNonEmptyString(patch, 'buyerEmail', d.email || data.buyerEmail);
+          setIfNonEmptyString(patch, 'buyerPhone', d.personalDetails?.phone || data.buyerPhone);
         }
         if (sellerDoc.exists()) {
           const d = sellerDoc.data() as any;
-          patch.sellerName = d.displayName || d.name || d.email || data.sellerName;
-          patch.sellerEmail = d.email || data.sellerEmail;
-          patch.sellerPhone = d.personalDetails?.phone || data.sellerPhone;
+          setIfNonEmptyString(patch, 'sellerName', d.displayName || d.name || d.email || data.sellerName);
+          setIfNonEmptyString(patch, 'sellerEmail', d.email || data.sellerEmail);
+          setIfNonEmptyString(patch, 'sellerPhone', d.personalDetails?.phone || data.sellerPhone);
         }
 
-        await updateDoc(doc(db, 'conversations', existingConversation.id), patch);
+        // Avoid writing empty patches (Firestore rejects undefined fields).
+        if (Object.keys(patch).length > 1) {
+          await updateDoc(doc(db, 'conversations', existingConversation.id), patch);
+        }
       }
     } catch (err) {
       console.error('Failed to backfill conversation participant metadata:', err);
@@ -394,12 +402,6 @@ export async function createOrGetConversation(
     buyerId,
     sellerId,
     participants: [buyerId, sellerId],
-    buyerName,
-    sellerName,
-    buyerEmail,
-    sellerEmail,
-    buyerPhone,
-    sellerPhone,
     unreadCount: {
       [buyerId]: 0,
       [sellerId]: 0,
@@ -408,6 +410,14 @@ export async function createOrGetConversation(
     createdAt: new Date(),
     updatedAt: new Date(),
   };
+
+  // Firestore rejects `undefined` values; only include optional fields when present.
+  setIfNonEmptyString(conversationData, 'buyerName', buyerName);
+  setIfNonEmptyString(conversationData, 'sellerName', sellerName);
+  setIfNonEmptyString(conversationData, 'buyerEmail', buyerEmail);
+  setIfNonEmptyString(conversationData, 'sellerEmail', sellerEmail);
+  setIfNonEmptyString(conversationData, 'buyerPhone', buyerPhone);
+  setIfNonEmptyString(conversationData, 'sellerPhone', sellerPhone);
 
   if (isAdminSupport) {
     conversationData.isAdminSupport = true;
