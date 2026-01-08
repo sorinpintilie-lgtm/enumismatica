@@ -109,6 +109,7 @@ export default function SettingsPage() {
       loadSecurityLog();
       loadSessions();
       loadTrustedDevices();
+      ensureSessionExists();
     }
   }, [user?.uid]);
 
@@ -238,6 +239,37 @@ export default function SettingsPage() {
       setSessionsError(err?.message || 'Nu s-au putut încărca sesiunile.');
     } finally {
       setSessionsLoading(false);
+    }
+  };
+
+  // Ensure a session exists for the current user
+  const ensureSessionExists = async () => {
+    if (!user) return;
+
+    try {
+      const existingSessionId = localStorage.getItem('enumismatica_session_id');
+      if (existingSessionId) return; // Session already exists
+
+      const token = await user.getIdToken();
+      const res = await fetch('/api/auth/sessions/start', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          deviceLabel: typeof navigator !== 'undefined' ? navigator.platform : 'web',
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.sessionId) {
+          localStorage.setItem('enumismatica_session_id', String(data.sessionId));
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to ensure session exists:', err);
     }
   };
 
@@ -1184,12 +1216,20 @@ export default function SettingsPage() {
                   Vezi unde ești autentificat și deloghează celelalte dispozitive.
                 </p>
               </div>
-              <button
-                onClick={revokeOtherSessions}
-                className="bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-500/40 px-4 py-2 rounded-lg font-semibold"
-              >
-                Deloghează celelalte
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={loadSessions}
+                  className="bg-gold-500/20 hover:bg-gold-500/30 text-gold-200 border border-gold-500/40 px-4 py-2 rounded-lg font-semibold"
+                >
+                  Reîncarcă
+                </button>
+                <button
+                  onClick={revokeOtherSessions}
+                  className="bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-500/40 px-4 py-2 rounded-lg font-semibold"
+                >
+                  Deloghează celelalte
+                </button>
+              </div>
             </div>
 
             {sessionsError && (
@@ -1201,7 +1241,18 @@ export default function SettingsPage() {
             {sessionsLoading ? (
               <p className="text-sm text-slate-300">Se încarcă...</p>
             ) : sessions.length === 0 ? (
-              <p className="text-sm text-slate-300">Nu există sesiuni înregistrate încă. Autentifică-te pentru a crea o sesiune.</p>
+              <div className="text-center py-4">
+                <p className="text-sm text-slate-300 mb-2">Nu există sesiuni înregistrate încă.</p>
+                <button
+                  onClick={() => {
+                    ensureSessionExists();
+                    setTimeout(() => loadSessions(), 1000);
+                  }}
+                  className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 rounded-lg font-semibold text-sm mt-2"
+                >
+                  Creează sesiune
+                </button>
+              </div>
             ) : (
               <div className="space-y-2">
                 {sessions.map((s) => {

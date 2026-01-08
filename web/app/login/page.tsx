@@ -169,12 +169,11 @@ export default function LoginPage() {
               console.warn('Failed to check trusted device:', err);
             }
           }
- 
-          // User has 2FA enabled, send login attempt notification and show stepper
+
+          // User has 2FA enabled but not on a trusted device, show 2FA directly without stepper
           await sendLoginAttemptNotification(user.email || email);
-          setShowStepper(true);
+          setShow2FA(true);
           setPendingUserId(user.uid);
-          setCurrentStep(1);
         } else {
           // No 2FA, send login success email and proceed to dashboard
           await sendLoginSuccessNotification(user.email || email);

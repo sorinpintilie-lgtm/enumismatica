@@ -848,7 +848,7 @@ export default function AuctionDetailPage() {
                             if (product.acceptsOffers === false) {
                               showToast({
                                 type: 'info',
-                                title: 'Oferțiile nu sunt acceptate',
+                                title: 'Ofertele nu sunt acceptate',
                                 message: 'Vânzătorul nu acceptă oferte pentru această piesă.',
                               });
                               return;

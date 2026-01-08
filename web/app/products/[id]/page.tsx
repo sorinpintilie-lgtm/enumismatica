@@ -549,7 +549,7 @@ export default function ProductDetailPage() {
                         if (product.acceptsOffers === false) {
                           showToast({
                             type: 'info',
-                            title: 'Oferțiile nu sunt acceptate',
+                            title: 'Ofertele nu sunt acceptate',
                             message: 'Vânzătorul nu acceptă oferte pentru această piesă.',
                           });
                           return;
@@ -564,7 +564,7 @@ export default function ProductDetailPage() {
                         : !!user && product.ownerId === user.uid
                         ? 'Ești proprietarul acestei piese'
                         : product.acceptsOffers === false
-                        ? 'Oferțiile nu sunt acceptate'
+                        ? 'Ofertele nu sunt acceptate'
                         : 'Transmite o ofertă'}
                     </button>
                   </div>
