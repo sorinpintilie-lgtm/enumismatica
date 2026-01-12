@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     // Send email to Monetaria Statului
     await transporter.sendMail({
       from: process.env.EMAIL_FROM,
-      to: 'marketing@monetariastatului.ro',
+      to: 'Simona.badea@monetariastatului.ro',
       subject: `Comandă nouă: ${orderData.piesaCommandata}`,
       html: emailContent,
     });

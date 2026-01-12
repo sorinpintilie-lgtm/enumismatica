@@ -3,7 +3,7 @@ import sgMail from '@sendgrid/mail';
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'contact@enumismatica.ro';
 const TEST_EMAIL = 'sorin.pintilie@sky.ro'; // Test email address
-const PRODUCTION_EMAIL = 'marketing@monetariastatului.ro';
+const PRODUCTION_EMAIL = 'Simona.badea@monetariastatului.ro';
 
 // Use production email
 const TARGET_EMAIL = PRODUCTION_EMAIL;
