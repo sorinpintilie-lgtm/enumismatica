@@ -128,33 +128,28 @@ export default function MonetariaStatuluiPage() {
           // Extract properties from specifications
           const specs = p.specifications || '';
           
-          // Extract material - get only the value after "Material:" and before the next specification or end
-          let material = '';
-          const materialMatch = specs.match(/Material:\s*([^\n-]+)/i);
-          if (materialMatch) {
-            material = materialMatch[1].trim();
-          }
+          // Helper function to extract value after a marker and clean it
+          const extractValue = (text: string, marker: string): string => {
+            const parts = text.split(marker);
+            if (parts.length > 1) {
+              // Get the value and clean it - remove any trailing specification markers or extra text
+              let value = parts[1].trim();
+              // Remove any trailing specification markers (like "- Diametru:", "- Greutate:", "- Calitate:")
+              value = value.replace(/\s*-\s*(?:Diametru|Greutate|Calitate):.*/gi, '');
+              // Remove any trailing pipe characters
+              value = value.replace(/\s*\|\s*$/g, '');
+              // Clean up extra whitespace
+              value = value.replace(/\s+/g, ' ').trim();
+              return value;
+            }
+            return '';
+          };
           
-          // Extract diameter - get only the value after "Diametru:" and before the next specification or end
-          let diameter = '';
-          const diameterMatch = specs.match(/Diametru:\s*([^\n-]+)/i);
-          if (diameterMatch) {
-            diameter = diameterMatch[1].trim();
-          }
-          
-          // Extract weight - get only the value after "Greutate:" and before the next specification or end
-          let weight = '';
-          const weightMatch = specs.match(/Greutate:\s*([^\n-]+)/i);
-          if (weightMatch) {
-            weight = weightMatch[1].trim();
-          }
-          
-          // Extract quality - get only the value after "Calitate:" and before the next specification or end
-          let quality = '';
-          const qualityMatch = specs.match(/Calitate:\s*([^\n-]+)/i);
-          if (qualityMatch) {
-            quality = qualityMatch[1].trim();
-          }
+          // Extract each property
+          const material = extractValue(specs, 'Material:');
+          const diameter = extractValue(specs, 'Diametru:');
+          const weight = extractValue(specs, 'Greutate:');
+          const quality = extractValue(specs, 'Calitate:');
 
           return {
             ...p,
