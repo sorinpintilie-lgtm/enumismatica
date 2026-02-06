@@ -70,6 +70,48 @@ export default function MonetariaStatuluiPage() {
     return materialMap[normalized] || material;
   };
 
+  // Normalize diameter values to remove duplicates
+  const normalizeDiameter = (diameter: string): string => {
+    if (!diameter) return diameter;
+    return diameter
+      .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+      .replace(/\s*mm\s*/i, ' mm')  // Standardize "mm" format
+      .trim();
+  };
+
+  // Normalize weight values to remove duplicates
+  const normalizeWeight = (weight: string): string => {
+    if (!weight) return weight;
+    return weight
+      .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+      .replace(/\s*grame\s*/i, ' grame')  // Standardize "grame" format
+      .replace(/\s*gram\s*/i, ' grame')  // Standardize "gram" to "grame"
+      .trim();
+  };
+
+  // Normalize quality values to remove duplicates
+  const normalizeQuality = (quality: string): string => {
+    if (!quality) return quality;
+    const normalized = quality
+      .toLowerCase()
+      .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+      .replace(/-\s+/g, '-')  // Fix spacing after dash
+      .replace(/\s+-/g, '-')  // Fix spacing before dash
+      .trim();
+    
+    // Map common variations to standard names
+    const qualityMap: { [key: string]: string } = {
+      'patinata': 'patinată',
+      'sablata - patinata': 'sablată - patinată',
+      'sablata-patinata': 'sablată - patinată',
+      'proof like': 'proof like',
+      'proof': 'proof',
+      'clasica': 'clasică',
+    };
+    
+    return qualityMap[normalized] || quality;
+  };
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -123,10 +165,10 @@ export default function MonetariaStatuluiPage() {
             category: p.category,
             image: `/Monetaria_statului/romanian_mint_products/${p.category_slug}/${p.image_files}`,
             link: `/monetaria-statului/${p.product_id}`,
-            diameter,
-            weight,
+            diameter: normalizeDiameter(diameter),
+            weight: normalizeWeight(weight),
             mint: normalizeMaterial(material),
-            era: quality,
+            era: normalizeQuality(quality),
           };
         });
         setProducts(transformedProducts);
@@ -150,13 +192,13 @@ export default function MonetariaStatuluiPage() {
       baseProducts = baseProducts.filter(p => normalizeMaterial((p as any).mint) === normalizeMaterial(material));
     }
     if (excludeFilter !== 'diameter' && diameter !== 'Toate Diametrele') {
-      baseProducts = baseProducts.filter(p => (p as any).diameter === diameter);
+      baseProducts = baseProducts.filter(p => normalizeDiameter((p as any).diameter) === normalizeDiameter(diameter));
     }
     if (excludeFilter !== 'weight' && weight !== 'Toate Greutățile') {
-      baseProducts = baseProducts.filter(p => (p as any).weight === weight);
+      baseProducts = baseProducts.filter(p => normalizeWeight((p as any).weight) === normalizeWeight(weight));
     }
     if (excludeFilter !== 'quality' && quality !== 'Toate Calitățile') {
-      baseProducts = baseProducts.filter(p => (p as any).era === quality);
+      baseProducts = baseProducts.filter(p => normalizeQuality((p as any).era) === normalizeQuality(quality));
     }
 
     return baseProducts;
@@ -164,9 +206,9 @@ export default function MonetariaStatuluiPage() {
 
   // Calculate available options for each filter based on other filters
   const availableMaterials = ['Toate Materialele', ...new Set(getFilteredProductsExcluding('material').map(p => normalizeMaterial((p as any).mint)).filter(Boolean))];
-  const availableDiameters = ['Toate Diametrele', ...new Set(getFilteredProductsExcluding('diameter').map(p => (p as any).diameter).filter(Boolean))];
-  const availableWeights = ['Toate Greutățile', ...new Set(getFilteredProductsExcluding('weight').map(p => (p as any).weight).filter(Boolean))];
-  const availableQualities = ['Toate Calitățile', ...new Set(getFilteredProductsExcluding('quality').map(p => (p as any).era).filter(Boolean))];
+  const availableDiameters = ['Toate Diametrele', ...new Set(getFilteredProductsExcluding('diameter').map(p => normalizeDiameter((p as any).diameter)).filter(Boolean))];
+  const availableWeights = ['Toate Greutățile', ...new Set(getFilteredProductsExcluding('weight').map(p => normalizeWeight((p as any).weight)).filter(Boolean))];
+  const availableQualities = ['Toate Calitățile', ...new Set(getFilteredProductsExcluding('quality').map(p => normalizeQuality((p as any).era)).filter(Boolean))];
 
   const categories = ['all', ...new Set(products.map(p => p.category))];
   let filteredProducts = selectedCategory === 'all' ? products : products.filter(p => p.category === selectedCategory);
@@ -176,13 +218,13 @@ export default function MonetariaStatuluiPage() {
     filteredProducts = filteredProducts.filter(p => normalizeMaterial((p as any).mint) === normalizeMaterial(material));
   }
   if (diameter !== 'Toate Diametrele') {
-    filteredProducts = filteredProducts.filter(p => (p as any).diameter === diameter);
+    filteredProducts = filteredProducts.filter(p => normalizeDiameter((p as any).diameter) === normalizeDiameter(diameter));
   }
   if (weight !== 'Toate Greutățile') {
-    filteredProducts = filteredProducts.filter(p => (p as any).weight === weight);
+    filteredProducts = filteredProducts.filter(p => normalizeWeight((p as any).weight) === normalizeWeight(weight));
   }
   if (quality !== 'Toate Calitățile') {
-    filteredProducts = filteredProducts.filter(p => (p as any).era === quality);
+    filteredProducts = filteredProducts.filter(p => normalizeQuality((p as any).era) === normalizeQuality(quality));
   }
 
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
