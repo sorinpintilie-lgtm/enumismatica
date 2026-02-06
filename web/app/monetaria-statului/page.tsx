@@ -130,49 +130,68 @@ export default function MonetariaStatuluiPage() {
           
           // Helper function to extract and clean material values
           const extractMaterial = (text: string): string => {
-            text = text.trim().replace(/\u200B/g, ''); // Remove zero-width spaces
+            // Normalize whitespace and remove zero-width spaces
+            let materialText = text.trim()
+                .replace(/\u200B/g, '')
+                .replace(/[\n\r]+/g, ' ')
+                .replace(/\s+/g, ' ');
             
-            if (text === "Toate Materialele") return text;
+            if (materialText === "Toate Materialele") return materialText;
             
-            // Split by pipe and take first part
-            let material = text.split('|')[0].trim();
+            // Extract material (everything between "Material:" and "|" or "-")
+            const match = materialText.match(/-?\s*Material:?\s*([^|]+?)(?:\s*[-]|\||$)/i);
+            if (!match) return '';
             
-            // Remove specifications (numbers, dimensions, quality, mintage)
-            material = material
-                .replace(/\s+\d+\s*mm.*$/i, '')
-                .replace(/\s+(Tiraj|Diametru|Greutate|Calitate|Pret)[\s:].*$/i, '')
-                .replace(/\s+(proof|patinată|sablată|bucăți|grame).*$/i, '')
+            let material = match[1].trim()
+                .split(/\s*Diametru:/i)[0]
+                .split(/\s*Greutate:/i)[0]
+                .split(/\s*Calitate:/i)[0]
+                .split(/\s*Tiraj:/i)[0]
+                .replace(/[-:,;]+$/, '')
                 .replace(/\s*‰\s*/g, '‰')
-                .replace(/;+$/, '')
                 .trim();
             
-            // Normalize variations
+            // Normalize to standard names
             const lower = material.toLowerCase();
-            if (/argint.*999/.test(lower)) return "Argint 999‰";
-            if (/argint.*925/.test(lower)) return "Argint 925‰";
-            if (/aliaj.*cupru.*argintat/.test(lower)) return "Aliaj de cupru argintat";
-            if (/aliaj.*cupru/.test(lower)) return "Aliaj de cupru";
-            if (lower === 'cupru') return "Cupru";
-            if (/tombac.*argintat/.test(lower)) return "Tombac argintat";
-            if (lower === 'tombac') return "Tombac";
+            
+            if (lower.includes('argint')) {
+                if (lower.includes('999')) return 'Argint 999‰';
+                if (lower.includes('925')) return 'Argint 925‰';
+                return 'Argint';
+            }
+            
+            if (lower.includes('aliaj') && lower.includes('cupru')) {
+                return lower.includes('argintat') ? 'Aliaj de cupru argintat' : 'Aliaj de cupru';
+            }
+            
+            if (lower.includes('cupru')) return 'Cupru';
+            
+            if (lower.includes('tombac')) {
+                return lower.includes('argintat') ? 'Tombac argintat' : 'Tombac';
+            }
             
             return material;
           };
           
           // Helper function to extract and clean diameter values
           const extractDiameter = (text: string): string => {
-            text = text.trim().replace(/\u200B/g, '');
+            // Normalize whitespace and remove zero-width spaces
+            let diameterText = text.trim()
+                .replace(/\u200B/g, '')
+                .replace(/[\n\r]+/g, ' ')
+                .replace(/\s+/g, ' ');
             
-            if (text === "Toate Diametrele") return text;
+            if (diameterText === "Toate Diametrele") return diameterText;
             
-            // Split by pipe and take first part
-            let diameter = text.split('|')[0].trim();
+            // Extract diameter (everything between "Diametru:" and "|" or "-")
+            const match = diameterText.match(/-?\s*Diametru:?\s*([^|]+?)(?:\s*[-]|\||$)/i);
+            if (!match) return '';
             
-            // Remove extra specifications
-            diameter = diameter
-                .replace(/\s+(Tiraj|Greutate|Calitate|Pret)[\s:].*$/i, '')
-                .replace(/\s+(proof|patinată|sablată|bucăți|grame).*$/i, '')
-                .replace(/;+$/, '')
+            let diameter = match[1].trim()
+                .split(/\s*Greutate:/i)[0]
+                .split(/\s*Calitate:/i)[0]
+                .split(/\s*Tiraj:/i)[0]
+                .replace(/[-:,;]+$/, '')
                 .trim();
             
             return diameter;
@@ -180,18 +199,22 @@ export default function MonetariaStatuluiPage() {
           
           // Helper function to extract and clean weight values
           const extractWeight = (text: string): string => {
-            text = text.trim().replace(/\u200B/g, '');
+            // Normalize whitespace and remove zero-width spaces
+            let weightText = text.trim()
+                .replace(/\u200B/g, '')
+                .replace(/[\n\r]+/g, ' ')
+                .replace(/\s+/g, ' ');
             
-            if (text === "Toate Greutățile") return text;
+            if (weightText === "Toate Greutățile") return weightText;
             
-            // Split by pipe and take first part
-            let weight = text.split('|')[0].trim();
+            // Extract weight (everything between "Greutate:" and "|" or "-")
+            const match = weightText.match(/-?\s*Greutate:?\s*([^|]+?)(?:\s*[-]|\||$)/i);
+            if (!match) return '';
             
-            // Remove extra specifications
-            weight = weight
-                .replace(/\s+(Tiraj|Diametru|Greutate|Calitate|Pret)[\s:].*$/i, '')
-                .replace(/\s+(proof|patinată|sablată|bucăți|grame).*$/i, '')
-                .replace(/;+$/, '')
+            let weight = match[1].trim()
+                .split(/\s*Calitate:/i)[0]
+                .split(/\s*Tiraj:/i)[0]
+                .replace(/[-:,;]+$/, '')
                 .trim();
             
             return weight;
@@ -199,28 +222,32 @@ export default function MonetariaStatuluiPage() {
           
           // Helper function to extract and clean quality values
           const extractQuality = (text: string): string => {
-            text = text.trim().replace(/\u200B/g, '');
+            // Normalize whitespace and remove zero-width spaces
+            let qualityText = text.trim()
+                .replace(/\u200B/g, '')
+                .replace(/[\n\r]+/g, ' ')
+                .replace(/\s+/g, ' ');
             
-            if (text === "Toate Calitățile") return text;
+            if (qualityText === "Toate Calitățile") return qualityText;
             
-            // Split by pipe and take first part
-            let quality = text.split('|')[0].trim();
+            // Extract quality (everything between "Calitate:" and "|" or "-")
+            const match = qualityText.match(/-?\s*Calitate:?\s*([^|]+?)(?:\s*[-]|\||$)/i);
+            if (!match) return '';
             
-            // Remove extra specifications
-            quality = quality
-                .replace(/\s+(Tiraj|Diametru|Greutate|Pret)[\s:].*$/i, '')
-                .replace(/\s+(proof|patinată|sablată|bucăți|grame).*$/i, '')
-                .replace(/;+$/, '')
+            let quality = match[1].trim()
+                .split(/\s*Tiraj:/i)[0]
+                .replace(/[-:,;]+$/, '')
                 .trim();
             
-            // Normalize variations
+            // Normalize to standard names
             const lower = quality.toLowerCase();
-            if (/patinată/.test(lower)) return "patinată";
-            if (/sablată.*patinată/.test(lower)) return "sablată - patinată";
-            if (/sablată/.test(lower)) return "sablată";
-            if (/proof.*like/.test(lower)) return "proof like";
-            if (/proof/.test(lower)) return "proof";
-            if (/clasică/.test(lower)) return "clasică";
+            
+            if (lower.includes('patinată')) return 'patinată';
+            if (lower.includes('sablată') && lower.includes('patinată')) return 'sablată - patinată';
+            if (lower.includes('sablată')) return 'sablată';
+            if (lower.includes('proof') && lower.includes('like')) return 'proof like';
+            if (lower.includes('proof')) return 'proof';
+            if (lower.includes('clasică')) return 'clasică';
             
             return quality;
           };
