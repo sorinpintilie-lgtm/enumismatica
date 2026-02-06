@@ -183,6 +183,24 @@ export default function MonetariaStatuluiPage() {
     loadData();
   }, []);
 
+  // Restore page state from localStorage on mount
+  useEffect(() => {
+    const savedPage = localStorage.getItem('monetaria-page');
+    if (savedPage) {
+      setCurrentPage(parseInt(savedPage, 10));
+    }
+  }, []);
+
+  // Save page state to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('monetaria-page', currentPage.toString());
+  }, [currentPage]);
+
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, material, diameter, weight, quality]);
+
   // Calculate dynamic filter options based on current selections
   const getFilteredProductsExcluding = (excludeFilter: string) => {
     let baseProducts = selectedCategory === 'all' ? products : products.filter(p => p.category === selectedCategory);
