@@ -46,6 +46,30 @@ export default function MonetariaStatuluiPage() {
   const [weight, setWeight] = useState<string>('Toate Greutățile');
   const [quality, setQuality] = useState<string>('Toate Calitățile');
 
+  // Normalize material names to remove duplicates
+  const normalizeMaterial = (material: string): string => {
+    if (!material) return material;
+    const normalized = material
+      .toLowerCase()
+      .replace(/[:\s]+/g, ' ')  // Replace colons and multiple spaces with single space
+      .replace(/\s+/g, ' ')      // Replace multiple spaces with single space
+      .trim();
+    
+    // Map common variations to standard names
+    const materialMap: { [key: string]: string } = {
+      'argint 999‰': 'Argint 999‰',
+      'argint 925‰': 'Argint 925‰',
+      'aliaj de cupru': 'Aliaj de cupru',
+      'aliaj cupru': 'Aliaj de cupru',
+      'aliaj: cupru': 'Aliaj de cupru',
+      'aliaj din cupru': 'Aliaj de cupru',
+      'cupru': 'Aliaj de cupru',
+      'tombac argintat': 'Tombac argintat',
+    };
+    
+    return materialMap[normalized] || material;
+  };
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -94,7 +118,7 @@ export default function MonetariaStatuluiPage() {
             link: `/monetaria-statului/${p.product_id}`,
             diameter,
             weight,
-            mint: material,
+            mint: normalizeMaterial(material),
             era: quality,
           };
         });
@@ -116,7 +140,7 @@ export default function MonetariaStatuluiPage() {
 
     // Apply current filters EXCEPT the one we're calculating options for
     if (excludeFilter !== 'material' && material !== 'Toate Materialele') {
-      baseProducts = baseProducts.filter(p => (p as any).mint === material);
+      baseProducts = baseProducts.filter(p => normalizeMaterial((p as any).mint) === normalizeMaterial(material));
     }
     if (excludeFilter !== 'diameter' && diameter !== 'Toate Diametrele') {
       baseProducts = baseProducts.filter(p => (p as any).diameter === diameter);
@@ -132,7 +156,7 @@ export default function MonetariaStatuluiPage() {
   };
 
   // Calculate available options for each filter based on other filters
-  const availableMaterials = ['Toate Materialele', ...new Set(getFilteredProductsExcluding('material').map(p => (p as any).mint).filter(Boolean))];
+  const availableMaterials = ['Toate Materialele', ...new Set(getFilteredProductsExcluding('material').map(p => normalizeMaterial((p as any).mint)).filter(Boolean))];
   const availableDiameters = ['Toate Diametrele', ...new Set(getFilteredProductsExcluding('diameter').map(p => (p as any).diameter).filter(Boolean))];
   const availableWeights = ['Toate Greutățile', ...new Set(getFilteredProductsExcluding('weight').map(p => (p as any).weight).filter(Boolean))];
   const availableQualities = ['Toate Calitățile', ...new Set(getFilteredProductsExcluding('quality').map(p => (p as any).era).filter(Boolean))];
@@ -142,7 +166,7 @@ export default function MonetariaStatuluiPage() {
 
   // Apply Monetaria Statului filters
   if (material !== 'Toate Materialele') {
-    filteredProducts = filteredProducts.filter(p => (p as any).mint === material);
+    filteredProducts = filteredProducts.filter(p => normalizeMaterial((p as any).mint) === normalizeMaterial(material));
   }
   if (diameter !== 'Toate Diametrele') {
     filteredProducts = filteredProducts.filter(p => (p as any).diameter === diameter);
