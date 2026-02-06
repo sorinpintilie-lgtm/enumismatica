@@ -128,28 +128,108 @@ export default function MonetariaStatuluiPage() {
           // Extract properties from specifications
           const specs = p.specifications || '';
           
-          // Helper function to extract value after a marker and clean it
-          const extractValue = (text: string, marker: string): string => {
-            const parts = text.split(marker);
-            if (parts.length > 1) {
-              // Get the value and clean it - remove any trailing specification markers or extra text
-              let value = parts[1].trim();
-              // Remove any trailing specification markers (like "- Diametru:", "- Greutate:", "- Calitate:")
-              value = value.replace(/\s*-\s*(?:Diametru|Greutate|Calitate):.*/gi, '');
-              // Remove any trailing pipe characters
-              value = value.replace(/\s*\|\s*$/g, '');
-              // Clean up extra whitespace
-              value = value.replace(/\s+/g, ' ').trim();
-              return value;
-            }
-            return '';
+          // Helper function to extract and clean material values
+          const extractMaterial = (text: string): string => {
+            text = text.trim().replace(/\u200B/g, ''); // Remove zero-width spaces
+            
+            if (text === "Toate Materialele") return text;
+            
+            // Split by pipe and take first part
+            let material = text.split('|')[0].trim();
+            
+            // Remove specifications (numbers, dimensions, quality, mintage)
+            material = material
+                .replace(/\s+\d+\s*mm.*$/i, '')
+                .replace(/\s+(Tiraj|Diametru|Greutate|Calitate|Pret)[\s:].*$/i, '')
+                .replace(/\s+(proof|patinată|sablată|bucăți|grame).*$/i, '')
+                .replace(/\s*‰\s*/g, '‰')
+                .replace(/;+$/, '')
+                .trim();
+            
+            // Normalize variations
+            const lower = material.toLowerCase();
+            if (/argint.*999/.test(lower)) return "Argint 999‰";
+            if (/argint.*925/.test(lower)) return "Argint 925‰";
+            if (/aliaj.*cupru.*argintat/.test(lower)) return "Aliaj de cupru argintat";
+            if (/aliaj.*cupru/.test(lower)) return "Aliaj de cupru";
+            if (lower === 'cupru') return "Cupru";
+            if (/tombac.*argintat/.test(lower)) return "Tombac argintat";
+            if (lower === 'tombac') return "Tombac";
+            
+            return material;
+          };
+          
+          // Helper function to extract and clean diameter values
+          const extractDiameter = (text: string): string => {
+            text = text.trim().replace(/\u200B/g, '');
+            
+            if (text === "Toate Diametrele") return text;
+            
+            // Split by pipe and take first part
+            let diameter = text.split('|')[0].trim();
+            
+            // Remove extra specifications
+            diameter = diameter
+                .replace(/\s+(Tiraj|Greutate|Calitate|Pret)[\s:].*$/i, '')
+                .replace(/\s+(proof|patinată|sablată|bucăți|grame).*$/i, '')
+                .replace(/;+$/, '')
+                .trim();
+            
+            return diameter;
+          };
+          
+          // Helper function to extract and clean weight values
+          const extractWeight = (text: string): string => {
+            text = text.trim().replace(/\u200B/g, '');
+            
+            if (text === "Toate Greutățile") return text;
+            
+            // Split by pipe and take first part
+            let weight = text.split('|')[0].trim();
+            
+            // Remove extra specifications
+            weight = weight
+                .replace(/\s+(Tiraj|Diametru|Greutate|Calitate|Pret)[\s:].*$/i, '')
+                .replace(/\s+(proof|patinată|sablată|bucăți|grame).*$/i, '')
+                .replace(/;+$/, '')
+                .trim();
+            
+            return weight;
+          };
+          
+          // Helper function to extract and clean quality values
+          const extractQuality = (text: string): string => {
+            text = text.trim().replace(/\u200B/g, '');
+            
+            if (text === "Toate Calitățile") return text;
+            
+            // Split by pipe and take first part
+            let quality = text.split('|')[0].trim();
+            
+            // Remove extra specifications
+            quality = quality
+                .replace(/\s+(Tiraj|Diametru|Greutate|Pret)[\s:].*$/i, '')
+                .replace(/\s+(proof|patinată|sablată|bucăți|grame).*$/i, '')
+                .replace(/;+$/, '')
+                .trim();
+            
+            // Normalize variations
+            const lower = quality.toLowerCase();
+            if (/patinată/.test(lower)) return "patinată";
+            if (/sablată.*patinată/.test(lower)) return "sablată - patinată";
+            if (/sablată/.test(lower)) return "sablată";
+            if (/proof.*like/.test(lower)) return "proof like";
+            if (/proof/.test(lower)) return "proof";
+            if (/clasică/.test(lower)) return "clasică";
+            
+            return quality;
           };
           
           // Extract each property
-          const material = extractValue(specs, 'Material:');
-          const diameter = extractValue(specs, 'Diametru:');
-          const weight = extractValue(specs, 'Greutate:');
-          const quality = extractValue(specs, 'Calitate:');
+          const material = extractMaterial(specs);
+          const diameter = extractDiameter(specs);
+          const weight = extractWeight(specs);
+          const quality = extractQuality(specs);
 
           return {
             ...p,
