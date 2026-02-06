@@ -130,7 +130,6 @@ export default function MonetariaStatuluiPage() {
           
           // Helper function to extract and clean material values
           const extractMaterial = (text: string): string => {
-            // Normalize whitespace and remove zero-width spaces
             let materialText = text.trim()
                 .replace(/\u200B/g, '')
                 .replace(/[\n\r]+/g, ' ')
@@ -138,18 +137,17 @@ export default function MonetariaStatuluiPage() {
             
             if (materialText === "Toate Materialele") return materialText;
             
-            // Extract material (everything between "Material:" and "|" or "-")
-            const match = materialText.match(/-?\s*Material:?\s*([^|]+?)(?:\s*[-]|\||$)/i);
+            const match = materialText.match(/-?\s*Material:?\s*([^|]+?)(?:\s*[-|]|$)/i);
             if (!match) return '';
             
-            let material = match[1].trim()
-                .split(/\s*Diametru:/i)[0]
-                .split(/\s*Greutate:/i)[0]
-                .split(/\s*Calitate:/i)[0]
-                .split(/\s*Tiraj:/i)[0]
-                .replace(/[-:,;]+$/, '')
-                .replace(/\s*‰\s*/g, '‰')
-                .trim();
+            let material = match[1].trim();
+            
+            // AGGRESSIVE CLEANING - removes "grame", "grameee", etc.
+            material = material.split(/\s*[-]?\s*(Diametru|Greutate|Calitate|Tiraj|grame|mm|bucăți):/i)[0];
+            material = material.replace(/\s+\d+\s*(mm|grame+|bucăți).*$/i, '');  // grame+ matches any extra e's
+            material = material.replace(/\s+(grame+|mm|bucăți|proof|patinată).*$/i, '');
+            material = material.replace(/[-:,;\s]+$/, '').trim();
+            material = material.replace(/\s*‰\s*/g, '‰');
             
             // Normalize to standard names
             const lower = material.toLowerCase();
@@ -175,7 +173,6 @@ export default function MonetariaStatuluiPage() {
           
           // Helper function to extract and clean diameter values
           const extractDiameter = (text: string): string => {
-            // Normalize whitespace and remove zero-width spaces
             let diameterText = text.trim()
                 .replace(/\u200B/g, '')
                 .replace(/[\n\r]+/g, ' ')
@@ -183,23 +180,22 @@ export default function MonetariaStatuluiPage() {
             
             if (diameterText === "Toate Diametrele") return diameterText;
             
-            // Extract diameter (everything between "Diametru:" and "|" or "-")
-            const match = diameterText.match(/-?\s*Diametru:?\s*([^|]+?)(?:\s*[-]|\||$)/i);
+            const match = diameterText.match(/-?\s*Diametru:?\s*([^|]+?)(?:\s*[-|]|$)/i);
             if (!match) return '';
             
-            let diameter = match[1].trim()
-                .split(/\s*Greutate:/i)[0]
-                .split(/\s*Calitate:/i)[0]
-                .split(/\s*Tiraj:/i)[0]
-                .replace(/[-:,;]+$/, '')
-                .trim();
+            let diameter = match[1].trim();
+            
+            // AGGRESSIVE CLEANING
+            diameter = diameter.split(/\s*[-]?\s*(Greutate|Calitate|Tiraj|grame|bucăți):/i)[0];
+            diameter = diameter.replace(/\s+\d+\s*(mm|grame+|bucăți).*$/i, '');
+            diameter = diameter.replace(/\s+(grame+|mm|bucăți|proof|patinată).*$/i, '');
+            diameter = diameter.replace(/[-:,;\s]+$/, '').trim();
             
             return diameter;
           };
           
           // Helper function to extract and clean weight values
           const extractWeight = (text: string): string => {
-            // Normalize whitespace and remove zero-width spaces
             let weightText = text.trim()
                 .replace(/\u200B/g, '')
                 .replace(/[\n\r]+/g, ' ')
@@ -207,22 +203,22 @@ export default function MonetariaStatuluiPage() {
             
             if (weightText === "Toate Greutățile") return weightText;
             
-            // Extract weight (everything between "Greutate:" and "|" or "-")
-            const match = weightText.match(/-?\s*Greutate:?\s*([^|]+?)(?:\s*[-]|\||$)/i);
+            const match = weightText.match(/-?\s*Greutate:?\s*([^|]+?)(?:\s*[-|]|$)/i);
             if (!match) return '';
             
-            let weight = match[1].trim()
-                .split(/\s*Calitate:/i)[0]
-                .split(/\s*Tiraj:/i)[0]
-                .replace(/[-:,;]+$/, '')
-                .trim();
+            let weight = match[1].trim();
+            
+            // AGGRESSIVE CLEANING
+            weight = weight.split(/\s*[-]?\s*(Calitate|Tiraj|mm|bucăți):/i)[0];
+            weight = weight.replace(/\s+\d+\s*(mm|grame+|bucăți).*$/i, '');
+            weight = weight.replace(/\s+(grame+|mm|bucăți|proof|patinată).*$/i, '');
+            weight = weight.replace(/[-:,;\s]+$/, '').trim();
             
             return weight;
           };
           
           // Helper function to extract and clean quality values
           const extractQuality = (text: string): string => {
-            // Normalize whitespace and remove zero-width spaces
             let qualityText = text.trim()
                 .replace(/\u200B/g, '')
                 .replace(/[\n\r]+/g, ' ')
@@ -230,14 +226,16 @@ export default function MonetariaStatuluiPage() {
             
             if (qualityText === "Toate Calitățile") return qualityText;
             
-            // Extract quality (everything between "Calitate:" and "|" or "-")
-            const match = qualityText.match(/-?\s*Calitate:?\s*([^|]+?)(?:\s*[-]|\||$)/i);
+            const match = qualityText.match(/-?\s*Calitate:?\s*([^|]+?)(?:\s*[-|]|$)/i);
             if (!match) return '';
             
-            let quality = match[1].trim()
-                .split(/\s*Tiraj:/i)[0]
-                .replace(/[-:,;]+$/, '')
-                .trim();
+            let quality = match[1].trim();
+            
+            // AGGRESSIVE CLEANING
+            quality = quality.split(/\s*[-]?\s*(Tiraj|mm|grame|bucăți):/i)[0];
+            quality = quality.replace(/\s+\d+\s*(mm|grame+|bucăți).*$/i, '');
+            quality = quality.replace(/\s+(grame+|mm|bucăți).*$/i, '');
+            quality = quality.replace(/[-:,;\s]+$/, '').trim();
             
             // Normalize to standard names
             const lower = quality.toLowerCase();
