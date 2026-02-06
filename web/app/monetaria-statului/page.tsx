@@ -85,27 +85,34 @@ export default function MonetariaStatuluiPage() {
         const transformedProducts = data.products.map((p: RawProduct) => {
           // Extract properties from specifications
           const specs = p.specifications || '';
-          const lines = specs.split('|').map(line => line.trim());
-
-          let diameter = '';
-          let weight = '';
+          
+          // Extract material - get only the value after "Material:" and before the next specification or end
           let material = '';
+          const materialMatch = specs.match(/Material:\s*([^\n-]+)/i);
+          if (materialMatch) {
+            material = materialMatch[1].trim();
+          }
+          
+          // Extract diameter - get only the value after "Diametru:" and before the next specification or end
+          let diameter = '';
+          const diameterMatch = specs.match(/Diametru:\s*([^\n-]+)/i);
+          if (diameterMatch) {
+            diameter = diameterMatch[1].trim();
+          }
+          
+          // Extract weight - get only the value after "Greutate:" and before the next specification or end
+          let weight = '';
+          const weightMatch = specs.match(/Greutate:\s*([^\n-]+)/i);
+          if (weightMatch) {
+            weight = weightMatch[1].trim();
+          }
+          
+          // Extract quality - get only the value after "Calitate:" and before the next specification or end
           let quality = '';
-
-          lines.forEach(line => {
-            if (line.includes('Diametru:')) {
-              diameter = line.split('Diametru:')[1]?.trim() || '';
-            }
-            if (line.includes('Greutate:')) {
-              weight = line.split('Greutate:')[1]?.trim() || '';
-            }
-            if (line.includes('Material:')) {
-              material = line.split('Material:')[1]?.trim() || '';
-            }
-            if (line.includes('Calitate:')) {
-              quality = line.split('Calitate:')[1]?.trim() || '';
-            }
-          });
+          const qualityMatch = specs.match(/Calitate:\s*([^\n-]+)/i);
+          if (qualityMatch) {
+            quality = qualityMatch[1].trim();
+          }
 
           return {
             ...p,
