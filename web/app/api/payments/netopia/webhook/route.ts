@@ -26,14 +26,14 @@ export async function POST(req: NextRequest) {
     }
 
     const payload = JSON.parse(rawBody || '{}');
-    const orderId =
+    const candidateOrderId =
       payload?.order?.orderID ||
       payload?.order?.ntpID ||
       payload?.orderId ||
       payload?.ntpID ||
       null;
 
-    if (!orderId || typeof orderId !== 'string') {
+    if (!candidateOrderId || typeof candidateOrderId !== 'string') {
       return NextResponse.json({ error: 'Missing order identifier.' }, { status: 400 });
     }
 
@@ -51,14 +51,41 @@ export async function POST(req: NextRequest) {
 
     const ronAmount = Number(amountRaw);
 
-    const purchaseRef = adminDb.collection('creditPurchases').doc(orderId);
+    const directRef = adminDb.collection('creditPurchases').doc(candidateOrderId);
+    let purchaseRef = directRef;
+    let purchaseSnap = await directRef.get();
+
+    if (!purchaseSnap.exists) {
+      const byNetopiaOrderId = await adminDb
+        .collection('creditPurchases')
+        .where('netopiaOrderId', '==', candidateOrderId)
+        .limit(1)
+        .get();
+
+      if (!byNetopiaOrderId.empty) {
+        purchaseRef = byNetopiaOrderId.docs[0].ref;
+        purchaseSnap = byNetopiaOrderId.docs[0];
+      }
+    }
+
+    if (!purchaseSnap.exists) {
+      const byNtpId = await adminDb
+        .collection('creditPurchases')
+        .where('netopiaNtpId', '==', candidateOrderId)
+        .limit(1)
+        .get();
+
+      if (!byNtpId.empty) {
+        purchaseRef = byNtpId.docs[0].ref;
+        purchaseSnap = byNtpId.docs[0];
+      }
+    }
+
+    if (!purchaseSnap.exists) {
+      return NextResponse.json({ error: 'Purchase order not found' }, { status: 404 });
+    }
 
     await adminDb.runTransaction(async (tx) => {
-      const purchaseSnap = await tx.get(purchaseRef);
-      if (!purchaseSnap.exists) {
-        throw new Error('Purchase order not found');
-      }
-
       const purchase = purchaseSnap.data() as any;
       const effectiveAmount = Number.isFinite(ronAmount) && ronAmount > 0 ? ronAmount : Number(purchase.amountRON || 0);
 
@@ -126,7 +153,7 @@ export async function POST(req: NextRequest) {
         userId,
         type: 'purchase_netopia',
         provider: 'netopia',
-        paymentReference: orderId,
+        paymentReference: candidateOrderId,
         ronAmount: effectiveAmount,
         amount: creditsToAdd,
         createdAt: new Date(),

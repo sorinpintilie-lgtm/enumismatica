@@ -152,6 +152,10 @@ export async function POST(req: NextRequest) {
 
     const roundedAmount = Math.floor(ronAmount * 100) / 100;
     const orderId = randomUUID();
+    const netopiaOrderId = randomUUID().replace(/-/g, '');
+    const netopiaNtpId = `${Date.now()}${Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, '0')}`;
 
     const origin = req.nextUrl.origin;
     const baseUrl = getNetopiaBaseUrl();
@@ -166,7 +170,8 @@ export async function POST(req: NextRequest) {
       currency: 'RON',
       status: 'initiated',
       creditsApplied: false,
-      netopiaOrderId: orderId,
+      netopiaOrderId,
+      netopiaNtpId,
       paymentUrl: null as string | null,
       netopiaStatus: null as string | null,
       netopiaPayload: null as any,
@@ -198,11 +203,11 @@ export async function POST(req: NextRequest) {
         },
       },
       order: {
-        ntpID: orderId,
+        ntpID: netopiaNtpId,
         posSignature: signature,
         dateTime: new Date().toISOString(),
         description: `Achiziție credite eNumismatica (${roundedAmount} RON)`,
-        orderID: orderId,
+        orderID: netopiaOrderId,
         amount: roundedAmount,
         currency: 'RON',
         billing: {
