@@ -11,6 +11,77 @@ import {
 const MIN_RON = 2;
 const MAX_RON = 5000;
 
+type NetopiaCallResult = {
+  ok: boolean;
+  status: number;
+  data: any;
+  endpoint: string;
+};
+
+async function callNetopiaStart(
+  apiKey: string,
+  baseUrl: string,
+  payload: any,
+): Promise<NetopiaCallResult> {
+  const endpoint = `${baseUrl.replace(/\/+$/, '')}/payment/card/start`;
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      Authorization: apiKey,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const text = await res.text();
+  let data: any;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = { raw: text };
+  }
+
+  return {
+    ok: res.ok,
+    status: res.status,
+    data,
+    endpoint,
+  };
+}
+
+async function startNetopiaPayment(
+  configuredBaseUrl: string,
+  apiKey: string,
+  payload: any,
+): Promise<NetopiaCallResult> {
+  const candidates = Array.from(
+    new Set([
+      configuredBaseUrl,
+      'https://secure.sandbox.netopia-payments.com',
+      'https://secure-sandbox.netopia-payments.com',
+      'https://secure.netopia-payments.com',
+    ]),
+  );
+
+  let last: NetopiaCallResult | null = null;
+
+  for (const candidate of candidates) {
+    const result = await callNetopiaStart(apiKey, candidate, payload);
+    last = result;
+
+    const rawHtml = String(result?.data?.raw || '');
+    const looksLikeMarketingHtml =
+      rawHtml.includes('<!DOCTYPE html') && rawHtml.includes('netopia-payments.com');
+
+    if (!looksLikeMarketingHtml) {
+      return result;
+    }
+  }
+
+  return last || { ok: false, status: 500, data: { error: 'No NETOPIA response' }, endpoint: configuredBaseUrl };
+}
+
 function extractPaymentUrl(payload: any): string | null {
   if (!payload || typeof payload !== 'object') return null;
 
@@ -140,27 +211,15 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    const netopiaRes = await fetch(`${baseUrl}/payment/card/start`, {
-      method: 'POST',
-      headers: {
-        Authorization: apiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    const netopiaResult = await startNetopiaPayment(baseUrl, apiKey, payload);
+    const netopiaData: any = netopiaResult.data;
 
-    const netopiaText = await netopiaRes.text();
-    let netopiaData: any = null;
-    try {
-      netopiaData = JSON.parse(netopiaText);
-    } catch {
-      netopiaData = { raw: netopiaText };
-    }
-
-    if (!netopiaRes.ok) {
+    if (!netopiaResult.ok) {
       await adminDb.collection('creditPurchases').doc(orderId).set(
         {
           status: 'failed_to_create',
+          netopiaEndpoint: netopiaResult.endpoint,
+          netopiaHttpStatus: netopiaResult.status,
           netopiaPayload: netopiaData,
           updatedAt: new Date(),
         },
@@ -179,6 +238,8 @@ export async function POST(req: NextRequest) {
       {
         status: 'pending_payment',
         paymentUrl,
+        netopiaEndpoint: netopiaResult.endpoint,
+        netopiaHttpStatus: netopiaResult.status,
         netopiaPayload: netopiaData,
         updatedAt: new Date(),
       },
