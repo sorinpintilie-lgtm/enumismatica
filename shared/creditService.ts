@@ -36,7 +36,7 @@ const BOOST_COST = 5;
 const BOOST_DURATION_DAYS = 7;
 
 // Netopia purchases
-const CREDIT_PRICE_RON = 2; // 2 RON per credit
+const CREDIT_PRICE_RON = 1; // 1 RON per credit
 
 // Collection subscription
 const COLLECTION_SUBSCRIPTION_COST_PER_YEAR = 50; // 50 credits / year
