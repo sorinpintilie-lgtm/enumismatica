@@ -11,6 +11,57 @@ import {
 const MIN_RON = 2;
 const MAX_RON = 5000;
 
+function extractPaymentUrl(payload: any): string | null {
+  if (!payload || typeof payload !== 'object') return null;
+
+  const directCandidates = [
+    payload?.paymentUrl,
+    payload?.paymentURL,
+    payload?.payment_url,
+    payload?.redirectUrl,
+    payload?.redirectURL,
+    payload?.redirect_url,
+    payload?.url,
+    payload?.data?.paymentUrl,
+    payload?.data?.paymentURL,
+    payload?.data?.payment_url,
+    payload?.data?.redirectUrl,
+    payload?.data?.redirect_url,
+    payload?.data?.url,
+    payload?.payment?.url,
+    payload?.payment?.paymentUrl,
+    payload?.payment?.paymentURL,
+    payload?.result?.paymentUrl,
+    payload?.result?.url,
+  ];
+
+  for (const candidate of directCandidates) {
+    if (typeof candidate === 'string' && /^https?:\/\//i.test(candidate)) {
+      return candidate;
+    }
+  }
+
+  const visited = new Set<any>();
+  const stack: any[] = [payload];
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (!current || typeof current !== 'object' || visited.has(current)) continue;
+    visited.add(current);
+
+    for (const value of Object.values(current)) {
+      if (typeof value === 'string' && /^https?:\/\//i.test(value)) {
+        return value;
+      }
+      if (value && typeof value === 'object') {
+        stack.push(value);
+      }
+    }
+  }
+
+  return null;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const user = await requireVerifiedUser(req);
@@ -122,12 +173,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const paymentUrl =
-      netopiaData?.paymentUrl ||
-      netopiaData?.paymentURL ||
-      netopiaData?.data?.paymentUrl ||
-      netopiaData?.data?.paymentURL ||
-      null;
+    const paymentUrl = extractPaymentUrl(netopiaData);
 
     await adminDb.collection('creditPurchases').doc(orderId).set(
       {
@@ -138,6 +184,25 @@ export async function POST(req: NextRequest) {
       },
       { merge: true },
     );
+
+    if (!paymentUrl) {
+      await adminDb.collection('creditPurchases').doc(orderId).set(
+        {
+          status: 'missing_payment_url',
+          updatedAt: new Date(),
+        },
+        { merge: true },
+      );
+
+      return NextResponse.json(
+        {
+          error: 'NETOPIA did not return a payment URL.',
+          orderId,
+          raw: netopiaData,
+        },
+        { status: 502 },
+      );
+    }
 
     return NextResponse.json({
       orderId,
