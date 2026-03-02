@@ -1,6 +1,7 @@
 "use client";
 
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -88,6 +89,8 @@ export default function Footer() {
               <li><a href="/auctions" className="text-gray-300 hover:text-gold-400 transition-colors">Licitații</a></li>
               <li><a href="/monetaria-statului" className="text-gray-300 hover:text-gold-400 transition-colors">Monetaria Statului</a></li>
               <li><a href="/about" className="text-gray-300 hover:text-gold-400 transition-colors">Despre noi</a></li>
+              <li><Link href="/terms" className="text-gray-300 hover:text-gold-400 transition-colors">Termeni și Condiții</Link></li>
+              <li><Link href="/privacy" className="text-gray-300 hover:text-gold-400 transition-colors">Politica de Confidențialitate</Link></li>
             </ul>
           </div>
 
