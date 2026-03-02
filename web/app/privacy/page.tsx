@@ -172,6 +172,10 @@ export default function PrivacyPolicyPage() {
               <Link href="/terms" className="text-gold-300 hover:text-gold-200 underline">
                 Termenii și Condițiile
               </Link>
+              {' '}și informațiile despre{' '}
+              <Link href="/gdpr" className="text-gold-300 hover:text-gold-200 underline">
+                GDPR
+              </Link>
               .
             </p>
           </div>

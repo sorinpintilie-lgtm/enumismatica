@@ -156,6 +156,10 @@ export default function TermsPage() {
               <Link href="/privacy" className="text-gold-300 hover:text-gold-200 underline">
                 Politica de Confidențialitate
               </Link>
+              {' '}și în informarea noastră despre{' '}
+              <Link href="/gdpr" className="text-gold-300 hover:text-gold-200 underline">
+                GDPR
+              </Link>
               .
             </p>
           </div>

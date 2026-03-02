@@ -91,6 +91,7 @@ export default function Footer() {
               <li><a href="/about" className="text-gray-300 hover:text-gold-400 transition-colors">Despre noi</a></li>
               <li><Link href="/terms" className="text-gray-300 hover:text-gold-400 transition-colors">Termeni și Condiții</Link></li>
               <li><Link href="/privacy" className="text-gray-300 hover:text-gold-400 transition-colors">Politica de Confidențialitate</Link></li>
+              <li><Link href="/gdpr" className="text-gray-300 hover:text-gold-400 transition-colors">GDPR</Link></li>
             </ul>
           </div>
 
