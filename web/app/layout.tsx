@@ -5,10 +5,36 @@ import NavigationWrapper from './components/NavigationWrapper'
 import ScrollToTop from './components/ScrollToTop'
 import LoadingSpinner from './components/LoadingSpinner'
 import Footer from './components/Footer'
+import { getSiteUrl } from './lib/seo'
  
+const siteUrl = getSiteUrl()
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'eNumismatica - Magazin de Monede & Licitatii',
   description: 'Cumpara si vinde piese numismatice prin magazinul si platforma noastra de licitatii',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'ro_RO',
+    url: siteUrl,
+    siteName: 'eNumismatica',
+    title: 'eNumismatica - Magazin de Monede & Licitatii',
+    description: 'Cumpara si vinde piese numismatice prin magazinul si platforma noastra de licitatii',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
   icons: {
     icon: '/eNumismatica.ro_logo.ico',
     shortcut: '/eNumismatica.ro_logo.ico',
