@@ -2,18 +2,20 @@
 
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { formatRON } from '../../utils/currency';
 import {
   isAdmin,
   getAllProducts,
+  getAllUsers,
   deleteProduct,
   approveProduct,
   rejectProduct,
   republishProduct,
+  extendProductListingByDays,
 } from 'shared/adminService';
-import { Product } from 'shared/types';
+import { Product, User } from 'shared/types';
 
 export default function AdminProducts() {
   const { user, loading: authLoading } = useAuth();
@@ -21,10 +23,38 @@ export default function AdminProducts() {
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [selectedOwnerId, setSelectedOwnerId] = useState<string>('all');
+  const [ownerSearchTerm, setOwnerSearchTerm] = useState('');
+  const [listingExpiryFilter, setListingExpiryFilter] = useState<'all' | 'active' | 'expired' | 'missing'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [goToText, setGoToText] = useState('');
+  const [extendingProductId, setExtendingProductId] = useState<string | null>(null);
+
+  const usersById = useMemo(() => {
+    return new Map(users.map((u) => [u.id, u]));
+  }, [users]);
+
+  const usersForSelect = useMemo(() => {
+    const q = ownerSearchTerm.trim().toLowerCase();
+
+    const sorted = [...users].sort((a, b) => {
+      const aKey = (a.email || a.displayName || a.id).toLowerCase();
+      const bKey = (b.email || b.displayName || b.id).toLowerCase();
+      return aKey.localeCompare(bKey);
+    });
+
+    if (!q) return sorted;
+
+    return sorted.filter((u) => {
+      const haystack = `${u.email || ''} ${u.displayName || ''} ${u.name || ''} ${u.id}`.toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [users, ownerSearchTerm]);
+
+  const selectedOwner = selectedOwnerId === 'all' ? null : usersById.get(selectedOwnerId) || null;
 
   const normalizeProductId = (raw: string): string => {
     const text = raw.trim();
@@ -47,7 +77,7 @@ export default function AdminProducts() {
       }
 
       setIsAdminUser(true);
-      await loadProducts();
+      await Promise.all([loadProducts(), loadUsers()]);
       setLoading(false);
     };
 
@@ -59,6 +89,11 @@ export default function AdminProducts() {
   const loadProducts = async () => {
     const allProducts = await getAllProducts();
     setProducts(allProducts);
+  };
+
+  const loadUsers = async () => {
+    const allUsers = await getAllUsers();
+    setUsers(allUsers);
   };
 
   const handleDelete = async (productId: string) => {
@@ -101,11 +136,44 @@ export default function AdminProducts() {
     }
   };
 
+  const handleExtendListingBy30Days = async (productId: string) => {
+    const shouldExtend = confirm('Vrei să extinzi această listare cu +30 zile?');
+    if (!shouldExtend) return;
+
+    setExtendingProductId(productId);
+    const result = await extendProductListingByDays(productId, 30);
+
+    if (result.success) {
+      await loadProducts();
+    } else {
+      alert(`Error: ${result.error}`);
+    }
+
+    setExtendingProductId(null);
+  };
+
   const categoryFilteredProducts = products.filter(p =>
     categoryFilter === 'all' ? true : p.category === categoryFilter
   );
 
-  const filteredProducts = categoryFilteredProducts.filter(p =>
+  const ownerFilteredProducts = categoryFilteredProducts.filter((p) =>
+    selectedOwnerId === 'all' ? true : p.ownerId === selectedOwnerId
+  );
+
+  const listingExpiryFilteredProducts = ownerFilteredProducts.filter((p) => {
+    if (listingExpiryFilter === 'all') return true;
+
+    const expiry = p.listingExpiresAt;
+    if (!expiry) return listingExpiryFilter === 'missing';
+
+    const isExpired = expiry.getTime() <= Date.now();
+    if (listingExpiryFilter === 'expired') return isExpired;
+    if (listingExpiryFilter === 'active') return !isExpired;
+
+    return true;
+  });
+
+  const filteredProducts = listingExpiryFilteredProducts.filter(p =>
     filter === 'all' ? true : p.status === filter
   );
 
@@ -115,6 +183,8 @@ export default function AdminProducts() {
     return (
       p.id.toLowerCase().includes(q) ||
       p.ownerId.toLowerCase().includes(q) ||
+      (usersById.get(p.ownerId)?.email || '').toLowerCase().includes(q) ||
+      (usersById.get(p.ownerId)?.displayName || '').toLowerCase().includes(q) ||
       p.name.toLowerCase().includes(q) ||
       p.description.toLowerCase().includes(q)
     );
@@ -151,7 +221,7 @@ export default function AdminProducts() {
               filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
             }`}
           >
-            Toate ({categoryFilteredProducts.length})
+            Toate ({listingExpiryFilteredProducts.length})
           </button>
           <button
             onClick={() => setFilter('pending')}
@@ -159,7 +229,7 @@ export default function AdminProducts() {
               filter === 'pending' ? 'bg-yellow-600 text-white' : 'bg-gray-200 text-gray-700'
             }`}
           >
-            În așteptare ({categoryFilteredProducts.filter(p => p.status === 'pending').length})
+            În așteptare ({listingExpiryFilteredProducts.filter(p => p.status === 'pending').length})
           </button>
           <button
             onClick={() => setFilter('approved')}
@@ -167,7 +237,7 @@ export default function AdminProducts() {
               filter === 'approved' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'
             }`}
           >
-            Aprobate ({categoryFilteredProducts.filter(p => p.status === 'approved').length})
+            Aprobate ({listingExpiryFilteredProducts.filter(p => p.status === 'approved').length})
           </button>
           <button
             onClick={() => setFilter('rejected')}
@@ -175,8 +245,68 @@ export default function AdminProducts() {
               filter === 'rejected' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'
             }`}
           >
-            Respinse ({categoryFilteredProducts.filter(p => p.status === 'rejected').length})
+            Respinse ({listingExpiryFilteredProducts.filter(p => p.status === 'rejected').length})
           </button>
+        </div>
+
+        {/* User-focused admin control */}
+        <div className="mb-6 bg-white rounded-lg shadow-md p-4 md:p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Filtru rapid după utilizator</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Selectează utilizatorul după email, vezi toate produsele lui și poți reactiva listările expirate cu +30 zile.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Caută în listă după email / nume</label>
+              <input
+                value={ownerSearchTerm}
+                onChange={(e) => setOwnerSearchTerm(e.target.value)}
+                placeholder="ex: ion@exemplu.ro"
+                className="w-full px-4 py-2 rounded-md bg-gray-100 text-gray-800 border border-gray-300"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Utilizator</label>
+              <select
+                value={selectedOwnerId}
+                onChange={(e) => setSelectedOwnerId(e.target.value)}
+                className="w-full px-4 py-2 rounded-md bg-gray-100 text-gray-800 border border-gray-300"
+              >
+                <option value="all">Toți utilizatorii</option>
+                {usersForSelect.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.email || u.displayName || u.name || u.id}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="text-sm text-gray-700">
+            {selectedOwner ? (
+              <span>
+                Selectat: <span className="font-semibold">{selectedOwner.email || selectedOwner.displayName || selectedOwner.id}</span>
+              </span>
+            ) : (
+              <span>Nu este selectat un utilizator specific.</span>
+            )}
+          </div>
+        </div>
+
+        {/* Listing expiration filter */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-white mb-2">Status expirare listare</label>
+          <select
+            value={listingExpiryFilter}
+            onChange={(e) => setListingExpiryFilter(e.target.value as any)}
+            className="px-4 py-2 rounded-md bg-gray-200 text-gray-700"
+          >
+            <option value="all">Toate listările</option>
+            <option value="active">Doar active (neexpirate)</option>
+            <option value="expired">Doar expirate</option>
+            <option value="missing">Fără dată de expirare</option>
+          </select>
         </div>
 
         {/* Category Filter */}
@@ -281,13 +411,39 @@ export default function AdminProducts() {
                               href={`/admin/users/${product.ownerId}`}
                               className="text-blue-600 hover:text-blue-800 hover:underline"
                             >
-                              {product.ownerId}
+                              {usersById.get(product.ownerId)?.email || product.ownerId}
                             </Link>
+                          </p>
+                          <p>ID Proprietar: {product.ownerId}</p>
+                          <p>
+                            Listare expiră:{' '}
+                            <span
+                              className={`font-medium ${
+                                !product.listingExpiresAt
+                                  ? 'text-gray-500'
+                                  : product.listingExpiresAt.getTime() <= Date.now()
+                                  ? 'text-red-600'
+                                  : 'text-green-700'
+                              }`}
+                            >
+                              {!product.listingExpiresAt
+                                ? 'Nesetat'
+                                : `${product.listingExpiresAt.toLocaleDateString()} ${
+                                    product.listingExpiresAt.getTime() <= Date.now() ? '(Expirat)' : '(Activ)'
+                                  }`}
+                            </span>
                           </p>
                           <p>Creat: {product.createdAt.toLocaleDateString()}</p>
                         </div>
                       </div>
                       <div className="flex flex-col gap-2 ml-4">
+                        <button
+                          onClick={() => handleExtendListingBy30Days(product.id)}
+                          disabled={extendingProductId === product.id}
+                          className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white px-4 py-2 rounded-md text-sm"
+                        >
+                          {extendingProductId === product.id ? 'Se extinde...' : 'Reactivare +30 zile'}
+                        </button>
                         {product.status === 'pending' && (
                           <>
                             <button

@@ -23,6 +23,17 @@ import {
 } from './emailService';
 import { endAuction } from './auctionService';
 
+function toDateSafe(value: any): Date | undefined {
+  if (!value) return undefined;
+  if (value instanceof Date) return value;
+  if (value instanceof Timestamp) return value.toDate();
+  if (typeof value?.toDate === 'function') {
+    const converted = value.toDate();
+    return converted instanceof Date ? converted : undefined;
+  }
+  return undefined;
+}
+
 /**
  * Admin UID - hardcoded for security
  */
@@ -167,12 +178,20 @@ export async function updateUserVerificationStatus(
 export async function getAllProducts(): Promise<Product[]> {
   try {
     const productsSnapshot = await getDocs(collection(db, 'products'));
-    const products = productsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate() || new Date(),
-      updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-    })) as Product[];
+    const products = productsSnapshot.docs.map(doc => {
+      const data = doc.data() as any;
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        listingExpiresAt: toDateSafe(data.listingExpiresAt),
+        boostExpiresAt: toDateSafe(data.boostExpiresAt),
+        boostedAt: toDateSafe(data.boostedAt),
+        promotedAt: toDateSafe(data.promotedAt),
+        promotionExpiresAt: toDateSafe(data.promotionExpiresAt),
+      } as Product;
+    });
     return products.filter(p => p.listingType === 'direct');
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -189,15 +208,60 @@ export async function getProductById(productId: string): Promise<Product | null>
     if (!productDoc.exists()) {
       return null;
     }
+    const data = productDoc.data() as any;
     return {
       id: productDoc.id,
-      ...productDoc.data(),
-      createdAt: productDoc.data().createdAt?.toDate() || new Date(),
-      updatedAt: productDoc.data().updatedAt?.toDate() || new Date(),
+      ...data,
+      createdAt: data.createdAt?.toDate() || new Date(),
+      updatedAt: data.updatedAt?.toDate() || new Date(),
+      listingExpiresAt: toDateSafe(data.listingExpiresAt),
+      boostExpiresAt: toDateSafe(data.boostExpiresAt),
+      boostedAt: toDateSafe(data.boostedAt),
+      promotedAt: toDateSafe(data.promotedAt),
+      promotionExpiresAt: toDateSafe(data.promotionExpiresAt),
     } as Product;
   } catch (error) {
     console.error('Error fetching product:', error);
     return null;
+  }
+}
+
+/**
+ * Extend a product shop listing expiry by a number of days (admin only).
+ * If the listing is already expired, extension starts from "now".
+ */
+export async function extendProductListingByDays(
+  productId: string,
+  days: number = 30,
+): Promise<{ success: boolean; newExpiresAt?: Date; error?: string }> {
+  if (!days || days <= 0) {
+    return { success: false, error: 'Invalid listing extension duration' };
+  }
+
+  try {
+    const productRef = doc(db, 'products', productId);
+    const productDoc = await getDoc(productRef);
+
+    if (!productDoc.exists()) {
+      return { success: false, error: 'Product not found' };
+    }
+
+    const productData = productDoc.data() as any;
+    const now = new Date();
+
+    const currentExpiry = toDateSafe(productData.listingExpiresAt) || null;
+    const baseDate = currentExpiry && currentExpiry > now ? currentExpiry : now;
+    const newExpiresAt = new Date(baseDate);
+    newExpiresAt.setDate(newExpiresAt.getDate() + days);
+
+    await updateDoc(productRef, {
+      listingExpiresAt: Timestamp.fromDate(newExpiresAt),
+      updatedAt: Timestamp.fromDate(now),
+    });
+
+    return { success: true, newExpiresAt };
+  } catch (error: any) {
+    return { success: false, error: error.message };
   }
 }
 
