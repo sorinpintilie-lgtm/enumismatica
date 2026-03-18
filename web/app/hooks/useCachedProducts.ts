@@ -15,6 +15,26 @@ const DEFAULT_PRODUCT_FIELDS = [
   'boostedAt',
 ];
 
+const toDateSafe = (value: any): Date | null => {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (value?.toDate && typeof value.toDate === 'function') {
+    const converted = value.toDate();
+    return converted instanceof Date ? converted : null;
+  }
+  if (typeof value === 'string' || typeof value === 'number') {
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+};
+
+const isListingActive = (data: any): boolean => {
+  const listingExpiresAt = toDateSafe(data?.listingExpiresAt);
+  if (!listingExpiresAt) return true;
+  return listingExpiresAt.getTime() > Date.now();
+};
+
 /**
  * Cached products hook optimized for homepage and lightweight listings.
  * The `enabled` flag lets us avoid hitting Firestore when the user
@@ -50,6 +70,8 @@ export function useCachedProducts(
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         if (data.listingType === 'auction') return;
+        if (data.isSold === true) return;
+        if (!isListingActive(data)) return;
         const productData: any = { id: doc.id };
 
         // Only include requested fields for performance
@@ -185,6 +207,12 @@ export function useBoostedProducts(limitCount: number = 3) {
 
         // Only show approved products in the homepage hero, even if others are boosted.
         if (status !== 'approved') {
+          return;
+        }
+        if (data.isSold === true) {
+          return;
+        }
+        if (!isListingActive(data)) {
           return;
         }
 

@@ -20,6 +20,26 @@ import { Product } from 'shared/types';
 // Include boost fields so we can prioritize boosted products in listings
 const DEFAULT_PRODUCT_FIELDS = ['name', 'images', 'price', 'createdAt', 'updatedAt', 'boostExpiresAt', 'boostedAt'];
 
+const toDateSafe = (value: any): Date | null => {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (value?.toDate && typeof value.toDate === 'function') {
+    const converted = value.toDate();
+    return converted instanceof Date ? converted : null;
+  }
+  if (typeof value === 'string' || typeof value === 'number') {
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+};
+
+const isListingActive = (data: any): boolean => {
+  const listingExpiresAt = toDateSafe(data?.listingExpiresAt);
+  if (!listingExpiresAt) return true;
+  return listingExpiresAt.getTime() > Date.now();
+};
+
 /**
  * Live products hook used on catalog and other authenticated pages.
  * The `enabled` flag lets us avoid opening Firestore listeners when access
@@ -162,9 +182,13 @@ export function useProducts(
               name: data.name
             });
              
-            // Skip sold items
+            // Skip sold or expired listing items
             if (data.isSold === true) {
               console.log('[useProducts] Skipping sold product:', doc.id);
+              return;
+            }
+            if (!isListingActive(data)) {
+              console.log('[useProducts] Skipping expired listing product:', doc.id);
               return;
             }
              
@@ -236,9 +260,13 @@ export function useProducts(
               name: data.name
             });
             
-            // Skip sold items
+            // Skip sold or expired listing items
             if (data.isSold === true) {
               console.log('[useProducts] Skipping sold product:', doc.id);
+              return;
+            }
+            if (!isListingActive(data)) {
+              console.log('[useProducts] Skipping expired listing product:', doc.id);
               return;
             }
             
@@ -317,8 +345,11 @@ export function useProducts(
         snap.forEach((doc) => {
           const data = doc.data();
           
-          // Skip sold items
+          // Skip sold or expired listing items
           if (data.isSold === true) {
+            return;
+          }
+          if (!isListingActive(data)) {
             return;
           }
           
@@ -415,8 +446,11 @@ export function useProducts(
       snap.forEach((doc) => {
         const data = doc.data();
         
-        // Skip sold items
+        // Skip sold or expired listing items
         if (data.isSold === true) {
+          return;
+        }
+        if (!isListingActive(data)) {
           return;
         }
         
