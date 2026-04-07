@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 
 const APPLE_STORE_URL = 'https://apps.apple.com/us/app/enumismatica-ro/id6758997496'
-const PLAY_STORE_URL = process.env.NEXT_PUBLIC_PLAY_STORE_URL || 'https://play.google.com/store/apps'
+const PLAY_STORE_URL = process.env.NEXT_PUBLIC_PLAY_STORE_URL || 'https://play.google.com/store/apps/details?id=ro.enumismatica.mobile&hl=ro'
 const FALLBACK_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://enumismatica.ro'
 
 export default function AppDownloadRedirectPage() {
